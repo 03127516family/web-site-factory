@@ -26,6 +26,12 @@
 
 本阶段不实现 CMS、AI 生成 API、PostgreSQL、S3 发布、真实表单、产品 API 或模板管理界面。
 
+## 架构假设
+
+正式系统预留“发布时 Lambda/发布 Worker 组合 Header、页面 Body、Footer 和 SEO 元数据”的方案。Lambda 生成完整 HTML Release 后交给 S3/CloudFront 静态分发，不在用户访问时实时组合。
+
+该能力本计划暂不实现。页面模板原型可以假设 Header/Footer 组合能力已经存在，优先验证中间产品模板。iframe 仅允许作为临时视觉占位，不能用于 SEO、最终 DOM 或响应式验收；正式验收必须查看组合后的完整 HTML。
+
 ## 文件结构
 
 ```text

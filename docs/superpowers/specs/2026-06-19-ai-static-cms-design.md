@@ -251,7 +251,53 @@ CDN 位于 S3 前面，为访问者提供缓存和分发。
 
 数据库与 S3 不直接互连，由后台服务和发布 Worker 通过数据库驱动及 S3 SDK 协调。
 
-### 9.4 搜索
+### 9.4 预留的 Lambda 发布时组合方案
+
+最终发布架构预留使用 Lambda 或等价发布 Worker 统一管理 Header 和 Footer，但不在用户访问时实时渲染页面。
+
+源码和发布产物分开保存：
+
+```text
+/source/fragments/header.html
+/source/fragments/footer.html
+/source/pages/products/a/body.html
+/source/pages/products/a/meta.json
+
+/releases/v1/products/a/index.html
+/releases/v2/products/a/index.html
+```
+
+发布任务执行以下流程：
+
+```text
+Header
++ 页面 Body
++ Footer
++ 页面 SEO 元数据
+-> Lambda/发布 Worker 组合完整 HTML
+-> 写入新的 S3 Release
+-> 完整校验
+-> CloudFront 切换或刷新到新 Release
+```
+
+Header 或 Footer 在源码层只维护一份。修改后由发布任务自动批量生成受影响页面，不需要人工逐页修改。用户访问时仍然由 CloudFront/S3 返回已经生成好的完整 HTML，不依赖 Lambda 在线运行。
+
+发布失败时继续使用旧 Release。回滚通过重新指向上一个完整 Release 完成，不能让半成品页面进入正式路径。
+
+该方案目前作为目标架构记录，首个页面模板原型不实现 Lambda、S3 Release 切换或 CloudFront 自动刷新。原型阶段假设 Header/Footer 组合能力已经存在，重点验证页面主体模板。
+
+#### 原型阶段的 Header/Footer 模拟
+
+iframe 可以用于非常早期的视觉占位，但不能作为正式实现或最终验收方式，原因包括：
+
+- iframe 内外不属于同一个 DOM。
+- CSS、字体和响应式上下文相互隔离。
+- 高度和移动端导航需要额外通信。
+- 搜索引擎看到的结构与 Lambda 最终返回的完整 HTML 不一致。
+
+如果只是暂时集中开发产品页主体，可以把 Header/Footer 放入 iframe，并明确它们是可丢弃占位。更接近 Lambda 结果的开发态模拟方式，是通过本地 fragment loader 把独立 Header/Footer 注入同一个 DOM；最终结构验收必须使用扁平化后的完整 HTML。
+
+### 9.5 搜索
 
 搜索不进入首期范围。后续可以从已发布 HTML 和元数据构建独立搜索索引。搜索索引始终是派生产物，不是页面源数据。
 
