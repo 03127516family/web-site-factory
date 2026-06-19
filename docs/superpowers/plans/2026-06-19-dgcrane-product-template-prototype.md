@@ -1,65 +1,65 @@
-# DGCRANE Product Template Prototype Implementation Plan
+# DGCRANE 产品页面模板原型实施计划
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **执行要求：** 必须使用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans`，按照本计划逐项实施。所有步骤使用复选框（`- [ ]`）跟踪状态。
 
-**Goal:** Build a faithful static prototype of the DGCRANE Chinese product-family page with reusable Header and Footer partials, one complete product page template, responsive styling, and reserved AI/editor/dynamic-module markers.
+**目标：** 忠实还原 DGCRANE 中文产品系列页面，建立可复用的 Header 和 Footer、一个完整产品页面模板、响应式样式，并预留 AI、编辑器和动态模块标记。
 
-**Architecture:** Use Nunjucks only for site-shell composition: a base layout includes reusable Header and Footer partials, while the product page body remains complete HTML rather than a field-driven data form. A small Node build script renders the template into `dist/`; template markers identify page sections and editable fields, while form and related-products areas are reserved as API-driven modules.
+**架构：** Nunjucks 仅用于组合全站外壳：基础布局引入可复用的 Header 和 Footer，产品页面主体仍然保留为完整 HTML，而不是字段驱动的数据表单。小型 Node 构建脚本将模板渲染到 `dist/`；模板标记用于识别页面区域和可编辑内容，询价表单与相关产品区域预留为 API 动态模块。
 
-**Tech Stack:** Node.js 20+, Nunjucks, native `node:test`, HTML5, CSS, minimal browser JavaScript
+**技术栈：** Node.js 20+、Nunjucks、原生 `node:test`、HTML5、CSS、少量浏览器 JavaScript
 
 ---
 
-## Scope
+## 范围
 
-This plan implements only the first template prototype:
+本计划仅实现第一份模板原型：
 
-- Reusable Chinese site Header
-- Reusable Chinese site Footer
-- Shared inner-page trust banner
-- Breadcrumb system placeholder
-- `product-family-detail@1` page template based on the current single-girder gantry crane page
-- Responsive desktop/mobile CSS
-- Inquiry-form and related-products dynamic placeholders
-- Build and structural tests
-- Browser visual verification against `https://www.dgcrane.com/zh/products/single-girder-gantry-cranes/`
+- 可复用的中文站点 Header
+- 可复用的中文站点 Footer
+- 内页共用的品牌信任横幅
+- 面包屑系统占位
+- 基于当前单梁门式起重机页面的 `product-family-detail@1` 页面模板
+- 桌面端和移动端响应式 CSS
+- 询价表单与相关产品动态占位
+- 构建测试和结构测试
+- 在浏览器中与 `https://www.dgcrane.com/zh/products/single-girder-gantry-cranes/` 进行视觉验证
 
-It does not implement the CMS, AI generation API, PostgreSQL, S3 publishing, real forms, product APIs, or template management UI.
+本阶段不实现 CMS、AI 生成 API、PostgreSQL、S3 发布、真实表单、产品 API 或模板管理界面。
 
-## File Structure
+## 文件结构
 
 ```text
-package.json                              Node scripts and dependency declaration
-scripts/render.mjs                        Nunjucks environment and reusable render function
-scripts/build.mjs                         Production build entry point
-src/templates/layouts/base.njk            Shared HTML document shell
-src/templates/partials/header.njk         Reusable site header
-src/templates/partials/footer.njk         Reusable site footer
-src/templates/partials/trust-banner.njk   Reusable inner-page trust banner
+package.json                              Node 脚本和依赖声明
+scripts/render.mjs                        Nunjucks 环境和可复用渲染函数
+scripts/build.mjs                         生产构建入口
+src/templates/layouts/base.njk            共用 HTML 文档外壳
+src/templates/partials/header.njk         可复用站点页头
+src/templates/partials/footer.njk         可复用站点页脚
+src/templates/partials/trust-banner.njk   可复用内页信任横幅
 src/templates/pages/product-family-detail.njk
-                                          Complete product-family page body
-src/styles/site.css                       Shared and product-page responsive styles
-src/scripts/site.js                       Mobile navigation and dynamic-module fallback
-public/assets/logo.svg                    Local copy of company logo
-public/assets/product-hero.jpg            Representative product image
-tests/render.test.mjs                     Build and shell composition tests
-tests/template-contract.test.mjs          Required marker and security tests
-README.md                                 Local build and preview instructions
-dist/                                     Generated output, ignored by git
+                                          完整产品系列页面主体
+src/styles/site.css                       共用样式和产品页响应式样式
+src/scripts/site.js                       移动导航和动态模块降级逻辑
+public/assets/logo.svg                    公司 Logo 本地副本
+public/assets/product-hero.jpg            代表性产品图片
+tests/render.test.mjs                     构建和外壳组合测试
+tests/template-contract.test.mjs          必需标记和安全测试
+README.md                                 本地构建和预览说明
+dist/                                     生成产物，不纳入 Git
 ```
 
-### Task 1: Scaffold the Static Template Builder
+### 任务 1：搭建静态模板构建器
 
-**Files:**
-- Create: `package.json`
-- Create: `.gitignore`
-- Create: `scripts/render.mjs`
-- Create: `scripts/build.mjs`
-- Create: `tests/render.test.mjs`
+**文件：**
+- 新建：`package.json`
+- 新建：`.gitignore`
+- 新建：`scripts/render.mjs`
+- 新建：`scripts/build.mjs`
+- 新建：`tests/render.test.mjs`
 
-- [ ] **Step 1: Write the failing render test**
+- [ ] **步骤 1：编写失败的渲染测试**
 
-Create `tests/render.test.mjs`:
+新建 `tests/render.test.mjs`：
 
 ```js
 import assert from "node:assert/strict";
@@ -78,19 +78,19 @@ test("renders a complete HTML document", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and verify it fails**
+- [ ] **步骤 2：运行测试并确认失败**
 
-Run:
+运行：
 
 ```bash
 node --test tests/render.test.mjs
 ```
 
-Expected: FAIL because `scripts/render.mjs` does not exist.
+预期：测试失败，因为 `scripts/render.mjs` 尚不存在。
 
-- [ ] **Step 3: Add package and ignore configuration**
+- [ ] **步骤 3：添加包配置和忽略规则**
 
-Create `package.json`:
+新建 `package.json`：
 
 ```json
 {
@@ -108,7 +108,7 @@ Create `package.json`:
 }
 ```
 
-Create `.gitignore`:
+新建 `.gitignore`：
 
 ```gitignore
 node_modules/
@@ -116,17 +116,17 @@ dist/
 .DS_Store
 ```
 
-Run:
+运行：
 
 ```bash
 npm install
 ```
 
-Expected: `node_modules` and `package-lock.json` are created.
+预期：生成 `node_modules` 和 `package-lock.json`。
 
-- [ ] **Step 4: Implement the reusable renderer and build command**
+- [ ] **步骤 4：实现可复用渲染器和构建命令**
 
-Create `scripts/render.mjs`:
+新建 `scripts/render.mjs`：
 
 ```js
 import nunjucks from "nunjucks";
@@ -149,7 +149,7 @@ export function renderSource(source, context = {}) {
 }
 ```
 
-Create `scripts/build.mjs`:
+新建 `scripts/build.mjs`：
 
 ```js
 import { cp, mkdir, writeFile } from "node:fs/promises";
@@ -169,32 +169,32 @@ await cp("src/scripts/site.js", "dist/assets/site.js");
 await cp("public/assets", "dist/assets", { recursive: true });
 ```
 
-- [ ] **Step 5: Commit the scaffold**
+- [ ] **步骤 5：提交构建脚手架**
 
 ```bash
 git add package.json package-lock.json .gitignore scripts tests/render.test.mjs
 git commit -m "build: scaffold static template renderer"
 ```
 
-### Task 2: Build the Reusable Site Shell
+### 任务 2：建立可复用站点外壳
 
-**Files:**
-- Create: `src/templates/layouts/base.njk`
-- Create: `src/templates/partials/header.njk`
-- Create: `src/templates/partials/footer.njk`
-- Create: `src/templates/partials/trust-banner.njk`
-- Create: `src/templates/pages/product-family-detail.njk`
-- Modify: `tests/render.test.mjs`
+**文件：**
+- 新建：`src/templates/layouts/base.njk`
+- 新建：`src/templates/partials/header.njk`
+- 新建：`src/templates/partials/footer.njk`
+- 新建：`src/templates/partials/trust-banner.njk`
+- 新建：`src/templates/pages/product-family-detail.njk`
+- 修改：`tests/render.test.mjs`
 
-- [ ] **Step 1: Extend the failing test for shell uniqueness**
+- [ ] **步骤 1：扩展失败测试，检查外壳唯一性**
 
-Change the renderer import in `tests/render.test.mjs` to:
+把 `tests/render.test.mjs` 中的渲染器导入改为：
 
 ```js
 import { renderSource, renderTemplate } from "../scripts/render.mjs";
 ```
 
-Then append:
+然后追加：
 
 ```js
 test("includes each reusable shell partial exactly once", () => {
@@ -207,19 +207,19 @@ test("includes each reusable shell partial exactly once", () => {
 });
 ```
 
-- [ ] **Step 2: Run the focused test and verify it fails**
+- [ ] **步骤 2：运行定向测试并确认失败**
 
-Run:
+运行：
 
 ```bash
 node --test tests/render.test.mjs
 ```
 
-Expected: FAIL because the product page template does not exist.
+预期：测试失败，因为产品页模板尚不存在。
 
-- [ ] **Step 3: Create the base layout**
+- [ ] **步骤 3：创建基础布局**
 
-Create `src/templates/layouts/base.njk`:
+新建 `src/templates/layouts/base.njk`：
 
 ```njk
 <!doctype html>
@@ -241,9 +241,9 @@ Create `src/templates/layouts/base.njk`:
 </html>
 ```
 
-- [ ] **Step 4: Create the reusable Header**
+- [ ] **步骤 4：创建可复用 Header**
 
-Create `src/templates/partials/header.njk` with these stable regions:
+新建 `src/templates/partials/header.njk`，包含以下稳定区域：
 
 ```njk
 <header class="site-header" data-site-header>
@@ -276,9 +276,9 @@ Create `src/templates/partials/header.njk` with these stable regions:
 </header>
 ```
 
-- [ ] **Step 5: Create the trust banner and Footer**
+- [ ] **步骤 5：创建信任横幅和 Footer**
 
-Create `src/templates/partials/trust-banner.njk`:
+新建 `src/templates/partials/trust-banner.njk`：
 
 ```njk
 <aside class="trust-banner" data-trust-banner>
@@ -294,7 +294,7 @@ Create `src/templates/partials/trust-banner.njk`:
 </aside>
 ```
 
-Create `src/templates/partials/footer.njk`:
+新建 `src/templates/partials/footer.njk`：
 
 ```njk
 <footer class="site-footer" data-site-footer>
@@ -314,9 +314,9 @@ Create `src/templates/partials/footer.njk`:
 </footer>
 ```
 
-- [ ] **Step 6: Create the minimum product-page shell**
+- [ ] **步骤 6：创建最小产品页外壳**
 
-Create `src/templates/pages/product-family-detail.njk`:
+新建 `src/templates/pages/product-family-detail.njk`：
 
 ```njk
 {% extends "layouts/base.njk" %}
@@ -325,32 +325,32 @@ Create `src/templates/pages/product-family-detail.njk`:
 {% endblock %}
 ```
 
-- [ ] **Step 7: Run tests and commit**
+- [ ] **步骤 7：运行测试并提交**
 
-Run:
+运行：
 
 ```bash
 npm test
 ```
 
-Expected: PASS for the renderer and shell-composition tests.
+预期：渲染器和外壳组合测试全部通过。
 
-Commit:
+提交：
 
 ```bash
 git add src/templates tests/render.test.mjs
 git commit -m "feat: add reusable site shell templates"
 ```
 
-### Task 3: Build the Product-Family Page Template
+### 任务 3：建立产品系列页面模板
 
-**Files:**
-- Modify: `src/templates/pages/product-family-detail.njk`
-- Create: `tests/template-contract.test.mjs`
+**文件：**
+- 修改：`src/templates/pages/product-family-detail.njk`
+- 新建：`tests/template-contract.test.mjs`
 
-- [ ] **Step 1: Write the failing template-contract tests**
+- [ ] **步骤 1：编写失败的模板契约测试**
 
-Create `tests/template-contract.test.mjs`:
+新建 `tests/template-contract.test.mjs`：
 
 ```js
 import assert from "node:assert/strict";
@@ -382,19 +382,19 @@ test("contains no executable inline content", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests and verify failure**
+- [ ] **步骤 2：运行测试并确认失败**
 
-Run:
+运行：
 
 ```bash
 node --test tests/template-contract.test.mjs
 ```
 
-Expected: FAIL because the product page template does not exist.
+预期：测试失败，因为产品页模板尚未包含必需区域。
 
-- [ ] **Step 3: Create the complete product page body**
+- [ ] **步骤 3：创建完整产品页面主体**
 
-Create `src/templates/pages/product-family-detail.njk`. It must extend `layouts/base.njk` and contain, in this order:
+修改 `src/templates/pages/product-family-detail.njk`。它必须继承 `layouts/base.njk`，并按以下顺序包含内容：
 
 ```njk
 {% extends "layouts/base.njk" %}
@@ -428,34 +428,34 @@ Create `src/templates/pages/product-family-detail.njk`. It must extend `layouts/
 {% endblock %}
 ```
 
-- [ ] **Step 4: Run all structural tests and commit**
+- [ ] **步骤 4：运行全部结构测试并提交**
 
-Run:
+运行：
 
 ```bash
 npm test
 ```
 
-Expected: PASS for all tests.
+预期：全部测试通过。
 
-Commit:
+提交：
 
 ```bash
 git add src/templates/pages tests
 git commit -m "feat: add product family page template"
 ```
 
-### Task 4: Add Local Assets and Responsive Styles
+### 任务 4：添加本地资源和响应式样式
 
-**Files:**
-- Create: `public/assets/logo.svg`
-- Create: `public/assets/product-hero.jpg`
-- Create: `src/styles/site.css`
-- Create: `src/scripts/site.js`
+**文件：**
+- 新建：`public/assets/logo.svg`
+- 新建：`public/assets/product-hero.jpg`
+- 新建：`src/styles/site.css`
+- 新建：`src/scripts/site.js`
 
-- [ ] **Step 1: Download approved company-site assets**
+- [ ] **步骤 1：下载已确认的公司官网资源**
 
-Run:
+运行：
 
 ```bash
 mkdir -p public/assets
@@ -464,11 +464,11 @@ curl -L 'https://www.dgcrane.com/wp-content/uploads/Single-girder-gantry-crane-4
 file public/assets/logo.svg public/assets/product-hero.jpg
 ```
 
-Expected: `logo.svg` is SVG and `product-hero.jpg` is JPEG image data.
+预期：`logo.svg` 为 SVG 文件，`product-hero.jpg` 为 JPEG 图片。
 
-- [ ] **Step 2: Create the responsive stylesheet**
+- [ ] **步骤 2：创建响应式样式表**
 
-Create `src/styles/site.css` with design tokens, shared shell styles, product hero grid, long-form content spacing, card grids, dynamic-section styling, and responsive breakpoints. The required layout contract is:
+新建 `src/styles/site.css`，包含设计变量、共用外壳样式、产品首屏网格、长内容间距、卡片网格、动态区域样式和响应式断点。必须满足以下布局契约：
 
 ```css
 :root { --container: 1200px; --brand: #d71920; --ink: #1f252b; --muted: #66717c; --line: #e2e6e9; --surface: #f4f6f7; --section: 80px; }
@@ -510,9 +510,9 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 600px) { .container { width: min(calc(100% - 28px), var(--container)); } .topbar nav { display: none; } .trust-banner ul, .feature-grid, .process-grid, .case-grid, .footer-grid { grid-template-columns: 1fr; } .product-hero { gap: 32px; padding-bottom: 56px; } }
 ```
 
-- [ ] **Step 3: Add minimal mobile navigation behavior**
+- [ ] **步骤 3：添加最小移动端导航行为**
 
-Create `src/scripts/site.js`:
+新建 `src/scripts/site.js`：
 
 ```js
 const toggle = document.querySelector(".nav-toggle");
@@ -525,9 +525,9 @@ toggle?.addEventListener("click", () => {
 });
 ```
 
-- [ ] **Step 4: Build and verify output files**
+- [ ] **步骤 4：构建并验证输出文件**
 
-Run:
+运行：
 
 ```bash
 npm run build
@@ -538,94 +538,94 @@ test -f dist/assets/logo.svg
 test -f dist/assets/product-hero.jpg
 ```
 
-Expected: all commands exit with code 0.
+预期：所有命令均以状态码 0 结束。
 
-- [ ] **Step 5: Commit styles and assets**
+- [ ] **步骤 5：提交样式和资源**
 
 ```bash
 git add public src/styles src/scripts
 git commit -m "feat: style responsive product template"
 ```
 
-### Task 5: Verify the Prototype in the In-App Browser
+### 任务 5：在应用内浏览器验证原型
 
-**Files:**
-- Create: `README.md`
+**文件：**
+- 新建：`README.md`
 
-- [ ] **Step 1: Start the local preview server**
+- [ ] **步骤 1：启动本地预览服务器**
 
-Run:
+运行：
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Expected: the server listens at `http://localhost:4173`.
+预期：服务器监听 `http://localhost:4173`。
 
-- [ ] **Step 2: Open the generated product page**
+- [ ] **步骤 2：打开生成的产品页面**
 
-Open:
+打开：
 
 ```text
 http://localhost:4173/zh/products/single-girder-gantry-cranes/
 ```
 
-Verify at desktop width:
+在桌面端宽度下验证：
 
-- Header and Footer appear once.
-- Trust banner appears between Header and breadcrumb.
-- Hero has content on the left and product image on the right.
-- Overview, advantages, components, process and cases follow in order.
-- Inquiry and related-products API placeholders are visible.
-- No horizontal overflow occurs.
+- Header 和 Footer 各出现一次。
+- 信任横幅位于 Header 与面包屑之间。
+- 产品首屏左侧为内容，右侧为产品图片。
+- 概述、优势、组成部分、生产流程和案例按顺序出现。
+- 询价表单和相关产品 API 占位可见。
+- 页面没有横向溢出。
 
-- [ ] **Step 3: Verify responsive behavior**
+- [ ] **步骤 3：验证响应式行为**
 
-Check at 390×844 and verify:
+在 390×844 尺寸下检查：
 
-- Mobile navigation is collapsed and opens once.
-- Hero becomes one column.
-- Product cards and Footer columns become one column.
-- Text and images remain within the viewport.
+- 移动导航默认收起，并且能够正常打开。
+- 产品首屏变为单列。
+- 产品卡片和 Footer 栏目变为单列。
+- 文字和图片均保持在视口内。
 
-- [ ] **Step 4: Compare against the source page**
+- [ ] **步骤 4：与来源页面对比**
 
-Compare the local page with:
+把本地页面与以下页面比较：
 
 ```text
 https://www.dgcrane.com/zh/products/single-girder-gantry-cranes/
 ```
 
-The prototype must preserve the source page's information hierarchy and brand identity. Exact pixel parity is not required in this first pass; the template must be structurally faithful, responsive, and free of WordPress runtime dependencies.
+原型必须保留来源页面的信息层级和品牌识别。第一轮不要求像素级完全一致，但模板必须忠实保留结构、支持响应式，并且不依赖 WordPress 运行时。
 
-- [ ] **Step 5: Document commands and boundaries**
+- [ ] **步骤 5：记录命令和模板边界**
 
-Create `README.md`:
+新建 `README.md`：
 
 ```markdown
-# DGCRANE Template Prototype
+# DGCRANE 模板原型
 
-## Commands
+## 命令
 
-- `npm install` installs dependencies.
-- `npm test` validates template composition and markers.
-- `npm run build` renders the static site into `dist/`.
-- `npm run preview` serves `dist/` on port 4173.
+- `npm install` 安装依赖。
+- `npm test` 验证模板组合和标记。
+- `npm run build` 把静态网站渲染到 `dist/`。
+- `npm run preview` 在 4173 端口提供 `dist/` 预览。
 
-## Template Boundaries
+## 模板边界
 
-- `header.njk` and `footer.njk` are reusable across every page type.
-- `trust-banner.njk` is reusable across inner pages.
-- `product-family-detail.njk` is the first complete middle-page template.
-- `data-field` marks editable content without requiring Markdown to use a fixed schema.
-- `data-dynamic` reserves modules that will later call APIs.
-- The current prototype does not include CMS, AI, database, S3, or real dynamic APIs.
+- `header.njk` 和 `footer.njk` 可供所有页面类型复用。
+- `trust-banner.njk` 可供所有内页复用。
+- `product-family-detail.njk` 是第一份完整的中间页面模板。
+- `data-field` 标记可编辑内容，但不要求 Markdown 使用固定字段结构。
+- `data-dynamic` 预留以后调用 API 的模块。
+- 当前原型不包含 CMS、AI、数据库、S3 或真实动态 API。
 ```
 
-- [ ] **Step 6: Run final verification and commit**
+- [ ] **步骤 6：运行最终验证并提交**
 
-Run:
+运行：
 
 ```bash
 npm test
@@ -633,9 +633,9 @@ npm run build
 git status --short
 ```
 
-Expected: tests and build pass; only intended README or generated lockfile changes remain before commit.
+预期：测试和构建通过；提交前只剩预期的 README 或 lockfile 变更。
 
-Commit:
+提交：
 
 ```bash
 git add README.md package-lock.json
