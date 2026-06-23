@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  {{SEO}}
+
+  <!-- 本地化样式（顺序与原站 <head> 一致；swiper.css 原站重复引用一次，忠实保留） -->
+  <link rel="stylesheet" href="/assets/css/fonts.css">
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/swiper.css">
+  <link rel="stylesheet" href="/assets/css/photoswipe.css">
+  <link rel="stylesheet" href="/assets/css/mediaelementplayer.css">
+  <link rel="stylesheet" href="/assets/css/default-skin.css">
+  <link rel="stylesheet" href="/assets/css/swiper.css">
+  <link rel="stylesheet" href="/assets/css/landing-page.css">
+</head>
+<body>
+  <div id="wrapper">
+    {{HEADER}}
+    {{BODY}}
+    {{FOOTER}}
+  </div>
+
+  <!-- 本地化交互脚本（顺序：依赖先于使用） -->
+  <script src="/assets/js/jquery-2.1.4.min.js"></script>
+  <script src="/assets/js/swiper.min.js"></script>
+  <script src="/assets/js/photoswipe.min.js"></script>
+  <script src="/assets/js/jquery.accordion.js"></script>
+  <script src="/assets/js/jquery.copy.js"></script>
+  <script src="/assets/js/page-init.js"></script>
+</body>
+</html>

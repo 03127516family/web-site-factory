@@ -1,0 +1,10 @@
+{
+  "name": "dgcrane-placement-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "serve": "node scripts/build.mjs && python3 -m http.server --directory dist 8080"
+  }
+}
