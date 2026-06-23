@@ -10,6 +10,10 @@
     - data-repeat="<grp>" 标记可重复块容器；其子项每个带唯一 data-block-id，
                           子项即「单元模版」——按 MD 数组逐个克隆填充（契约文档有抽出的单元模版）
     - data-dynamic        运行时由 API 接管的动态模块（现为静态占位）
+    - data-optional="<key>"   条件块：MD 无对应 <key> 数据则整块删除（有数据→渲染保留，无→不渲染）
+
+  超集裁剪：带 data-optional 的块按 MD 数据「在不在」决定渲染或删除——同一份模版裁出不同产品页。
+    自由槽 data-slot（结构各异的独有内容，如对比表）等机制见契约「页面间差异机制」§7；本模版暂未预置。
 
   内容三分类（MD 只驱动 content）：
     - dynamic：带 data-dynamic（inquiry-form、related-products）——运行时 API
@@ -68,7 +72,7 @@
 		</div><!-- prort button-->
 	</div><!-- pcon -->
 
-	<div data-template="gallery@1" data-block-id="gallery" class="ltgallery clearfix">
+	<div data-template="gallery@1" data-block-id="gallery" data-optional="gallery" class="ltgallery clearfix">
 	<div class="swiper-container gallery-top" style="pointer-events: none;">
 		<div class="swiper-wrapper" data-repeat="gallery">
 			<div class="swiper-slide" data-block-id="gallery-1"><img data-field="gallery.image" src="/assets/img/product/5Ton-LDC-type-single-girder-overhead-crane-in-India-1.jpg" alt="印度5吨LDC型单梁桥式起重机 1" width="870" height="580"></div>
@@ -106,7 +110,7 @@
 
 <div class="content wrap">
 
-	<section data-template="overview@1" data-block-id="overview" class="pro-info clearfix">
+	<section data-template="overview@1" data-block-id="overview" data-optional="overview" class="pro-info clearfix">
 		<h3 data-field="overview.title">概述</h3>
 		<div data-field="overview.body">
 
@@ -138,7 +142,7 @@
 	</section>
 	<!-- pro-info -->
 
-	<section data-template="introduction@1" data-block-id="introduction" class="pro-info clearfix">
+	<section data-template="introduction@1" data-block-id="introduction" data-optional="introduction" class="pro-info clearfix">
 		<h3 data-field="introduction.title">简介</h3>
 		<div data-field="introduction.body">
 
@@ -161,7 +165,7 @@
 	</section>
 	<!-- pro-info -->
 
-	<section data-template="components@1" data-block-id="components" class="pro-info clearfix">
+	<section data-template="components@1" data-block-id="components" data-optional="components" class="pro-info clearfix">
 		<h3 data-field="components.title">选项和组件</h3>
 		<div><div id="parts" data-repeat="components">
 			<div class="faq_block" data-block-id="components-1">
@@ -253,7 +257,7 @@
 		</div></div>
 	</section>
 
-	<section data-template="crane-types@1" data-block-id="crane-types" class="pro-info clearfix">
+	<section data-template="crane-types@1" data-block-id="crane-types" data-optional="crane_types" class="pro-info clearfix">
 		<h3 data-field="crane_types.title">适用于不同工作条件的起重机类型</h3>
 		<div class="types">
 		<div class="types_info" data-repeat="crane-types"> <div class="grid_3" data-block-id="crane-type-1"><img loading="lazy" decoding="async" data-field="crane_type.image" src="/assets/img/product/LDA-scaled.jpg" width="285" height="190" />
@@ -310,7 +314,7 @@
 		</div>
 	</section>
 
-	<section data-template="installation@1" data-block-id="installation" class="pro-info clearfix" style="margin-bottom: 60px;">
+	<section data-template="installation@1" data-block-id="installation" data-optional="installation" class="pro-info clearfix" style="margin-bottom: 60px;">
 		<h3 data-field="installation.title">可进行现场安装或远程指导</h3>
 		<div class="cases">
 			<p data-field="installation.body">建立信任确实很难，但凭借我们10多年的销售经验和所做的3000多个项目，终端用户和代理商都从我们的合作中获得并受益。顺便说一下，独立销售代表的招聘。丰厚的佣金/无风险。</p>
