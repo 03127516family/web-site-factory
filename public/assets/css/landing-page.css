@@ -9922,3 +9922,9 @@ ol li {
 #hooklp .eot-cranes-list1.hookCase .proIntroduce li:last-child {
   margin-bottom: 0;
 }
+
+/* 自定义对比表/参数表（custom_tables 内的裸 table）通用样式：一处生效全站 */
+.custom_tables table { border-collapse: collapse; width: 100%; font-size: 14px; }
+.custom_tables th, .custom_tables td { border: 1px solid #d9d9d9; padding: 10px 14px; vertical-align: top; }
+.custom_tables th { background: #f2f5fa; font-weight: 600; }
+.custom_tables tr:nth-child(even) td { background: #fafbfd; }
