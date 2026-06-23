@@ -12,7 +12,7 @@ import { renderBodyFromMarkdown } from "./render.mjs";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const p = (...s) => join(ROOT, ...s);
 const PORT = 8099;
-const CDP = 9222;
+const CDP = 9456; // 避开常见调试端口（Chrome/Edge 默认 9222）冲突
 const TOL = 2; // 像素容差
 const CHROME = process.env.CHROME || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
 

@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "serve": "node scripts/build.mjs && python3 -m http.server --directory dist 8080",
+    "edit": "node scripts/edit-server.mjs",
     "verify:geom": "node --experimental-websocket scripts/verify-geom.mjs"
   },
   "dependencies": {

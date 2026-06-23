@@ -32,7 +32,33 @@ const REPEATS = {
 // 哪些正文块是「按 ### 拆成重复项」的（其余 ## 块是单体富文本）
 const REPEAT_BODY_BLOCKS = new Set(["components", "crane-types"]);
 
-export async function renderBodyFromMarkdown(templateHtml, mdPath) {
+// data-repeat 名 → frontmatter 里对应的数组路径（编辑模式写回坐标 fm:<array>.<i>.<key> 用）。
+const REPEAT_FM_ARRAY = {
+  gallery: "gallery",
+  "gallery-thumbs": "gallery",
+  components: "components_images",
+  "production-flow": "production_flow.steps",
+  "crane-types": "crane_types_images",
+  cases: "installation.cases",
+  "related-products": "related_products.seed",
+};
+
+// 非重复字段点路径 → ## 标题块名（mdhead:<block>）。注意 crane_types 映射到连字符 crane-types。
+const HEAD_BLOCK_OF = {
+  "overview.title": "overview",
+  "introduction.title": "introduction",
+  "components.title": "components",
+  "crane_types.title": "crane-types",
+};
+
+// 正文富文本块（mdbody:<block>，rich）的点路径 → 块名。
+const RICH_BODY_BLOCK_OF = {
+  "overview.body": "overview",
+  "introduction.body": "introduction",
+};
+
+export async function renderBodyFromMarkdown(templateHtml, mdPath, opts = {}) {
+  const editMode = opts.editMode === true;
   const raw = await readFile(mdPath, "utf8");
   const { frontmatter, body } = splitFrontmatter(raw);
   const fm = parseYaml(frontmatter) || {};
@@ -41,9 +67,48 @@ export async function renderBodyFromMarkdown(templateHtml, mdPath) {
 
   const root = parseHtml(templateHtml, { comment: true });
   pruneOptional(root, data);
-  expandRepeats(root, data);
-  fillFields(root, data);
+  expandRepeats(root, data, editMode);
+  fillFields(root, data, editMode);
   return root.toString();
+}
+
+// 非重复字段的写回坐标分类：纯函数，path → { md:<data-md 值>, edit:<data-edit 类型> }。
+// edit 为 image/link 时若元素并非 <img>/<a> 应由调用方按实际标签回退到 text；这里只给出「按 path 的预期类型」。
+function classifyField(path, tag) {
+  // ## 标题块（overview/introduction/components/crane_types 的 .title）→ mdhead:<block>，text。
+  if (path in HEAD_BLOCK_OF) return { md: `mdhead:${HEAD_BLOCK_OF[path]}`, edit: "text" };
+  // 正文富文本块（overview/introduction 的 .body）→ mdbody:<block>，rich。
+  if (path in RICH_BODY_BLOCK_OF) return { md: `mdbody:${RICH_BODY_BLOCK_OF[path]}`, edit: "rich" };
+  // installation 正文：纯文本块 → mdbody:installation，text。
+  if (path === "installation.body") return { md: "mdbody:installation", edit: "text" };
+  // hero.highlights：frontmatter 数组渲染成 <ul>，按富文本编辑。
+  if (path === "hero.highlights") return { md: "fm:hero.highlights", edit: "rich" };
+  // 其余 → fm:<path>，类型按元素标签 / path 后缀判定。
+  return { md: `fm:${path}`, edit: editTypeOf(tag, path, null) };
+}
+
+// 元素标签 + 路径/键 → 编辑类型：<img>→image；<a> 且以 url 结尾→link；否则 text。
+function editTypeOf(tag, path, key) {
+  if (tag === "img") return "image";
+  if (tag === "a" && ((path && path.endsWith(".url")) || (key && key.endsWith("url")))) return "link";
+  return "text";
+}
+
+// 编辑模式下给可编辑元素打写回坐标。
+function tagEditable(el, md, edit) {
+  el.setAttribute("data-md", md);
+  el.setAttribute("data-edit", edit);
+}
+
+// 重复块单元内字段的写回坐标：组名 name + 0 基索引 i + 单元内键 key（与 path）。
+function tagUnitField(el, name, i, key, path) {
+  const tag = (el.tagName || "").toLowerCase();
+  // 特例：components/crane-types 的 body 写回正文块的第 i 个 ### 项（mdbody:<block>#<i>）。
+  if (name === "components" && key === "body") return tagEditable(el, `mdbody:components#${i}`, "text");
+  if (name === "crane-types" && key === "body") return tagEditable(el, `mdbody:crane-types#${i}`, "rich");
+  // 其余 → fm:<数组路径>.<i>.<key>，类型按元素标签 / key 后缀判定。
+  const array = REPEAT_FM_ARRAY[name];
+  tagEditable(el, `fm:${array}.${i}.${key}`, editTypeOf(tag, path, key));
 }
 
 // ---------- MD 解析 ----------
@@ -191,7 +256,7 @@ function pruneOptional(root, data) {
   }
 }
 
-function expandRepeats(root, data) {
+function expandRepeats(root, data, editMode = false) {
   for (const container of root.querySelectorAll("[data-repeat]")) {
     const name = container.getAttribute("data-repeat");
     const spec = REPEATS[name];
@@ -207,20 +272,22 @@ function expandRepeats(root, data) {
         const clone = unit.clone();
         if (clone.getAttribute && clone.getAttribute("data-block-id"))
           clone.setAttribute("data-block-id", `${stem}-${i + 1}`);
-        return fillUnit(clone, item, spec.prefix);
+        // 编辑模式下把组名 name 和 0 基索引 i 传下去，给单元内字段打写回坐标。
+        return fillUnit(clone, item, spec.prefix, editMode ? { name, i } : null);
       })
       .join("\n");
     container.set_content(html);
   }
 }
 
-function fillUnit(unit, item, prefix) {
+function fillUnit(unit, item, prefix, edit = null) {
   const fields = unit.querySelectorAll("[data-field]");
   if (unit.getAttribute && unit.getAttribute("data-field")) fields.unshift(unit);
   const altText = item.alt ?? item.name ?? item.title ?? item.label;
   for (const el of fields) {
     const path = el.getAttribute("data-field");
     const key = path.startsWith(prefix + ".") ? path.slice(prefix.length + 1) : path;
+    if (edit) tagUnitField(el, edit.name, edit.i, key, path);
     applyValue(el, item[key], path, item);
     // 重复块单元是「克隆首个单元」来的：图片须去掉首单元残留的 srcset/sizes（否则会按 srcset
     // 加载到错误的图），并把 alt 改成本项文字。
@@ -239,11 +306,16 @@ function fillUnit(unit, item, prefix) {
   return unit.toString();
 }
 
-function fillFields(root, data) {
+function fillFields(root, data, editMode = false) {
   for (const el of root.querySelectorAll("[data-field]")) {
     const path = el.getAttribute("data-field");
     const value = resolve(data, path);
     if (value === undefined) continue; // 容器 / 重复块前缀字段 / 无数据 → 保持原样
+    if (editMode) {
+      const tag = (el.tagName || "").toLowerCase();
+      const { md, edit } = classifyField(path, tag);
+      tagEditable(el, md, edit);
+    }
     applyValue(el, value, path, null);
   }
 }

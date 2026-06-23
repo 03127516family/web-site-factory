@@ -8,14 +8,14 @@
 
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { renderBodyFromMarkdown } from "./render.mjs";
 
-const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const p = (...s) => join(ROOT, ...s);
+export const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+export const p = (...s) => join(ROOT, ...s);
 
 // 页面清单：将来一个 MD 一个产品页时，这里按 content 目录展开即可。
-const pages = [
+export const pages = [
   {
     slug: "products/single-girder-eot-cranes",
     lang: "zh-CN",
@@ -34,17 +34,19 @@ const pages = [
   },
 ];
 
-async function composePage(page) {
+// 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
+// 注入编辑器资源（window.__EDIT__ + editor.css + editor.js）。生产 build 不传 opts，产出干净。
+export async function composePage(page, opts = {}) {
   const layout = await readFile(p("src/layouts/document.html"), "utf8");
   const header = await readFile(p("src/fragments/header.html"), "utf8");
   const footer = await readFile(p("src/fragments/footer.html"), "utf8");
   let body = await readFile(p(page.template), "utf8");
 
   if (page.content) {
-    body = await renderBodyFromMarkdown(body, p(page.content));
+    body = await renderBodyFromMarkdown(body, p(page.content), { editMode: opts.editMode === true });
   }
 
-  return layout
+  let html = layout
     .replaceAll("{{LANG}}", page.lang)
     .replaceAll("{{TITLE}}", page.title)
     .replaceAll("{{DESCRIPTION}}", page.description)
@@ -52,6 +54,15 @@ async function composePage(page) {
     .replace("{{HEADER}}", () => header)
     .replace("{{BODY}}", () => body)
     .replace("{{FOOTER}}", () => footer);
+
+  if (opts.editMode === true) {
+    const inject =
+      `<script>window.__EDIT__=${JSON.stringify({ slug: page.slug })};</script>\n` +
+      `<link rel="stylesheet" href="/assets/css/editor.css">\n` +
+      `<script src="/assets/js/editor.js"></script>\n`;
+    html = html.includes("</body>") ? html.replace("</body>", inject + "</body>") : html + inject;
+  }
+  return html;
 }
 
 async function build() {
@@ -69,7 +80,10 @@ async function build() {
   }
 }
 
-build().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// 仅在直接运行（node scripts/build.mjs）时执行 build；被 edit-server 等 import 时不触发。
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  build().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
