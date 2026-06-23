@@ -9,6 +9,7 @@
 import { readFile, writeFile, mkdir, cp, rm } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { renderBodyFromMarkdown } from "./render.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const p = (...s) => join(ROOT, ...s);
@@ -20,8 +21,8 @@ const pages = [
     lang: "zh-CN",
     title: "单梁桥式起重机 - DGCRANE",
     description: "单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120 多个国家。",
-    template: "src/templates/product-superset.html",
-    // content: 'src/content/single-girder-eot-cranes.md', // 启用后由 MD 驱动填充
+    template: "src/templates/product.html",
+    content: "src/content/single-girder-eot-cranes.md", // 由 MD 驱动填充
   },
   {
     slug: "products/overhead-cranes-for-sale",
@@ -40,7 +41,7 @@ async function composePage(page) {
   let body = await readFile(p(page.template), "utf8");
 
   if (page.content) {
-    body = await fillTemplateFromMarkdown(body, p(page.content));
+    body = await renderBodyFromMarkdown(body, p(page.content));
   }
 
   return layout
@@ -51,11 +52,6 @@ async function composePage(page) {
     .replace("{{HEADER}}", () => header)
     .replace("{{BODY}}", () => body)
     .replace("{{FOOTER}}", () => footer);
-}
-
-// 占位：将来按 FIELD-MAP 把 MD 的 frontmatter / 正文填进 data-field / data-repeat。
-async function fillTemplateFromMarkdown(template /*, mdPath */) {
-  return template; // TODO: 实现 MD → data-field 注入
 }
 
 async function build() {

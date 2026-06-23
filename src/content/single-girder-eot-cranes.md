@@ -31,13 +31,15 @@ summary:
   cta: 报价要求
 
 # 快速参数（spec.*）
-capacity: 容量：1-20吨
-span: 跨度长度：4-31.5米
-duty_class: 工作职责。A3, A4
-voltage: 工作电压：220V~690V，50-60Hz，3ph AC
-temperature: 工作环境温度：-25℃～+40℃，相对湿度≤85%
-control: 起重机控制模式。地面控制/远程控制/机舱室
-price_range: $750-4500/套
+spec:
+  capacity: 容量：1-20吨
+  span: 跨度长度：4-31.5米
+  duty_class: 工作职责。A3, A4
+  voltage: 工作电压：220V~690V，50-60Hz，3ph AC
+  temperature: 工作环境温度：-25℃～+40℃，相对湿度≤85%
+  control: 起重机控制模式。地面控制/远程控制/机舱室
+  # 含 <span> 行内强调：富文本字段，渲染器按 innerHTML 注入
+  price_range: "参考价格范围。<span>$750-4500/套</span>"
 
 # gallery（产品图库，data-repeat="gallery"）
 gallery:
@@ -54,9 +56,11 @@ gallery:
   - { image: 20ton-single-girder-overhead-crane-2.jpg, alt: 20吨单梁桥式起重机 2 }
   - { image: 20ton-single-girder-overhead-crane-1.jpg, alt: 20吨单梁桥式起重机1台 }
 
-# introduction 区块内嵌图
+# introduction 区块内嵌图（正文内嵌图改用 markdown 行内图语法，见下方正文）
 introduction:
   image: singlegirdereot-crane-9.jpg
+  image_w: 830
+  image_h: 300
 
 # components（部件分解，data-repeat="components"）：图片文件名清单
 components_images:
@@ -125,8 +129,7 @@ related_products:
     - { title: FEM标准桥式起重机, image: European_Overhead_Crane.jpg, url: "https://www.dgcrane.com/zh/products/overhead-cranes-for-sale/", summary: "欧式桥式起重机广泛用于机械制造、石油、石化、港口、铁路、民航、电力、食品、造纸、建材、电子等行业的车间和仓库等物料搬运场合。它们特别适用于需要精确定位的材料处理。, 大型部件的精密装配等场合。" }
 ---
 
-## 概述
-<!-- overview.title / overview.body -->
+## 概述 <!--block:overview-->
 
 电动单梁桥式起重机是根据GB3811-2008和JB/T1306-2008标准设计的。它是以CD1、MD1、WH164电动葫芦、环链电动葫芦为起重机构的车间起重设备。它广泛用于机械加工、装配、修理、仓库等工作场所。它是现代工业企业实现生产过程机械化、自动化，减少繁重的手工劳动，提高劳动生产率的重要工具和设备。主要部件有桥架、电动葫芦、电控系统。
 
@@ -153,12 +156,11 @@ related_products:
 - 可选：无线电遥控
 - 涂层：定制。通常漆面为金黄色。旅行驱动器为天蓝色。
 
-## 简介
-<!-- introduction.title / introduction.body（内嵌图 introduction.image）-->
+## 简介 <!--block:introduction-->
 
 单梁 eot 起重机由单根桥梁、两条轨道、端部卡车、两条跑道梁和一台用于提升在桥梁上运行的负载的起重机组成。端车在固定在跑道横梁上的轨道上运行。它是中重载最具成本效益的设备之一。单梁 eot 起重机为覆盖区域和运动控制提供最大的灵活性。与安装在工厂上部一样，单梁起重机占用的地面空间最少，在移动范围内遇到的障碍物最少。经过多年的努力，我公司已成功跻身国内一流的单梁起重机制造商行列。可以对单梁 eot 起重机进行修改以适应不断变化的需求。这种设备的操作相当灵活。它也很容易根据您工厂的独特条件以及生产和负载的多样性进行定制。
 
-![单梁EOT起重机](introduction.image)
+![单梁EOT起重机](singlegirdereot-crane-9.jpg){830x300}
 
 ### DGCRANE的桥式起重机的优势
 
@@ -174,8 +176,7 @@ related_products:
 - 单梁起重机在工作期间应始终受到密切监督。不要在没有人看管的情况下单独离开起重机。
 - 在工作一段时间后，应该对起重机及其部件进行检查。检查的时间间隔取决于实际使用情况。
 
-## 选项和组件
-<!-- components.title + 每个 ### 子标题映射一个 data-repeat="components" 项；图片取自 frontmatter components_images -->
+## 选项和组件 <!--block:components-->
 
 ### 主梁
 
@@ -217,15 +218,13 @@ JHQ-C系列聚氨酯缓冲器具有超强的防撞能力和良好的缓冲效果
 
 操作面板、遥控、驾驶室控制。起重机也可配备两套操作装置，即：地面+遥控或司机室+遥控。但出于安全问题，两种操作方式只能切换，不能同时使用。控制电路电压一般为交流36V安全电压。
 
-## 一台标准的单梁桥式起重机将在20天内生产出来。
-<!-- production-flow：步骤与图片取自 frontmatter production_flow.steps；提示取自 production_flow.tips -->
+## 一台标准的单梁桥式起重机将在20天内生产出来。 <!--block:production-flow-->
 
 来料检验 → 钢板开卷和开裂 → 钢板切割 → 滚动槽 → 焊接加劲器 → 焊接工字钢和盖板 → 起重机预装 → 仙鹤画 → 起重机包装和交付
 
 > 提示。不同电压的起重机的交货时间可能会延长10-15天，因为电气元件需要由我们的供应商定制。
 
-## 适用于不同工作条件的起重机类型
-<!-- crane-types：每个 ### 子标题映射一个 data-repeat="crane-types" 项；图片取自 frontmatter crane_types_images -->
+## 适用于不同工作条件的起重机类型 <!--block:crane-types-->
 
 ### LDA（普通单梁桥式起重机）。
 
@@ -263,7 +262,6 @@ JHQ-C系列聚氨酯缓冲器具有超强的防撞能力和良好的缓冲效果
 - 该起重机运行机构采用单独驱动方式，驱动与制动均由锥形转子电动机完成，传动采用“一开二闭”齿轮传动。
 - 该产品具有结构紧凑、刚性好、操作简便、噪音低、安全可靠、外形美观等优点。
 
-## 可进行现场安装或远程指导
-<!-- installation.title / installation.body；案例卡片取自 frontmatter installation.cases -->
+## 可进行现场安装或远程指导 <!--block:installation-->
 
 建立信任确实很难，但凭借我们10多年的销售经验和所做的3000多个项目，终端用户和代理商都从我们的合作中获得并受益。顺便说一下，独立销售代表的招聘。丰厚的佣金/无风险。
