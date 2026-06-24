@@ -12,6 +12,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { parseDocument } from "yaml";
 import { parse as parseHtml } from "node-html-parser";
+import { REPEAT_FM_ARRAY } from "./render.mjs";
 
 const IMG_BASE = "/assets/img/product/";
 
@@ -31,6 +32,95 @@ export async function patchMarkdown(mdPath, coord, kind, value) {
   const next = applyPatch(raw, coord, kind, value);
   await writeFile(mdPath, next, "utf8");
   return next;
+}
+
+// ---------- arrayOp：data-repeat 组的增删 ----------
+
+// add 时往 frontmatter 数组末尾追加的默认占位条目。用户加完会立即改。
+const NEW_ITEM = {
+  gallery: { image: "", alt: "新图片" },
+  cases: { title: "新案例", image: "", url: "#" },
+  "related-products": { title: "新产品", image: "", url: "#", summary: "新说明" },
+  "production-flow": { label: "新步骤", image: "" },
+  specs: { text: "新参数" },
+  components: { name: "新组件", image: null },
+  "crane-types": { name: "新型号", image: null },
+};
+
+// 既有 frontmatter 数组、又有正文 ### 项 的「双处同步」组：组名 → markdown 块 key。
+const DUAL_BLOCK = { components: "components", "crane-types": "crane-types" };
+
+// 对某 data-repeat 组的 MD 数据做增删并落盘。op ∈ "add" | "remove"；remove 时 index 为 0 基下标。
+export async function arrayOp(mdPath, group, op, index) {
+  const raw = await readFile(mdPath, "utf8");
+  const next = applyArrayOp(raw, group, op, index);
+  await writeFile(mdPath, next, "utf8");
+  return next;
+}
+
+// 纯函数核心：对原文做组增删，返回整篇文本。frontmatter 与（双处组的）正文同按同一 index 改动。
+export function applyArrayOp(raw, group, op, index) {
+  const arrayPath = REPEAT_FM_ARRAY[group];
+  if (!arrayPath) throw new Error(`未知的 data-repeat 组：${group}`);
+  if (op !== "add" && op !== "remove") throw new Error(`未知的 op：${op}`);
+  const item = NEW_ITEM[group];
+  if (op === "add" && !item) throw new Error(`组 ${group} 没有 NEW_ITEM 默认条目`);
+
+  const { frontmatter, body, hasFm } = splitFile(raw);
+  if (!hasFm) throw new Error("文件没有 frontmatter，无法 arrayOp");
+
+  // 1) frontmatter 数组增删
+  const doc = parseDocument(frontmatter);
+  const pathArr = arrayPath.split(".");
+  if (op === "add") {
+    doc.addIn(pathArr, doc.createNode(item, { flow: true }));
+  } else {
+    if (typeof index !== "number" || index < 0) throw new Error(`remove 需要 0 基 index：${index}`);
+    if (!doc.deleteIn([...pathArr, index]))
+      throw new Error(`数组 ${arrayPath} 没有第 ${index} 项可删`);
+  }
+  const fmText = doc.toString({ lineWidth: 0 }).replace(/\n$/, "");
+
+  // 2) 双处组（components / crane-types）：正文 ### 项 同步增删（同一 index）
+  let newBody = body;
+  const block = DUAL_BLOCK[group];
+  if (block) {
+    if (op === "add") {
+      newBody = appendBodyItem(body, block, item.name, "新说明");
+    } else {
+      newBody = removeBodyItem(body, block, index);
+    }
+  }
+
+  return `---\n${fmText}\n---\n${newBody}`;
+}
+
+// 在 `## 块` 末尾追加一个 `### name\n\n content` 项。
+function appendBodyItem(body, block, name, content) {
+  const lines = body.split(/\r?\n/);
+  const { bodyEnd } = locateBlock(lines, block);
+  const before = lines.slice(0, bodyEnd); // 直到下一个 ## 之前（含本块全部 ### 项）
+  const after = lines.slice(bodyEnd); // 下一个 ## 起（或文件尾）
+  const text = `### ${name}\n\n${content}`;
+  return assemble(before, text, after);
+}
+
+// 删除 `## 块` 下第 i 个 `### 项`（标题行到下一个 ### / ## 之前）。
+function removeBodyItem(body, block, i) {
+  const lines = body.split(/\r?\n/);
+  const { bodyStart, bodyEnd } = locateBlock(lines, block);
+  const heads = [];
+  for (let k = bodyStart; k < bodyEnd; k++) {
+    if (/^###\s+/.test(lines[k])) heads.push(k);
+  }
+  if (typeof i !== "number" || i < 0 || i >= heads.length)
+    throw new Error(`块 ${block} 没有第 ${i} 个 ### 项`);
+  const itemHead = heads[i];
+  const itemEnd = i + 1 < heads.length ? heads[i + 1] : bodyEnd;
+  const before = lines.slice(0, itemHead); // 不含被删项标题行
+  const after = lines.slice(itemEnd); // 下一个 ### 或下一个 ## 起
+  // 用 assemble 但内容为空：去掉前后多余空行并保留结构。
+  return assemble(before, "", after);
 }
 
 // 纯函数核心（便于测试）：接收原文与坐标，返回 patch 后的整篇文本。

@@ -20,7 +20,9 @@
   }
 
   var SAVE_URL = "/api/save";
+  var ARRAY_OP_URL = "/api/array-op";
   var IMG_PREFIX = "/assets/img/product/";
+  var SCROLL_KEY = "editorScroll";
 
   // ---------------------------------------------------------------------------
   // small DOM helpers
@@ -305,6 +307,130 @@
   }
 
   // ---------------------------------------------------------------------------
+  // scroll persistence across reloads (used by add/remove)
+  // ---------------------------------------------------------------------------
+  function restoreScroll() {
+    var raw;
+    try {
+      raw = window.sessionStorage.getItem(SCROLL_KEY);
+    } catch (e) {
+      raw = null;
+    }
+    if (raw == null) return;
+    try {
+      window.sessionStorage.removeItem(SCROLL_KEY);
+    } catch (e) {
+      /* ignore */
+    }
+    var y = Number(raw);
+    if (!isNaN(y)) window.scrollTo(0, y);
+  }
+
+  function reloadKeepingScroll() {
+    try {
+      window.sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+    } catch (e) {
+      /* ignore */
+    }
+    window.location.reload();
+  }
+
+  // ---------------------------------------------------------------------------
+  // array-op transport (add / remove repeated items)
+  // ---------------------------------------------------------------------------
+  // op: "add" | "remove". index only meaningful for "remove".
+  // Reloads (preserving scroll) on success; red toast on failure.
+  var arrayOpBusy = false;
+  function arrayOp(group, op, index, control) {
+    if (arrayOpBusy) return;
+    arrayOpBusy = true;
+    if (control) control.classList.add("editor-busy");
+
+    var body = { slug: SLUG, group: group, op: op };
+    if (op === "remove") body.index = index;
+
+    fetch(ARRAY_OP_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        if (!res || !res.ok) {
+          throw new Error("array-op failed: " + (res ? res.status : "no response"));
+        }
+        // success -> reload to pick up the re-rendered list
+        reloadKeepingScroll();
+      })
+      .catch(function (err) {
+        arrayOpBusy = false;
+        if (control) control.classList.remove("editor-busy");
+        toast(op === "add" ? "添加失败" : "删除失败", false); // 添加失败 / 删除失败
+        throw err;
+      });
+  }
+
+  // ---------------------------------------------------------------------------
+  // add-control bar (one per [data-group], inserted as a sibling AFTER it)
+  // ---------------------------------------------------------------------------
+  function wireGroup(group) {
+    var name = group.getAttribute("data-group") || "";
+
+    // bar is editor chrome: never carries data-md / data-edit.
+    var bar = el("div", "editor-group-bar");
+
+    var label = el("span", "editor-group-bar__label", name);
+    bar.appendChild(label);
+
+    var addBtn = el("button", "editor-group-bar__add", "＋ 添加"); // ＋ 添加
+    addBtn.type = "button";
+    addBtn.title = "添加一项：" + name;
+    bar.appendChild(addBtn);
+
+    addBtn.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      arrayOp(name, "add", null, bar);
+    });
+
+    // insert as the group's next sibling, outside the container.
+    if (group.parentNode) {
+      group.parentNode.insertBefore(bar, group.nextSibling);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // remove badge (one per [data-idx] unit, hover-revealed)
+  // ---------------------------------------------------------------------------
+  function wireUnit(unit) {
+    // badge is editor chrome: never carries data-md / data-edit.
+    var badge = el("button", "editor-remove", "×");
+    badge.type = "button";
+    badge.title = "删除这一项"; // 删除这一项
+
+    badge.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (arrayOpBusy) return;
+
+      var host = unit.closest ? unit.closest("[data-group]") : null;
+      var group = host ? host.getAttribute("data-group") : null;
+      if (!group) {
+        toast("无法定位分组", false); // 无法定位分组
+        return;
+      }
+      if (!window.confirm("删除这一项？不可撤销")) return; // 删除这一项？不可撤销
+      arrayOp(group, "remove", Number(unit.dataset.idx), badge);
+    });
+
+    // keep mousedown from bubbling into contenteditable / image handlers
+    badge.addEventListener("mousedown", function (e) {
+      e.stopPropagation();
+    });
+
+    unit.appendChild(badge);
+  }
+
+  // ---------------------------------------------------------------------------
   // scan + dispatch
   // ---------------------------------------------------------------------------
   function scan() {
@@ -330,8 +456,23 @@
     }
   }
 
-  ready(function () {
+  function scanGroups() {
+    var groups = document.querySelectorAll("[data-group]");
+    for (var i = 0; i < groups.length; i++) wireGroup(groups[i]);
+
+    var units = document.querySelectorAll("[data-idx]");
+    for (var j = 0; j < units.length; j++) wireUnit(units[j]);
+  }
+
+  // ---------------------------------------------------------------------------
+  // bootstrap
+  // ---------------------------------------------------------------------------
+  function initEditor() {
     mountBanner();
-    scan();
-  });
+    scan();        // existing value-editing: contenteditable / image / link
+    scanGroups();  // add-control bars + remove badges
+    restoreScroll(); // jump back after an add/remove reload
+  }
+
+  ready(initEditor);
 })();
