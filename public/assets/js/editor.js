@@ -112,13 +112,30 @@
   // text / rich: contenteditable
   // ---------------------------------------------------------------------------
   function currentValue(node, kind) {
-    if (kind === "rich") return node.innerHTML;
-    return (node.textContent || "").trim();
+    // 关键：排除编辑器注入的控件（× 删除徽标、＋添加条等），否则当「单元本身就是可编辑元素」
+    // （如规格行 <li> 既是 data-idx 单元又是 data-md 字段）时，徽标会被存进 MD 内容并不断累积。
+    var clone = node.cloneNode(true);
+    var chrome = clone.querySelectorAll(".editor-remove, .editor-group-bar");
+    for (var i = 0; i < chrome.length; i++) chrome[i].remove();
+    if (kind === "rich") return clone.innerHTML.trim();
+    return (clone.textContent || "").trim();
   }
 
   function wireEditable(node, kind) {
     node.setAttribute("contenteditable", "true");
     node.setAttribute("spellcheck", "false");
+
+    // When the editable text lives inside an <a> (e.g. the CTA span or a
+    // related-product card title/summary), clicks must reach the caret without
+    // bubbling up to the ancestor anchor — otherwise the "edit link URL" dialog
+    // (or a navigation) steals the interaction. Stop propagation so the click
+    // resolves to "place caret here / edit this text".
+    node.addEventListener("mousedown", function (e) {
+      e.stopPropagation();
+    });
+    node.addEventListener("click", function (e) {
+      e.stopPropagation();
+    });
 
     // snapshot of the value when focus was gained (used for change detection
     // and rollback on failed save)
@@ -253,6 +270,13 @@
   }
 
   function wireImage(img) {
+    // Stop mousedown from reaching swiper / ancestor-anchor handlers. In the
+    // gallery thumbnail strip the thumbs are swiper slides that would otherwise
+    // navigate the big image; in edit mode a thumbnail is an edit target, so we
+    // suppress navigation and just open the image dialog on click.
+    img.addEventListener("mousedown", function (e) {
+      e.stopPropagation();
+    });
     img.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
@@ -304,6 +328,32 @@
         }
       });
     });
+  }
+
+  // ---------------------------------------------------------------------------
+  // anchor neutralization
+  // ---------------------------------------------------------------------------
+  // Some editable text/images live inside <a> elements (the CTA button, related-
+  // product cards, case titles). In edit mode an anchor click must never
+  // navigate. We neutralize every anchor that either is itself an editable link
+  // or wraps an editable [data-md] descendant.
+  //
+  // Anchors carrying data-edit="link" are handled by wireLink (which already
+  // calls preventDefault + opens the URL dialog), so we skip those here to avoid
+  // double-binding. For the remaining wrapper anchors we just cancel navigation;
+  // the editable descendants (text/image) stop propagation themselves, so the
+  // anchor only ever sees clicks on its non-editable regions — which now do
+  // nothing instead of jumping.
+  function neutralizeAnchors() {
+    var anchors = document.querySelectorAll("a");
+    for (var i = 0; i < anchors.length; i++) {
+      var a = anchors[i];
+      if (a.getAttribute("data-edit") === "link") continue; // wireLink owns it
+      if (!a.querySelector("[data-md]")) continue; // no editable content inside
+      a.addEventListener("click", function (e) {
+        e.preventDefault();
+      });
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -392,9 +442,26 @@
       arrayOp(name, "add", null, bar);
     });
 
-    // insert as the group's next sibling, outside the container.
-    if (group.parentNode) {
-      group.parentNode.insertBefore(bar, group.nextSibling);
+    // Decide where to mount the bar. The default is the group's next sibling.
+    // But when the group lives inside a swiper container (e.g. the gallery
+    // thumbnail strip's .swiper-wrapper), that container is overflow:hidden and
+    // would clip the bar. In that case hoist the bar out to a non-clipped
+    // ancestor so the "＋ 添加" control stays visible below the gallery.
+    var anchorNode = group; // bar is inserted right after this node
+    var swiperContainer = group.closest ? group.closest(".swiper-container") : null;
+    if (swiperContainer) {
+      bar.classList.add("editor-group-bar--gallery");
+      var ltgallery = group.closest ? group.closest(".ltgallery") : null;
+      if (ltgallery) {
+        anchorNode = ltgallery; // place after the whole gallery block
+      } else if (swiperContainer.parentNode) {
+        anchorNode = swiperContainer; // place after the swiper container
+      }
+      // else: fall back to the group itself (anchorNode unchanged)
+    }
+
+    if (anchorNode.parentNode) {
+      anchorNode.parentNode.insertBefore(bar, anchorNode.nextSibling);
     }
   }
 
@@ -406,6 +473,8 @@
     var badge = el("button", "editor-remove", "×");
     badge.type = "button";
     badge.title = "删除这一项"; // 删除这一项
+    // 单元可能本身就是 contenteditable（如规格行 <li>）：徽标设为不可编辑，光标跳过、不被当成内容。
+    badge.contentEditable = "false";
 
     badge.addEventListener("click", function (e) {
       e.preventDefault();
@@ -469,9 +538,10 @@
   // ---------------------------------------------------------------------------
   function initEditor() {
     mountBanner();
-    scan();        // existing value-editing: contenteditable / image / link
-    scanGroups();  // add-control bars + remove badges
-    restoreScroll(); // jump back after an add/remove reload
+    scan();              // existing value-editing: contenteditable / image / link
+    neutralizeAnchors(); // cancel navigation for anchors wrapping editables
+    scanGroups();        // add-control bars + remove badges
+    restoreScroll();     // jump back after an add/remove reload
   }
 
   ready(initEditor);

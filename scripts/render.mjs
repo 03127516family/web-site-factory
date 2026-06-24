@@ -30,8 +30,9 @@ export const REPEATS = {
   "related-products": { array: (d) => d.related_products?.items, prefix: "related" },
 };
 
-// 镜像组：渲染但不显示增删 UI（gallery-thumbs 跟随 gallery，结构由 gallery 控制）。
-export const NO_STRUCT_EDIT = new Set(["gallery-thumbs"]);
+// 不在其上显示增删 UI 的组。gallery 大图区被模版写了 pointer-events:none + swiper fade（同时只显一张）
+// + overflow:hidden，不适合放控件；改由缩略图组 gallery-thumbs 承载画廊增删（它映射同一个 gallery 数组）。
+export const NO_STRUCT_EDIT = new Set(["gallery"]);
 
 // 哪些正文块是「按 ### 拆成重复项」的（其余 ## 块是单体富文本）
 const REPEAT_BODY_BLOCKS = new Set(["components", "crane-types"]);

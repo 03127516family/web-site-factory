@@ -39,6 +39,8 @@ export async function patchMarkdown(mdPath, coord, kind, value) {
 // add 时往 frontmatter 数组末尾追加的默认占位条目。用户加完会立即改。
 const NEW_ITEM = {
   gallery: { image: "", alt: "新图片" },
+  "gallery-thumbs": { image: "", alt: "新图片" }, // 画廊增删由缩略图组承载，映射同一 gallery 数组
+
   cases: { title: "新案例", image: "", url: "#" },
   "related-products": { title: "新产品", image: "", url: "#", summary: "新说明" },
   "production-flow": { label: "新步骤", image: "" },

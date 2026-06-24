@@ -340,3 +340,31 @@ body.editor-active {
   opacity: 0.55;
   pointer-events: none;
 }
+
+/* --- gallery thumbnail strip overrides ------------------------------------ */
+/* Thumbnails are small swiper slides (~95x63). Shrink the remove badge and
+   tuck it into the top-right corner so it never blankets the whole thumb, and
+   only reveal it while hovering that thumbnail unit. */
+.gallery-thumbs [data-idx] {
+  /* slides already participate in the swiper layout; just ensure the badge
+     anchors to the thumbnail box. */
+  position: relative;
+}
+
+.gallery-thumbs .editor-remove {
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  font: 700 11px/16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+/* The gallery add-bar is hoisted out of the (clipped) swiper container and
+   placed after the whole gallery block. Keep it flush with the gallery and
+   clear the floated thumbnail strip above it. */
+.editor-group-bar--gallery {
+  clear: both;
+  margin-top: 12px;
+}
