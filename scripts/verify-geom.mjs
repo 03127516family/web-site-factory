@@ -18,12 +18,19 @@ const CHROME = process.env.CHROME || "/Applications/Google Chrome.app/Contents/M
 
 const MEASURE = `(()=>{const out=[];for(const el of document.querySelectorAll('[data-block-id]')){const r=el.getBoundingClientRect();out.push({id:el.getAttribute('data-block-id'),x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)});}return JSON.stringify(out);})()`;
 
-// 测量哪些页面：每项 { name, template, content }
+// 测量哪些页面：每项 { name, template, content, baseline? }
+// A = 渲染器把 content(MD) 填进 template；B = baseline(缺省同 template) 原样静态页（ground truth）。
 const PAGES = [
   {
     name: "single-girder",
     template: "src/templates/product.html",
     content: "src/content/single-girder-eot-cranes.md",
+  },
+  {
+    name: "overhead",
+    template: "src/templates/product-superset.html", // A：超集 + overhead MD（即生产所发）
+    baseline: "src/templates/overhead-cranes-for-sale.html", // B：原站 1:1 静态页
+    content: "src/content/overhead-cranes-for-sale.md",
   },
 ];
 
@@ -125,9 +132,10 @@ async function main() {
   // 生成每页的 A(渲染器)/B(静态模版) 到 dist 根，让 /assets 绝对路径可解析
   for (const pg of PAGES) {
     const tpl = await readFile(p(pg.template), "utf8");
+    const tplB = await readFile(p(pg.baseline || pg.template), "utf8");
     const bodyA = await renderBodyFromMarkdown(tpl, p(pg.content));
     await writeFile(p(`dist/_geomA_${pg.name}.html`), await compose(bodyA), "utf8");
-    await writeFile(p(`dist/_geomB_${pg.name}.html`), await compose(tpl), "utf8");
+    await writeFile(p(`dist/_geomB_${pg.name}.html`), await compose(tplB), "utf8");
   }
 
   const server = spawn("python3", ["-m", "http.server", "--directory", p("dist"), String(PORT)], {

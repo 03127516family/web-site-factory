@@ -30,7 +30,8 @@ export const pages = [
     title: "FEM标准桥式起重机（欧式桥式起重机） - DGCRANE",
     description:
       "欧式（FEM标准）桥式起重机制造商与出口商，广泛用于机械制造、石化、港口、电力等行业，技术先进、自重轻、能效高。",
-    template: "src/templates/overhead-cranes-for-sale.html",
+    template: "src/templates/product-superset.html",
+    content: "src/content/overhead-cranes-for-sale.md", // 由 MD 驱动填充（超集模版按数据裁剪）
   },
 ];
 

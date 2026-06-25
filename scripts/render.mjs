@@ -50,19 +50,17 @@ export const REPEAT_FM_ARRAY = {
   "related-products": "related_products.seed",
 };
 
-// 非重复字段点路径 → ## 标题块名（mdhead:<block>）。注意 crane_types 映射到连字符 crane-types。
-const HEAD_BLOCK_OF = {
-  "overview.title": "overview",
-  "introduction.title": "introduction",
-  "components.title": "components",
-  "crane_types.title": "crane-types",
-};
+// 正文块写回坐标不再写死白名单：由 buildData 在「确定数据来源」时就地产出（path → {md,edit}），
+// classifyField 直接查这张动态表（见下）。新增/改名一个 ## 块即自动可编辑，无需在此登记。
 
-// 正文富文本块（mdbody:<block>，rich）的点路径 → 块名。
-const RICH_BODY_BLOCK_OF = {
-  "overview.body": "overview",
-  "introduction.body": "introduction",
-};
+// 一段正文 HTML 是否「富文本」（编辑器存 innerHTML、写回走 htmlToMd 反解）：
+// 含块级结构（列表/表格/小标题/图）或多段 <p> → rich；否则（单段纯文本）→ text。
+function bodyEditKind(html) {
+  const h = String(html || "");
+  if (/<(ul|ol|table|h4|img)\b/i.test(h)) return "rich";
+  if ((h.match(/<p\b/gi) || []).length > 1) return "rich";
+  return "text";
+}
 
 export async function renderBodyFromMarkdown(templateHtml, mdPath, opts = {}) {
   const editMode = opts.editMode === true;
@@ -70,24 +68,20 @@ export async function renderBodyFromMarkdown(templateHtml, mdPath, opts = {}) {
   const { frontmatter, body } = splitFrontmatter(raw);
   const fm = parseYaml(frontmatter) || {};
   const blocks = parseBody(body);
-  const data = buildData(fm, blocks);
+  const { data, coords } = buildData(fm, blocks);
 
   const root = parseHtml(templateHtml, { comment: true });
   pruneOptional(root, data);
   expandRepeats(root, data, editMode);
-  fillFields(root, data, editMode);
+  fillFields(root, data, editMode, coords);
   return root.toString();
 }
 
 // 非重复字段的写回坐标分类：纯函数，path → { md:<data-md 值>, edit:<data-edit 类型> }。
 // edit 为 image/link 时若元素并非 <img>/<a> 应由调用方按实际标签回退到 text；这里只给出「按 path 的预期类型」。
-function classifyField(path, tag, value) {
-  // ## 标题块（overview/introduction/components/crane_types 的 .title）→ mdhead:<block>，text。
-  if (path in HEAD_BLOCK_OF) return { md: `mdhead:${HEAD_BLOCK_OF[path]}`, edit: "text" };
-  // 正文富文本块（overview/introduction 的 .body）→ mdbody:<block>，rich。
-  if (path in RICH_BODY_BLOCK_OF) return { md: `mdbody:${RICH_BODY_BLOCK_OF[path]}`, edit: "rich" };
-  // installation 正文：纯文本块 → mdbody:installation，text。
-  if (path === "installation.body") return { md: "mdbody:installation", edit: "text" };
+function classifyField(path, tag, value, coords = {}) {
+  // 来自正文 ## 块的字段（标题/正文）→ 用 buildData 就地产出的动态坐标（mdhead:/mdbody:）。
+  if (coords[path]) return coords[path];
   // hero.highlights：frontmatter 数组渲染成 <ul>，按富文本编辑。
   if (path === "hero.highlights") return { md: "fm:hero.highlights", edit: "rich" };
   // 其余 → fm:<path>，类型按元素标签 / path 后缀 / 值是否含行内标签 判定。
@@ -112,9 +106,12 @@ function tagEditable(el, md, edit) {
 // 重复块单元内字段的写回坐标：组名 name + 0 基索引 i + 单元内键 key（与 path）+ 值 value。
 function tagUnitField(el, name, i, key, path, value) {
   const tag = (el.tagName || "").toLowerCase();
-  // 特例：components/crane-types 的 body 写回正文块的第 i 个 ### 项（mdbody:<block>#<i>）。
-  if (name === "components" && key === "body") return tagEditable(el, `mdbody:components#${i}`, "text");
-  if (name === "crane-types" && key === "body") return tagEditable(el, `mdbody:crane-types#${i}`, "rich");
+  // 按 ### 拆项的块（components/crane-types…）的 body 写回正文块第 i 个 ### 项（mdbody:<block>#<i>）；
+  // rich/text 按内容判定（列表/标签 → rich，单段纯文本 → text），不写死组名。
+  if (key === "body" && REPEAT_BODY_BLOCKS.has(name)) {
+    const edit = typeof value === "string" && value.includes("<") ? "rich" : "text";
+    return tagEditable(el, `mdbody:${name}#${i}`, edit);
+  }
   // 其余 → fm:<数组路径>.<i>.<key>，类型按元素标签 / key 后缀 / 值含标签 判定。
   const array = REPEAT_FM_ARRAY[name];
   tagEditable(el, `fm:${array}.${i}.${key}`, editTypeOf(tag, path, key, value));
@@ -177,7 +174,7 @@ function splitBySubheading(content) {
   return items.map((it) => ({ name: it.name, content: it.lines.join("\n").trim() }));
 }
 
-// 极简 markdown→HTML：空行分块；列表 / ### 小标题 / 行内图 / 段落。
+// 极简 markdown→HTML：空行分块；列表 / ### 小标题 / 管道表格 / 行内图 / 原始HTML透传 / 段落。
 function mdToHtml(md) {
   if (!md) return "";
   const blocks = md.split(/\n{2,}/);
@@ -190,6 +187,17 @@ function mdToHtml(md) {
       html.push("<ul>" + lines.map((l) => `<li>${l.slice(2).trim()}</li>`).join("") + "</ul>");
     } else if (/^###\s+/.test(block)) {
       html.push(`<h4>${block.replace(/^###\s+/, "").trim()}</h4>`);
+    } else if (lines.length >= 2 && lines[0].includes("|") && /-/.test(lines[1]) && /^[\s|:-]+$/.test(lines[1])) {
+      // GitHub 风格管道表格：首行表头、次行 ---|--- 分隔、其余数据行。
+      // 产出与原站对比表一致的 <table><tbody> 结构（表头 <th style="text-align: left;">）。
+      const cells = (l) => l.replace(/^\s*\|/, "").replace(/\|\s*$/, "").split("|").map((c) => c.trim());
+      const head = cells(lines[0]);
+      const rows = lines.slice(2).map(cells);
+      let t = "<table>\n<tbody>\n<tr>\n";
+      t += head.map((h) => `<th style="text-align: left;">${h}</th>`).join("\n") + "\n</tr>\n";
+      for (const r of rows) t += "<tr>\n" + r.map((c) => `<td>${c}</td>`).join("\n") + "\n</tr>\n";
+      t += "</tbody>\n</table>";
+      html.push(t);
     } else {
       const img = block.match(/^!\[([^\]]*)\]\(([^)]+?)\)(?:\{(\d+)x(\d+)\})?$/);
       if (img) {
@@ -198,6 +206,8 @@ function mdToHtml(md) {
         html.push(
           `<img decoding="async" class="alignnone size-full" src="${resolveImg(src)}" alt="${alt}"${dim} />`,
         );
+      } else if (block.startsWith("<")) {
+        html.push(block); // 原始 HTML 块（如 <p><img></p> 内嵌图、<ul> 等）原样透传，不再包 <p>
       } else {
         html.push(`<p>${lines.join("").trim()}</p>`);
       }
@@ -207,15 +217,29 @@ function mdToHtml(md) {
 }
 
 // 用正文块补全 frontmatter，拼出渲染器用的统一数据对象。
+// 返回 { data, coords }：coords 是「编辑写回坐标」的动态表（path → {md,edit}），
+// 在每处「字段确实取自正文 ## 块」时就地登记——与数据来源同源，不再另立白名单。
+// 取自 frontmatter 的字段不登记（classifyField 默认回落到 fm:）。
 function buildData(fm, blocks) {
   const d = { ...fm };
-  if (blocks.overview) d.overview = { title: blocks.overview.title, body: blocks.overview.html };
-  if (blocks.introduction)
+  const coords = {};
+  const headAt = (key) => ({ md: `mdhead:${key}`, edit: "text" }); // ## 标题取自块
+  const bodyAt = (key, html) => ({ md: `mdbody:${key}`, edit: bodyEditKind(html) }); // 块正文
+
+  if (blocks.overview) {
+    d.overview = { title: blocks.overview.title, body: blocks.overview.html };
+    coords["overview.title"] = headAt("overview");
+    coords["overview.body"] = bodyAt("overview", blocks.overview.html);
+  }
+  if (blocks.introduction) {
     d.introduction = {
       ...(fm.introduction || {}),
       title: blocks.introduction.title,
       body: blocks.introduction.html,
     };
+    coords["introduction.title"] = headAt("introduction");
+    coords["introduction.body"] = bodyAt("introduction", blocks.introduction.html);
+  }
   if (blocks.components) {
     const imgs = fm.components_images || [];
     d.components = {
@@ -223,9 +247,12 @@ function buildData(fm, blocks) {
       items: blocks.components.items.map((it, i) => ({
         name: it.name,
         image: imgs[i]?.image ?? null,
-        body: it.content, // 单段纯文本，模版自带 <p> 外壳
+        // 单段纯文本 → 保持原样（模版自带 <p> 外壳，1:1）；含列表等 markdown 结构 → 渲成 HTML。
+        // 按内容自适应，故 markdown 列表型组件(如保护装置)既能渲染、也能编辑往返。
+        body: /^\s*-\s/m.test(it.content) ? mdToHtml(it.content) : it.content,
       })),
     };
+    coords["components.title"] = headAt("components"); // 各项 body 的坐标由 tagUnitField 打（重复块）
   }
   if (blocks["crane-types"]) {
     const imgs = fm.crane_types_images || [];
@@ -237,12 +264,36 @@ function buildData(fm, blocks) {
         body: mdToHtml(it.content), // 列表 → <ul>，按富文本注入
       })),
     };
+    coords["crane_types.title"] = headAt("crane-types");
   }
-  if (blocks.installation)
+  if (blocks.installation) {
     d.installation = { ...(fm.installation || {}), body: blocks.installation.raw };
+    coords["installation.body"] = bodyAt("installation", blocks.installation.raw);
+    // installation.title 取自 frontmatter（不登记，回落 fm:）
+  }
+  // 通用单体富文本块：以上「特殊结构块」之外的任意 `## 标题 <!--block:KEY-->`，
+  // 自动映射成 d[KEY]={title, body}（块名连字符→data 键下划线），并就地登记 title/body 写回坐标。
+  // 新增/改名一个段，只要模版里有对应 data-optional/data-field，即「能渲染、也能编辑」，无需改本文件。
+  // 套壳按「内容」决定而非段名：body 含 <table> → 外包 .custom_tables（对齐原站对比表结构）。
+  const STRUCTURED_BLOCKS = new Set([
+    "overview",
+    "introduction",
+    "components",
+    "crane-types",
+    "production-flow", // 这些块各有专门处理（重复项/内嵌图/frontmatter 步骤等），不走通用映射
+    "installation",
+  ]);
+  for (const [blockKey, blk] of Object.entries(blocks)) {
+    if (STRUCTURED_BLOCKS.has(blockKey)) continue;
+    const dataKey = blockKey.replace(/-/g, "_");
+    const body = blk.html.includes("<table") ? `<div class="custom_tables">${blk.html}</div>` : blk.html;
+    d[dataKey] = { title: blk.title, body };
+    coords[`${dataKey}.title`] = headAt(blockKey);
+    coords[`${dataKey}.body`] = bodyAt(blockKey, blk.html);
+  }
   if (fm.related_products?.seed)
     d.related_products = { ...fm.related_products, items: fm.related_products.seed };
-  return d;
+  return { data: d, coords };
 }
 
 // ---------- DOM 填充 ----------
@@ -319,14 +370,14 @@ function fillUnit(unit, item, prefix, edit = null) {
   return unit.toString();
 }
 
-function fillFields(root, data, editMode = false) {
+function fillFields(root, data, editMode = false, coords = {}) {
   for (const el of root.querySelectorAll("[data-field]")) {
     const path = el.getAttribute("data-field");
     const value = resolve(data, path);
     if (value === undefined) continue; // 容器 / 重复块前缀字段 / 无数据 → 保持原样
     if (editMode) {
       const tag = (el.tagName || "").toLowerCase();
-      const { md, edit } = classifyField(path, tag, value);
+      const { md, edit } = classifyField(path, tag, value, coords);
       tagEditable(el, md, edit);
     }
     applyValue(el, value, path, null);
@@ -342,6 +393,10 @@ function applyValue(el, value, path, item) {
       return;
     }
     el.setAttribute("src", resolveImg(value));
+    // 非重复字段图（如 hero）也去掉模版残留的 srcset/sizes，否则浏览器会按 srcset
+    // 加载到模版默认（别的产品）的图；src 是本产品的正确图。
+    el.removeAttribute("srcset");
+    el.removeAttribute("sizes");
     return;
   }
   if (value == null) return;

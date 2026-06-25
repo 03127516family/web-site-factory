@@ -332,6 +332,11 @@ function collectBlocks(nodes, out) {
       if (items.length) out.push(items.join("\n"));
       continue;
     }
+    if (tag === "table") {
+      flushText();
+      out.push(tableToMd(node));
+      continue;
+    }
     if (tag === "img") {
       flushText();
       out.push(imgToMd(node));
@@ -347,6 +352,18 @@ function collectBlocks(nodes, out) {
     textRun.push(decodeEntities(node.text));
   }
   flushText();
+}
+
+// <table> → GitHub 管道表格（mdToHtml 表格分支的逆）。首行 <th>/<td> 作表头 + ---|--- 分隔行 + 数据行。
+function tableToMd(node) {
+  const rows = node.querySelectorAll("tr");
+  if (!rows.length) return "";
+  const cellsOf = (tr) => tr.querySelectorAll("th,td").map((c) => cleanText(c.text));
+  const header = cellsOf(rows[0]);
+  if (!header.length) return "";
+  const lines = [`| ${header.join(" | ")} |`, `| ${header.map(() => "---").join(" | ")} |`];
+  for (let i = 1; i < rows.length; i++) lines.push(`| ${cellsOf(rows[i]).join(" | ")} |`);
+  return lines.join("\n");
 }
 
 function imgToMd(node) {
