@@ -38,7 +38,7 @@ specs:
   - { text: "工作电压：220V~690V，50-60Hz，3ph AC" }
   - { text: "工作环境温度：-25℃～+40℃，相对湿度≤85%" }
   - { text: "起重机控制模式。地面控制/远程控制/机舱室" }
-  - { text: "参考价格范围。<span>$750-4500/套</span>" }
+  - { text: "参考价格范围。<span>$750-4500/套</span><div></div>" }
 
 # gallery（产品图库，data-repeat="gallery"）
 gallery:

@@ -1,0 +1,8 @@
+{
+  "//": "辅助防护：内容 MD 里有 <!--block:KEY--> 这类结构标记，绝不能被 markdown 格式化器改写（曾被改成链接致正文整段失效）。真正的兜底是 render.mjs 的 validateBlocks（build 时改坏即报错）；此处只降低本仓库 VS Code 用户的复发概率。",
+  "[markdown]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": null
+  },
+  "files.trimTrailingWhitespace": false
+}

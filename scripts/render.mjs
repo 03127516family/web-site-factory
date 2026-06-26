@@ -68,6 +68,7 @@ export async function renderBodyFromMarkdown(templateHtml, mdPath, opts = {}) {
   const { frontmatter, body } = splitFrontmatter(raw);
   const fm = parseYaml(frontmatter) || {};
   const blocks = parseBody(body);
+  validateBlocks(body, blocks, templateHtml, mdPath); // 改坏即报错，不静默退默认
   const { data, coords } = buildData(fm, blocks);
 
   const root = parseHtml(templateHtml, { comment: true });
@@ -123,6 +124,35 @@ function splitFrontmatter(raw) {
   const m = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!m) return { frontmatter: "", body: raw };
   return { frontmatter: m[1], body: m[2] };
+}
+
+// 兜底校验：MD 结构被编辑器/格式化器改坏时「当场报错」，而不是静默退回模版默认。
+// 只用通用规则（不写死段名）：① 每个 ## 二级标题必须带合法 <!--block:KEY-->；
+// ② 每个 block KEY 规范化后须在模版出现（data-field="KEY..." 或 data-optional="KEY"）。
+function validateBlocks(body, blocks, templateHtml, mdPath) {
+  const errors = [];
+  body.split(/\r?\n/).forEach((line, i) => {
+    if (/^##(?!#)\s/.test(line) && !/<!--\s*block:[\w-]+\s*-->\s*$/.test(line)) {
+      errors.push(
+        `第 ${i + 1} 行：## 标题缺少/损坏 block 标记 → "${line.trim().slice(0, 60)}"（应以 <!--block:KEY--> 收尾）`,
+      );
+    }
+  });
+  const tmplKeys = new Set();
+  for (const m of templateHtml.matchAll(/data-field="([\w-]+)/g)) tmplKeys.add(m[1]);
+  for (const m of templateHtml.matchAll(/data-optional="([\w-]+)"/g)) tmplKeys.add(m[1]);
+  for (const bk of Object.keys(blocks)) {
+    const dk = bk.replace(/-/g, "_");
+    if (!tmplKeys.has(dk) && !tmplKeys.has(bk)) {
+      errors.push(`block KEY "${bk}" 在模版里找不到对应 data-field/data-optional（拼错？模版无此槽？）`);
+    }
+  }
+  if (errors.length) {
+    throw new Error(
+      `[MD 校验失败] ${mdPath}\n  - ${errors.join("\n  - ")}\n` +
+        `（多半是编辑器的 markdown 格式化把 <!--block:KEY--> 改写了；请勿让格式化器改写它。）`,
+    );
+  }
 }
 
 // 把 markdown 正文按 `## 标题 <!--block:KEY-->` 切块。

@@ -33,6 +33,15 @@ export const pages = [
     template: "src/templates/product-superset.html",
     content: "src/content/overhead-cranes-for-sale.md", // 由 MD 驱动填充（超集模版按数据裁剪）
   },
+  {
+    slug: "products/free-standing-jib-cranes",
+    lang: "zh-CN",
+    title: "独立式旋臂起重机 - DGCRANE",
+    description:
+      "独立式（自由站立式）旋臂起重机制造商与出口商，容量高达16吨、臂长高达16米、旋转120-360°，结构轻巧、占地小、易安装，适用于短距离密集作业单元。",
+    template: "src/templates/product-superset.html",
+    content: "src/content/free-standing-jib-cranes.md", // 超集模版按数据裁剪（仅 6 段正文，其余 data-optional 删除）
+  },
 ];
 
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
