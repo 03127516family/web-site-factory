@@ -42,6 +42,15 @@ export const pages = [
     template: "src/templates/product-superset.html",
     content: "src/content/free-standing-jib-cranes.md", // 超集模版按数据裁剪（仅 6 段正文，其余 data-optional 删除）
   },
+  {
+    slug: "products/multi-point-suspension-cranes",
+    lang: "zh-CN",
+    title: "多点悬挂式起重机：适用于大跨度工业车间 - DGCRANE",
+    description:
+      "多点悬挂式起重机专为大跨度工业车间和仓库（如飞机制造与维修厂）设计，通过多个悬挂点分散载荷，起重 3-40 吨，最大跨度可达 80 米。",
+    template: "src/templates/product-superset.html",
+    content: "src/content/multi-point-suspension-cranes.md", // AI 生成出货 HTML；编辑走老编辑器写回此 MD（勿 build 覆盖 dist）
+  },
 ];
 
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前

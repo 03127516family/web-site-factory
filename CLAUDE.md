@@ -105,3 +105,12 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
 - **2026-06-25** 引擎铁律：禁名字驱动逻辑/白名单；渲染侧与编辑侧对称、皆从实际 `blocks` 推导；加新页族 = 加自声明模版，引擎不动（详见 §2）。
 - **2026-06-25** 再平衡：刹「往深做工具」，提「把产品搬进来」；引擎纯化重构（注册表搬模版属性）等第二个页族再做。
 - **2026-06-26** MD 兜底校验（`render.mjs::validateBlocks`，build/verify 共用）：① 每个 `^##` 二级标题必须带合法 `<!--block:KEY-->`；② 每个 block KEY 规范化后须在模版出现（`data-field`/`data-optional`）。违反即抛错中止，**改坏不再静默退默认**。起因：编辑器全局 markdown 格式化扩展把 `<!--block:KEY-->` 改写成链接 `[!--block--](...)`，致正文整段失效却 build 不报错。配置防护（`.vscode` 关 markdown formatOnSave）只是辅助；编辑器无关的兜底是这道校验（可进 CI）。
+
+- **2026-06-26** 「AI 生成 HTML」第二条生成路的规范（与「函数/引擎生成」并存，避免每次返工）。**两条生成路**：①函数路 = `render.mjs`+`npm run build`，MD→HTML 确定性；②AI 路 = 我（AI）按 MD 手写成品 HTML 直接落 `dist/`，**不经 render/build**。**编辑两路统一走老编辑器 `npm run edit` 写回 MD**（`patchMarkdown` 确定性）；**MD 永远是源真相**。AI 路出货 HTML 必须守下面 5 条，否则编辑器（超集渲染版）与出货页会漂移：
+  1. **MD 先行且对超集合法**：先落结构化 MD，`validateBlocks` 要过。选正文 block 的 KEY 三看——**语义**对得上、**body 是 `<div data-field>`**（多段富文本禁选 `<p data-field>` 槽，如 `installation.body` 是 `<p>`，塞「h4+多段 p」会触发 §2.4 拆裂只剩首段可编辑）、**模版内位置**（决定渲染顺序，须与文章原序一致）。本页实例：功能→`overview`、比较→`main_features`、案例→`which_better`（位置 110<166<290，且都是 div）。
+  2. **HTML = 共享 chrome 逐字复用 + 仅重写产品正文**：head/header/nav/footer/photoswipe 从现成产物页（如 `single-girder-eot-cranes`）逐字复制（那部分天然 1:1）；只重写 hero/面包屑/`#product`/related。`#product` 须从标题包到询盘表单才闭合（§7），related 在其外（全宽）。语言切换/订阅表单 action 里的产品路径替换为本页 slug。
+  3. **正文结构与超集渲染同形**：每段写成 `<section class="pro-info clearfix"><h3>…</h3><div>… h4/p/ul 同级 …</div></section>`，与 `render.mjs` 从同一 MD 的输出同构——保证编辑器所见与出货页结构对齐、改动可一一对应。
+  4. **缺图按 known-leftover**：`<img>` 带 `width/height`，缺图不破几何，后补素材即可。
+  5. **铁律：AI 路页面不准 `npm run build`**（引擎产物会覆盖 AI 产物）。登记进 `build.mjs::pages` 只为让编辑器能服务该 slug（加数据≠跑 build）。编辑写回 MD → 要更新出货页时**再走 AI 路按最新 MD 重出 HTML**对齐。验证 = 标签平衡 + 与参照产物页结构比对（不跑 build）。
+
+  > 术语白话：**chrome** = 每页都一样的外壳——顶部语言切换、导航大菜单、页脚、以及 `photoswipe`；整段从现成产物页复制、一字不改。**photoswipe** = 产物页 footer 前那段 `<div id="gallery" class="pswp" aria-hidden="true">…</div>`，是默认隐藏的全屏看图灯箱，点正文产品图才弹出，所有页相同（平时不显示，所以容易没注意到它）。**同形** = 手写正文的 HTML 骨架（`section.pro-info > h3 + div`，h4/p/ul 与 div 平级、不把内容嵌进 `<p>`）要与引擎从同一 MD 渲染出的结构一致。**known-leftover（已知遗留，缺图占位）** = `<img>` 带 `width/height`，图 404 也按框预留、版面不塌；后补素材按同名文件丢进 `assets/img/product/` 即显示，HTML 不改。
