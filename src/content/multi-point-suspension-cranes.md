@@ -19,10 +19,8 @@ hero:
     - 一个由50多人组成的技术团队
     - 3000多个不同行业的案例
 
-# product-summary（标题 + 简介 + 快速参数 + 报价 CTA）
+# product-summary（标题 + 快速参数 + 报价 CTA）。简介导语见正文 <!--block:summary-intro-->
 summary:
-  intro: >-
-    多点悬挂式起重机是一种专为满足大跨度工业车间和仓库（例如飞机制造厂和飞机维修厂）需求而设计的专用悬挂式起重机。通过多个悬挂点分散载荷，该起重机可降低起重机重量对建筑物屋顶结构的影响，从而降低建筑物高度，并有助于显著降低工厂建设成本。
   cta: 报价要求
 
 # 快速参数（specs：data-repeat 数组，可在编辑器里增删行）
@@ -50,6 +48,10 @@ related_products:
     - { title: 单梁桥式起重机, image: Single-Girder-Overhead-Crane-1.jpg, url: "https://www.dgcrane.com/zh/products/single-girder-eot-cranes/", summary: "无论您是在进行采购计划，还是正在确定厂房起重设备的定制方案，如果起重能力要求在20吨及以下，单梁桥式起重机具有结构简单、方案灵活、拆装运输方便等优点可以是您的第二选择。" }
     - { title: 单轨桥式起重机, image: mb-Monorail-Overhead-Crane.jpg, url: "https://www.dgcrane.com/zh/monorail-overhead-cranes/", summary: "单轨吊是一种替代传统起重机和传送带的起重机。这些起重机大多用于在有限的区域内重新安置材料或产品。这种场所可以是工厂或整个工作站。单轨吊的设计很简单，可以与建筑物的结构兼容，不需要做大的改动。" }
 ---
+
+## 导语 <!--block:summary-intro-->
+
+多点悬挂式起重机是一种专为满足大跨度工业车间和仓库（例如飞机制造厂和飞机维修厂）需求而设计的专用悬挂式起重机。通过多个悬挂点分散载荷，该起重机可降低起重机重量对建筑物屋顶结构的影响，从而降低建筑物高度，并有助于显著降低工厂建设成本。
 
 ## 功能和亮点 <!--block:overview-->
 
