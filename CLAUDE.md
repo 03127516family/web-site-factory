@@ -98,6 +98,40 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
 
 ---
 
+## 9. 真实页 → 模版转换规则（页族无关，所有页族通用）
+
+> 与 §2 对称的另一面：§2 说**引擎**不认页族、只读 marker + 内容形态；§9 说**造模版的人（AI）**也不认页族、只按内容形态挂 marker。
+> **这套规则对 product / category / post / 任何未来页族一字不改**——变的只是切出来的块、起的名，规则本身恒定。若某页族要"特殊切法"，即等于在规则层重新引入 §2.1 禁止的页族特判，自相矛盾。
+> 触发：每次「加新页族」或「把一张真实页做成自声明模版」，照这 7 步走，**先按此规则、再动手生模版**，不靠记忆。
+
+**7 步流程：**
+
+```
+① 切块   真实页正文从上到下切成段，每段单独判定
+② 判形   每段归入 4 形态之一（决定挂哪种 marker，见下表）
+③ 命名   按「同名接线」起名；跨页族复用的照搬产品模版（hero / inquiry_form /
+           related_products / breadcrumb.trail），不另起
+④ 抽模子 重复区只保留第 1 个单元当克隆模子，其余删
+⑤ 复 chrome  head/header/nav/footer/photoswipe 从现成产物页逐字复制，不重写
+⑥ 守硬约束  多段富文本用 <div data-field> 不用 <p>（§2.4）；#product 包到询盘才闭合（§7）
+⑦ 验      落基准 MD → validateBlocks 过 → npm run build → npm run verify:geom 1:1
+```
+
+**形态 → marker 速查表（②③的依据，4 形态穷尽任何页面）：**
+
+| 看到这种内容 | 判为 | 挂这对 marker（成对，缺一不可） |
+|---|---|---|
+| 一个标题 / 一张图 / 一个链接 | 单值 | `data-field="路径"` + `data-edit="text\|rich\|image\|link"` |
+| 连续好几段说明文字 | 长正文 | `<div data-field="KEY.body">` + MD `<!--block:KEY-->`（同 KEY） |
+| 同结构出现 N 次（子型号 / 案例 / FAQ / 组件 / 章节） | 重复 | `data-repeat="名"` + 容器 `data-array="md.数组路径"` |
+| 本页有、同族别页可能没有 | 可选 | `data-optional="key"` |
+
+**命名唯一铁律（接线，非审美）：模版的名 = MD 的路径，一字不差**。`data-field="hero.title"`→去 MD 取 `hero.title`；`data-repeat`+`data-array="md.subtypes"`→对 frontmatter `subtypes:` 数组；单元内字段用单数相对名（`title`/`body`/`image`）。起名习惯：语义英文小写、点分层、重复区用复数名。
+
+> 状态：本规则首次固化于做 category 页族（`double-girder-overhead-crane` 等品类页，结构区别于单产品页 product@1——子型号各自带规格表 + FAQ + 案例，不是"一张总表"）时。先用它实跑 category 当试金石，证明够用后此规则即所有页族通用方法论。
+
+---
+
 ## 决策日志（新拍定的约定往这里追加，带日期）
 
 - **2026-06-25** 模版走「单超集 + 按 MD 裁剪」，不走「每产品一模版」。
@@ -114,3 +148,11 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
   5. **铁律：AI 路页面不准 `npm run build`**（引擎产物会覆盖 AI 产物）。登记进 `build.mjs::pages` 只为让编辑器能服务该 slug（加数据≠跑 build）。编辑写回 MD → 要更新出货页时**再走 AI 路按最新 MD 重出 HTML**对齐。验证 = 标签平衡 + 与参照产物页结构比对（不跑 build）。
 
   > 术语白话：**chrome** = 每页都一样的外壳——顶部语言切换、导航大菜单、页脚、以及 `photoswipe`；整段从现成产物页复制、一字不改。**photoswipe** = 产物页 footer 前那段 `<div id="gallery" class="pswp" aria-hidden="true">…</div>`，是默认隐藏的全屏看图灯箱，点正文产品图才弹出，所有页相同（平时不显示，所以容易没注意到它）。**同形** = 手写正文的 HTML 骨架（`section.pro-info > h3 + div`，h4/p/ul 与 div 平级、不把内容嵌进 `<p>`）要与引擎从同一 MD 渲染出的结构一致。**known-leftover（已知遗留，缺图占位）** = `<img>` 带 `width/height`，图 404 也按框预留、版面不塌；后补素材按同名文件丢进 `assets/img/product/` 即显示，HTML 不改。
+
+- **2026-06-29** **post（文章/案例）页族实施方案（实跑验证中，俄罗斯门机案例当试金石）。** 文章与产品/分类的本质区别：正文是**自由散文 + 逐图自定义排版**（这段两列、下段单列），不是固定 schema。但用户硬约束「**body 必须可见即可编辑**」。结论链（物理定律）：① 「可编辑」⊕「任意自由 HTML」互斥——能就地改的前提是内容符合编辑器认得的坐标，故自由 HTML 出局；② 但把**布局**与**值**切开即两全：**布局 = AI 烧一次的死骨架**（带 marker，不在编辑器改，要改=重烧），**值 = 落 MD 的活文字/图**（可见即可编辑）。改值不碰骨架 → `htmlToMd↔mdToHtml` round-trip 不会烂版式。
+  - **内容槽约定（复用现有坐标，零新机制）**：长正文段→`## 块`（坐标 `mdbody:KEY`，editor 当 rich 改）；标题/图文件名→frontmatter `body.<语义id>`（坐标 `fm:body.*`）。骨架里每个文字/图槽挂 `data-field`+`data-edit`；同一版式容器多图用 `body.<段>_img<n>`，**排版由父容器 class（`fig-full`/`fig-2col`/`fig-grid`）决定，逐段自由、不需固定结构**。editor.js / patchMarkdown **零改动**即可就地改值写回 MD。
+  - **一套槽约定 + 两条同步路（呼应 2026-06-26 两条生产路）**：**A 路（默认 ~95%）**＝骨架当「每篇一份模版」存 `src/templates/posts/<slug>.html`，引擎按 MD 填值 → 改文字 `build` **自动重渲**（严格优于 AI 路：白赚可编辑 + 免重烧）；**B 路（逃生舱，极少）**＝骨架只手写进 `dist/`，改文字后手动重烧对齐（套 2026-06-26 AI 路 5 条）。选路规则：body 由标准件（段/标题/图/表）搭成→A；需「填骨架表达不了」的一次性特殊视觉→才降 B。**两路编辑体验一致**（都是改 `body.*`），只差出货页靠引擎重渲还是 AI 重烧。
+  - **A 路前提**：每篇 post 的 slug 在 `build.mjs::pages` 指向自己那份 `posts/<slug>.html`——`pages` 本就是 slug→模版映射，**配置层即可，不动引擎**（`render.mjs` 按 marker 填值通用、不认页族）。落地时先验证此条。
+  - **TOC（左栏目录）**：JS 扫 body 里 h2/h3 自动生成 + 锚点，从原站逐字复制当 chrome，零引擎介入；只需保证骨架渲染出带 id 的真实 h2/h3。**改版式 = 重烧骨架**（A 重存模版 / B 重写 dist），非日常编辑。
+
+- **2026-06-26** 固化 **§9「真实页→模版转换规则」**（页族无关、与 §2 对称的通用方法论）：切块→判形→命名→抽模子→复 chrome→守硬约束→验，7 步 + 形态→marker 速查表。起因：要做 category 页族（品类页 `double-girder` 结构异于单产品 product@1），怕生模版时不照规则——故**先把规则钉进 CLAUDE.md，再按规则生模版**，不靠记忆。生模版交付时附 7 步自检对照表，`verify:geom` 兜底。
