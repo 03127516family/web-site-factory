@@ -327,7 +327,7 @@ function collectBlocks(nodes, out) {
       flushText();
       const items = node
         .querySelectorAll("li")
-        .map((li) => `- ${cleanText(li.text)}`)
+        .map((li) => `- ${cleanText(inlineMd(li))}`)
         .filter((l) => l !== "- ");
       if (items.length) out.push(items.join("\n"));
       continue;
@@ -348,10 +348,45 @@ function collectBlocks(nodes, out) {
       collectBlocks(node.childNodes, out);
       continue;
     }
-    // 其它行内标签（span/strong/em/a…）：剥标签，保留文本，并入当前段落
-    textRun.push(decodeEntities(node.text));
+    // 行内格式标签：还原成 markdown（mdToHtml::inline 的逆），保持 round-trip。
+    if (tag === "strong" || tag === "b") {
+      textRun.push(`**${inlineMd(node)}**`);
+      continue;
+    }
+    if (tag === "em" || tag === "i") {
+      textRun.push(`*${inlineMd(node)}*`);
+      continue;
+    }
+    if (tag === "a") {
+      const href = node.getAttribute("href") || "";
+      textRun.push(href ? `[${inlineMd(node)}](${href})` : inlineMd(node));
+      continue;
+    }
+    // 其它行内标签（span…）：剥标签，保留文本（含内部行内格式），并入当前段落
+    textRun.push(inlineMd(node));
   }
   flushText();
+}
+
+// 行内节点 → markdown：递归还原 **粗**/*斜*/[文](url)，其余标签剥壳保留文本。
+// 是 render.mjs::inline 的逆；供 collectBlocks（段落/列表项）复用。
+function inlineMd(node) {
+  let s = "";
+  for (const c of node.childNodes || []) {
+    if (c.nodeType === 3) {
+      s += decodeEntities(c.rawText);
+      continue;
+    }
+    if (c.nodeType !== 1) continue;
+    const t = (c.rawTagName || "").toLowerCase();
+    if (t === "strong" || t === "b") s += `**${inlineMd(c)}**`;
+    else if (t === "em" || t === "i") s += `*${inlineMd(c)}*`;
+    else if (t === "a") {
+      const href = c.getAttribute("href") || "";
+      s += href ? `[${inlineMd(c)}](${href})` : inlineMd(c);
+    } else s += inlineMd(c); // span 等 → 剥壳
+  }
+  return s;
 }
 
 // <table> → GitHub 管道表格（mdToHtml 表格分支的逆）。首行 <th>/<td> 作表头 + ---|--- 分隔行 + 数据行。

@@ -204,6 +204,15 @@ function splitBySubheading(content) {
   return items.map((it) => ({ name: it.name, content: it.lines.join("\n").trim() }));
 }
 
+// 行内 markdown：**粗体** / *斜体* / [文字](链接)。htmlToMd（md-write.mjs）有对称的逆向。
+// 顺序：先粗体（消耗成对 **），再链接，最后斜体（剩余单 *），避免 ** 被斜体误匹配。
+function inline(s) {
+  return String(s)
+    .replace(/\*\*([^*]+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\[([^\]]+?)\]\(([^)\s]+?)\)/g, '<a href="$2">$1</a>')
+    .replace(/\*([^*\n]+?)\*/g, "<em>$1</em>");
+}
+
 // 极简 markdown→HTML：空行分块；列表 / ### 小标题 / 管道表格 / 行内图 / 原始HTML透传 / 段落。
 function mdToHtml(md) {
   if (!md) return "";
@@ -214,9 +223,9 @@ function mdToHtml(md) {
     if (!block) continue;
     const lines = block.split(/\r?\n/);
     if (lines.every((l) => l.startsWith("- "))) {
-      html.push("<ul>" + lines.map((l) => `<li>${l.slice(2).trim()}</li>`).join("") + "</ul>");
+      html.push("<ul>" + lines.map((l) => `<li>${inline(l.slice(2).trim())}</li>`).join("") + "</ul>");
     } else if (/^###\s+/.test(block)) {
-      html.push(`<h4>${block.replace(/^###\s+/, "").trim()}</h4>`);
+      html.push(`<h4>${inline(block.replace(/^###\s+/, "").trim())}</h4>`);
     } else if (lines.length >= 2 && lines[0].includes("|") && /-/.test(lines[1]) && /^[\s|:-]+$/.test(lines[1])) {
       // GitHub 风格管道表格：首行表头、次行 ---|--- 分隔、其余数据行。
       // 产出与原站对比表一致的 <table><tbody> 结构（表头 <th style="text-align: left;">）。
@@ -224,8 +233,8 @@ function mdToHtml(md) {
       const head = cells(lines[0]);
       const rows = lines.slice(2).map(cells);
       let t = "<table>\n<tbody>\n<tr>\n";
-      t += head.map((h) => `<th style="text-align: left;">${h}</th>`).join("\n") + "\n</tr>\n";
-      for (const r of rows) t += "<tr>\n" + r.map((c) => `<td>${c}</td>`).join("\n") + "\n</tr>\n";
+      t += head.map((h) => `<th style="text-align: left;">${inline(h)}</th>`).join("\n") + "\n</tr>\n";
+      for (const r of rows) t += "<tr>\n" + r.map((c) => `<td>${inline(c)}</td>`).join("\n") + "\n</tr>\n";
       t += "</tbody>\n</table>";
       html.push(t);
     } else {
@@ -239,7 +248,7 @@ function mdToHtml(md) {
       } else if (block.startsWith("<")) {
         html.push(block); // 原始 HTML 块（如 <p><img></p> 内嵌图、<ul> 等）原样透传，不再包 <p>
       } else {
-        html.push(`<p>${lines.join("").trim()}</p>`);
+        html.push(`<p>${inline(lines.join("").trim())}</p>`);
       }
     }
   }

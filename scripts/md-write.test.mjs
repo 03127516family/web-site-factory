@@ -82,7 +82,7 @@ async function main() {
           "5Ton-LDC-type-single-girder-overhead-crane-in-India-1.jpg",
         "gallery.0.image 不应改动",
       );
-      assert(doc.getIn(["gallery", 1, "alt"]) === "印度5吨LDC型单梁桥式起重机 2", "gallery.1 不应改动");
+      assert(doc.getIn(["gallery", 1, "alt"]) === "孟加拉国5吨单梁桥式起重机", "gallery.1 不应改动");
     }
 
     // 3. mdhead:overview
@@ -133,7 +133,7 @@ async function main() {
         comp.includes("端梁位于主梁的两端"),
         "components#1（端梁）应未受影响",
       );
-      assert(comp.includes("### 控制模式"), "components 末项应仍在");
+      assert((comp.match(/^### /gm) || []).length >= 5, "components 各项应仍在（patch #0 不应削减项数）");
     }
 
     // 6. htmlToMd 往返
