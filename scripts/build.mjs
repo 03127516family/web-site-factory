@@ -71,6 +71,16 @@ export const pages = [
     template: "src/templates/posts/gantry-cranes-for-sale.html",
     content: "src/content/gantry-cranes-for-sale.md",
   },
+  {
+    // 第三篇 post——从【裸 MD】烧制（起重作业安全培训，标准/列表/图集型长文）。
+    slug: "posts/crane-lifting-safety-training",
+    lang: "zh-CN",
+    title: "起重机操作安全管理：核心标准、危险及风险预防 | DGCRANE",
+    description:
+      "起重作业安全核心规范：典型事故案例警示、吊钩与钢丝绳使用报废标准、操作员标准化安全操作规程、“十不吊”安全禁令及标准指挥手势，全面防范起重作业安全风险。",
+    template: "src/templates/posts/crane-lifting-safety-training.html",
+    content: "src/content/crane-lifting-safety-training.md",
+  },
 ];
 
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
