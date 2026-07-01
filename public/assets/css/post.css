@@ -1,0 +1,110 @@
+/* ============================================================
+   文章页（post@1）正文区像素级 CSS —— 复刻 dgcrane / website 主题
+   作用域根：.toptitle（蓝底标题横幅） / #Topics / .craneinfo / #rank-math-toc / #p_author
+   只含文章区规则；全局 reset/body/font/.wrap/.clearfix 由 main.css 提供，此处不重复（防撞全局）。
+   两栏机制 = 经典 float：#rank-math-toc float:left 240，.craneinfo>:not(#rank-math-toc) float:right 880。
+   ============================================================ */
+
+/* sticky TOC 依赖祖先链无 overflow:hidden（风险#7） */
+#wrapper { overflow: visible !important; }
+
+/* ---------- 1. 标题横幅 .toptitle（蓝底 + 面包屑 + h1 + 作者） ---------- */
+.toptitle { max-width: 1440px; margin: 0 auto 100px; background-color: #023e8a; overflow: hidden; position: relative; top: 30px; z-index: -1; }
+.toptitle .wrap .title { width: 1170px; margin: 100px 0 60px 0; padding-left: 290px; }
+.toptitle .wrap .title h1 { font-size: 36px; color: #ffffff; font-weight: 400; line-height: 140%; margin: 48px 0 32px 0; text-transform: none; padding: 6px 0 0 0; }
+.toptitle .wrap .title .tag { margin: 6px 0; }
+.toptitle .wrap .title .tag, .toptitle .wrap .title .author { color: #92A8D4; }
+.toptitle .wrap .title .tag span { background: none; padding: 0; }
+.toptitle .wrap .title .author { text-transform: uppercase; }
+.toptitle .wrap .title .author svg { width: 30px; height: 22px; fill: #92A8D4 !important; margin: 2px 2px 0 0; float: left; }
+
+/* ---------- 2. 面包屑（文章页变体，收进 .toptitle 防撞产品页 .breadcrumb） ---------- */
+.toptitle .breadcrumb { position: relative; display: block; width: auto; margin: 0; }
+.toptitle .breadcrumb span { display: inline-block; top: 0; }
+.toptitle .breadcrumb .unique_one,
+.toptitle .breadcrumb a,
+.toptitle .breadcrumb .symbol { font-size: 15px; color: #92A8D4; line-height: 24px; margin-right: 8px; text-decoration: none; }
+.toptitle .breadcrumb .current { color: #92A8D4; font-size: 15px; line-height: 24px; }
+.toptitle .breadcrumb a:hover { color: #F5A623; -webkit-transition: all .2s ease; }
+
+/* ---------- 3. 文章最外层 + 两栏布局父 ---------- */
+#Topics { width: 1170px; margin: 0 auto; }
+#Topics .TopicsInfo { position: relative; display: inline-block; width: 100%; }
+#Topics .craneinfo { margin: 0 0 80px 0; text-align: left; width: 100%; align-items: stretch; }
+.craneinfo > :not(#rank-math-toc) { width: 880px; flex: 1; float: right; }   /* 右栏正文：每个直接子节点 */
+.craneinfo::after { content: ""; display: table; clear: both; }              /* 清浮动 */
+
+/* ---------- 4. 左栏 TOC（rank-math-toc / sticky / float:left） ---------- */
+#Topics #rank-math-toc { width: 240px !important; z-index: 50; top: 15%; display: flex; flex-direction: column; gap: 0; position: sticky; float: left; margin-right: 20px; min-height: 100%; }
+#Topics #rank-math-toc p { font-size: 16px; color: #4A4A4A; line-height: 140%; font-weight: 700; text-transform: none; margin: 30px 0 20px 0 !important; }
+#rank-math-toc ul { list-style: none; margin: 0; padding: 0; width: auto; }
+#rank-math-toc a { width: auto; }
+#rank-math-toc ul li { margin: 0 0 20px 0; text-transform: none; }
+#rank-math-toc ul li a { font-size: 16px; color: #9B9B9B; line-height: 140%; font-weight: 400; margin: 0 0 16px 0; width: auto; text-decoration: none; }
+#rank-math-toc ul li a:hover { color: #4A4A4A; }
+#rank-math-toc ul li a.focus { color: #003296; outline: none; }
+#rank-math-toc ul li ul li { font-size: 14px; margin: 0 0 10px 20px; color: #9B9B9B; }
+#rank-math-toc ul ul { margin: 10px 0 10px 10px !important; }
+#rank-math-toc ul li ul li a { font-size: 14px; color: #9B9B9B; }
+#rank-math-toc ul li ul li a.focus, #rank-math-toc ul li.h2-item a.focus { color: #003296; }
+#Topics .craneinfo nav { max-height: 600px; overflow-y: auto; padding-right: 10px; }
+#Topics .craneinfo nav::-webkit-scrollbar { width: 8px; height: 100%; background-color: transparent; }
+#Topics .craneinfo nav::-webkit-scrollbar-track { background: #F2F3F4; }
+#Topics .craneinfo nav::-webkit-scrollbar-thumb { border-radius: 4px; background-color: #E5E4E2; }
+
+/* ---------- 5. 右栏正文：标题 / 段落 / 图 / 列表 / 链接 ---------- */
+#Topics .craneinfo img { max-width: 100%; height: auto; display: block; margin-bottom: 20px; }
+#Topics .craneinfo h2 { font-size: 32px; color: #000000; line-height: 140%; font-weight: 700; text-transform: none; margin: 70px 0 20px 0; text-align: left; }
+#Topics .craneinfo h3 { font-size: 24px; color: #000000; line-height: 140%; font-weight: 400; text-transform: none; margin: 40px 0 20px 0; text-align: left; }
+#Topics .craneinfo h4 { font-size: 18px; color: #000000; line-height: 140%; font-weight: 400; text-transform: none; margin: 20px 0 10px 0; text-align: left; }
+#Topics .craneinfo p { color: #000000; font-size: 18px; line-height: 150%; margin: 0 0 30px 0; }
+#Topics .craneinfo h2 > a { font-size: 32px; }
+.craneinfo > :not(#rank-math-toc) a { font-size: 18px; color: #003296; line-height: 140%; }
+.craneinfo > :not(#rank-math-toc) a:hover { color: #F5A623; }
+
+/* 正文列表：自定义实心方块 marker */
+.craneinfo ul { padding-left: 16px; }
+.craneinfo ol { padding-left: 0; }
+.craneinfo > :not(#rank-math-toc) ul { position: relative; margin-bottom: 40px; }
+.craneinfo > :not(#rank-math-toc) ul ul { list-style-type: circle !important; margin: 10px 0 0 20px; }
+.craneinfo > :not(#rank-math-toc) li { font-size: 18px; color: #4A4A4A; line-height: 140%; font-weight: 400; margin: 0 0 12px 0; padding: 0 0 0 28px; position: relative; }
+.craneinfo > :not(#rank-math-toc) li:last-child { margin-bottom: 0; }
+.craneinfo > :not(#rank-math-toc) li:before { content: ''; display: block; width: 6px; height: 6px; background: #92A8D4; position: absolute; left: 10px; margin-top: 10px; }
+#Topics ul ul { list-style-type: circle !important; margin: 10px 0 0 20px; }
+#Topics ul ul li { padding: 0 !important; }
+#Topics ul ul li:before { display: none !important; }
+
+/* figure / 图注 */
+#Topics .craneinfo figure { margin-bottom: 20px; }
+#Topics .craneinfo figure img { margin-bottom: 10px; }
+#Topics .craneinfo figcaption { font-size: 16px; color: #808080; line-height: 150%; font-weight: 400; }
+
+/* ---------- 6. Gutenberg 块：columns / column / image（两图并排） ---------- */
+.wp-block-columns { align-items: normal !important; box-sizing: border-box; display: flex; flex-wrap: nowrap !important; }
+.wp-block-columns:not(.is-not-stacked-on-mobile) > .wp-block-column { flex-basis: 0; flex-grow: 1; }
+:where(.wp-block-columns) { margin-bottom: 1.75em; }
+.wp-block-column { flex-grow: 1; min-width: 0; overflow-wrap: break-word; word-break: break-word; }
+.wp-block-image img { box-sizing: border-box; height: auto; max-width: 100%; vertical-align: bottom; }
+.wp-block-image figure { margin: 0; }
+body .is-layout-flex { display: flex; }
+.is-layout-flex { flex-wrap: wrap; align-items: center; }
+.is-layout-flex > :is(*, div) { margin: 0; }
+:where(.is-layout-flex) { gap: 0.5em; }
+:where(.wp-block-columns.is-layout-flex) { gap: 2em; }   /* 两图块列间距 */
+.wp-container-core-columns-is-layout-1,
+.wp-container-core-columns-is-layout-2,
+.wp-container-core-columns-is-layout-3 { flex-wrap: nowrap; }
+
+/* 产品类型卡片网格：图片统一 3:2 裁切填充，消除长宽比不同导致的高低参差 */
+#Topics .craneinfo .card-grid .wp-block-image img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; margin-bottom: 0; }
+#Topics .craneinfo .card-name { font-size: 18px; color: #003296; line-height: 140%; font-weight: 700; text-align: center; margin: 10px 0 0 0; }
+
+/* ---------- 7. 作者盒 #p_author ---------- */
+#p_author { max-width: 100%; height: auto; background-color: #f4f7fe; padding: 40px 50px; overflow: auto; margin: 40px 0; }
+#p_author .authorphoto { width: 20%; height: auto; display: block; float: left; margin: 0 !important; }
+#p_author .rightname { width: 75%; height: auto; float: right; }
+#p_author .rightname .name { font-size: 24px !important; color: #003399 !important; font-weight: 700; line-height: 120%; margin: 0 !important; }
+#p_author .rightname .title { font-size: 14px !important; color: #707070 !important; font-weight: 400; margin: 10px 0 !important; }
+#p_author .rightname p { font-size: 14px !important; color: #000000; font-weight: 700; margin: 20px 0 !important; padding: 0; }
+#p_author .rightname h5 { margin: 10px 0 !important; font-size: 14px !important; }
+#p_author .rightname h5 a { font-size: 14px !important; color: #003399; font-weight: 700 !important; padding: 0; text-decoration-line: underline !important; text-transform: lowercase; }

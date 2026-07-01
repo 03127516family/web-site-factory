@@ -1,0 +1,167 @@
+<!--
+  post@1 自声明模版 —— 32吨门机出口俄罗斯（案例文章）
+  规则见 CLAUDE.md §9 / 决策日志 2026-06-29：
+  · 布局 = AI 烧的死骨架（每篇一份模版）；值走 MD（body.* → fm:，## 块 → mdbody:）
+  · 两栏靠 float：#rank-math-toc(左240) + .craneinfo>:not(#rank-math-toc)(右880)
+  · ★ 每个正文块必须是 .craneinfo 的【直接子节点】，否则 float:right 不命中（CSS 风险#9）
+  · marker：data-field 取值点 / data-edit 编辑方式 / <div data-field="KEY.body"> ↔ MD <!--block:KEY-->
+-->
+
+<!-- ============ 蓝底标题横幅：面包屑 + 标题 + 作者 ============ -->
+<div class="toptitle">
+	<div class="wrap">
+		<div class="title">
+			<div class="breadcrumb"><span xmlns:v="http://rdf.data-vocabulary.org/#">
+				<span class="unique_one" typeof="v:Breadcrumb"><a href="https://www.dgcrane.com/zh/" rel="v:url" property="v:title">首页</a><span class="symbol">></span><span rel="v:child" typeof="v:Breadcrumb"><a href="https://www.dgcrane.com/zh/posts/" rel="v:url" property="v:title">案例</a><span class="symbol">></span><span class="current" data-field="breadcrumb.current">32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境</span></span></span></span></div>
+			<h1 data-field="title">32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境</h1>
+			<div class="info-top">
+				<div class="author"><svg viewBox="0 0 24 18"><path d="M12 12c2.7 0 8 1.34 8 4v2H4v-2c0-2.66 5.3-4 8-4zm0-2a4 4 0 110-8 4 4 0 010 8z"/></svg><span data-field="author.name">赵卓拉</span></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ============ 文章正文区：左 TOC + 右正文（float 两栏） ============ -->
+<div id="Topics">
+	<div class="TopicsInfo wrap">
+		<div class="craneinfo">
+
+			<!-- 左栏目录：JS 扫 .craneinfo 内 h2/h3[id] 动态生成，随可编辑标题同步 -->
+			<div id="rank-math-toc" class="wp-block-rank-math-toc-block">
+				<p>目录</p>
+				<nav><ul></ul></nav>
+			</div>
+
+			<!-- 导言（无标题，正文起首段） -->
+			<div data-field="lead.body" data-edit="rich">
+				<p>该项目涉及一台32吨的发动机 轨道式集装箱龙门起重机，该设备出口俄罗斯，主要用于集装箱的装卸和转运作业。</p>
+			</div>
+
+			<!-- hero 铺满图 -->
+			<figure class="wp-block-image size-full"><img data-field="body.img_hero" data-edit="image" alt="32吨轨道式集装箱龙门起重机出口俄罗斯" width="880" height="495" /></figure>
+
+			<!-- H2 核心采购要求 -->
+			<h2 id="core-procurement-requirements" class="wp-block-heading" data-field="body.h_req" data-edit="text">核心采购要求</h2>
+			<div data-field="req.body" data-edit="rich"><p>俄罗斯客户的核心要求……</p></div>
+
+			<!-- H2 定制化解决方案（仅标题，无正文块） -->
+			<h2 id="customized-solution" class="wp-block-heading" data-field="body.h_solution" data-edit="text">定制化解决方案</h2>
+
+			<!-- H3 低温适应性设计 -->
+			<h3 id="low-temperature-adaptability-design" class="wp-block-heading" data-field="body.h_lowtemp" data-edit="text">低温适应性设计</h3>
+			<div data-field="lowtemp.body" data-edit="rich"><p>为确保在俄罗斯-40°C的低温环境下可靠运行……</p></div>
+			<figure class="wp-block-image size-full"><img data-field="body.img_mainbeam" data-edit="image" alt="主梁" width="880" height="495" /></figure>
+			<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-1 wp-block-columns-is-layout-flex">
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_cabin" data-edit="image" alt="驾驶室" width="424" height="300" /></figure></div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_travmotor" data-edit="image" alt="行走电机" width="424" height="300" /></figure></div>
+			</div>
+
+			<!-- H3 本地化设计 -->
+			<h3 id="localization-design" class="wp-block-heading" data-field="body.h_localization" data-edit="text">本地化设计</h3>
+			<div data-field="localization.body" data-edit="rich"><p>为确保操作简便和本地兼容性……</p></div>
+			<figure class="wp-block-image size-full"><img data-field="body.img_control" data-edit="image" alt="控制系统" width="880" height="495" /></figure>
+
+			<!-- H3 安全保护系统 -->
+			<h3 id="safety-protection-system" class="wp-block-heading" data-field="body.h_safety" data-edit="text">安全保护系统</h3>
+			<div data-field="safety.body" data-edit="rich"><p>配置了一套全面的安全保护系统……</p></div>
+
+			<!-- H3 运输保护设计 -->
+			<h3 id="transport-protection-design" class="wp-block-heading" data-field="body.h_transport" data-edit="text">运输保护设计</h3>
+			<div data-field="transport.body" data-edit="rich"><p>考虑到运往俄罗斯的长途运输……</p></div>
+			<figure class="wp-block-image size-full"><img data-field="body.img_travmech" data-edit="image" alt="行走机构包装" width="880" height="495" /></figure>
+			<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-2 wp-block-columns-is-layout-flex">
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_trolley" data-edit="image" alt="台车包装" width="424" height="300" /></figure></div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_spreader" data-edit="image" alt="集装箱吊具包装" width="424" height="300" /></figure></div>
+			</div>
+
+			<!-- H2 交付结果 -->
+			<h2 id="delivery-results" class="wp-block-heading" data-field="body.h_delivery" data-edit="text">交付结果</h2>
+			<div data-field="delivery.body" data-edit="rich"><p>交付的32吨轨道式集装箱龙门起重机成功满足了客户的所有关键要求……</p></div>
+			<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-3 wp-block-columns-is-layout-flex">
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_result1" data-edit="image" alt="32吨轨道式集装箱龙门起重机" width="424" height="300" /></figure></div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_result2" data-edit="image" alt="32吨轨道式集装箱龙门起重机 俄罗斯" width="424" height="300" /></figure></div>
+			</div>
+
+			<!-- H2 项目概要 -->
+			<h2 id="project-summary" class="wp-block-heading" data-field="body.h_summary" data-edit="text">项目概要</h2>
+			<div data-field="summary.body" data-edit="rich"><p>该项目的核心不仅仅是交付一台龙门起重机……</p></div>
+
+			<!-- H2 获取报价 -->
+			<h2 id="get-customized-crane-solutions-and-quotation" class="wp-block-heading" data-field="body.h_getquote" data-edit="text">获取定制化起重机解决方案和报价</h2>
+			<div data-field="getquote.body" data-edit="rich"><p>DGCRANE 在起重机出口方面拥有超过 15 年的经验……</p></div>
+
+			<!-- 作者盒 -->
+			<div id="p_author">
+				<img class="authorphoto" data-field="author.avatar" data-edit="image" alt="赵卓拉" width="158" height="182" />
+				<div class="rightname">
+					<p class="name" data-field="author.name" data-edit="text">赵卓拉</p>
+					<p class="title" data-field="author.title" data-edit="text">桥式起重机/门式起重机/旋臂起重机/起重机零部件解决方案专家</p>
+					<p data-field="author.bio" data-edit="text">拥有10多年起重机海外出口行业经验，帮助10,000+客户解决售前问题和疑虑，如果您有任何相关需求，请随时与我联系！</p>
+				</div>
+			</div>
+
+		</div><!-- /.craneinfo -->
+	</div><!-- /.TopicsInfo -->
+</div><!-- /#Topics -->
+
+<!-- ============ 询盘表单（复用产品页动态块） ============ -->
+<section data-template="inquiry-form@1" data-dynamic="inquiry-form" data-form-id="713" data-block-id="inquiry-form" class="post-inquiry wrap" id="from-single">
+	<h3 data-field="inquiry_form.title">填写您的详细资料，我们将在24小时内给您答复!</h3>
+	<div id="from-2"><div class="wpforms-container" id="wpforms-713"><form id="wpforms-form-713" class="wpforms-validate wpforms-form wpforms-ajax-form" data-formid="713" method="post" enctype="multipart/form-data"><div class="wpforms-field-container"><div class="wpforms-field wpforms-field-name your-name"><label class="wpforms-field-label">姓名</label><div class="wpforms-field-row wpforms-field-large"><div class="wpforms-field-row-block wpforms-first wpforms-one-half"><input type="text" class="wpforms-field-name-first" name="wpforms[fields][0][first]" placeholder="名字"></div><div class="wpforms-field-row-block wpforms-one-half"><input type="text" class="wpforms-field-name-last" name="wpforms[fields][0][last]" placeholder="姓氏"></div></div></div><div class="wpforms-field wpforms-field-email your-email"><label class="wpforms-field-label">电子邮件 <span class="wpforms-required-label">*</span></label><input type="email" class="wpforms-field-large wpforms-field-required" name="wpforms[fields][1]" required></div><div class="wpforms-field wpforms-field-phone your-phone"><label class="wpforms-field-label">电话</label><input type="tel" class="wpforms-field-large" name="wpforms[fields][3]"></div><div class="wpforms-field wpforms-field-textarea"><label class="wpforms-field-label">留言</label><textarea class="wpforms-field-medium" name="wpforms[fields][2]"></textarea></div></div><div class="wpforms-submit-container"><button type="submit" name="wpforms[submit]" class="wpforms-submit your-submit" value="wpforms-submit">发送消息</button></div></form></div></div>
+</section>
+
+<!-- ============ photoswipe 灯箱（chrome，逐字复用，默认隐藏） ============ -->
+<div id="gallery" class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="pswp__bg"></div>
+	<div class="pswp__scroll-wrap">
+		<div class="pswp__container">
+			<div class="pswp__item"></div>
+			<div class="pswp__item"></div>
+			<div class="pswp__item"></div>
+		</div>
+		<div class="pswp__ui pswp__ui--hidden">
+			<div class="pswp__top-bar">
+				<div class="pswp__counter"></div>
+				<button class="pswp__button pswp__button--close" title="关闭 (Esc)"></button>
+				<button class="pswp__button pswp__button--zoom" title="放大/缩小"></button>
+			</div>
+			<button class="pswp__button pswp__button--arrow--left" title="上一页 (箭头向左)"></button>
+			<button class="pswp__button pswp__button--arrow--right" title="下一步(向右箭头)"></button>
+			<div class="pswp__caption"><div class="pswp__caption__center"></div></div>
+		</div>
+	</div>
+</div>
+
+<!-- ============ TOC 生成器：扫 .craneinfo 内 h2/h3[id] 建左栏目录（随可编辑标题同步） ============ -->
+<script>
+(function () {
+	function buildTOC() {
+		var root = document.querySelector('#Topics .craneinfo');
+		var ul = document.querySelector('#rank-math-toc nav ul');
+		if (!root || !ul) return;
+		ul.innerHTML = '';
+		var heads = root.querySelectorAll('h2[id], h3[id]');
+		var curSub = null;
+		heads.forEach(function (h) {
+			var li = document.createElement('li');
+			var a = document.createElement('a');
+			a.href = '#' + h.id;
+			a.textContent = (h.textContent || '').trim();
+			li.appendChild(a);
+			if (h.tagName === 'H2') {
+				li.className = 'h2-item';
+				ul.appendChild(li);
+				var sub = document.createElement('ul');
+				li.appendChild(sub);
+				curSub = sub;
+			} else {
+				(curSub || ul).appendChild(li);
+			}
+		});
+		// 清掉空的二级容器
+		ul.querySelectorAll('li > ul:empty').forEach(function (e) { e.remove(); });
+	}
+	if (document.readyState !== 'loading') buildTOC();
+	else document.addEventListener('DOMContentLoaded', buildTOC);
+})();
+</script>

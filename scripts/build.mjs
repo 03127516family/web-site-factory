@@ -51,6 +51,26 @@ export const pages = [
     template: "src/templates/product-superset.html",
     content: "src/content/multi-point-suspension-cranes.md", // AI 生成出货 HTML；编辑走老编辑器写回此 MD（勿 build 覆盖 dist）
   },
+  {
+    // 第一个 post 页族页（案例文章）。CLAUDE.md §9 / 决策日志 2026-06-29：A 路——每篇一份骨架模版，引擎按 MD 填值。
+    slug: "posts/32t-rail-mounted-container-gantry-crane-exported-to-russia",
+    lang: "zh-CN",
+    title: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境 | DGCRANE",
+    description:
+      "32吨轨道式集装箱龙门起重机出口俄罗斯案例：Q355E耐低温钢、-40℃稳定运行、俄语本地化、全面安全防护与运输保护，提供完整可靠的集装箱搬运解决方案。",
+    template: "src/templates/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.html",
+    content: "src/content/32t-rail-mounted-container-gantry-crane-exported-to-russia.md",
+  },
+  {
+    // 第二篇 post——从【裸 MD】烧制（无原页可逆向，版式由 AI 判断；竞品稿已改 DGCRANE + 译中文）。
+    slug: "posts/gantry-cranes-for-sale",
+    lang: "zh-CN",
+    title: "龙门起重机选购指南：价格行情、智能选购与专家建议 | DGCRANE",
+    description:
+      "龙门起重机选购指南：单梁/双梁/半龙门/便携式价格区间、影响成本的关键因素（设备/特殊设计/运输/安装）及智能选购建议，助你做出明智的采购决策。",
+    template: "src/templates/posts/gantry-cranes-for-sale.html",
+    content: "src/content/gantry-cranes-for-sale.md",
+  },
 ];
 
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
