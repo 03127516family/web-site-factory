@@ -95,6 +95,13 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
 
 - 面包屑 `breadcrumb.trail` 未 data 化（超集里仍是单梁硬编码，显示「Eot Cranes」非「桥式起重机」）——待接进渲染器，使 trail 由 MD 驱动。
 - 个别素材缺失需补图（如 overhead 组件 `Crane-electric-control-bo.jpg`，原站亦缺）。
+- **SEO 技术 hygiene 全面缺失**（2026-07-01 盘点，尚未实现，待 base URL 拍板后动手）：
+  - `{{SEO}}` 占位符（`src/layouts/document.html:8`）恒被 `build.mjs:102` 替换成空字符串——canonical、Open Graph、JSON-LD（Article/Product/BreadcrumbList）一个都没有。
+  - 面包屑现在用的是**过时的** Data-Vocabulary.org RDFa（模版里 `xmlns:v="http://rdf.data-vocabulary.org/#"`），Google 2020 年起已不认此格式出富摘要，应补 `BreadcrumbList` JSON-LD。
+  - 无 `sitemap.xml` / `robots.txt`，应由 `build.mjs::pages` 循环生成（同源不会漏页）。
+  - 图片落盘未压缩（如这次 crane-lifting-safety-training 拷的几张图有 3-4MB/张），拖 LCP；以后素材落 `public/assets/img/` 前应先压缩。
+  - 卡点：canonical/OG/sitemap 的绝对 URL 需要 base URL（生产域名挂根路径还是 `/zh/` 子路径），未拍板。
+- **询盘表单无真实后端**（2026-07-01 盘点）：`data-form-id="713"` 那个表单是老 WordPress+WPForms 站的静态快照，`<form>` 无 `action`、无 JS 拦截提交——现在填完点"发送消息"提交不到任何地方。已把表单去重成共享 fragment `src/fragments/inquiry-form.html`（`build.mjs::composePage` + `verify-geom.mjs` 都已接入注入，不再是逐模版复制粘贴），并统一了产品页/文章页字段集（含文件上传）。**但后端提交方案本身未定、未接**——讨论过自建 Lambda（环境里发现有真实 AWS 凭证，账号 `125131361182`/`aws-cn`），用户明确"先别真发，方案以后再说"，**不要在没有进一步明确指示前，往这个真实 AWS 账号里创建任何云资源**。footer 里另一个订阅表单（`data-form-id="780"`）同样是死的（`action` 里还带着一段抓取时的 Google 搜索点击追踪参数），未动，属同类问题。
 
 ---
 
@@ -156,3 +163,7 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
   - **TOC（左栏目录）**：JS 扫 body 里 h2/h3 自动生成 + 锚点，从原站逐字复制当 chrome，零引擎介入；只需保证骨架渲染出带 id 的真实 h2/h3。**改版式 = 重烧骨架**（A 重存模版 / B 重写 dist），非日常编辑。
 
 - **2026-06-26** 固化 **§9「真实页→模版转换规则」**（页族无关、与 §2 对称的通用方法论）：切块→判形→命名→抽模子→复 chrome→守硬约束→验，7 步 + 形态→marker 速查表。起因：要做 category 页族（品类页 `double-girder` 结构异于单产品 product@1），怕生模版时不照规则——故**先把规则钉进 CLAUDE.md，再按规则生模版**，不靠记忆。生模版交付时附 7 步自检对照表，`verify:geom` 兜底。
+
+- **2026-07-01** **SEO 工作范围拍定**：SEO 分两层——①**技术 hygiene**（meta/canonical/OG/JSON-LD/sitemap/robots/图片压缩/内部链接）是代码工作，归 AI 负责，可清单化、可验证；②**内容策略、关键词/竞品调研、外链积累、多语言（hreflang，依赖尚未拍板的 i18n 架构）、监测运营**不是代码能解决的，AI 不做、也不该拍脑袋硬做。做完①不等于能提升排名——那要靠②，是运营/内容侧的判断，不在本系统范围内。具体缺口清单见 §8。
+
+- **2026-07-01** **询盘表单去重为共享 fragment**：巡检发现表单在 5 份模版里逐字复制（产品家族/文章家族各一份变体，字段集还不一致），且都是 WordPress+WPForms 的死快照、无真实提交后端。抽成 `src/fragments/inquiry-form.html`，`build.mjs::composePage` 与 `verify-geom.mjs`（独立维护一份 `compose()`，两处都要接 `{{INQUIRY_FORM}}` marker 替换，改一处忘了另一处会导致 A/B 几何假性不对齐——已踩过这个坑）统一注入；两个家族字段集合并取并集（含文件上传）。**后端提交方案明确暂缓，不实现**：过程中发现本环境挂着真实 AWS 凭证（账号 `125131361182`，`aws-cn` 分区），一度讨论自建 Lambda，用户明确"先别真发，后续再定是接第三方还是自建"——**未经用户进一步明确指示，不要往这个真实账号创建任何云资源**（哪怕看起来只是"随便建个测试用的"）。

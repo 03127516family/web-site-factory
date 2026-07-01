@@ -89,11 +89,13 @@ export async function composePage(page, opts = {}) {
   const layout = await readFile(p("src/layouts/document.html"), "utf8");
   const header = await readFile(p("src/fragments/header.html"), "utf8");
   const footer = await readFile(p("src/fragments/footer.html"), "utf8");
+  const inquiryForm = await readFile(p("src/fragments/inquiry-form.html"), "utf8");
   let body = await readFile(p(page.template), "utf8");
 
   if (page.content) {
     body = await renderBodyFromMarkdown(body, p(page.content), { editMode: opts.editMode === true });
   }
+  body = body.replace("{{INQUIRY_FORM}}", () => inquiryForm);
 
   let html = layout
     .replaceAll("{{LANG}}", page.lang)
