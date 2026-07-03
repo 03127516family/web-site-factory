@@ -73,6 +73,7 @@ async function main() {
     }
 
     // 2. fm:gallery.0.alt
+    const gallery1AltBefore = fmDoc(await readFile(tmp, "utf8")).getIn(["gallery", 1, "alt"]);
     await patchMarkdown(tmp, "fm:gallery.0.alt", "text", "新alt");
     {
       const doc = fmDoc(await readFile(tmp, "utf8"));
@@ -82,7 +83,7 @@ async function main() {
           "5Ton-LDC-type-single-girder-overhead-crane-in-India-1.jpg",
         "gallery.0.image 不应改动",
       );
-      assert(doc.getIn(["gallery", 1, "alt"]) === "孟加拉国5吨单梁桥式起重机", "gallery.1 不应改动");
+      assert(doc.getIn(["gallery", 1, "alt"]) === gallery1AltBefore, "gallery.1 不应改动");
     }
 
     // 3. mdhead:overview

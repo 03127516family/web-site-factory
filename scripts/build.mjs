@@ -18,6 +18,8 @@ export const p = (...s) => join(ROOT, ...s);
 export const pages = [
   {
     slug: "products/single-girder-eot-cranes",
+    type: "product",
+    mode: "render",
     lang: "zh-CN",
     title: "单梁桥式起重机 - DGCRANE",
     description: "单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120 多个国家。",
@@ -26,6 +28,8 @@ export const pages = [
   },
   {
     slug: "products/overhead-cranes-for-sale",
+    type: "product",
+    mode: "render",
     lang: "zh-CN",
     title: "FEM标准桥式起重机（欧式桥式起重机） - DGCRANE",
     description:
@@ -35,6 +39,8 @@ export const pages = [
   },
   {
     slug: "products/free-standing-jib-cranes",
+    type: "product",
+    mode: "render",
     lang: "zh-CN",
     title: "独立式旋臂起重机 - DGCRANE",
     description:
@@ -44,16 +50,20 @@ export const pages = [
   },
   {
     slug: "products/multi-point-suspension-cranes",
+    type: "product",
+    mode: "render",
     lang: "zh-CN",
     title: "多点悬挂式起重机：适用于大跨度工业车间 - DGCRANE",
     description:
       "多点悬挂式起重机专为大跨度工业车间和仓库（如飞机制造与维修厂）设计，通过多个悬挂点分散载荷，起重 3-40 吨，最大跨度可达 80 米。",
     template: "src/templates/product-superset.html",
-    content: "src/content/multi-point-suspension-cranes.md", // AI 生成出货 HTML；编辑走老编辑器写回此 MD（勿 build 覆盖 dist）
+    content: "src/content/multi-point-suspension-cranes.md",
   },
   {
     // 第一个 post 页族页（案例文章）。CLAUDE.md §9 / 决策日志 2026-06-29：A 路——每篇一份骨架模版，引擎按 MD 填值。
     slug: "posts/32t-rail-mounted-container-gantry-crane-exported-to-russia",
+    type: "post",
+    mode: "render",
     lang: "zh-CN",
     title: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境 | DGCRANE",
     description:
@@ -64,6 +74,8 @@ export const pages = [
   {
     // 第二篇 post——从【裸 MD】烧制（无原页可逆向，版式由 AI 判断；竞品稿已改 DGCRANE + 译中文）。
     slug: "posts/gantry-cranes-for-sale",
+    type: "post",
+    mode: "render",
     lang: "zh-CN",
     title: "龙门起重机选购指南：价格行情、智能选购与专家建议 | DGCRANE",
     description:
@@ -74,6 +86,8 @@ export const pages = [
   {
     // 第三篇 post——从【裸 MD】烧制（起重作业安全培训，标准/列表/图集型长文）。
     slug: "posts/crane-lifting-safety-training",
+    type: "post",
+    mode: "render",
     lang: "zh-CN",
     title: "起重机操作安全管理：核心标准、危险及风险预防 | DGCRANE",
     description:
@@ -85,6 +99,7 @@ export const pages = [
 
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
 // 注入编辑器资源（window.__EDIT__ + editor.css + editor.js）。生产 build 不传 opts，产出干净。
+// 只处理 mode==="render" 的页面（template+MD 现算）；是否调用本函数由调用方（build()/edit-server.mjs）按 page.mode 决定。
 export async function composePage(page, opts = {}) {
   const layout = await readFile(p("src/layouts/document.html"), "utf8");
   const header = await readFile(p("src/fragments/header.html"), "utf8");
@@ -123,6 +138,10 @@ async function build() {
   await cp(p("public"), p("dist"), { recursive: true });
 
   for (const page of pages) {
+    if ((page.mode || "render") !== "render") {
+      console.log("skipped", page.slug, `(${page.mode})`);
+      continue;
+    }
     const html = await composePage(page);
     const out = p("dist", page.slug, "index.html");
     await mkdir(dirname(out), { recursive: true });

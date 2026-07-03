@@ -129,6 +129,14 @@ const server = createServer(async (req, res) => {
     const page = pageBySlug(slug);
     if (page) {
       if (!page.content) return send(res, 200, `<p>该页无 MD 数据源，暂不可编辑。<a href="/">返回</a></p>`, MIME[".html"]);
+      if ((page.mode || "render") !== "render") {
+        return send(
+          res,
+          200,
+          `<p>该页面为 "${page.mode}" 模式（非引擎渲染），编辑器暂不支持预览编辑。<a href="/">返回</a></p>`,
+          MIME[".html"],
+        );
+      }
       const html = await composePage(page, { editMode: true });
       return send(res, 200, html, MIME[".html"]);
     }
