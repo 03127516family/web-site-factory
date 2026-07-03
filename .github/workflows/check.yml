@@ -1,0 +1,26 @@
+# CI 质量门（蓝图 06 章 §2 / 14 章 G0）：push/PR 即跑 单测 + build + 几何回归。
+# geom 用 runner 预装的 Google Chrome（verify-geom.mjs 支持 CHROME 环境变量覆盖路径）。
+name: check
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: 单测
+        run: node --test scripts/
+      - name: 构建
+        run: npm run build
+      - name: 几何回归（双跑其一；本地钩子为另一道）
+        run: npm run verify:geom
+        env:
+          CHROME: /usr/bin/google-chrome

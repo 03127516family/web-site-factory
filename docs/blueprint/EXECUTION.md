@@ -12,7 +12,7 @@
 
 | # | 事项 | 解锁什么 | 预计花你几分钟 |
 |---|---|---|---|
-| 1 | **Git 远端**：在 GitHub 建**私有空仓库**，名字推荐 **`site-factory`**（去品牌化——dgcrane 只是首个试点站，DECISIONS ⑫；介绍文案见 DECISIONS ⑫.3；**不要**勾选初始化 README/.gitignore），把仓库地址发我；本机若无 GitHub 凭证则 `gh auth login` 一次，或给我一个仅限该仓库的 fine-grained PAT | P0 单点风险解除 + CI + 一切云化 | 10 分钟 |
+| ~~1~~ | ✅ **已完成（2026-07-03）**：远端 `git@github.com:03127516family/web-site-factory.git` 已接，`main`+`claude` 全历史已推送 | P0 已解除 | — |
 | 4 | **发布授权档**（不急，发布线建成前用不上）：默认按最严档运行——"我干完给你预览清单，你点头才上线"；想提速就说"机械类放权" | 我"自己跑"的节奏 | 1 分钟 |
 | 5 | 上线前杂项（搬迁中后期才需要）：老站 WordPress 凭证长期可用性确认；备案状态（仅国内加速需要）；缺图素材渠道 | 搬迁 B0–B4 收尾 | 零散 |
 
@@ -24,8 +24,8 @@
 
 | 状态 | 任务 | 门禁/依赖 |
 |---|---|---|
-| ☐ 下一个 | `npm run check` 聚合命令 + git pre-push 钩子（06 §2） | 无 |
-| ☐ | SEO 注入全套：canonical/OG/JSON-LD/sitemap/robots + 面包屑 data 化（08 章；base URL 已拍定） | 无 |
+| ✅ | `npm run check` 聚合 + pre-push 钩子 + `.nvmrc`/engines 钉 Node 版本 + GitHub Actions CI（ubuntu 跑单测+build+完整 geom） | 完成 2026-07-03 |
+| ☐ **下一个** | SEO 注入全套：canonical/OG/JSON-LD/sitemap/robots + 面包屑 data 化（08 章；base URL 已拍定） | 无 |
 | ☐ | 图片闸门脚本 + 存量超标图压缩（08 §3） | 无 |
 | ☐ | 404 页 + favicon 核对（01-7） | 无 |
 | ☐ | 询盘表单 mock 提交：前端拦截提交 + 校验/加载/成功/失败四态 + 端点常量（`INQUIRY_ENDPOINT`，mock→真只改一处）；footer 订阅表单同治 | 无 |
@@ -35,10 +35,11 @@
 
 ## 门禁状态（14 章）
 
-- **G3 搬迁入口**：未过（图片闸门/SEO/钩子 0/3）→ 上表前三项就是在凑这个门。
-- **远端**：无——P0 风险活跃，三个 commit（`d8f98fb`/`4760fcb`/`07c0572`）只存在于本机。
+- **G3 搬迁入口**：1/3（质量门钩子 ✅ / SEO ☐ / 图片闸门 ☐）。
+- **远端**：✅ `git@github.com:03127516family/web-site-factory.git`——push 受本机 pre-push 钩子 + 云端 Actions CI 双质量门保护。注意：远端 `main` 落后 `claude` 29 个提交，是否合并/怎么合等用户示意。
 - **发布授权**：暂按最严档（一切上线动作需用户点头），待"等你的事 #4"定档。
 
 ## 已完成
 
+- 2026-07-03：**P0 解除**——GitHub 远端（web-site-factory）建立、全历史推送；`npm run check` 聚合 + pre-push 钩子 + Node 版本钉死（.nvmrc/engines）+ Actions CI（含完整 geom，用 runner 预装 Chrome）。
 - 2026-07-03：蓝图 v2 全 15 篇 + DECISIONS ⑩ 条；工作区三个 commit（引擎 mode 路由 / CLAUDE.md 决策日志 / 蓝图）；拍定表单=Postmark、托管=S3+CloudFront。

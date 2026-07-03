@@ -3,11 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node scripts/build.mjs",
     "serve": "node scripts/build.mjs && python3 -m http.server --directory dist 8080",
     "edit": "node scripts/edit-server.mjs",
-    "verify:geom": "node --experimental-websocket scripts/verify-geom.mjs"
+    "verify:geom": "node --experimental-websocket scripts/verify-geom.mjs",
+    "check": "node --test scripts/ && npm run verify:geom",
+    "prepare": "git config core.hooksPath .githooks || true"
   },
   "dependencies": {
     "node-html-parser": "^8.0.3",
