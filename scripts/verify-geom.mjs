@@ -8,6 +8,7 @@ import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderBodyFromMarkdown } from "./render.mjs";
+import { pages } from "./build.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const p = (...s) => join(ROOT, ...s);
@@ -18,21 +19,20 @@ const CHROME = process.env.CHROME || "/Applications/Google Chrome.app/Contents/M
 
 const MEASURE = `(()=>{const out=[];for(const el of document.querySelectorAll('[data-block-id]')){const r=el.getBoundingClientRect();out.push({id:el.getAttribute('data-block-id'),x:Math.round(r.left),y:Math.round(r.top),w:Math.round(r.width),h:Math.round(r.height)});}return JSON.stringify(out);})()`;
 
-// 测量哪些页面：每项 { name, template, content, baseline? }
-// A = 渲染器把 content(MD) 填进 template；B = baseline(缺省同 template) 原样静态页（ground truth）。
-const PAGES = [
-  {
-    name: "single-girder",
-    template: "src/templates/product.html",
-    content: "src/content/single-girder-eot-cranes.md",
-  },
-  {
-    name: "overhead",
-    template: "src/templates/product-superset.html", // A：超集 + overhead MD（即生产所发）
-    baseline: "src/templates/overhead-cranes-for-sale.html", // B：原站 1:1 静态页
-    content: "src/content/overhead-cranes-for-sale.md",
-  },
-];
+// 测量哪些页面：单源自 build.mjs 的登记（2026-07-03 走查 F2 落地——本文件自带的第二份
+// 手写注册表已删除）。凡登记里带 page.geomBaseline 的页面进入几何回归；其余页面待
+// 基准冻结（"祝圣"流程，06 章）后通过在其 MD 里加 geomBaseline 字段纳入。
+// A = 渲染器把 content(MD) 填进 template；B = geomBaseline 原样静态页（ground truth）。
+// 注：本文件的 compose() 与 build.mjs::composePage 故意不同——A 面须保留 marker
+// 供 [data-block-id] 测量，生产 compose 会剥掉它们；两处的 fragment 注入仍须人工同步（坑账#4）。
+const PAGES = pages
+  .filter((pg) => pg.geomBaseline)
+  .map((pg) => ({
+    name: pg.slug.split("/").pop(),
+    template: pg.template,
+    content: pg.content,
+    baseline: pg.geomBaseline,
+  }));
 
 function run(cmd, args) {
   return new Promise((res, rej) => {

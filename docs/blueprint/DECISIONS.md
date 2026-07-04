@@ -89,6 +89,13 @@
   **F7 post 骨架复制权衡**：确认 body-only（无 chrome 重复），族内共同块随篇复制为已接受代价，公共块逐个 fragment 化缓解。
   执行影响：阶段 1 重排，新增 **1.0 真相源收敛**先于一切（含 SEO 重做——前次实现已主动回退，设计经 check 验证过）。全部修复方向是**删与并**，修完系统更简单。走查通过判据："一个页面=一份 MD，系统里不存在第二个需要人工同步的登记处"。
 
+- **2026-07-03 ⑯ 阶段 1.0 真相源收敛落地（走查 F1/F2 的治疗）**：
+  1. **`page:` 登记块成为规范**（04 章 §1 已更新）：必填 slug/type/lang/title/description/template，可选 mode/geomBaseline/family；旧的顶层 `slug:`/`template:` 双份行删除（grep 证实无代码读取，族@版本语义保留为 `family:`）。
+  2. **build.mjs 手写 pages[] 数组删除**，登记由 `loadPages()` 扫 `src/content/*.md` 派生，缺登记/缺字段抛错中止；**verify-geom 第二份注册表删除**，改为 `import { pages }` 过滤 `geomBaseline` 派生。
+  3. **验收**：改造前后 7/7 页 dist 产物 **逐字节一致**（shasum 全量比对）+ 单测 3/3 + geom 两页 1:1——重构零行为变化的数学证明。
+  4. 未尽项：**1.0b** 其余 5 页按祝圣流程冻结基准后纳入 geom（覆盖 7/7）；verify-geom 的 compose 确认为**功能性差异**保留（A 面须保留 marker 供 [data-block-id] 测量，生产 compose 剥 marker），坑账#4 的同步责任缩小到这一处。
+  5. **提请用户**（CLAUDE.md 归你维护，我不改）：CLAUDE.md §5 "MD 自带 slug 与 template"一句已被 `page:` 登记块取代，方便时可自行更新。
+
 ---
 
 ## 待拍板清单（阻塞项，按顺序）

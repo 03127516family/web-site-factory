@@ -1,7 +1,13 @@
 ---
 # ===== 结构化字段（frontmatter）→ 映射到 product-superset.html 的 data-field =====
-slug: multi-point-suspension-cranes
-template: product-superset@1
+page:
+  slug: products/multi-point-suspension-cranes
+  type: product
+  lang: zh-CN
+  title: "多点悬挂式起重机：适用于大跨度工业车间 - DGCRANE"
+  description: "多点悬挂式起重机专为大跨度工业车间和仓库（如飞机制造与维修厂）设计，通过多个悬挂点分散载荷，起重 3-40 吨，最大跨度可达 80 米。"
+  template: src/templates/product-superset.html
+  family: product-superset@1
 title: 多点悬挂式起重机
 breadcrumb:
   current: 多点悬挂式起重机

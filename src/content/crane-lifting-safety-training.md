@@ -1,6 +1,12 @@
 ---
-slug: posts/crane-lifting-safety-training
-template: post@1
+page:
+  slug: posts/crane-lifting-safety-training
+  type: post
+  lang: zh-CN
+  title: "起重机操作安全管理：核心标准、危险及风险预防 | DGCRANE"
+  description: "起重作业安全核心规范：典型事故案例警示、吊钩与钢丝绳使用报废标准、操作员标准化安全操作规程、“十不吊”安全禁令及标准指挥手势，全面防范起重作业安全风险。"
+  template: src/templates/posts/crane-lifting-safety-training.html
+  family: post@1
 title: "起重机操作安全管理：核心标准、危险及风险预防"
 breadcrumb:
   current: "起重机操作安全管理：核心标准、危险及风险预防"

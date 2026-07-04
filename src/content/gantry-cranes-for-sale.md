@@ -1,6 +1,12 @@
 ---
-slug: posts/gantry-cranes-for-sale
-template: post@1
+page:
+  slug: posts/gantry-cranes-for-sale
+  type: post
+  lang: zh-CN
+  title: "龙门起重机选购指南：价格行情、智能选购与专家建议 | DGCRANE"
+  description: "龙门起重机选购指南：单梁/双梁/半龙门/便携式价格区间、影响成本的关键因素（设备/特殊设计/运输/安装）及智能选购建议，助你做出明智的采购决策。"
+  template: src/templates/posts/gantry-cranes-for-sale.html
+  family: post@1
 title: "龙门起重机选购指南：价格行情、智能选购与专家建议"
 breadcrumb:
   current: "龙门起重机选购指南：价格行情、智能选购与专家建议"

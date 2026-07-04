@@ -1,6 +1,12 @@
 ---
-slug: posts/32t-rail-mounted-container-gantry-crane-exported-to-russia
-template: post@1
+page:
+  slug: posts/32t-rail-mounted-container-gantry-crane-exported-to-russia
+  type: post
+  lang: zh-CN
+  title: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境 | DGCRANE"
+  description: "32吨轨道式集装箱龙门起重机出口俄罗斯案例：Q355E耐低温钢、-40℃稳定运行、俄语本地化、全面安全防护与运输保护，提供完整可靠的集装箱搬运解决方案。"
+  template: src/templates/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.html
+  family: post@1
 title: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境"
 breadcrumb:
   current: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境"

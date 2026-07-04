@@ -1,8 +1,15 @@
 ---
 # ===== 结构化字段（frontmatter）→ 映射到 product.html 的 data-field =====
 # 见 src/templates/FIELD-MAP.md 的对应表。
-slug: single-girder-eot-cranes
-template: product@1
+page:
+  slug: products/single-girder-eot-cranes
+  type: product
+  lang: zh-CN
+  title: "单梁桥式起重机 - DGCRANE"
+  description: "单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120 多个国家。"
+  template: src/templates/product.html
+  geomBaseline: src/templates/product.html
+  family: product@1
 title: 单梁桥式起重机
 breadcrumb:
   current: 单梁桥式起重机

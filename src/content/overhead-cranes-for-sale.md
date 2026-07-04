@@ -1,8 +1,15 @@
 ---
 # ===== 结构化字段（frontmatter）→ 映射到 product-superset.html 的 data-field =====
 # 产品：FEM标准桥式起重机（欧式桥式起重机）。内容以原站 1:1 静态页为准提取。
-slug: overhead-cranes-for-sale
-template: product-superset@1
+page:
+  slug: products/overhead-cranes-for-sale
+  type: product
+  lang: zh-CN
+  title: "FEM标准桥式起重机（欧式桥式起重机） - DGCRANE"
+  description: "欧式（FEM标准）桥式起重机制造商与出口商，广泛用于机械制造、石化、港口、电力等行业，技术先进、自重轻、能效高。"
+  template: src/templates/product-superset.html
+  geomBaseline: src/templates/overhead-cranes-for-sale.html
+  family: product-superset@1
 title: FEM标准桥式起重机
 breadcrumb:
   current: FEM标准桥式起重机

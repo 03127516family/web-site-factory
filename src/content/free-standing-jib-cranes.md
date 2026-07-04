@@ -3,8 +3,14 @@
 # 产品：独立式旋臂起重机（free-standing JIB crane）。内容取自 src/content/raw/free-standing-jib-cranes.txt。
 # 注：本产品原料文章较散，仅含 导语/概述/简介/优势/基本参数/主要特点 六段正文；
 #     无图库/组件/型号/生产流程/案例素材，对应段落由超集 data-optional 自动裁掉（faithful，不臆造）。
-slug: free-standing-jib-cranes
-template: product-superset@1
+page:
+  slug: products/free-standing-jib-cranes
+  type: product
+  lang: zh-CN
+  title: "独立式旋臂起重机 - DGCRANE"
+  description: "独立式（自由站立式）旋臂起重机制造商与出口商，容量高达16吨、臂长高达16米、旋转120-360°，结构轻巧、占地小、易安装，适用于短距离密集作业单元。"
+  template: src/templates/product-superset.html
+  family: product-superset@1
 title: 独立式旋臂起重机
 breadcrumb:
   current: 独立式旋臂起重机
