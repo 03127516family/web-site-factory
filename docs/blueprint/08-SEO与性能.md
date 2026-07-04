@@ -1,15 +1,74 @@
 # 08 · SEO 与性能
 
-> 范围（2026-07-01 拍板）：SEO 分两层——**①技术 hygiene 是代码工作，归 AI，全部在此章清单化**；②内容策略/关键词/外链/监测运营**不做**（不是代码能解决的，做完①也不等于排名提升——那是运营侧的事）。base URL 已拍板（2026-07-02）：`https://www.dgcrane.com/zh/...`，本章全部绝对 URL 以此拼接。
+> 范围（2026-07-01 拍板，07-03 ⑭ 修订为四层责任制）：SEO 从每页 MD **同源派生、构建期生成**；**代码只负责技术层（L1）**，语义/关键词是 AI 烧页时做（L2/L3），外链/监测是运营侧（L4，§5）。base URL 已拍板（2026-07-02）：`https://www.dgcrane.com/zh/...`。
 
 ---
 
-## 1. 现状缺口（盘点于 2026-07-01，全部待实现）
+## 0. SEO 架构总览（系统视图，2026-07-04；下次接手先读这一节）
 
-- `{{SEO}}` 占位符（`src/layouts/document.html` 第 8 行）恒被 `build.mjs` 替换成**空字符串**——canonical、OG、JSON-LD 一个都没有。
-- 面包屑用的是 Data-Vocabulary RDFa（Google 2020 起不认），且超集里 trail 硬编码单梁。
-- 无 sitemap.xml / robots.txt。
-- 图片未压缩入库（存在 3–4MB/张）。
+**一句话**：SEO 不是独立子系统，是从每页 MD **同源派生的构建期产物**——零运行时、零手写、零独立数据库。下面六问答完整个架构。
+
+**① 每页的 SEO 记录在哪（数据模型）** —— 没有独立 SEO 库；一篇页面的 SEO 就是它 MD 里的几个字段（单一真相，F1）：
+
+| SEO 记录项 | 存在 MD 哪里 |
+|---|---|
+| SEO 标题 | `page.title`（**可与页面 H1 的顶层 `title` 不同**——SEO 标题带"\| DGCRANE"后缀，H1 不带） |
+| SEO 描述 | `page.description` |
+| og 预览图 | 首图（product: `hero.image`/gallery 首图；post: `body.img_hero`/首个 `img_*`） |
+| 面包屑名 | `breadcrumb.current` |
+
+看"这篇 SEO 是什么" = 看它 MD 这几行；改 SEO = 改这几行。
+
+**② 字段 → 标签怎么变（派生管线）** —— build 时 `seoHead()` 按固定映射生成 `<head>`，零手写：
+
+| 输出标签 | 取自 |
+|---|---|
+| `canonical` / `og:url` | 站点 base + `page.slug` |
+| `<title>` / `og:title` | `page.title` |
+| `description` / `og:description` | `page.description` |
+| `og:image` | 首图 |
+| `og:locale` | `page.lang` |
+| JSON-LD（`Product`/`Article` + `BreadcrumbList`） | `page.type` + 上述 + `breadcrumb.current` |
+| `sitemap.xml` 的 loc/lastmod | 遍历登记；lastmod=该 MD 的 git 提交日期 |
+
+**同源则不漏页**——加一页自动进 sitemap，不需另登记。
+
+**③ 多语言 SEO 怎么接（详 [12 章 §3.7](12-修改传播与多语言同步.md)）**
+- **hreflang 自动派生、不手设**：从多语言关联清单（这页有哪些语言）算出互指 + `x-default`，**永远对称**（手写易漏一边，Google 直接忽略不对称的）。
+- 每语言独立 canonical（**各指自己，不指默认语言**——这是最易踩的坑）、独立 sitemap、`og:locale`。
+- 语言切换器与 hreflang **同源**（同一份配对数据），可见 UI 与 SEO 声明永不矛盾。
+- 站点 base 与目标语言由 `site.config` 管（**待建**；现在是 `build.mjs` 硬编码常量）。
+
+**④ 怎么编辑 / 后台管理**
+- **今天**：SEO 字段在 `<head>`、页面上看不见 → 改 MD 文本（三级模型的 L2 结构层）。**编辑器点不到**（它只改页面上可见的东西）。
+- **未来后台**：一个 **SEO 面板**（类比 WordPress Yoast），填 SEO 标题/描述/og 图/面包屑 → 写回**同样这几个 MD 字段** → 走同一套 `edit-save` 机制。**待建，属管理软件层。**
+- **hreflang 后台不手打**：只调它的输入（`site.config` 目标语言 / 每页本地化 slug / "此页不出某语言"排除开关），后台**展示算出来的 hreflang 供核对**，标签本身由系统生成。
+
+**⑤ 四层责任**（详 §5）：L1 技术（代码，build 时）/ L2 语义（烧 MD 时，AI）/ L3 关键词（调研，阶段 2.2）/ L4 外链（运营，不做）；**监测分析 = 上线后 + 你给 Search Console 数据才能做**。做满 L1–L3 也不承诺排名（诚实边界）。
+
+**⑥ 现状三态**（2026-07-04 实测，`✅已建 / 🔶设计定待建 / 📐设计未建 / ⏸有意暂缓`）：
+
+| 部件 | 状态 |
+|---|---|
+| canonical / OG 全套 / JSON-LD（Product/Article/BreadcrumbList）/ sitemap.xml | ✅ 已建（阶段 1.1，7 个测试守着） |
+| 每页 SEO 记录 = MD `page` 块 | ✅ 已是现状 |
+| 面包屑：删旧 RDFa + trail 数据化 + JSON-LD 三级 | 🔶 设计定，待建（任务 1.2；6 个模版还带旧 RDFa） |
+| 图片压缩 / LCP 闸门 | 🔶 设计定，待建（任务 1.3；存量有 4.1MB/张） |
+| `robots.txt` | ⏸ 共存期故意不生成（域名根归老站，整站切换后接管） |
+| hreflang / 每语言 canonical / `site.config` | 📐 设计定，**未建**（属多语言 M3；单语言站本就无需 hreflang） |
+| 后台 SEO 面板 | 📐 设计，待产品化（管理软件层，还没有任何后台） |
+| 监测分析（排名/流量/Search Console） | ⏸ **上线后才能做**，且需你授权 Search Console 数据 |
+
+> 一句话状态：**技术层核心 ✅ 已建；面包屑/图片是待建收尾；hreflang/site.config/后台面板是设计好未建；监测是上线后的事。** 详细逐项见下。
+
+---
+
+## 1. 现状（2026-07-04 更新；原 07-01 缺口盘点已大部清偿）
+
+- ✅ **`{{SEO}}` 已生效**：canonical / OG 全套 / JSON-LD / sitemap.xml 均已由 `build.mjs::seoHead()` + sitemap 生成（阶段 1.1，7 测试）。**（此前本节写"一个都没有"，是 1.1 前的旧状态，已过时——2026-07-04 更正，免得误导接手者。）**
+- 🔶 **仍缺**：面包屑用的还是 Data-Vocabulary RDFa（6 个模版），trail 超集里硬编码单梁（任务 1.2）。
+- 🔶 **仍缺**：图片未压缩入库（存在 4.1MB/张，任务 1.3）。
+- ⏸ **暂不做**：robots.txt（共存期归老站）；hreflang（多语言 M3）。
 
 ## 2. 实现方案（逐项，全部从 `build.mjs::pages[]` 同源派生——**同源则不漏页**，这是设计原则）
 
