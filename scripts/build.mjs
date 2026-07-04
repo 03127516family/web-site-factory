@@ -67,13 +67,22 @@ function jsonLdFor(page, fm, url, img) {
           brand: { "@type": "Brand", name: "DGCRANE" },
           ...(img ? { image: img } : {}),
         };
-  const breadcrumb = {
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "首页", item: SITE_BASE },
-      { "@type": "ListItem", position: 2, name: fm?.breadcrumb?.current || name, item: url },
-    ],
-  };
+  // BreadcrumbList 从 MD 的 breadcrumb.trail（祖先链，含首页）+ current 同源派生，出完整 N 级——
+  // 与页面可见面包屑同一份数据（1.2：trail 数据化后不再硬编两级）。
+  const trail = Array.isArray(fm?.breadcrumb?.trail) ? fm.breadcrumb.trail : [];
+  const itemListElement = trail.map((t, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: t.label,
+    item: t.url,
+  }));
+  itemListElement.push({
+    "@type": "ListItem",
+    position: trail.length + 1,
+    name: fm?.breadcrumb?.current || name,
+    item: url,
+  });
+  const breadcrumb = { "@type": "BreadcrumbList", itemListElement };
   return { "@context": "https://schema.org", "@graph": [entity, breadcrumb] };
 }
 
@@ -151,8 +160,12 @@ export async function composePage(page, opts = {}) {
   const header = await readFile(p("src/fragments/header.html"), "utf8");
   const footer = await readFile(p("src/fragments/footer.html"), "utf8");
   const inquiryForm = await readFile(p("src/fragments/inquiry-form.html"), "utf8");
+  const breadcrumb = await readFile(p("src/fragments/breadcrumb.html"), "utf8");
   let body = await readFile(p(page.template), "utf8");
 
+  // {{BREADCRUMB}} 必须在渲染器之前注入——它自带 data-repeat/data-field，要由引擎按 MD 填值；
+  // {{INQUIRY_FORM}} 是静态片段（无 marker），渲染器不碰，之后注入即可。
+  body = body.replace("{{BREADCRUMB}}", () => breadcrumb);
   if (page.content) {
     body = await renderBodyFromMarkdown(body, p(page.content), { editMode: opts.editMode === true });
   }

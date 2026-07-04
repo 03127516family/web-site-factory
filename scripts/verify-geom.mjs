@@ -131,8 +131,14 @@ async function main() {
 
   // 生成每页的 A(渲染器)/B(静态模版) 到 dist 根，让 /assets 绝对路径可解析
   for (const pg of PAGES) {
-    const tpl = await readFile(p(pg.template), "utf8");
+    let tpl = await readFile(p(pg.template), "utf8");
     let tplB = await readFile(p(pg.baseline || pg.template), "utf8");
+    const breadcrumb = await readFile(p("src/fragments/breadcrumb.html"), "utf8");
+    // {{BREADCRUMB}} 须在渲染前注入 A 面模版（自带 marker 由引擎填值）。B 面同步注入（镜像
+    // INQUIRY_FORM）：原站静态基准（overhead）无此 marker → 无害空操作、保留内联真实面包屑；
+    // 若基准恰是带 marker 的模版本身（single-girder 的 product.html）→ 注入片段，避免 B 面残留字面量。
+    tpl = tpl.replace("{{BREADCRUMB}}", () => breadcrumb);
+    tplB = tplB.replace("{{BREADCRUMB}}", () => breadcrumb);
     let bodyA = await renderBodyFromMarkdown(tpl, p(pg.content));
     const inquiryForm = await readFile(p("src/fragments/inquiry-form.html"), "utf8");
     // 与 build.mjs::composePage 同步：无 baseline 时 tplB === tpl 本身也带 marker；有 baseline（原站静态页）则本来就没有 marker，replace 是无害空操作。

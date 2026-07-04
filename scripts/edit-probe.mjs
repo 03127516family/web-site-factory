@@ -24,8 +24,15 @@ const isKnown = (page, coord) => KNOWN_BROKEN.find((k) => k.test(page, coord));
 
 // ── 渲染一份「MD 字符串 → 编辑模式正文 DOM」（纯内存）─────────────────────
 async function renderEdit(page, rawMd, templateCache) {
-  const tmpl = templateCache.get(page.template) || (await readFile(p(page.template), "utf8"));
-  templateCache.set(page.template, tmpl);
+  let tmpl = templateCache.get(page.template);
+  if (!tmpl) {
+    tmpl = await readFile(p(page.template), "utf8");
+    // {{BREADCRUMB}} 自带 data-repeat/data-field，须在渲染前注入模版才由引擎填值、才被探针覆盖
+    // （与 build.mjs::composePage / verify-geom 同步：漏注入则面包屑坐标脱测）。
+    const breadcrumb = await readFile(p("src/fragments/breadcrumb.html"), "utf8");
+    tmpl = tmpl.replace("{{BREADCRUMB}}", () => breadcrumb);
+    templateCache.set(page.template, tmpl);
+  }
   const bodyHtml = renderBodyFromString(tmpl, rawMd, { editMode: true }, page.content);
   return parseHtml(bodyHtml);
 }

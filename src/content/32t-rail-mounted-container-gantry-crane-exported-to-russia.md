@@ -10,6 +10,9 @@ page:
 title: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境"
 breadcrumb:
   current: "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境"
+  trail:
+    - { label: 首页, url: "https://www.dgcrane.com/zh/" }
+    - { label: 案例, url: "https://www.dgcrane.com/zh/posts/" }
 author:
   name: 赵卓拉
   title: 桥式起重机/门式起重机/旋臂起重机/起重机零部件解决方案专家

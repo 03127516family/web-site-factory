@@ -10,6 +10,9 @@ page:
 title: "起重机操作安全管理：核心标准、危险及风险预防"
 breadcrumb:
   current: "起重机操作安全管理：核心标准、危险及风险预防"
+  trail:
+    - { label: 首页, url: "https://www.dgcrane.com/zh/" }
+    - { label: 案例, url: "https://www.dgcrane.com/zh/posts/" }
 body:
   # —— 区段标题（TOC 扫这些）——
   h_accident: 起重作业事故警示与安全风险剖析

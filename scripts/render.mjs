@@ -20,6 +20,7 @@ const IMG_BASE = "/assets/img/product/";
 
 // data-repeat 名 → { 取数据数组, 单元字段前缀 }
 export const REPEATS = {
+  "breadcrumb-trail": { array: (d) => d.breadcrumb?.trail, prefix: "crumb" },
   gallery: { array: (d) => d.gallery, prefix: "gallery" },
   "gallery-thumbs": { array: (d) => d.gallery, prefix: "gallery" },
   specs: { array: (d) => d.specs, prefix: "spec" },
@@ -32,7 +33,8 @@ export const REPEATS = {
 
 // 不在其上显示增删 UI 的组。gallery 大图区被模版写了 pointer-events:none + swiper fade（同时只显一张）
 // + overflow:hidden，不适合放控件；改由缩略图组 gallery-thumbs 承载画廊增删（它映射同一个 gallery 数组）。
-export const NO_STRUCT_EDIT = new Set(["gallery"]);
+// 面包屑 trail：数据驱动渲染 + SEO，但不挂增删 UI（站点分类树，非逐点内容；决策 1.2①「只读驱动」）。
+export const NO_STRUCT_EDIT = new Set(["gallery", "breadcrumb-trail"]);
 
 // 哪些正文块是「按 ### 拆成重复项」的（其余 ## 块是单体富文本）
 const REPEAT_BODY_BLOCKS = new Set(["components", "crane-types"]);
@@ -40,6 +42,7 @@ const REPEAT_BODY_BLOCKS = new Set(["components", "crane-types"]);
 // data-repeat 名 → frontmatter 里对应的数组路径（编辑模式写回坐标 fm:<array>.<i>.<key>、
 // 以及增删 arrayOp 定位数组 都用它）。
 export const REPEAT_FM_ARRAY = {
+  "breadcrumb-trail": "breadcrumb.trail",
   gallery: "gallery",
   "gallery-thumbs": "gallery",
   specs: "specs",

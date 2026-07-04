@@ -4,7 +4,7 @@
 > **续跑口令**：新会话说「看 EXECUTION 继续」；也可建定时任务自动续跑（用户说一声就建）。
 > **更新纪律**：每次会话结束前更新本文件。执行状态以此为准，设计原理在蓝图各章。
 
-最后更新：2026-07-04　当前位置：**阶段 1 进行中——1.0 真相源收敛 ✅、1.1 SEO ✅、编辑链路全坐标探针实测 ✅、地基化第一步 ✅、1.8 编辑器写回黑洞修复 ✅（name 黑洞 + `<p>` 槽拆裂两处清零，棘轮基线归零，455/455 全绿 + geom 1:1）；下一个 = 1.2 面包屑 fragment，随后 E-4 富文本存回结构漂移 / E-3 引擎纯化**
+最后更新：2026-07-04　当前位置：**阶段 1 进行中——1.0 真相源收敛 ✅、1.1 SEO ✅、地基化第一步 ✅、1.8 编辑器写回黑洞修复 ✅、1.2 面包屑 fragment ✅（trail 数据化 + 删 RDFa + BreadcrumbList 升 N 级 + 一份 fragment 治 5 拷贝；probe 483/483、geom 7 页 1:1）；下一个 = 1.3 图片闸门 / 1.4 表单 mock，随后 E-4 富文本存回结构漂移 / E-3 引擎纯化**
 
 ---
 
@@ -18,7 +18,7 @@
 |---|---|---|
 | ✅ **1.0** | **真相源收敛（走查 F1/F2）已完成 2026-07-03**：7 份 MD 获得 `page:` 登记块，登记表由目录派生，pages[] 手写数组与 verify-geom 第二份注册表**已删除**；验收达成——**改造前后 7/7 页产物逐字节一致** + 单测 3/3 + geom 1:1。未尽项转 1.0b：其余 5 页基准冻结（祝圣）后 geom 覆盖 7/7；verify-geom 的 compose 保留（功能性差异：A 面须保留 marker 供测量），fragment 注入同步责任缩至此一处（坑账#4） | ✅ |
 | ✅ **1.1** | **SEO 生成器已完成 2026-07-03**（架在 1.0 单源上）：canonical / OG 全套 / JSON-LD（Product/Article + BreadcrumbList 两级）/ sitemap.xml（lastmod=MD 的 git 提交日期），全部从登记（=MD frontmatter）同源派生；robots 共存期不生成（根归老站）。验收达成：单测 7/7（含 canonical 唯一、JSON-LD 可解析、sitemap 不漏页、属性转义）+ geom 1:1 | ✅ |
-| 1.2 | 面包屑抽 **fragment**（走查 F4：一次治 5 份拷贝）+ trail 数据化 + 删 RDFa + 清 related 区旧词汇 | geom 双视口 1:1（7 页全量） |
+| ✅ **1.2** | **面包屑数据化 + fragment 已完成 2026-07-04**：① 抽共享 fragment `src/fragments/breadcrumb.html`（一份治 5 份拷贝：2 产品模版 + 3 post 模版），`{{BREADCRUMB}}` 由 `composePage`/`verify-geom`/`edit-probe` **三处注入**（须在渲染器之前注入——片段自带 marker 由引擎填值；漏一处则脱测/脱渲）。② **trail 数据化**：中段不再硬编「Eot Cranes」，`breadcrumb-trail` 登记进 `REPEATS`/`REPEAT_FM_ARRAY`（登记法，决策②），按 MD `breadcrumb.trail` 克隆——free-standing 现正确显「旋臂起重机」而非「Eot Cranes」；3 个 post MD 补 trail（首页>案例）。③ **删 RDFa**：live 模版清空过时 Data-Vocabulary（geom 基准 `overhead-…html` 作为冻结原站保留 RDFa，不动）。④ **SEO 升级**：`jsonLdFor` 由硬编两级改为读 trail+current 出 **N 级 BreadcrumbList**（overhead 现三级）。只读驱动（`NO_STRUCT_EDIT`，无增删 UI；label/url 值仍可点改）。验收达成：**probe 483/483**（新增 28 trail 坐标全绿）、单测 7/7、**geom 7 页 1:1**（面包屑 section 盒不变） | ✅ geom 1:1 + probe 483 |
 | 1.3 | 图片闸门：`npm run img` 压缩脚本 + 存量超标图清理（3–4MB 那批） | 全站图达标（08 章规格） |
 | 1.4 | 表单 mock：`INQUIRY_ENDPOINT` 单点常量 + 前端四态（校验/加载/成功/失败）+ honeypot；订阅表单同治；请求协议按 Postmark 函数目标形态定（切真零改造） | 手测四态 |
 | 1.7 | **抛弃 Python**：`serve`/`verify-geom` 的 `python3 -m http.server` 换 Node 静态服务器（总流程②，全栈 Node、无 Python） | check 全绿 |
@@ -91,6 +91,7 @@
 
 ## 已完成
 
+- 2026-07-04：**1.2 面包屑数据化 + fragment**（用户先审设计后放行：①只读驱动 ②登记法）。抽 `src/fragments/breadcrumb.html`（`data-repeat="breadcrumb-trail"`，登记进 `REPEATS`/`REPEAT_FM_ARRAY`/`NO_STRUCT_EDIT`），`{{BREADCRUMB}}` 三处注入（`composePage`/`verify-geom`/`edit-probe`，须在引擎前注入——片段自带 marker）；中段由 MD `breadcrumb.trail` 驱动（删硬编「Eot Cranes」，free-standing 现正确显「旋臂起重机」）；3 post MD 补 trail；删 live 模版 RDFa（geom 基准保留）；`jsonLdFor` 升 N 级 BreadcrumbList；顺手清 related-products 区旧词汇（`data-dynamic`/`data-template`/`data-slot`/`data-category`，台账#8，保留 `data-block-id`/`data-repeat`）。**probe 483/483、单测 7/7、geom 7 页 1:1**（面包屑 section 盒不变）。
 - 2026-07-04：**1.8 编辑器写回黑洞修复**（用户"修改后自己再测试"）。两处清零：① **name 黑洞**——`tagUnitField` 对 components/crane-types 的 `name` 键改发坐标 `mdhead:<block>#<i>`（原 `fm:<数组>.N.name` 渲染侧不读），md-write 加 `patchHeadItem` 改第 i 个 ### 标题行；渲染与编辑同取正文 ###，收单处（fm 数组只留 image）。② **`<p>` 槽拆裂**——`applyValue` 按内容形态把装块级内容的 `<p>` 就地改 `<div>`（内容驱动，非段名特判；纯文本仍 `<p>`，geom 未动）。`edit-probe` 棘轮基线 `KNOWN_BROKEN` 归零：token 428→**455 全绿**、identity 302、arrays 36；单测 7/7；geom overhead 81/81、single-girder 78/78 逐元素 1:1；E2E 实证改组件名出货页即显。③ 富文本存回结构漂移未动 → 独立残项 E-4（视觉无损）。
 - 2026-07-03：**地基化第一步——引擎字符串入口 + 编辑链路回归门**（用户"最好变成地基后续复用"）。① `render.mjs` 抽出 `renderBodyFromString(template, mdString, opts)`，原 `renderBodyFromMarkdown` = readFile + 委托，**dist 逐字节一致**（stash 前后 shasum 全等证明）；这是云端 edit-save/render-page Lambda 所需形态（拿到的 MD 是 S3/git 字符串而非路径）。② 一次性探针收编为常驻门 `scripts/edit-probe.mjs`，**纯内存跑**（不写任何真实文件，崩了不脏工作区），进 `npm run check`（pre-push + CI 自动复验）；455 坐标 token 428 过 / identity 302/302 / arrays 36/36，27 个已知缺陷做成**棘轮基线**（`KNOWN_BROKEN`，只能变好不能变坏；修好会提示摘除）。从此"编辑器能否准确改任何地方"是被 CI 守住的属性，不再靠人肉抽查。
 - 2026-07-03：**编辑链路全坐标实测**（455 坐标真实写回验证）：identity 无损 302/302、增删 36/36 全过；定位 3 类缺陷（name 写回黑洞 26 / p 槽拆裂 1 / 富文本存回漂移 10 视觉无损）→ 立项 1.8 + E-4。

@@ -10,6 +10,9 @@ page:
 title: "龙门起重机选购指南：价格行情、智能选购与专家建议"
 breadcrumb:
   current: "龙门起重机选购指南：价格行情、智能选购与专家建议"
+  trail:
+    - { label: 首页, url: "https://www.dgcrane.com/zh/" }
+    - { label: 案例, url: "https://www.dgcrane.com/zh/posts/" }
 body:
   # —— 区段标题（TOC 扫这些）——
   h_overview: 龙门起重机选购：市场概览
