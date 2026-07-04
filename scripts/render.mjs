@@ -62,13 +62,21 @@ function bodyEditKind(html) {
   return "text";
 }
 
+// 文件入口：读盘 → 委托字符串入口。保留原签名，行为逐字节不变。
 export async function renderBodyFromMarkdown(templateHtml, mdPath, opts = {}) {
-  const editMode = opts.editMode === true;
   const raw = await readFile(mdPath, "utf8");
+  return renderBodyFromString(templateHtml, raw, opts, mdPath);
+}
+
+// 字符串入口（不碰文件系统）：模版 + MD 原文字符串 → 正文 HTML。
+// 云端 edit-save/render-page Lambda 拿到的 MD 是 S3/git 来的字符串而非路径，直接调本函数；
+// 编辑链路回归门也用它做纯内存渲染（不写真实文件）。srcLabel 仅用于 validateBlocks 报错定位。
+export function renderBodyFromString(templateHtml, raw, opts = {}, srcLabel = "<string>") {
+  const editMode = opts.editMode === true;
   const { frontmatter, body } = splitFrontmatter(raw);
   const fm = parseYaml(frontmatter) || {};
   const blocks = parseBody(body);
-  validateBlocks(body, blocks, templateHtml, mdPath); // 改坏即报错，不静默退默认
+  validateBlocks(body, blocks, templateHtml, srcLabel); // 改坏即报错，不静默退默认
   const { data, coords } = buildData(fm, blocks);
 
   const root = parseHtml(templateHtml, { comment: true });
