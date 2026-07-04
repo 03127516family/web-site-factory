@@ -4,7 +4,7 @@
 > **续跑口令**：新会话说「看 EXECUTION 继续」；也可建定时任务自动续跑（用户说一声就建）。
 > **更新纪律**：每次会话结束前更新本文件。执行状态以此为准，设计原理在蓝图各章。
 
-最后更新：2026-07-03　当前位置：**阶段 1 未开跑，等用户说"执行"**
+最后更新：2026-07-03　当前位置：**全链路走查完成（15 章，发现 F1–F7），阶段 1 已按走查重排（新增 1.0 真相源收敛）；代码零改动待跑，等用户过目走查结论或直接说"执行"**
 
 ---
 
@@ -13,11 +13,12 @@
 ### 阶段 0 · 地基 ✅ 已完成
 远端仓库（web-site-factory，claude 分支）、pre-push 钩子 + Actions CI 双质量门、Node 版本钉死、蓝图 15 篇 + 决策日志。
 
-### 阶段 1 · 管线强化（一次性改造，之后每页自动受益）
+### 阶段 1 · 管线强化（一次性改造，之后每页自动受益；2026-07-03 按走查 15 章重排）
 | # | 任务 | 验收 |
 |---|---|---|
-| 1.1 | SEO 生成器（L1）：canonical / OG / JSON-LD（Product/Article + BreadcrumbList 先两级，分类页迁入后升三级）/ sitemap.xml，全部从 `pages[]`+MD 同源派生；`{{SEO}}` 接活 | check 全绿 + 单测断言（canonical 唯一、JSON-LD 可解析） |
-| 1.2 | 面包屑可见层 data 化（修"Eot Cranes"错显）+ 删过时 RDFa + 清 related 区旧词汇 | geom 双视口 1:1 |
+| **1.0** | **真相源收敛（走查 F1/F2，先于一切）**：title/description/lang 等页面元数据入 MD frontmatter，登记表由 `src/content/` 目录派生，**删** pages[] 手写数组；verify-geom 复用同一登记（**删**自带注册表+compose 双份），基准成每页字段，geom 覆盖 7/7 | 改造前后全页产物逐字节一致 + 单测 + geom 全绿 |
+| 1.1 | SEO 生成器（在 1.0 单源上**重做**；设计已验证过一轮——canonical/OG/JSON-LD/sitemap 同源派生曾 check 全绿后主动回退，换取值源即可） | check 全绿 + SEO 单测（canonical 唯一、JSON-LD 可解析） |
+| 1.2 | 面包屑抽 **fragment**（走查 F4：一次治 5 份拷贝）+ trail 数据化 + 删 RDFa + 清 related 区旧词汇 | geom 双视口 1:1（7 页全量） |
 | 1.3 | 图片闸门：`npm run img` 压缩脚本 + 存量超标图清理（3–4MB 那批） | 全站图达标（08 章规格） |
 | 1.4 | 表单 mock：`INQUIRY_ENDPOINT` 单点常量 + 前端四态（校验/加载/成功/失败）+ honeypot；订阅表单同治；请求协议按 Postmark 函数目标形态定（切真零改造） | 手测四态 |
 | 1.5 | single-girder 切超集模版 + 退役 `product.html`（`overhead-…html` 保留作 geom 基准） | geom 1:1 |
