@@ -115,11 +115,17 @@ function tagEditable(el, md, edit) {
 // 重复块单元内字段的写回坐标：组名 name + 0 基索引 i + 单元内键 key（与 path）+ 值 value。
 function tagUnitField(el, name, i, key, path, value) {
   const tag = (el.tagName || "").toLowerCase();
-  // 按 ### 拆项的块（components/crane-types…）的 body 写回正文块第 i 个 ### 项（mdbody:<block>#<i>）；
-  // rich/text 按内容判定（列表/标签 → rich，单段纯文本 → text），不写死组名。
-  if (key === "body" && REPEAT_BODY_BLOCKS.has(name)) {
-    const edit = typeof value === "string" && value.includes("<") ? "rich" : "text";
-    return tagEditable(el, `mdbody:${name}#${i}`, edit);
+  // 按 ### 拆项的块（components/crane-types…）：body 与 name 都取自正文（渲染的真源），坐标都指正文——
+  //   body → 第 i 个 ### 项的正文（mdbody:<block>#<i>，rich/text 按内容判定）；
+  //   name → 第 i 个 ### 项的标题行（mdhead:<block>#<i>）。
+  // fm 的 <数组>_images 只承载 image（index 对齐）；其 name 字段渲染侧不读、编辑侧不写（收单处，
+  // 2026-07-04 修 1.8#1「name 写回黑洞」：旧坐标指 fm:components_images.N.name 但渲染取正文 ###，改名不生效）。
+  if (REPEAT_BODY_BLOCKS.has(name)) {
+    if (key === "body") {
+      const edit = typeof value === "string" && value.includes("<") ? "rich" : "text";
+      return tagEditable(el, `mdbody:${name}#${i}`, edit);
+    }
+    if (key === "name") return tagEditable(el, `mdhead:${name}#${i}`, "text");
   }
   // 其余 → fm:<数组路径>.<i>.<key>，类型按元素标签 / key 后缀 / 值含标签 判定。
   const array = REPEAT_FM_ARRAY[name];
@@ -432,7 +438,14 @@ function fillFields(root, data, editMode = false, coords = {}) {
 }
 
 function applyValue(el, value, path, item) {
-  const tag = (el.tagName || "").toLowerCase();
+  let tag = (el.tagName || "").toLowerCase();
+  // §2.4：<p> 槽装不下块级内容（<ul>/<table>/<h4>/嵌套<p>…）——解析器/浏览器会按 HTML 规则把它拆到
+  // <p> 之外，使该 data-field 元素变空、不可编辑（1.8#2）。按「内容形态」就地把这种 <p> 改成 <div>
+  // （内容驱动，非段名特判；与原站手写页一致：列表型组件用 <div>、纯文本组件仍用 <p>）。
+  if (tag === "p" && typeof value === "string" && /<(ul|ol|table|h4|div|p|section|blockquote)\b/i.test(value)) {
+    el.tagName = "div";
+    tag = "div";
+  }
   if (tag === "img") {
     if (value == null) {
       const photo = el.closest(".photo");

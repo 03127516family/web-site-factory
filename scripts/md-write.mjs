@@ -4,6 +4,7 @@
 // coord 四种前缀：
 //   fm:<点路径>            —— 改 frontmatter（YAML），保留注释/缩进，正文原样
 //   mdhead:<block>         —— 改 `## 标题 <!--block:KEY-->` 的标题文字（保留锚）
+//   mdhead:<block>#<i>     —— 改该块下第 i 个 `### 项` 的标题文字（components/crane-types 的 name 真源）
 //   mdbody:<block>         —— 替换该 ## 块标题行之后的整段正文区
 //   mdbody:<block>#<i>     —— 替换该块下第 i 个 `### 项` 标题行之后的内容
 //
@@ -138,7 +139,12 @@ export function applyPatch(raw, coord, kind, value) {
   const { frontmatter, body, hasFm } = splitFile(raw);
   let newBody;
   if (prefix === "mdhead") {
-    newBody = patchHead(body, arg, value);
+    const hashIdx = arg.indexOf("#");
+    if (hashIdx >= 0) {
+      newBody = patchHeadItem(body, arg.slice(0, hashIdx), Number(arg.slice(hashIdx + 1)), String(value));
+    } else {
+      newBody = patchHead(body, arg, value);
+    }
   } else if (prefix === "mdbody") {
     const hashIdx = arg.indexOf("#");
     const text = kind === "rich" ? htmlToMd(value) : String(value);
@@ -185,6 +191,18 @@ function patchHead(body, block, title) {
   );
   if (!re.test(body)) throw new Error(`找不到块标题：${block}`);
   return body.replace(re, (_m, pre, anchor) => `${pre}${title} ${anchor.trimStart()}`);
+}
+
+// 改块内第 i 个 `### 项` 的标题文字（保留 `### ` 前缀）。收单处后，components/crane-types 的
+// name 唯一真源就是这行 ### 标题（渲染与编辑都取它）。
+function patchHeadItem(body, block, i, title) {
+  const lines = body.split(/\r?\n/);
+  const { bodyStart, bodyEnd } = locateBlock(lines, block);
+  const heads = [];
+  for (let k = bodyStart; k < bodyEnd; k++) if (/^###\s+/.test(lines[k])) heads.push(k);
+  if (i < 0 || i >= heads.length) throw new Error(`块 ${block} 没有第 ${i} 个 ### 项`);
+  lines[heads[i]] = `### ${String(title).trim()}`;
+  return lines.join("\n");
 }
 
 // ---------- 块/项定位（行扫描）----------

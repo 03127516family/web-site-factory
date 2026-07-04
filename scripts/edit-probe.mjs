@@ -17,16 +17,9 @@ const norm = (s) => String(s ?? "").replace(/\s+/g, " ").trim();
 
 // ── 棘轮基线：已知未修缺陷（修好后从这里删）────────────────────────────────
 // 命中 test(page,coord) 的 token 失败视为「已知」，不判红；但若它其实通过了，会提示摘除。
-const KNOWN_BROKEN = [
-  {
-    id: "1.8#1 双处结构 name 写回黑洞",
-    test: (page, coord) => /^fm:(components_images|crane_types_images)\.\d+\.name$/.test(coord),
-  },
-  {
-    id: "1.8#2 <p data-field> 槽装列表被拆到坐标外",
-    test: (page, coord) => coord === "mdbody:components#6" && page === "products/overhead-cranes-for-sale",
-  },
-];
+// 1.8#1（name 写回黑洞，坐标改指正文 ### 标题 mdhead:<block>#<i>）与 1.8#2（<p> 槽装列表被拆，
+// 渲染按内容形态改 <div>）已于 2026-07-04 修复并从基线摘除；基线现为空 = 编辑链路零已知缺陷。
+const KNOWN_BROKEN = [];
 const isKnown = (page, coord) => KNOWN_BROKEN.find((k) => k.test(page, coord));
 
 // ── 渲染一份「MD 字符串 → 编辑模式正文 DOM」（纯内存）─────────────────────
