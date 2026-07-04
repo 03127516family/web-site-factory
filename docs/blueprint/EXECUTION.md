@@ -21,6 +21,7 @@
 | 1.2 | 面包屑抽 **fragment**（走查 F4：一次治 5 份拷贝）+ trail 数据化 + 删 RDFa + 清 related 区旧词汇 | geom 双视口 1:1（7 页全量） |
 | 1.3 | 图片闸门：`npm run img` 压缩脚本 + 存量超标图清理（3–4MB 那批） | 全站图达标（08 章规格） |
 | 1.4 | 表单 mock：`INQUIRY_ENDPOINT` 单点常量 + 前端四态（校验/加载/成功/失败）+ honeypot；订阅表单同治；请求协议按 Postmark 函数目标形态定（切真零改造） | 手测四态 |
+| 1.7 | **抛弃 Python**：`serve`/`verify-geom` 的 `python3 -m http.server` 换 Node 静态服务器（总流程②，全栈 Node、无 Python） | check 全绿 |
 | 1.5 | single-girder 切超集模版 + 退役 `product.html`（`overhead-…html` 保留作 geom 基准） | geom 1:1 |
 | 1.6 | 404 页 + favicon 核对 | 人眼过一遍 |
 

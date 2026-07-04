@@ -96,6 +96,13 @@
   4. 未尽项：**1.0b** 其余 5 页按祝圣流程冻结基准后纳入 geom（覆盖 7/7）；verify-geom 的 compose 确认为**功能性差异**保留（A 面须保留 marker 供 [data-block-id] 测量，生产 compose 剥 marker），坑账#4 的同步责任缩小到这一处。
   5. **提请用户**（CLAUDE.md 归你维护，我不改）：CLAUDE.md §5 "MD 自带 slug 与 template"一句已被 `page:` 登记块取代，方便时可自行更新。
 
+- **2026-07-03 ⑰ 定调：缺的是"贯通主轴"，云端产品不是"未来"而是本体（用户强烈反馈）**。用户明确：不要再分析已有文档、要一条从 MD 到访客到多语言到管理的完整系统流程；并补两条硬需求：**MD→HTML 要"AI 能组装、代码也能组装"两条路并存**；**抛弃 Python**（预览/验证换 Node）。承认此前 altitude 错误：把 S3 存储/Lambda/管理软件/云端可见即可编辑/本地同步全推成"M2/M3 触发式未来"，而这些正是用户要的本体。**动作**：
+  1. 新增 [00-系统总流程](00-系统总流程.md) 作为**主轴**（README 置顶必读）：按用户列的顺序 ①原料→MD ②MD→HTML(引擎/AI 两路) ③SEO ④多语言+发布(S3 三平面+CloudFront) ⑤访问 ⑥可见即可编辑(云端往返: browser→API→edit-save Lambda→patchMarkdown→草稿→预览→publish) ⑦同步其他语言(i18n-diff+translate) ⑧管理软件(SPA+Cognito+API+DynamoDB) 逐段落地，含 S3 桶/路径规范 + 9 个 Lambda 清单 + 现有内核如何原样打包成 Lambda 载荷。
+  2. **B 路（AI 组装 HTML）正式恢复**为"新页族/特殊版式"的合法组装器（此前封存），铁律=产物带同套 marker、过 validateBlocks+geom，故 AI 组的页也能被引擎重渲、被编辑器编辑。
+  3. **抛弃 Python** 进执行队列。
+  4. 存储真相模型钉定：git=源真相+版本；S3 三平面=drafts(草稿)/web(发布,CF源)/media(媒体)；DynamoDB=非真相的运营元数据(任务/锁/缓存)，页面列表从 content 目录派生（呼应 F1）。
+  5. 红线不变：纸上设计不碰真实 AWS 账号，建资源须用户明示授权。
+
 ---
 
 ## 待拍板清单（阻塞项，按顺序）
