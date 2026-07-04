@@ -83,6 +83,7 @@ export function renderBodyFromString(templateHtml, raw, opts = {}, srcLabel = "<
   const { data, coords } = buildData(fm, blocks);
 
   const root = parseHtml(templateHtml, { comment: true });
+  validateRequired(root, data, srcLabel); // 必填字段缺数据即报错，不许退模版占位（与 validateBlocks 同哲学）
   pruneOptional(root, data);
   expandRepeats(root, data, editMode);
   fillFields(root, data, editMode, coords);
@@ -362,6 +363,35 @@ function resolveImg(value) {
   if (!value) return value;
   if (/^(https?:)?\//.test(value)) return value; // 已是绝对路径/URL
   return IMG_BASE + value;
+}
+
+// 必填校验：模版自声明 `data-required` 的点，MD 必须给数据，否则抛错中止（不许退模版占位符）。
+// marker 驱动、不认字段名（§2）：与 data-optional 互为反义——可选(缺→删段) ↔ 必填(缺→报错)。
+//   · data-required 挂在 data-repeat 容器 → 其 backing 数组须非空（如面包屑 trail）；
+//   · data-required 挂在普通 data-field → resolve(data,path) 须有非空值（如 breadcrumb.current、h1 title）。
+// 起因：面包屑 trail/current 缺失时会静默出占位「首页 > 当前页」上线（1.2 走查发现）。
+function validateRequired(root, data, mdPath) {
+  const errors = [];
+  for (const el of root.querySelectorAll("[data-required]")) {
+    const repeatName = el.getAttribute("data-repeat");
+    if (repeatName) {
+      const arr = REPEATS[repeatName]?.array(data);
+      if (!Array.isArray(arr) || arr.length === 0)
+        errors.push(`必填重复区 data-repeat="${repeatName}"：MD 缺对应数组或为空`);
+      continue;
+    }
+    const path = el.getAttribute("data-field");
+    if (!path) continue;
+    const v = resolve(data, path);
+    if (v === undefined || v === null || v === "")
+      errors.push(`必填字段 data-field="${path}"：MD 无值（不许退模版占位）`);
+  }
+  if (errors.length) {
+    throw new Error(
+      `[必填校验失败] ${mdPath}\n  - ${errors.join("\n  - ")}\n` +
+        `（模版用 data-required 声明了这些点必须由 MD 提供；补齐对应 frontmatter/正文即可。）`,
+    );
+  }
 }
 
 function pruneOptional(root, data) {

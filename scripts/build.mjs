@@ -67,22 +67,18 @@ function jsonLdFor(page, fm, url, img) {
           brand: { "@type": "Brand", name: "DGCRANE" },
           ...(img ? { image: img } : {}),
         };
-  // BreadcrumbList 从 MD 的 breadcrumb.trail（祖先链，含首页）+ current 同源派生，出完整 N 级——
-  // 与页面可见面包屑同一份数据（1.2：trail 数据化后不再硬编两级）。
+  // 面包屑 JSON-LD 先两级（首页 > 当前页）：中间分类页尚未迁入，trail 中段 URL 会指向死链，
+  // 结构化数据不该断言 404（决策⑭.3）。可见面包屑仍出完整 trail（其中段死链是既有问题，随 B3 解）；
+  // B3 分类页迁入后，这里改读完整 trail 升三级。首页项取 trail[0]（即 首页/zh/），与可见面包屑同源。
   const trail = Array.isArray(fm?.breadcrumb?.trail) ? fm.breadcrumb.trail : [];
-  const itemListElement = trail.map((t, i) => ({
-    "@type": "ListItem",
-    position: i + 1,
-    name: t.label,
-    item: t.url,
-  }));
-  itemListElement.push({
-    "@type": "ListItem",
-    position: trail.length + 1,
-    name: fm?.breadcrumb?.current || name,
-    item: url,
-  });
-  const breadcrumb = { "@type": "BreadcrumbList", itemListElement };
+  const home = trail[0] || { label: "首页", url: SITE_BASE };
+  const breadcrumb = {
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: home.label, item: home.url },
+      { "@type": "ListItem", position: 2, name: fm?.breadcrumb?.current || name, item: url },
+    ],
+  };
   return { "@context": "https://schema.org", "@graph": [entity, breadcrumb] };
 }
 
