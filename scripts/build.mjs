@@ -157,15 +157,16 @@ export async function composePage(page, opts = {}) {
   const footer = await readFile(p("src/fragments/footer.html"), "utf8");
   const inquiryForm = await readFile(p("src/fragments/inquiry-form.html"), "utf8");
   const breadcrumb = await readFile(p("src/fragments/breadcrumb.html"), "utf8");
+  const photoswipe = await readFile(p("src/fragments/photoswipe.html"), "utf8");
   let body = await readFile(p(page.template), "utf8");
 
   // {{BREADCRUMB}} 必须在渲染器之前注入——它自带 data-repeat/data-field，要由引擎按 MD 填值；
-  // {{INQUIRY_FORM}} 是静态片段（无 marker），渲染器不碰，之后注入即可。
+  // {{INQUIRY_FORM}}/{{PHOTOSWIPE}} 是静态 chrome 片段（无 marker），渲染器不碰，之后注入即可。
   body = body.replace("{{BREADCRUMB}}", () => breadcrumb);
   if (page.content) {
     body = await renderBodyFromMarkdown(body, p(page.content), { editMode: opts.editMode === true });
   }
-  body = body.replace("{{INQUIRY_FORM}}", () => inquiryForm);
+  body = body.replace("{{INQUIRY_FORM}}", () => inquiryForm).replace("{{PHOTOSWIPE}}", () => photoswipe);
 
   const fm = page.content ? await readFrontmatter(p(page.content)) : {};
   let html = layout

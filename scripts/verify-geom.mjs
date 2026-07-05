@@ -141,9 +141,10 @@ async function main() {
     tplB = tplB.replace("{{BREADCRUMB}}", () => breadcrumb);
     let bodyA = await renderBodyFromMarkdown(tpl, p(pg.content));
     const inquiryForm = await readFile(p("src/fragments/inquiry-form.html"), "utf8");
+    const photoswipe = await readFile(p("src/fragments/photoswipe.html"), "utf8");
     // 与 build.mjs::composePage 同步：无 baseline 时 tplB === tpl 本身也带 marker；有 baseline（原站静态页）则本来就没有 marker，replace 是无害空操作。
-    bodyA = bodyA.replace("{{INQUIRY_FORM}}", () => inquiryForm);
-    tplB = tplB.replace("{{INQUIRY_FORM}}", () => inquiryForm);
+    bodyA = bodyA.replace("{{INQUIRY_FORM}}", () => inquiryForm).replace("{{PHOTOSWIPE}}", () => photoswipe);
+    tplB = tplB.replace("{{INQUIRY_FORM}}", () => inquiryForm).replace("{{PHOTOSWIPE}}", () => photoswipe);
     await writeFile(p(`dist/_geomA_${pg.name}.html`), await compose(bodyA), "utf8");
     await writeFile(p(`dist/_geomB_${pg.name}.html`), await compose(tplB), "utf8");
   }
