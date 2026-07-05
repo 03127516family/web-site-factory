@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { pages, composePage, seoHead, sitemapXml, SITE_BASE } from "./build.mjs";
+import { pages, composePage, seoHead, sitemapXml, SITE_BASE, pageUrl, i18nGroups } from "./build.mjs";
 
 test("all registered pages declare their generation mode and type", () => {
   assert.ok(pages.length > 0);
@@ -60,11 +60,41 @@ test("SEO head: canonical unique, OG present, JSON-LD parses (product + post)", 
 test("sitemapXml derives from registry (same-source, no page left out)", () => {
   const entries = pages
     .filter((page) => (page.mode || "render") === "render")
-    .map((page) => ({ loc: SITE_BASE + page.slug + "/", lastmod: "2026-07-03" }));
+    .map((page) => ({ loc: pageUrl(page), lastmod: "2026-07-03" }));
   const xml = sitemapXml(entries);
   assert.equal((xml.match(/<url>/g) || []).length, pages.length, "sitemap 条数 = 登记页面数");
-  for (const page of pages) assert.ok(xml.includes(`${SITE_BASE}${page.slug}/`), page.slug);
+  for (const page of pages) assert.ok(xml.includes(pageUrl(page)), page.slug);
   assert.match(xml, /^<\?xml version="1\.0" encoding="UTF-8"\?>/);
+});
+
+test("i18n pilot: en mirror registered, hreflang symmetric pair, per-lang canonical (决策㉘)", async () => {
+  const zh = pages.find((c) => c.slug === "posts/5-ton-overhead-crane");
+  const en = pages.find((c) => c.slug === "en/posts/5-ton-overhead-crane");
+  assert.ok(zh && en, "镜像对必须都登记");
+  assert.equal(en.lang, "en");
+  assert.equal(en.langDir, "en");
+  assert.equal(zh.i18nKey, en.i18nKey, "镜像文件名 = 配对键");
+  assert.equal(i18nGroups.get(zh.i18nKey).length, 2);
+
+  // en 页 URL 自带 en/ 前缀且不落 /zh/；zh 页保持 /zh/ base
+  assert.equal(pageUrl(en), "https://www.dgcrane.com/en/posts/5-ton-overhead-crane/");
+  assert.equal(pageUrl(zh), `${SITE_BASE}posts/5-ton-overhead-crane/`);
+
+  const zhHtml = await composePage(zh);
+  const enHtml = await composePage(en);
+  for (const [name, html] of [["zh", zhHtml], ["en", enHtml]]) {
+    // hreflang 双向对称（U-4 第①道校验的先声）：两页都声明整组 + x-default 指源语言
+    assert.ok(html.includes(`hreflang="zh-CN" href="${pageUrl(zh)}"`), `${name}: 缺 zh-CN alternate`);
+    assert.ok(html.includes(`hreflang="en" href="${pageUrl(en)}"`), `${name}: 缺 en alternate`);
+    assert.ok(html.includes(`hreflang="x-default" href="${pageUrl(zh)}"`), `${name}: x-default 应指源语言`);
+  }
+  assert.ok(enHtml.includes(`<link rel="canonical" href="${pageUrl(en)}">`), "en canonical 指自己");
+  assert.match(enHtml, /og:locale" content="en_US"/);
+  assert.match(enHtml, /og:locale:alternate" content="zh_CN"/);
+  assert.match(zhHtml, /og:locale" content="zh_CN"/);
+  // 单语言页不得输出 hreflang（自指是噪音）
+  const single = await composePage(pages.find((c) => c.slug === "products/overhead-cranes-for-sale"));
+  assert.ok(!single.includes('hreflang'), "无翻译版本的页面不输出 hreflang");
 });
 
 test("seoHead escapes attribute values", () => {

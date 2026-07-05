@@ -34,6 +34,31 @@ body:
   img_case4: /assets/img/post/5t-case-philippines.jpg
 inquiry_form:
   title: 填写您的详细资料，我们将在24小时内给您答复!
+# 字段版本戳（决策⑳，多语言同步主线）：编辑器改哪个字段，保存链路给哪个 +1（服务端加戳，
+# 试点期为手埋初值）。目标语言 MD 的 i18n.translated_rev 与此逐字段比对，目标戳<源戳=该字段待更新。
+i18n_rev:
+  title: 1
+  page.title: 1
+  page.description: 1
+  breadcrumb.current: 1
+  body.h_types: 1
+  body.h_apps: 1
+  body.h_price: 1
+  body.h_price_custom: 1
+  body.h_factors: 1
+  body.h_compare: 1
+  body.h_cases: 1
+  body.h_conclusion: 1
+  inquiry_form.title: 1
+  lead: 1
+  types: 1
+  apps: 1
+  price: 1
+  price_custom: 1
+  factors: 1
+  compare: 1
+  cases: 1
+  conclusion: 1
 ---
 
 ## 导言 <!--block:lead-->

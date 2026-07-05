@@ -167,6 +167,13 @@
   5. **12 章即时修正 4 处**：§3.0 内容层"随 MD 进 git"→"戳在 MD 里，MD 在哪戳在哪"；§3.1 `source_commit`→`source_version`（本地=commit，产品期=S3 版本 ID）；§3.3 兜底 `git show`→版本化存储接口；§3.10 产品期提供者=S3 版本化拍定（删"或 git 远端"）。
   6. 红线原样：以上全为纸上设计，**不建任何 AWS 资源**。
 
+- **2026-07-04 ㉘ 多语言一页垂直切片试点落地（用户"我还是想看看多语言的生成"；14 章纪律：提前必须显式，此为显式提前，非偷跑 M3）**：
+  1. **范围**：5-ton 文章页一对（zh 源 + en 镜像），链条=烧 en MD → 登记扫语言子目录 → build 出 `/en/` 页 → hreflang 成对 + og:locale → 版本戳 → `i18n:status` 状态报告。**明确不做**：不上线（本地 dist 而已）、编辑器不自动加戳（保存链路服务端加戳属 M3）、语言切换器未接、en 页外壳暂中文 chrome、U-1/U-2 未拍板故翻译时人工保守处理（DGCRANE/LD/LH/QD/HD/FEM/CD/MD 型号一律不译）。
+  2. **落地形态（全在装配层 build.mjs + 内容，引擎 render.mjs/editor.js 零改动——§3.0 判据实证）**：①镜像树=12 章 §3.1（`src/content/en/<同名>.md`，配对键=镜像文件名 `i18nKey`，`raw/` 排除）；②目标语言页 **slug 自带 `<lang>/` 前缀**（URL 即路径：`en/posts/5-ton-overhead-crane`）——registry 唯一性、dist 输出路径、edit-server 路由三处零改动白拿，源语言仍走 /zh/ base（现行 dist→/zh/ 拓扑），M1 拓扑翻转（dist→域名根）时统一；③ `pageUrl(page)` 按 langDir 派生 URL；④ hreflang 组内互指 + **x-default=源语言页**（12 章 §3.7 原文：指默认语言 zh）+ og:locale/og:locale:alternate 按映射；⑤ **deployLangs 闸以常量落地**（sitemap/hreflang 只认闸内语言；**试点期全开 `["zh-CN","en"]` 以便本地看整链，上线前收回 `["zh-CN"]`**，终态归 site.config）；⑥ 版本戳按 ⑳ 手埋初值（zh `i18n_rev` 22 字段 / en `i18n.translated_rev` 镜像），`scripts/i18n-status.mjs`=manifest 最小内核（纯函数只读当前 MD 戳，CLI 与未来后台 API 同内核）。
+  3. **验收实录**：单测 8/8（新增 hreflang 双向对称+单语言页不输出 hreflang 断言=U-4 ①道先声）；probe **533/533**（en 页 +25 坐标全绿——**英文润色开箱即用**，编辑器对 en MD 直接可写回）；geom 两基准页 1:1；hreflang 仅出现在 5-ton 两页（其余 zh 页无漂移）；stale 演示实测：`i18n_rev.types` 1→2 → 状态报告即显 "en: 1 个字段待更新 → types"，复原即回"已同步"。
+  4. **试点暴露的已知债（登记不装死）**：D-1 生产 sitemap 目前会随闸全开收 en URL（上线前随闸收回即消）；D-2 zh/en 双页 dist 拓扑不对称（zh 在根、en 在 `en/`），M1 部署拓扑翻转时统一为 `<lang>/` 对称；D-3 en 页 chrome（导航/页脚/表单体）仍中文，fragments 拆语言目录属启用期第一步（12 章 §3.8）；D-4 语言切换器仍是 header 里的死快照，接真链接与 hreflang 同源（12 章 §3.7）留启用期。
+  5. 试点不改变节奏共识：主线仍是 EXECUTION 阶段 1 收尾 → 阶段 2 搬迁盘点;多语言批量启用仍等英文站拍板 + U-1~U-3 拍板。
+
 ## 待拍板清单（阻塞项，按顺序）
 
 | # | 问题 | 状态 | 阻塞什么 |

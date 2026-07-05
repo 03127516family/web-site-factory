@@ -19,8 +19,20 @@ export const p = (...s) => join(ROOT, ...s);
 // ===== SEO（蓝图 08 章）：全部从登记（=MD frontmatter）同源派生，构建期生成、零运行时 =====
 // 生产 base（决策 2026-07-02：中文站走 /zh/ 子路径）。资产绝对 URL 前缀与部署拓扑绑定
 // （蓝图 07 章"构建侧配套"）——上线联调若拓扑有变，只改这两个常量。
-export const SITE_BASE = "https://www.dgcrane.com/zh/";
+export const SITE_ROOT = "https://www.dgcrane.com/";
+export const SITE_BASE = SITE_ROOT + "zh/";
 const ASSET_BASE = "https://www.dgcrane.com/zh";
+
+// ===== 多语言试点（决策㉘ 显式提前；机制=蓝图 12 章） =====
+// deployLangs 闸（㉖）：对外语言清单——sitemap/hreflang 只认列内语言。试点期全开以便
+// 本地看整链；上线前收回为 ["zh-CN"]（en 对外=整站切换日）；终态此值归 site.config。
+const DEPLOY_LANGS = ["zh-CN", "en"];
+const OG_LOCALE = { "zh-CN": "zh_CN", en: "en_US", "en-US": "en_US" };
+const ogLocale = (lang) => OG_LOCALE[lang] || lang.replace("-", "_");
+
+// 页面绝对 URL：源语言（内容根目录）走 /zh/ base（现行部署拓扑 dist→/zh/）；
+// 目标语言 slug 自带 "<lang>/" 前缀（URL 即路径）。M1 拓扑翻转（dist→域名根）时统一。
+export const pageUrl = (page) => (page.langDir ? SITE_ROOT + page.slug + "/" : SITE_BASE + page.slug + "/");
 
 const escAttr = (s = "") =>
   String(s).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;");
@@ -85,17 +97,35 @@ function jsonLdFor(page, fm, url, img) {
 // 每页 SEO head 块（替换 layout 的 {{SEO}}）。meta description 已由 {{DESCRIPTION}} 输出，
 // 此处不重复；canonical 每页恰一个。
 export function seoHead(page, fm) {
-  const url = SITE_BASE + page.slug + "/";
+  const url = pageUrl(page);
   const imgPath = ogImagePath(page, fm);
   const img = imgPath ? ASSET_BASE + imgPath : null;
   const ld = JSON.stringify(jsonLdFor(page, fm, url, img)).replaceAll("<", "\\u003c");
+  // hreflang 成对生成（12 章 §3.7）：同翻译组、且在 deployLangs 闸内的语言互指；
+  // x-default 指源语言页（默认语言 zh）。组内只有自己 → 不输出（单语言页自指是噪音）。
+  const siblings = (i18nGroups.get(page.i18nKey) || []).filter((m) => DEPLOY_LANGS.includes(m.lang));
+  const hreflang =
+    siblings.length > 1
+      ? [
+          ...siblings.map((m) => `<link rel="alternate" hreflang="${m.lang}" href="${pageUrl(m)}">`),
+          `<link rel="alternate" hreflang="x-default" href="${pageUrl(siblings.find((m) => !m.langDir) || siblings[0])}">`,
+        ]
+      : [];
+  const localeAlternates =
+    siblings.length > 1
+      ? siblings
+          .filter((m) => m.lang !== page.lang)
+          .map((m) => `<meta property="og:locale:alternate" content="${ogLocale(m.lang)}">`)
+      : [];
   return [
     `<link rel="canonical" href="${url}">`,
+    ...hreflang,
     `<meta property="og:type" content="${page.type === "post" ? "article" : "product"}">`,
     `<meta property="og:title" content="${escAttr(page.title)}">`,
     `<meta property="og:description" content="${escAttr(page.description)}">`,
     `<meta property="og:url" content="${url}">`,
-    `<meta property="og:locale" content="zh_CN">`,
+    `<meta property="og:locale" content="${ogLocale(page.lang)}">`,
+    ...localeAlternates,
     ...(img ? [`<meta property="og:image" content="${escAttr(img)}">`] : []),
     `<script type="application/ld+json">${ld}</script>`,
   ].join("\n  ");
@@ -127,12 +157,21 @@ function contentLastmod(page) {
 async function loadPages() {
   const dir = p("src/content");
   const entries = await readdir(dir, { withFileTypes: true });
-  const files = entries
-    .filter((entry) => entry.isFile() && entry.name.endsWith(".md"))
-    .map((entry) => entry.name)
-    .sort();
+  const files = [];
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name.endsWith(".md")) files.push({ name: entry.name, langDir: null });
+    // 语言镜像子目录（12 章 §3.1 镜像树）：src/content/<lang>/<同名文件>.md = 同一逻辑页的
+    // 目标语言版，配对键 = 镜像文件名（i18nKey）。raw/ 是裸文章原料目录，不是语言。
+    else if (entry.isDirectory() && entry.name !== "raw") {
+      for (const sub of await readdir(join(dir, entry.name), { withFileTypes: true })) {
+        if (sub.isFile() && sub.name.endsWith(".md"))
+          files.push({ name: `${entry.name}/${sub.name}`, langDir: entry.name });
+      }
+    }
+  }
+  files.sort((a, b) => (a.name < b.name ? -1 : 1));
   const list = [];
-  for (const name of files) {
+  for (const { name, langDir } of files) {
     const raw = await readFile(join(dir, name), "utf8");
     const matched = /^---\r?\n([\s\S]*?)\r?\n---/.exec(raw);
     if (!matched) throw new Error(`src/content/${name}: 缺 frontmatter`);
@@ -141,12 +180,28 @@ async function loadPages() {
     for (const key of ["slug", "type", "lang", "title", "description", "template"]) {
       if (!reg[key]) throw new Error(`src/content/${name}: page.${key} 缺失`);
     }
-    list.push({ ...reg, mode: reg.mode || "render", content: `src/content/${name}` });
+    if (langDir && !reg.slug.startsWith(langDir + "/"))
+      throw new Error(`src/content/${name}: 目标语言页 slug 须以 "${langDir}/" 开头（URL 即路径），现为 "${reg.slug}"`);
+    list.push({
+      ...reg,
+      mode: reg.mode || "render",
+      content: `src/content/${name}`,
+      langDir, // null=源语言（根目录=权威位）；"en" 等=目标语言镜像
+      i18nKey: name.split("/").pop().replace(/\.md$/, ""), // 镜像文件名 = 跨语言配对键
+    });
   }
   if (list.length === 0) throw new Error("src/content/ 下没有任何已登记页面");
   return list.sort((a, b) => (a.slug < b.slug ? -1 : 1));
 }
 export const pages = await loadPages();
+
+// 翻译组索引：i18nKey → 该逻辑页的全部语言版本（12 章 §3.1.1 manifest 的最小内核）。
+export const i18nGroups = new Map();
+for (const pg of pages) {
+  const group = i18nGroups.get(pg.i18nKey) || [];
+  group.push(pg);
+  i18nGroups.set(pg.i18nKey, group);
+}
 
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
 // 注入编辑器资源（window.__EDIT__ + editor.css + editor.js）。生产 build 不传 opts，产出干净。
@@ -205,7 +260,9 @@ async function build() {
     await mkdir(dirname(out), { recursive: true });
     await writeFile(out, html, "utf8");
     console.log("built", page.slug + "/index.html", `(${html.length} bytes)`);
-    sitemapEntries.push({ loc: SITE_BASE + page.slug + "/", lastmod: contentLastmod(page) });
+    // sitemap 只收 deployLangs 闸内语言（㉖：未对外语言可建、可预览、不进 sitemap）
+    if (DEPLOY_LANGS.includes(page.lang))
+      sitemapEntries.push({ loc: pageUrl(page), lastmod: contentLastmod(page) });
   }
 
   await writeFile(p("dist", "sitemap.xml"), sitemapXml(sitemapEntries), "utf8");
