@@ -1,0 +1,75 @@
+<!--
+  post@1 自声明模版 —— 5吨桥式起重机终极指南（从裸调研稿烧制）
+  规则见 CLAUDE.md §9（切块→判形→命名，全从本文 derive）/ 决策 2026-06-29：布局=AI 烧的死骨架；
+  值走 MD（body.*→fm:、## 块→mdbody:）。★ 每个正文块须是 .craneinfo 直接子节点。
+  chrome（toptitle/craneinfo 外壳/询盘/photoswipe/TOC）按 §9⑤ 从现成 post 产物页逐字复用。
+-->
+
+<!-- ============ 蓝底标题横幅：面包屑 + 标题 ============ -->
+<div class="toptitle">
+	<div class="wrap">
+		<div class="title">
+			{{BREADCRUMB}}
+			<h1 data-field="title" data-required>5吨桥式起重机终极指南：类型、价格与应用</h1>
+		</div>
+	</div>
+</div>
+
+<!-- ============ 文章正文：左 TOC + 右正文（float 两栏） ============ -->
+<div id="Topics">
+	<div class="TopicsInfo wrap">
+		<div class="craneinfo">
+
+			<div id="rank-math-toc" class="wp-block-rank-math-toc-block">
+				<p>目录</p>
+				<nav><ul></ul></nav>
+			</div>
+
+			<!-- 导言 -->
+			<div data-field="lead.body" data-edit="rich"><p>在现代工业生产与物料搬运中，5吨桥式起重机是应用最广泛的中型起重设备之一……</p></div>
+
+			<!-- H2 类型 -->
+			<h2 id="types" class="wp-block-heading" data-field="body.h_types" data-edit="text">5吨桥式起重机的类型</h2>
+			<figure class="wp-block-image size-full"><img data-field="body.img_types" data-edit="image" alt="5吨桥式起重机类型总览" width="880" height="495" /></figure>
+			<div data-field="types.body" data-edit="rich"><p>以下是常见的5吨桥式起重机类型……</p></div>
+
+			<!-- H2 应用行业 -->
+			<h2 id="applications" class="wp-block-heading" data-field="body.h_apps" data-edit="text">5吨桥式起重机的常见应用行业</h2>
+			<div data-field="apps.body" data-edit="rich"><p>5吨桥式起重机因其结构灵活、承载适中、操作便捷……</p></div>
+
+			<!-- H2 价格 -->
+			<h2 id="price" class="wp-block-heading" data-field="body.h_price" data-edit="text">5吨桥式起重机价格</h2>
+			<div data-field="price.body" data-edit="rich"><p>了解5吨桥式起重机的价格是选择合适设备的关键……</p></div>
+
+			<!-- H2 定制价格案例 -->
+			<h2 id="price-custom" class="wp-block-heading" data-field="body.h_price_custom" data-edit="text">定制化5吨桥式起重机价格案例</h2>
+			<div data-field="price_custom.body" data-edit="rich"><p>案例一：电磁桥式起重机……</p></div>
+
+			<!-- H2 影响因素 -->
+			<h2 id="factors" class="wp-block-heading" data-field="body.h_factors" data-edit="text">影响价格的主要因素</h2>
+			<div data-field="factors.body" data-edit="rich"><p>起重能力与跨度、起升机构类型……</p></div>
+
+			<!-- H2 类型对比 -->
+			<h2 id="comparison" class="wp-block-heading" data-field="body.h_compare" data-edit="text">5吨桥式起重机各类型对比</h2>
+			<div data-field="compare.body" data-edit="rich"><p>根据不同厂房结构、净空高度、使用频率及预算要求……</p></div>
+
+			<!-- H2 矿山案例 -->
+			<h2 id="cases" class="wp-block-heading" data-field="body.h_cases" data-edit="text">矿山案例</h2>
+			<div data-field="cases.body" data-edit="rich"><p>5吨 FEM 单梁桥式起重机出口印度尼西亚……</p></div>
+
+			<!-- H2 结论 -->
+			<h2 id="conclusion" class="wp-block-heading" data-field="body.h_conclusion" data-edit="text">结论</h2>
+			<div data-field="conclusion.body" data-edit="rich"><p>5吨桥式起重机作为现代工业生产中的核心设备……</p></div>
+
+		</div><!-- /.craneinfo -->
+	</div><!-- /.TopicsInfo -->
+</div><!-- /#Topics -->
+
+<!-- ============ 询盘表单（复用共享 fragment） ============ -->
+<section data-block-id="inquiry-form" class="post-inquiry wrap" id="from-single">
+	<h3 data-field="inquiry_form.title">填写您的详细资料，我们将在24小时内给您答复!</h3>
+	{{INQUIRY_FORM}}
+</section>
+
+<!-- ============ photoswipe 灯箱（chrome，逐字复用） ============ -->
+{{PHOTOSWIPE}}
