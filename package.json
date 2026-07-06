@@ -13,6 +13,7 @@
     "verify:geom": "node --experimental-websocket scripts/verify-geom.mjs",
     "edit:probe": "node scripts/edit-probe.mjs",
     "i18n:status": "node scripts/i18n-status.mjs",
+    "i18n:touch": "node scripts/i18n-touch.mjs",
     "check": "node --test scripts/ && npm run edit:probe && npm run verify:geom",
     "prepare": "git config core.hooksPath .githooks || true"
   },

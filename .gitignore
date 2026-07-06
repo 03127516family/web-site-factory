@@ -2,3 +2,4 @@ node_modules/
 dist/
 .worktrees/
 .DS_Store
+.i18n-events.jsonl
