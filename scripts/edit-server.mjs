@@ -8,6 +8,7 @@ import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize } from "node:path";
 import { pages, composePage, p } from "./build.mjs";
 import { patchMarkdown, arrayOp } from "./md-write.mjs";
+import { stampOnSave } from "./i18n-touch.mjs";
 
 const PORT = process.env.EDIT_PORT ? Number(process.env.EDIT_PORT) : 8081;
 const PUBLIC = p("public");
@@ -102,8 +103,12 @@ const server = createServer(async (req, res) => {
       if (typeof coord !== "string" || typeof value !== "string")
         return send(res, 400, JSON.stringify({ ok: false, error: "参数缺失" }), MIME[".json"]);
       await patchMarkdown(p(page.content), coord, kind, value);
-      console.log(`saved ${slug}  ${coord} (${kind})`);
-      return send(res, 200, JSON.stringify({ ok: true }), MIME[".json"]);
+      // 保存链路自动加戳（决策⑳ 主线：编辑事件即同步信号；本地 edit-server = M3 edit-save
+      // Lambda 的本地形态）。源语言页某字段被存 → i18n_rev 该字段 +1 + 记事件；目标语言页/
+      // 未追踪字段静默 no-op。editor.js 零改动——加戳纯属服务端职责。
+      const stamped = await stampOnSave(page, coord);
+      console.log(`saved ${slug}  ${coord} (${kind})${stamped ? `  ⟳ i18n_rev.${stamped.field}=${stamped.to}` : ""}`);
+      return send(res, 200, JSON.stringify({ ok: true, stamped }), MIME[".json"]);
     }
 
     if (req.method === "POST" && path === "/api/array-op") {

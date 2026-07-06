@@ -39,16 +39,56 @@ function fieldValue(doc, key) {
   return doc.blocks[key]; // 正文块
 }
 
-// 在 frontmatter 的 i18n_rev 段内，把某字段的戳 +1（只动这一段，避免误伤同名行）
-function bumpStamp(text, key, from) {
-  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)[1];
+// 在 frontmatter 的 i18n_rev 段内，把某字段的戳 +1（只动这一段，避免误伤同名行）。
+// 自读当前值，返回 { text, bumped, to }。字段不在 i18n_rev（如共享图/chrome）→ 原样返回。
+export function bumpStampInText(text, key) {
+  const fmMatch = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
+  if (!fmMatch) return { text, bumped: false };
+  const fm = fmMatch[1];
   const start = fm.search(/^i18n_rev:/m);
+  if (start === -1) return { text, bumped: false }; // 该页没有翻译设置
   const after = fm.slice(start).search(/\n(?=\S)/); // i18n_rev 段到下一个顶格键为止
   const end = after === -1 ? fm.length : start + after;
   const region = fm.slice(start, end);
   const esc = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const bumped = region.replace(new RegExp(`^(\\s+${esc}:\\s*)${from}\\s*$`, "m"), `$1${from + 1}`);
-  return text.replace(region, bumped);
+  const re = new RegExp(`^(\\s+${esc}:\\s*)(\\d+)\\s*$`, "m");
+  const m = re.exec(region);
+  if (!m) return { text, bumped: false }; // 该字段未被 i18n_rev 追踪
+  const to = Number(m[2]) + 1;
+  return { text: text.replace(region, region.replace(re, `$1${to}`)), bumped: true, to };
+}
+
+// 编辑坐标 → i18n_rev 字段名：剥前缀（fm:/mdbody:/mdhead:）与重复项后缀（#n）。
+// 与 fieldValue 的字段语义对称（点路径 frontmatter / 裸名 ## 块）。
+export function coordToField(coord) {
+  return coord.replace(/^(fm|mdbody|mdhead):/, "").replace(/#\d+$/, "");
+}
+
+function gitActor() {
+  try {
+    return execSync("git config user.name", { cwd: ROOT, encoding: "utf8" }).trim() || "unknown";
+  } catch {
+    return "unknown";
+  }
+}
+
+// 追加一条字段级事件到本地 .i18n-events.jsonl（= M3 事件日志的本地预览；持久底账仍是 git 提交）
+export async function logEvent(slug, action, fields) {
+  const entry = { ts: new Date().toISOString(), actor: gitActor(), slug, action, fields };
+  await appendFile(p(".i18n-events.jsonl"), JSON.stringify(entry) + "\n", "utf8");
+}
+
+// 编辑器保存链路调用：源语言页某坐标被保存 → 给对应字段加戳 + 记事件。
+// 目标语言页编辑=人工润色（§3.5），不动源戳；无翻译设置/字段未追踪=静默 no-op。
+export async function stampOnSave(page, coord) {
+  if (page.langDir) return null; // 目标语言页：人工润色，不加源戳
+  const field = coordToField(coord);
+  const text = await readFile(p(page.content), "utf8");
+  const { text: out, bumped, to } = bumpStampInText(text, field);
+  if (!bumped) return null;
+  await writeFile(p(page.content), out, "utf8");
+  await logEvent(page.slug, "source-edit", [field]);
+  return { field, to };
 }
 
 export async function touch(slug) {
@@ -80,23 +120,10 @@ export async function touch(slug) {
   }
 
   let out = working;
-  for (const key of changed) out = bumpStamp(out, key, curRev[key]);
-  if (changed.length) await writeFile(p(rel), out, "utf8");
-
-  // 追加字段级事件（本地 .i18n-events.jsonl = M3 事件日志的本地预览；持久底账仍是 git 提交）
+  for (const key of changed) out = bumpStampInText(out, key).text;
   if (changed.length) {
-    let actor = "unknown";
-    try {
-      actor = execSync("git config user.name", { cwd: ROOT, encoding: "utf8" }).trim() || actor;
-    } catch { /* 无 git 身份时留 unknown */ }
-    const entry = {
-      ts: new Date().toISOString(),
-      actor,
-      slug: page.slug,
-      action: "source-edit",
-      fields: changed,
-    };
-    await appendFile(p(".i18n-events.jsonl"), JSON.stringify(entry) + "\n", "utf8");
+    await writeFile(p(rel), out, "utf8");
+    await logEvent(page.slug, "source-edit", changed);
   }
   return { slug: page.slug, changed };
 }
