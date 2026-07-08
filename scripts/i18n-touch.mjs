@@ -1,16 +1,18 @@
-// i18n:touch —— 过渡期"改完自动加戳"的那根线（决策⑳ 的 git 兜底路径 §3.3 的本地实体）。
-// 产品期由编辑器保存链路在写值那一刻加戳（M3）；本地期编辑器还没接自动加戳，于是用
-// git 这个现成的"修改日志"补：比对工作区 vs HEAD，认出源 MD 里哪些【字段】变了，给
-// 对应的 i18n_rev 戳 +1，并追加一条【字段级事件】到 .i18n-events.jsonl（= M3 DynamoDB
-// 事件日志的本地预览）。一次检测，两个产物：喂戳（状态）+ 留痕（历史），不互相抢答。
+// i18n:touch —— 过渡期"改完自动加戳"的那根线（决策⑳ 的兜底路径 §3.3 的本地实体）。
+// 产品期由编辑器保存链路在写值那一刻加戳（M3）；本地期编辑器绕过时（直接在文本编辑器改 MD）
+// 用它补加戳。**基准不取 git**（决策㉗：git 只是代码仓、非内容真相）——改取【MD 自存指纹】：
+// frontmatter 里 i18n_fp.<字段> 存「上次抬戳时该字段值的指纹」，touch 重算当前指纹逐字段比对，
+// 变了的给 i18n_rev +1、并把指纹刷到当前，另追加一条【字段级事件】到 .i18n-events.jsonl
+//（= M3 DynamoDB 事件日志的本地预览）。一次检测，两个产物：喂戳（状态）+ 留痕（历史）。
+// 不变式：i18n_fp[字段] == 上次 i18n_rev 抬戳时刻的字段值指纹（stampOnSave 与 touch 共同维护）。
 //
 // 用法：node scripts/i18n-touch.mjs <slug|文件名>   （改完中文、翻译英文之前跑）
-// 基准 = git HEAD（上次提交）：所以工作流是「改 → touch → 处理英文 → 一起 commit」，
-// commit 后基准重置。已提交但没 touch 的改动它看不到（编辑器被绕过的已知局限，同 §3.3）。
+// 首次运行（无 i18n_fp）= 只落基准指纹、不抬戳；此后 touch 幂等（同内容再跑不重复加戳）。
 import { readFile, writeFile, appendFile } from "node:fs/promises";
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
-import { parse as parseYaml } from "yaml";
+import { parse as parseYaml, parseDocument } from "yaml";
 import { pages, p, ROOT } from "./build.mjs";
 
 // 把一份 MD 文本解析成 { fm(frontmatter 对象), blocks(块KEY→正文文本) }
@@ -64,6 +66,27 @@ export function coordToField(coord) {
   return coord.replace(/^(fm|mdbody|mdhead):/, "").replace(/#\d+$/, "");
 }
 
+// 字段值 → 短指纹（sha1 前 12 位）。入参用 fieldValue 的产出（已按同一套字段语义归一化），
+// 故指纹的"值"定义与渲染/编辑/戳完全一致，不另立规则。
+function fp(value) {
+  const s = typeof value === "string" ? value : JSON.stringify(value ?? "");
+  return createHash("sha1").update(s).digest("hex").slice(0, 12);
+}
+
+// 把一批字段指纹写进 frontmatter 的 i18n_fp 段（无则新建；扁平点键，镜像 i18n_rev 结构）。
+// 走 YAML CST 往返（保留注释/flow 风格，lineWidth:0 保持 flow 映射单行、diff 干净），与
+// md-write::patchFrontmatter 同一手法。setIn 用显式二元路径 → "body.h_cases" 当字面键不被点拆。
+function writeFingerprints(text, fpMap) {
+  const keys = Object.keys(fpMap);
+  if (!keys.length) return text;
+  const m = /^(---\r?\n)([\s\S]*?)(\r?\n---)/.exec(text);
+  if (!m) return text;
+  const doc = parseDocument(m[2]);
+  for (const k of keys) doc.setIn(["i18n_fp", k], fpMap[k]);
+  const fmText = doc.toString({ lineWidth: 0 }).replace(/\n$/, "");
+  return m[1] + fmText + m[3] + text.slice(m[0].length);
+}
+
 function gitActor() {
   try {
     return execSync("git config user.name", { cwd: ROOT, encoding: "utf8" }).trim() || "unknown";
@@ -72,7 +95,7 @@ function gitActor() {
   }
 }
 
-// 追加一条字段级事件到本地 .i18n-events.jsonl（= M3 事件日志的本地预览；持久底账仍是 git 提交）
+// 追加一条字段级事件到本地 .i18n-events.jsonl（= M3 事件日志的本地预览；产品期底账 = DynamoDB，非 git）
 export async function logEvent(slug, action, fields) {
   const entry = { ts: new Date().toISOString(), actor: gitActor(), slug, action, fields };
   await appendFile(p(".i18n-events.jsonl"), JSON.stringify(entry) + "\n", "utf8");
@@ -115,8 +138,11 @@ export async function stampOnSave(page, coord) {
   if (page.langDir) return null; // 目标语言页：人工润色，不加源戳
   const field = coordToField(coord);
   const text = await readFile(p(page.content), "utf8");
-  const { text: out, bumped, to } = bumpStampInText(text, field);
+  const { text: bumpedText, bumped, to } = bumpStampInText(text, field);
   if (!bumped) return null;
+  // 抬戳的同时把该字段指纹刷到当前值（此刻文件已被 patchMarkdown 写入新值）——维护不变式，
+  // 否则事后 touch 会把这次编辑器改动再判一次「变了」→ 重复抬戳。
+  const out = writeFingerprints(bumpedText, { [field]: fp(fieldValue(parseDoc(bumpedText), field)) });
   await writeFile(p(page.content), out, "utf8");
   await logEvent(page.slug, "source-edit", [field]);
   return { field, to };
@@ -131,32 +157,27 @@ export async function touch(slug) {
 
   const rel = page.content; // src/content/....md（repo 相对）
   const working = await readFile(p(rel), "utf8");
-  let headText;
-  try {
-    headText = execSync(`git show HEAD:"${rel}"`, { cwd: ROOT, encoding: "utf8" });
-  } catch {
-    throw new Error(`${rel} 在 HEAD 中不存在（新文件）——首次翻译不需要 touch，直接翻即可`);
-  }
-
   const cur = parseDoc(working);
-  const head = parseDoc(headText);
   const curRev = cur.fm.i18n_rev || {};
-  const headRev = head.fm.i18n_rev || {};
+  const storedFp = cur.fm.i18n_fp || {}; // 基准 = MD 自存指纹（决策㉗：不取 git）
+  const firstRun = Object.keys(storedFp).length === 0;
 
   const changed = [];
+  const fpUpdates = {};
   for (const key of Object.keys(curRev)) {
-    if (fieldValue(cur, key) === fieldValue(head, key)) continue; // 内容没变
-    if ((curRev[key] ?? 0) > (headRev[key] ?? 0)) continue; // 已经 touch 过（幂等）
-    changed.push(key);
+    const now = fp(fieldValue(cur, key) ?? "");
+    fpUpdates[key] = now; // 总把指纹刷到当前值
+    if (storedFp[key] === undefined) continue; // 无基线（首次/新增字段）：只落基准、不判改
+    if (storedFp[key] === now) continue; // 指纹一致 = 内容自上次抬戳未变
+    changed.push(key); // 指纹变了 = 内容被改过
   }
 
   let out = working;
-  for (const key of changed) out = bumpStampInText(out, key).text;
-  if (changed.length) {
-    await writeFile(p(rel), out, "utf8");
-    await logEvent(page.slug, "source-edit", changed);
-  }
-  return { slug: page.slug, changed };
+  for (const key of changed) out = bumpStampInText(out, key).text; // 变了的字段 i18n_rev +1
+  out = writeFingerprints(out, fpUpdates); // 刷新全部指纹（含首次 baseline）→ 保证幂等
+  if (out !== working) await writeFile(p(rel), out, "utf8");
+  if (changed.length) await logEvent(page.slug, "source-edit", changed);
+  return { slug: page.slug, changed, baselined: firstRun };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
@@ -165,9 +186,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error("用法：node scripts/i18n-touch.mjs <slug|文件名>");
     process.exit(1);
   }
-  const { slug: full, changed } = await touch(slug);
-  if (!changed.length) {
-    console.log(`○ ${full}：源内容相对 HEAD 无字段变化（或已 touch 过），未加戳`);
+  const { slug: full, changed, baselined } = await touch(slug);
+  if (baselined) {
+    console.log(`◆ ${full}：首次运行，已落基准指纹 i18n_fp（未抬戳）——此后改内容再 touch 即检测`);
+  } else if (!changed.length) {
+    console.log(`○ ${full}：源内容相对上次抬戳指纹无变化（或已 touch 过），未加戳`);
   } else {
     console.log(`✓ ${full}：${changed.length} 个字段检测到修改，已加戳并记入 .i18n-events.jsonl`);
     console.log(`  字段：${changed.join(", ")}`);
