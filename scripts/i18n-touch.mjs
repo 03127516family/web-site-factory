@@ -14,7 +14,7 @@ import { parse as parseYaml } from "yaml";
 import { pages, p, ROOT } from "./build.mjs";
 
 // 把一份 MD 文本解析成 { fm(frontmatter 对象), blocks(块KEY→正文文本) }
-function parseDoc(text) {
+export function parseDoc(text) {
   const m = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/.exec(text);
   if (!m) return { fm: {}, blocks: {} };
   const fm = parseYaml(m[1]) || {};
@@ -33,7 +33,7 @@ function parseDoc(text) {
 
 // 按 i18n_rev 的字段名取值：先当 frontmatter 点路径解析，解析不到则当正文块 KEY。
 // 与渲染/编辑同一套字段语义（点路径→frontmatter，裸名→## 块），不另立规则。
-function fieldValue(doc, key) {
+export function fieldValue(doc, key) {
   const viaDot = key.split(".").reduce((o, seg) => (o == null ? undefined : o[seg]), doc.fm);
   if (viaDot !== undefined) return typeof viaDot === "string" ? viaDot.trim() : JSON.stringify(viaDot);
   return doc.blocks[key]; // 正文块
@@ -76,6 +76,37 @@ function gitActor() {
 export async function logEvent(slug, action, fields) {
   const entry = { ts: new Date().toISOString(), actor: gitActor(), slug, action, fields };
   await appendFile(p(".i18n-events.jsonl"), JSON.stringify(entry) + "\n", "utf8");
+}
+
+// 在 en MD 的 i18n.translated_rev 段内，把某字段的值设为 target（=源当前戳）。只动该段。
+function setTranslatedRev(text, key, value) {
+  const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)[1];
+  const start = fm.search(/^\s*translated_rev:/m);
+  if (start === -1) return text;
+  const lines = fm.slice(start).split("\n");
+  let end = lines.length;
+  for (let i = 1; i < lines.length; i++) if (/^\s{0,2}\S/.test(lines[i])) { end = i; break; }
+  const region = lines.slice(0, end).join("\n");
+  const esc = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`^(\\s+${esc}:\\s*)\\d+\\s*$`, "m");
+  if (re.test(region)) return text.replace(region, region.replace(re, `$1${value}`));
+  // 字段不在 translated_rev 名册（源新增了段）：按现有字段缩进在段末追加一行 —— 不静默 no-op，
+  // 否则该字段即便译过 i18n:status 仍永久报 stale（决策⑳ 判据以「戳存在与否」为准）。
+  const indent = (region.match(/\n(\s+)\S/) || [, "    "])[1];
+  return text.replace(region, `${region.replace(/\s+$/, "")}\n${indent}${key}: ${value}`);
+}
+
+// 翻译任务落地那一步（代码侧）：译文已写入目标字段后，把 translated_rev.<字段> 抬到
+// 源当前 i18n_rev.<字段> → 该字段回"已同步"。记一条 translate 事件。译文本身由 AI 产出、
+// 经 patchMarkdown 按坐标写入（与本函数解耦）——本函数只做确定性的"抬戳 + 记账"。
+export async function markTranslated(targetPage, fields) {
+  const source = pages.find((pg) => !pg.langDir && pg.i18nKey === targetPage.i18nKey);
+  if (!source) throw new Error(`找不到 ${targetPage.i18nKey} 的源语言页——无法抬戳（源 i18n_rev 是 translated_rev 的基准）`);
+  const srcRev = parseDoc(await readFile(p(source.content), "utf8")).fm.i18n_rev || {};
+  let text = await readFile(p(targetPage.content), "utf8");
+  for (const f of fields) text = setTranslatedRev(text, f, srcRev[f] ?? 1);
+  await writeFile(p(targetPage.content), text, "utf8");
+  await logEvent(targetPage.slug, "translate", fields);
 }
 
 // 编辑器保存链路调用：源语言页某坐标被保存 → 给对应字段加戳 + 记事件。
