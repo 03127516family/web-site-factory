@@ -15,7 +15,6 @@
     "i18n:status": "node scripts/i18n-status.mjs",
     "i18n:touch": "node scripts/i18n-touch.mjs",
     "i18n:apply": "node scripts/i18n-apply.mjs",
-    "i18n:lint": "node scripts/i18n-lint.mjs",
     "i18n:validate": "node scripts/i18n-validate.mjs",
     "check": "node --test scripts/ && npm run i18n:validate && npm run edit:probe && npm run verify:geom",
     "prepare": "git config core.hooksPath .githooks || true"

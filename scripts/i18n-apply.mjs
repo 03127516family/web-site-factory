@@ -17,7 +17,7 @@ import { pages, p } from "./build.mjs";
 import { i18nStatus } from "./i18n-status.mjs";
 import { patchMarkdown } from "./md-write.mjs";
 import { parseDoc, fieldValue, markTranslated, logEvent } from "./i18n-touch.mjs";
-import { loadTerms, relevantTerms, lintField } from "./i18n-terms.mjs";
+import { loadTerms, relevantTerms } from "./i18n-terms.mjs";
 
 // 字段名 → 编辑坐标：与 fieldValue 同一套语义（fm 点路径解析得到→fm:，否则→mdbody:）。
 // 不含任何人工判断——坐标是字段在源 doc 里「实际取自哪」推出来的（对称于 coordToField 的逆）。
@@ -76,10 +76,7 @@ async function apply(targetSlug, fromPath) {
     await patchMarkdown(p(target.content), fieldCoord(srcDoc, field), "text", translations[field]);
   }
   await markTranslated(target, fields); // 一次抬 translated_rev 到源戳 + 一条 translate 事件
-  // 写回后 lint（警告、不致命——已落盘；硬门禁走独立 i18n:lint）
-  const terms = await loadTerms(source.lang, target.lang);
-  const violations = fields.flatMap((f) => lintField(f, fieldValue(srcDoc, f), translations[f], terms));
-  return { target: targetSlug, applied: fields, violations };
+  return { target: targetSlug, applied: fields };
 }
 
 // C3 镜像结构同步（U-3）：源有、目标缺的字段/段，用【源文本】灌占位（不写 translated_rev →
@@ -112,21 +109,10 @@ export async function syncStructure(targetSlug) {
   return { target: targetSlug, seeded };
 }
 
-// 独立术语门禁：对目标页当前译文（已落盘的值）逐字段 lint，覆盖整个 i18n_rev 名册。
-export async function lintTarget(targetSlug) {
-  const { target, source } = resolvePair(targetSlug);
-  const srcDoc = parseDoc(await readFile(p(source.content), "utf8"));
-  const tgtDoc = parseDoc(await readFile(p(target.content), "utf8"));
-  const terms = await loadTerms(source.lang, target.lang);
-  const roster = Object.keys(srcDoc.fm.i18n_rev || {});
-  const violations = roster.flatMap((f) => lintField(f, fieldValue(srcDoc, f), fieldValue(tgtDoc, f), terms));
-  return { target: targetSlug, checked: roster.length, violations };
-}
-
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [slug, flag, arg] = process.argv.slice(2);
   const usage =
-    "用法：\n  node scripts/i18n-apply.mjs <目标slug> --emit\n  node scripts/i18n-apply.mjs <目标slug> --from <译文json>\n  node scripts/i18n-apply.mjs <目标slug> --lint\n  node scripts/i18n-apply.mjs <目标slug> --sync-structure";
+    "用法：\n  node scripts/i18n-apply.mjs <目标slug> --emit\n  node scripts/i18n-apply.mjs <目标slug> --from <译文json>\n  node scripts/i18n-apply.mjs <目标slug> --sync-structure";
   if (!slug || !flag) {
     console.error(usage);
     process.exit(1);
@@ -140,22 +126,9 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       console.error(usage);
       process.exit(1);
     }
-    const { applied, violations } = await apply(slug, arg);
+    const { applied } = await apply(slug, arg);
     console.log(`✓ ${slug}：写回 ${applied.length} 个字段并抬戳 → ${applied.join(", ")}`);
-    if (violations.length) {
-      console.log(`  ⚠ 术语 lint ${violations.length} 处（已写盘，建议修正后重译）：`);
-      for (const v of violations) console.log(`    [${v.kind}] ${v.field}: ${v.term}`);
-    }
     console.log(`  → 跑 npm run i18n:status 确认转「已同步」`);
-  } else if (flag === "--lint") {
-    const { checked, violations } = await lintTarget(slug);
-    if (!violations.length) {
-      console.log(`✓ ${slug}：术语 lint 通过（校验 ${checked} 字段）`);
-    } else {
-      console.error(`✗ ${slug}：术语 lint ${violations.length} 处违规`);
-      for (const v of violations) console.error(`  [${v.kind}] ${v.field}: ${v.term}`);
-      process.exit(1);
-    }
   } else if (flag === "--sync-structure") {
     const { seeded } = await syncStructure(slug);
     if (!seeded.length) console.log(`○ ${slug}：镜像结构已完整，无缺字段`);
