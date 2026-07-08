@@ -3,3 +3,4 @@ dist/
 .worktrees/
 .DS_Store
 .i18n-events.jsonl
+i18n-lead.json
