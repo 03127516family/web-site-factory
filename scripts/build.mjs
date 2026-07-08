@@ -30,6 +30,11 @@ const DEPLOY_LANGS = ["zh-CN", "en"];
 const OG_LOCALE = { "zh-CN": "zh_CN", en: "en_US", "en-US": "en_US" };
 const ogLocale = (lang) => OG_LOCALE[lang] || lang.replace("-", "_");
 
+// 发布门禁（U-3，决策 2026-07-07）：build 期间置为「可发布页 slug 集」，供 seoHead 的 hreflang
+// 过滤与 sitemap/写盘用；null = 不设限（edit-server 预览 / 测试保持原行为）。渲染层不读它——
+// 只 build 决定出不出（过期字段照渲上次英文，此门禁只挡「有从未翻译字段」的目标页）。
+let publishableSlugs = null;
+
 // 页面绝对 URL：源语言（内容根目录）走 /zh/ base（现行部署拓扑 dist→/zh/）；
 // 目标语言 slug 自带 "<lang>/" 前缀（URL 即路径）。M1 拓扑翻转（dist→域名根）时统一。
 export const pageUrl = (page) => (page.langDir ? SITE_ROOT + page.slug + "/" : SITE_BASE + page.slug + "/");
@@ -103,7 +108,11 @@ export function seoHead(page, fm) {
   const ld = JSON.stringify(jsonLdFor(page, fm, url, img)).replaceAll("<", "\\u003c");
   // hreflang 成对生成（12 章 §3.7）：同翻译组、且在 deployLangs 闸内的语言互指；
   // x-default 指源语言页（默认语言 zh）。组内只有自己 → 不输出（单语言页自指是噪音）。
-  const siblings = (i18nGroups.get(page.i18nKey) || []).filter((m) => DEPLOY_LANGS.includes(m.lang));
+  // hreflang 只互指【在 deployLangs 闸内 且 可发布】的语言版本——未完成翻译被门禁挡下的目标页
+  // 不该被别的语言页 hreflang 指向（悬空 alternate）。publishableSlugs 未设（预览/测试）时不设限。
+  const siblings = (i18nGroups.get(page.i18nKey) || []).filter(
+    (m) => DEPLOY_LANGS.includes(m.lang) && (!publishableSlugs || publishableSlugs.has(m.slug)),
+  );
   const hreflang =
     siblings.length > 1
       ? [
@@ -203,6 +212,23 @@ for (const pg of pages) {
   i18nGroups.set(pg.i18nKey, group);
 }
 
+// 从未翻译字段：源有戳、目标 translated_rev 缺或为 0（会显示源占位/结构缺）——区别于「已译但
+// 过期」（0<译戳<源戳，仍显示上次英文，可发）。判据同决策⑳、只读两个当前 MD 的戳。
+function neverTranslated(sourceRev, translatedRev) {
+  return Object.keys(sourceRev).filter((f) => !(translatedRev[f] > 0));
+}
+
+// 发布门禁（U-3）：源语言页恒可发；目标语言页仅当【无任何「从未翻译」字段】才可发（过期 stale
+// 仍可发=显示上次英文）。孤儿镜像（无源）不发。渲染不参与——只 build 用它决定出不出。
+export async function isPublishable(page) {
+  if (!page.langDir) return true;
+  const source = (i18nGroups.get(page.i18nKey) || []).find((m) => !m.langDir);
+  if (!source) return false;
+  const sourceRev = (await readFrontmatter(p(source.content))).i18n_rev || {};
+  const translatedRev = (await readFrontmatter(p(page.content))).i18n?.translated_rev || {};
+  return neverTranslated(sourceRev, translatedRev).length === 0;
+}
+
 // 组装整页。opts.editMode=true 时：正文走渲染器编辑模式（打 data-md 坐标），并在 </body> 前
 // 注入编辑器资源（window.__EDIT__ + editor.css + editor.js）。生产 build 不传 opts，产出干净。
 // 只处理 mode==="render" 的页面（template+MD 现算）；是否调用本函数由调用方（build()/edit-server.mjs）按 page.mode 决定。
@@ -249,10 +275,21 @@ async function build() {
   // 把本地化资源整体拷进 dist，使 /assets/... 绝对路径在 dist 作为根目录时可解析。
   await cp(p("public"), p("dist"), { recursive: true });
 
+  // 先算发布门禁集（U-3）：render 页且 isPublishable。seoHead 的 hreflang 过滤依赖它，故须在
+  // 任何 composePage 之前置好。目标页有「从未翻译」字段 → 不入集 → 不写盘、不进 sitemap/hreflang。
+  publishableSlugs = new Set();
+  for (const page of pages) {
+    if ((page.mode || "render") === "render" && (await isPublishable(page))) publishableSlugs.add(page.slug);
+  }
+
   const sitemapEntries = [];
   for (const page of pages) {
     if ((page.mode || "render") !== "render") {
       console.log("skipped", page.slug, `(${page.mode})`);
+      continue;
+    }
+    if (!publishableSlugs.has(page.slug)) {
+      console.log("held", page.slug, "(未完成翻译，发布门禁暂扣)");
       continue;
     }
     const html = await composePage(page);

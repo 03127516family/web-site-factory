@@ -11,12 +11,12 @@
 //        一次抬戳 + 记一条 translate 事件。全部确定性。
 //
 // 产品期：翻译节点=翻译服务 Lambda，①③代码原样进后台，三步收敛成一条链（决策㉗）。
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { pages, p } from "./build.mjs";
 import { i18nStatus } from "./i18n-status.mjs";
 import { patchMarkdown } from "./md-write.mjs";
-import { parseDoc, fieldValue, markTranslated } from "./i18n-touch.mjs";
+import { parseDoc, fieldValue, markTranslated, logEvent } from "./i18n-touch.mjs";
 import { loadTerms, relevantTerms, lintField } from "./i18n-terms.mjs";
 
 // 字段名 → 编辑坐标：与 fieldValue 同一套语义（fm 点路径解析得到→fm:，否则→mdbody:）。
@@ -82,6 +82,36 @@ async function apply(targetSlug, fromPath) {
   return { target: targetSlug, applied: fields, violations };
 }
 
+// C3 镜像结构同步（U-3）：源有、目标缺的字段/段，用【源文本】灌占位（不写 translated_rev →
+// 从未翻译 → 被发布门禁挡住），保证镜像结构完整、build 不因必填缺段中止。译文由 apply 逐字转正。
+// 用于「源新增了段/字段」的传播：目标先有占位才谈得上翻译。
+export async function syncStructure(targetSlug) {
+  const { target, source } = resolvePair(targetSlug);
+  const srcRaw = await readFile(p(source.content), "utf8");
+  const srcDoc = parseDoc(srcRaw);
+  const roster = Object.keys(srcDoc.fm.i18n_rev || {});
+  const seeded = [];
+  for (const field of roster) {
+    const tgtDoc = parseDoc(await readFile(p(target.content), "utf8")); // 每轮重读（上轮可能已写盘）
+    if (fieldValue(tgtDoc, field) !== undefined) continue; // 目标已有该字段
+    const coord = fieldCoord(srcDoc, field);
+    const srcVal = fieldValue(srcDoc, field);
+    if (coord.startsWith("fm:")) {
+      await patchMarkdown(p(target.content), coord, "text", srcVal); // fm: setIn 建路径
+    } else {
+      // 缺块：把源的「## 标题 <!--block:KEY-->」整块（标题+正文）追加到目标末尾。render 按 KEY
+      // 定位、与 MD 顺序无关，故追加安全（决策②/§9：块由 KEY 接线）。
+      const key = coord.slice("mdbody:".length);
+      const heading = (new RegExp(`^##\\s+.*<!--\\s*block:${key}\\s*-->.*$`, "m").exec(srcRaw) || [`## ${key} <!--block:${key}-->`])[0];
+      const raw = await readFile(p(target.content), "utf8");
+      await writeFile(p(target.content), raw.replace(/\s*$/, "") + `\n\n${heading}\n${srcVal}\n`, "utf8");
+    }
+    seeded.push(field);
+  }
+  if (seeded.length) await logEvent(target.slug, "seed-placeholder", seeded);
+  return { target: targetSlug, seeded };
+}
+
 // 独立术语门禁：对目标页当前译文（已落盘的值）逐字段 lint，覆盖整个 i18n_rev 名册。
 export async function lintTarget(targetSlug) {
   const { target, source } = resolvePair(targetSlug);
@@ -95,7 +125,8 @@ export async function lintTarget(targetSlug) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [slug, flag, arg] = process.argv.slice(2);
-  const usage = "用法：\n  node scripts/i18n-apply.mjs <目标slug> --emit\n  node scripts/i18n-apply.mjs <目标slug> --from <译文json>\n  node scripts/i18n-apply.mjs <目标slug> --lint";
+  const usage =
+    "用法：\n  node scripts/i18n-apply.mjs <目标slug> --emit\n  node scripts/i18n-apply.mjs <目标slug> --from <译文json>\n  node scripts/i18n-apply.mjs <目标slug> --lint\n  node scripts/i18n-apply.mjs <目标slug> --sync-structure";
   if (!slug || !flag) {
     console.error(usage);
     process.exit(1);
@@ -124,6 +155,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       console.error(`✗ ${slug}：术语 lint ${violations.length} 处违规`);
       for (const v of violations) console.error(`  [${v.kind}] ${v.field}: ${v.term}`);
       process.exit(1);
+    }
+  } else if (flag === "--sync-structure") {
+    const { seeded } = await syncStructure(slug);
+    if (!seeded.length) console.log(`○ ${slug}：镜像结构已完整，无缺字段`);
+    else {
+      console.log(`✓ ${slug}：灌源占位 ${seeded.length} 个缺字段 → ${seeded.join(", ")}`);
+      console.log(`  （占位=源文本、未写 translated_rev → 发布门禁暂扣，待 --from 翻译转正）`);
     }
   } else {
     console.error(usage);
