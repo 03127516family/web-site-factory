@@ -8,7 +8,7 @@ import { spawn } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderBodyFromMarkdown } from "./render.mjs";
-import { pages } from "./build.mjs";
+import { pages, langSwitcher } from "./build.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const p = (...s) => join(ROOT, ...s);
@@ -32,6 +32,7 @@ const PAGES = pages
     template: pg.template,
     content: pg.content,
     baseline: pg.geomBaseline,
+    page: pg, // 供 langSwitcher 按页生成 {{LANG_SWITCH}}（A/B 同注入 → 几何恒等）
   }));
 
 function run(cmd, args) {
@@ -41,7 +42,7 @@ function run(cmd, args) {
   });
 }
 
-async function compose(bodyHtml) {
+async function compose(bodyHtml, page) {
   const layout = await readFile(p("src/layouts/document.html"), "utf8");
   const header = await readFile(p("src/fragments/header.html"), "utf8");
   const footer = await readFile(p("src/fragments/footer.html"), "utf8");
@@ -52,7 +53,9 @@ async function compose(bodyHtml) {
     .replaceAll("{{SEO}}", "")
     .replace("{{HEADER}}", () => header)
     .replace("{{BODY}}", () => bodyHtml)
-    .replace("{{FOOTER}}", () => footer);
+    .replace("{{FOOTER}}", () => footer)
+    // 与 build.mjs::composePage 同步（坑账#4）：切换器 marker 也要填，否则 A/B 都残留字面量。
+    .replaceAll("{{LANG_SWITCH}}", () => langSwitcher(page));
 }
 
 async function waitFor(url, tries = 40) {
@@ -145,8 +148,8 @@ async function main() {
     // 与 build.mjs::composePage 同步：无 baseline 时 tplB === tpl 本身也带 marker；有 baseline（原站静态页）则本来就没有 marker，replace 是无害空操作。
     bodyA = bodyA.replace("{{INQUIRY_FORM}}", () => inquiryForm).replace("{{PHOTOSWIPE}}", () => photoswipe);
     tplB = tplB.replace("{{INQUIRY_FORM}}", () => inquiryForm).replace("{{PHOTOSWIPE}}", () => photoswipe);
-    await writeFile(p(`dist/_geomA_${pg.name}.html`), await compose(bodyA), "utf8");
-    await writeFile(p(`dist/_geomB_${pg.name}.html`), await compose(tplB), "utf8");
+    await writeFile(p(`dist/_geomA_${pg.name}.html`), await compose(bodyA, pg.page), "utf8");
+    await writeFile(p(`dist/_geomB_${pg.name}.html`), await compose(tplB, pg.page), "utf8");
   }
 
   const server = spawn("python3", ["-m", "http.server", "--directory", p("dist"), String(PORT)], {

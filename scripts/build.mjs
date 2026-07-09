@@ -29,6 +29,10 @@ const ASSET_BASE = "https://www.dgcrane.com/zh";
 const DEPLOY_LANGS = ["zh-CN", "en"];
 const OG_LOCALE = { "zh-CN": "zh_CN", en: "en_US", "en-US": "en_US" };
 const ogLocale = (lang) => OG_LOCALE[lang] || lang.replace("-", "_");
+// 语言切换器的显示名（站点层语言登记表，同 DEPLOY_LANGS/OG_LOCALE 属 i18n 配置，非内容特判；
+// 终态随 site.config 迁出）。未登记语言回退到语言码本身。
+const LANG_LABEL = { "zh-CN": "简体中文", en: "English", "en-US": "English" };
+const langLabel = (lang) => LANG_LABEL[lang] || lang;
 
 // 发布门禁（U-3，决策 2026-07-07）：build 期间置为「可发布页 slug 集」，供 seoHead 的 hreflang
 // 过滤与 sitemap/写盘用；null = 不设限（edit-server 预览 / 测试保持原行为）。渲染层不读它——
@@ -99,6 +103,47 @@ function jsonLdFor(page, fm, url, img) {
   return { "@context": "https://schema.org", "@graph": [entity, breadcrumb] };
 }
 
+// 同翻译组、且【在 deployLangs 闸内 且 可发布】的语言版本（含本页自身）。hreflang 与语言切换器
+// 同源——都只互指真实存在、已过发布门禁的语言（避免悬空 alternate / 死切换链接）。
+// publishableSlugs 未设（预览/测试）时不设限。i18nGroups 定义在后，靠调用时已初始化（非 TDZ）。
+export function siblingsOf(page) {
+  return (i18nGroups.get(page.i18nKey) || []).filter(
+    (m) => DEPLOY_LANGS.includes(m.lang) && (!publishableSlugs || publishableSlugs.has(m.slug)),
+  );
+}
+
+// 语言切换器 HTML（替换 header/footer fragment 的 {{LANG_SWITCH}} marker）。原 WordPress 残留是
+// 写死 34 种语言、全指向旧站 single-girder 页的死链；改为按当前页从 siblingsOf 动态生成：当前语言=
+// 禁用 pill，其余真实语言=指向各自 pageUrl 的链接。只 1 种语言 → 只出当前 pill（无别的可切）。
+// 结构/类名逐字沿用原 trp-* DOM，故 main.css 的样式与测宽脚本原样生效。
+export function langSwitcher(page) {
+  const others = siblingsOf(page).filter((m) => m.lang !== page.lang);
+  const disabled = (lang) =>
+    `<a href="javascript:void(0)" class="trp-ls-shortcode-disabled-language trp-ls-disabled-language" title="${escAttr(langLabel(lang))}">${langLabel(lang)}</a>`;
+  const linkTo = (m) =>
+    `<a href="${pageUrl(m)}" title="${escAttr(langLabel(m.lang))}">${langLabel(m.lang)}</a>`;
+  const list = [disabled(page.lang), ...others.map(linkTo)].join("\n            ");
+  return `<div class="trp-language-switcher trp-language-switcher-container" data-no-translation>
+    <div class="trp-ls-shortcode-current-language">
+        ${disabled(page.lang)}
+    </div>
+    <div class="trp-ls-shortcode-language">
+            ${list}
+    </div>
+    <script type="application/javascript">
+        var trp_ls_shortcodes = document.querySelectorAll('.trp-language-switcher');
+        if ( trp_ls_shortcodes.length > 0) {
+            var trp_el = trp_ls_shortcodes[trp_ls_shortcodes.length - 1];
+            var trp_shortcode_language_item = trp_el.querySelector('.trp-ls-shortcode-language')
+            var trp_ls_shortcode_width = trp_shortcode_language_item.offsetWidth + 5;
+            trp_shortcode_language_item.style.width = trp_ls_shortcode_width + 'px';
+            trp_el.querySelector('.trp-ls-shortcode-current-language').style.width = trp_ls_shortcode_width + 'px';
+            trp_shortcode_language_item.style.display = 'none';
+        }
+    </script>
+</div>`;
+}
+
 // 每页 SEO head 块（替换 layout 的 {{SEO}}）。meta description 已由 {{DESCRIPTION}} 输出，
 // 此处不重复；canonical 每页恰一个。
 export function seoHead(page, fm) {
@@ -106,13 +151,10 @@ export function seoHead(page, fm) {
   const imgPath = ogImagePath(page, fm);
   const img = imgPath ? ASSET_BASE + imgPath : null;
   const ld = JSON.stringify(jsonLdFor(page, fm, url, img)).replaceAll("<", "\\u003c");
-  // hreflang 成对生成（12 章 §3.7）：同翻译组、且在 deployLangs 闸内的语言互指；
+  // hreflang 成对生成（12 章 §3.7）：同翻译组、且在 deployLangs 闸内且可发布的语言互指；
   // x-default 指源语言页（默认语言 zh）。组内只有自己 → 不输出（单语言页自指是噪音）。
-  // hreflang 只互指【在 deployLangs 闸内 且 可发布】的语言版本——未完成翻译被门禁挡下的目标页
-  // 不该被别的语言页 hreflang 指向（悬空 alternate）。publishableSlugs 未设（预览/测试）时不设限。
-  const siblings = (i18nGroups.get(page.i18nKey) || []).filter(
-    (m) => DEPLOY_LANGS.includes(m.lang) && (!publishableSlugs || publishableSlugs.has(m.slug)),
-  );
+  // 与语言切换器同源（siblingsOf），保证 hreflang 与可切换语言一致、不出悬空 alternate。
+  const siblings = siblingsOf(page);
   const hreflang =
     siblings.length > 1
       ? [
@@ -257,7 +299,9 @@ export async function composePage(page, opts = {}) {
     .replaceAll("{{SEO}}", () => seoHead(page, fm))
     .replace("{{HEADER}}", () => header)
     .replace("{{BODY}}", () => body)
-    .replace("{{FOOTER}}", () => footer);
+    .replace("{{FOOTER}}", () => footer)
+    // 语言切换器：header/footer 各有一个 {{LANG_SWITCH}} marker，按当前页动态生成（决策 2026-07-08）。
+    .replaceAll("{{LANG_SWITCH}}", () => langSwitcher(page));
 
   if (opts.editMode === true) {
     const inject =
