@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "serve": "node scripts/build.mjs && python3 -m http.server --directory dist 8080",
+    "serve": "node scripts/build.mjs && node scripts/static-server.mjs dist 8080",
     "edit": "node scripts/edit-server.mjs",
     "verify:geom": "node --experimental-websocket scripts/verify-geom.mjs",
     "edit:probe": "node scripts/edit-probe.mjs",

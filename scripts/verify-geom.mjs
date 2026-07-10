@@ -9,6 +9,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderBodyFromMarkdown } from "./render.mjs";
 import { pages, langSwitcher } from "./build.mjs";
+import { startServer } from "./static-server.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const p = (...s) => join(ROOT, ...s);
@@ -152,9 +153,7 @@ async function main() {
     await writeFile(p(`dist/_geomB_${pg.name}.html`), await compose(tplB, pg.page), "utf8");
   }
 
-  const server = spawn("python3", ["-m", "http.server", "--directory", p("dist"), String(PORT)], {
-    stdio: "ignore",
-  });
+  const server = await startServer(p("dist"), PORT); // Node 静态服务（去 python 依赖），await 后即在监听
   const chrome = spawn(
     CHROME,
     [
@@ -190,7 +189,7 @@ async function main() {
     }
     cdp.close();
   } finally {
-    server.kill();
+    server.close();
     chrome.kill();
     for (const pg of PAGES) {
       await rm(p(`dist/_geomA_${pg.name}.html`), { force: true });

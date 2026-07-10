@@ -1,0 +1,70 @@
+// 极简静态文件服务——替代 `python3 -m http.server`，去掉系统 Python 依赖（phase 1 缺口）。
+// 仅本地 build 预览（npm run serve）与几何回归（verify:geom）用；非生产组件、无需鲁棒性优化。
+// dist 以自身为根目录，页面里 /assets/... 是绝对路径，故本服务从 root 直接按 URL 路径取文件。
+import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { stat } from "node:fs/promises";
+import { join, resolve, normalize, extname, sep } from "node:path";
+import { pathToFileURL } from "node:url";
+
+const MIME = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".xml": "application/xml; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".eot": "application/vnd.ms-fontobject",
+  ".txt": "text/plain; charset=utf-8",
+  ".webmanifest": "application/manifest+json",
+};
+
+// 起服务，resolve 到「已在监听」的 server（await 后即可请求，无需再轮询）。调用方负责 server.close()。
+export function startServer(dir, port) {
+  const root = resolve(dir);
+  const server = createServer(async (req, res) => {
+    try {
+      const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
+      let filePath = normalize(join(root, urlPath));
+      // 防目录穿越：拼接归一化后须仍在 root 内（等于 root 或以 root+分隔符 开头）。
+      if (filePath !== root && !filePath.startsWith(root + sep)) {
+        res.writeHead(403).end("403");
+        return;
+      }
+      let st = await stat(filePath).catch(() => null);
+      if (st && st.isDirectory()) {
+        filePath = join(filePath, "index.html");
+        st = await stat(filePath).catch(() => null);
+      }
+      if (!st || !st.isFile()) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("404 Not Found");
+        return;
+      }
+      res.writeHead(200, {
+        "Content-Type": MIME[extname(filePath).toLowerCase()] || "application/octet-stream",
+        "Content-Length": st.size,
+      });
+      createReadStream(filePath).pipe(res);
+    } catch {
+      res.writeHead(500).end("500");
+    }
+  });
+  return new Promise((res) => server.listen(port, () => res(server)));
+}
+
+// CLI：node scripts/static-server.mjs [dir=dist] [port=8080]
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const [dir = "dist", port = "8080"] = process.argv.slice(2);
+  await startServer(dir, Number(port));
+  console.log(`静态服务 → http://localhost:${port}/  （根目录：${resolve(dir)}）`);
+}
