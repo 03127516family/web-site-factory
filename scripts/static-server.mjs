@@ -34,7 +34,10 @@ export function startServer(dir, port) {
   const root = resolve(dir);
   const server = createServer(async (req, res) => {
     try {
-      const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
+      let urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
+      // 生产拓扑 dist→/zh/（决策 2026-07-02）：本地把 /zh/ 前缀剥掉映射到 dist 根，
+      // 使站内 /zh/... 链接（logo、返回首页等）本地行为与生产一致。
+      if (urlPath === "/zh" || urlPath.startsWith("/zh/")) urlPath = urlPath.slice(3) || "/";
       let filePath = normalize(join(root, urlPath));
       // 防目录穿越：拼接归一化后须仍在 root 内（等于 root 或以 root+分隔符 开头）。
       if (filePath !== root && !filePath.startsWith(root + sep)) {

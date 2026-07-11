@@ -313,29 +313,124 @@ export async function composePage(page, opts = {}) {
   return html;
 }
 
-// 404 页：复用 chrome（layout/header/footer 构建期拼入，与产品页同一套壳），正文极简。
-// 写到 dist/404.html——静态托管的通用约定（S3/CloudFront、GitHub Pages 等都认这个路径）。
-// 合成页对象只为 langSwitcher 取当前语言 pill（i18nKey 不在任何翻译组 → 只出当前语言、无链接）。
-async function build404() {
+// —— 派生页（404 / 列表 / 首页）：不走 MD+模版渲染，由「pages 登记」构建期派生（同 sitemap/
+// 语言切换器先例：登记即内容，加页自动出现、零维护）。chrome 构建期拼入，产物仍是自包含 HTML。 ——
+
+// 拼 chrome 外壳：layout/header/footer + 语言切换器，正文由调用方给。派生页共用。
+async function composeChrome(bodyHtml, { title, description, seo, lang = "zh-CN" }) {
   const layout = await readFile(p("src/layouts/document.html"), "utf8");
   const header = await readFile(p("src/fragments/header.html"), "utf8");
   const footer = await readFile(p("src/fragments/footer.html"), "utf8");
-  const page = { slug: "404", lang: "zh-CN", i18nKey: "__404__", langDir: null };
+  const page = { slug: "__derived__", lang, i18nKey: "__derived__", langDir: null };
+  return layout
+    .replaceAll("{{LANG}}", lang)
+    .replaceAll("{{TITLE}}", title)
+    .replaceAll("{{DESCRIPTION}}", description)
+    .replaceAll("{{SEO}}", () => seo || "")
+    .replace("{{HEADER}}", () => header)
+    .replace("{{BODY}}", () => bodyHtml)
+    .replace("{{FOOTER}}", () => footer)
+    .replaceAll("{{LANG_SWITCH}}", () => langSwitcher(page));
+}
+
+// 404 页：正文极简。写 dist/404.html——静态托管通用约定（S3/CloudFront、GH Pages 都认）。
+async function build404() {
   const body = `<div class="wrap" style="max-width:720px;margin:80px auto 120px;padding:0 20px;text-align:center">
   <p style="font-size:110px;font-weight:700;color:#001A4F;margin:0;line-height:1">404</p>
   <h1 style="font-size:24px;color:#001A4F;margin:14px 0 18px">页面未找到</h1>
   <p style="color:#666">您访问的页面不存在或已被移动。</p>
   <p style="margin-top:28px"><a href="/zh/" style="color:#036AAE">返回首页 →</a></p>
 </div>`;
-  return layout
-    .replaceAll("{{LANG}}", page.lang)
-    .replaceAll("{{TITLE}}", "页面未找到 | DGCRANE")
-    .replaceAll("{{DESCRIPTION}}", "您访问的页面不存在。")
-    .replaceAll("{{SEO}}", `<meta name="robots" content="noindex">`)
-    .replace("{{HEADER}}", () => header)
-    .replace("{{BODY}}", () => body)
-    .replace("{{FOOTER}}", () => footer)
-    .replaceAll("{{LANG_SWITCH}}", () => langSwitcher(page));
+  return composeChrome(body, {
+    title: "页面未找到 | DGCRANE",
+    description: "您访问的页面不存在。",
+    seo: `<meta name="robots" content="noindex">`,
+  });
+}
+
+// 列表卡片：题图取该页 og 图同源（ogImagePath），标题去掉「| DGCRANE」尾巴，描述 CSS 截断。
+function cardHtml(page, fm) {
+  const img = ogImagePath(page, fm);
+  const title = escAttr(page.title.split("|")[0].trim());
+  const href = "/" + page.slug + "/";
+  return `<a href="${href}" style="display:block;width:270px;text-decoration:none;color:inherit;border:1px solid #e3e7ec;border-radius:4px;overflow:hidden;background:#fff">
+  ${img ? `<img src="${img}" alt="${title}" width="270" height="180" style="display:block;width:100%;height:180px;object-fit:cover">` : `<div style="height:180px;background:#f2f5f8"></div>`}
+  <div style="padding:12px 14px 16px">
+    <p style="margin:0 0 6px;font-size:16px;font-weight:600;color:#001A4F;line-height:1.4">${title}</p>
+    <p style="margin:0;font-size:13px;color:#666;line-height:1.6;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden">${escAttr(page.description)}</p>
+  </div>
+</a>`;
+}
+
+function listingSection(heading, cards) {
+  return `<section style="margin:0 0 50px">
+  <h2 style="font-size:22px;color:#001A4F;border-left:4px solid #036AAE;padding-left:12px;margin:0 0 20px">${heading}</h2>
+  <div style="display:flex;flex-wrap:wrap;gap:20px">${cards.join("\n")}</div>
+</section>`;
+}
+
+// 列表页/首页正文（派生自登记：只收源语言、可发布、render 页；en 内容成规模后再出 en 版列表）。
+async function buildDerivedPages(publishable) {
+  const listed = pages.filter(
+    (pg) => !pg.langDir && (pg.mode || "render") === "render" && publishable.has(pg.slug),
+  );
+  const withFm = [];
+  for (const pg of listed) withFm.push({ pg, fm: await readFrontmatter(p(pg.content)) });
+  const products = withFm.filter(({ pg }) => pg.type === "product");
+  const posts = withFm.filter(({ pg }) => pg.type === "post");
+  const wrap = (inner, h1, intro) =>
+    `<div class="wrap" style="max-width:1200px;margin:40px auto 80px;padding:0 20px">
+  <h1 style="font-size:26px;color:#001A4F;margin:0 0 8px">${h1}</h1>
+  <p style="color:#666;margin:0 0 34px">${intro}</p>
+  ${inner}
+</div>`;
+  const seoFor = (path, title, description) =>
+    [
+      `<link rel="canonical" href="${SITE_BASE}${path}">`,
+      `<meta property="og:type" content="website">`,
+      `<meta property="og:title" content="${escAttr(title)}">`,
+      `<meta property="og:description" content="${escAttr(description)}">`,
+      `<meta property="og:url" content="${SITE_BASE}${path}">`,
+      `<meta property="og:locale" content="${ogLocale("zh-CN")}">`,
+    ].join("\n  ");
+
+  const out = [];
+  if (products.length) {
+    const t = "起重机产品目录 | DGCRANE";
+    const d = `DGCRANE 起重机产品目录：${products.map(({ pg }) => pg.title.split("|")[0].trim()).join("、")}。`;
+    out.push({
+      path: "products/index.html", loc: SITE_BASE + "products/",
+      html: await composeChrome(
+        wrap(listingSection("全部产品", products.map(({ pg, fm }) => cardHtml(pg, fm))), "产品目录", `共 ${products.length} 个产品`),
+        { title: t, description: d, seo: seoFor("products/", t, d) },
+      ),
+    });
+  }
+  if (posts.length) {
+    const t = "案例与文章 | DGCRANE";
+    const d = "DGCRANE 起重机案例与技术文章列表。";
+    out.push({
+      path: "posts/index.html", loc: SITE_BASE + "posts/",
+      html: await composeChrome(
+        wrap(listingSection("案例与文章", posts.map(({ pg, fm }) => cardHtml(pg, fm))), "案例与文章", `共 ${posts.length} 篇`),
+        { title: t, description: d, seo: seoFor("posts/", t, d) },
+      ),
+    });
+  }
+  {
+    const t = "DGCRANE 起重机——桥式/门式/悬臂起重机制造商";
+    const d = "DGCRANE 起重机制造商与出口商：桥式起重机、门式起重机、悬臂起重机与电动葫芦，产品销往120多个国家。";
+    const body = wrap(
+      [
+        products.length ? listingSection(`产品（${products.length}）`, products.map(({ pg, fm }) => cardHtml(pg, fm))) : "",
+        posts.length ? listingSection(`案例与文章（${posts.length}）`, posts.map(({ pg, fm }) => cardHtml(pg, fm))) : "",
+      ].join("\n"),
+      "起重机制造商和出口商",
+      "10年以上起重机出口经验 · 产品销往120多个国家",
+    );
+    out.push({ path: "index.html", loc: SITE_BASE, html: await composeChrome(body, { title: t, description: d, seo: seoFor("", t, d) }) });
+  }
+  return out;
 }
 
 async function build() {
@@ -369,6 +464,15 @@ async function build() {
     // sitemap 只收 deployLangs 闸内语言（㉖：未对外语言可建、可预览、不进 sitemap）
     if (DEPLOY_LANGS.includes(page.lang))
       sitemapEntries.push({ loc: pageUrl(page), lastmod: contentLastmod(page) });
+  }
+
+  // 派生页：首页 + 产品目录 + 案例文章列表（从登记派生，进 sitemap）
+  for (const d of await buildDerivedPages(publishableSlugs)) {
+    const out = p("dist", d.path);
+    await mkdir(dirname(out), { recursive: true });
+    await writeFile(out, d.html, "utf8");
+    console.log("built", d.path, `(${d.html.length} bytes)`);
+    sitemapEntries.push({ loc: d.loc, lastmod: new Date().toISOString().slice(0, 10) });
   }
 
   await writeFile(p("dist", "sitemap.xml"), sitemapXml(sitemapEntries), "utf8");
