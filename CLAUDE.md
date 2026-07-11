@@ -93,15 +93,17 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
 
 ## 8. 已知遗留
 
-- 面包屑 `breadcrumb.trail` 未 data 化（超集里仍是单梁硬编码，显示「Eot Cranes」非「桥式起重机」）——待接进渲染器，使 trail 由 MD 驱动。
+> 2026-07-11 核账：原列的「面包屑未 data 化」「SEO 技术 hygiene 全面缺失」两条已**过时销账**——
+> trail 已由 MD 驱动（`{{BREADCRUMB}}` fragment + 渲染器填值，含 en 镜像英文 trail；single-girder
+> 显示「Eot Cranes」是忠实原站的**数据**，非缺口）；canonical/OG/JSON-LD（含 BreadcrumbList）/
+> sitemap.xml/hreflang/favicon/404 均已实现。仍真实的遗留如下：
+
 - 个别素材缺失需补图（如 overhead 组件 `Crane-electric-control-bo.jpg`，原站亦缺）。
-- **SEO 技术 hygiene 全面缺失**（2026-07-01 盘点，尚未实现，待 base URL 拍板后动手）：
-  - `{{SEO}}` 占位符（`src/layouts/document.html:8`）恒被 `build.mjs:102` 替换成空字符串——canonical、Open Graph、JSON-LD（Article/Product/BreadcrumbList）一个都没有。
-  - 面包屑现在用的是**过时的** Data-Vocabulary.org RDFa（模版里 `xmlns:v="http://rdf.data-vocabulary.org/#"`），Google 2020 年起已不认此格式出富摘要，应补 `BreadcrumbList` JSON-LD。
-  - 无 `sitemap.xml` / `robots.txt`，应由 `build.mjs::pages` 循环生成（同源不会漏页）。
-  - 图片落盘未压缩（如这次 crane-lifting-safety-training 拷的几张图有 3-4MB/张），拖 LCP；以后素材落 `public/assets/img/` 前应先压缩。
-  - base URL 已拍板（见决策日志 2026-07-02）：生产域名 `/zh/` 子路径，即 `https://www.dgcrane.com/zh/...`。
-- **询盘表单无真实后端**（2026-07-01 盘点）：`data-form-id="713"` 那个表单是老 WordPress+WPForms 站的静态快照，`<form>` 无 `action`、无 JS 拦截提交——现在填完点"发送消息"提交不到任何地方。已把表单去重成共享 fragment `src/fragments/inquiry-form.html`（`build.mjs::composePage` + `verify-geom.mjs` 都已接入注入，不再是逐模版复制粘贴），并统一了产品页/文章页字段集（含文件上传）。**但后端提交方案本身未定、未接**——讨论过自建 Lambda（环境里发现有真实 AWS 凭证，账号 `125131361182`/`aws-cn`），用户明确"先别真发，方案以后再说"，**不要在没有进一步明确指示前，往这个真实 AWS 账号里创建任何云资源**。footer 里另一个订阅表单（`data-form-id="780"`）同样是死的（`action` 里还带着一段抓取时的 Google 搜索点击追踪参数），未动，属同类问题。
+- **图片落盘未压缩**（如 crane-lifting-safety-training 的图 3-4MB/张），拖 LCP；以后素材落 `public/assets/img/` 前应先压缩（图片闸门未建）。
+- `robots.txt` 共存期有意不生成（域名根归老站管，蓝图 08 §2.3），整站切换后再接管。
+- **表单后端仍是假发送**（2026-07-11 起）：站侧已接线——`assets/js/form-submit.js` 拦截提交 fetch 到相对端点（询盘 `/api/inquiry`、订阅 `/api/subscribe`），本地由 mock 接收器（`app/`，不入库）落收件箱；**真实后端方案未定、未接**——曾讨论自建 Lambda（环境里有真实 AWS 凭证，账号 `125131361182`/`aws-cn`），用户明确"先别真发"，**不要在没有进一步明确指示前，往这个真实 AWS 账号里创建任何云资源**。生产期把端点换成真实 URL 即可，页面与 JS 零改动。
+- header 站内搜索框 action 仍指旧 WP 站（待站内搜索实现后接管）。
+- 语言切换/导航大菜单里的分类与栏目链接仍指旧站 `https://www.dgcrane.com/zh/...` 绝对地址（那些页面尚未迁入本系统，链接过去仍可用；迁入后应改相对路径）。
 
 ---
 
