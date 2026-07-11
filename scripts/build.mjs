@@ -313,6 +313,31 @@ export async function composePage(page, opts = {}) {
   return html;
 }
 
+// 404 页：复用 chrome（layout/header/footer 构建期拼入，与产品页同一套壳），正文极简。
+// 写到 dist/404.html——静态托管的通用约定（S3/CloudFront、GitHub Pages 等都认这个路径）。
+// 合成页对象只为 langSwitcher 取当前语言 pill（i18nKey 不在任何翻译组 → 只出当前语言、无链接）。
+async function build404() {
+  const layout = await readFile(p("src/layouts/document.html"), "utf8");
+  const header = await readFile(p("src/fragments/header.html"), "utf8");
+  const footer = await readFile(p("src/fragments/footer.html"), "utf8");
+  const page = { slug: "404", lang: "zh-CN", i18nKey: "__404__", langDir: null };
+  const body = `<div class="wrap" style="max-width:720px;margin:80px auto 120px;padding:0 20px;text-align:center">
+  <p style="font-size:110px;font-weight:700;color:#001A4F;margin:0;line-height:1">404</p>
+  <h1 style="font-size:24px;color:#001A4F;margin:14px 0 18px">页面未找到</h1>
+  <p style="color:#666">您访问的页面不存在或已被移动。</p>
+  <p style="margin-top:28px"><a href="/zh/" style="color:#036AAE">返回首页 →</a></p>
+</div>`;
+  return layout
+    .replaceAll("{{LANG}}", page.lang)
+    .replaceAll("{{TITLE}}", "页面未找到 | DGCRANE")
+    .replaceAll("{{DESCRIPTION}}", "您访问的页面不存在。")
+    .replaceAll("{{SEO}}", `<meta name="robots" content="noindex">`)
+    .replace("{{HEADER}}", () => header)
+    .replace("{{BODY}}", () => body)
+    .replace("{{FOOTER}}", () => footer)
+    .replaceAll("{{LANG_SWITCH}}", () => langSwitcher(page));
+}
+
 async function build() {
   await rm(p("dist"), { recursive: true, force: true });
   await mkdir(p("dist"), { recursive: true });
@@ -348,6 +373,10 @@ async function build() {
 
   await writeFile(p("dist", "sitemap.xml"), sitemapXml(sitemapEntries), "utf8");
   console.log("built sitemap.xml", `(${sitemapEntries.length} urls)`);
+
+  const notFound = await build404();
+  await writeFile(p("dist", "404.html"), notFound, "utf8");
+  console.log("built 404.html", `(${notFound.length} bytes)`);
 }
 
 // 仅在直接运行（node scripts/build.mjs）时执行 build；被 edit-server 等 import 时不触发。

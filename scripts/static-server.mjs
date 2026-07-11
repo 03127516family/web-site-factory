@@ -47,7 +47,15 @@ export function startServer(dir, port) {
         st = await stat(filePath).catch(() => null);
       }
       if (!st || !st.isFile()) {
-        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("404 Not Found");
+        // 静态托管通用约定：未命中 → 返回 root/404.html（状态码仍是 404）。没有就纯文本兜底。
+        const nf = join(root, "404.html");
+        const nfSt = await stat(nf).catch(() => null);
+        if (nfSt && nfSt.isFile()) {
+          res.writeHead(404, { "Content-Type": "text/html; charset=utf-8", "Content-Length": nfSt.size });
+          createReadStream(nf).pipe(res);
+        } else {
+          res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }).end("404 Not Found");
+        }
         return;
       }
       res.writeHead(200, {
