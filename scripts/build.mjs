@@ -369,6 +369,26 @@ function listingSection(heading, cards) {
 </section>`;
 }
 
+// 站内搜索索引：每个可列页一条 {slug,title,description,text}。text = MD 正文去壳成纯文本
+// （frontmatter/block 注释/HTML 标签/markdown 记号全剥），截 3000 字。构建期一次生成，
+// 搜索页 JS 客户端匹配——访客链路仍只依赖静态文件。
+async function buildSearchIndex(listed) {
+  const entries = [];
+  for (const { pg } of listed) {
+    const raw = await readFile(p(pg.content), "utf8");
+    const body = raw.replace(/^---\r?\n[\s\S]*?\r?\n---/, "");
+    const text = body
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/[#>*_`|[\]()-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 3000);
+    entries.push({ slug: pg.slug, title: pg.title.split("|")[0].trim(), description: pg.description, text });
+  }
+  return entries;
+}
+
 // 列表页/首页正文（派生自登记：只收源语言、可发布、render 页；en 内容成规模后再出 en 版列表）。
 async function buildDerivedPages(publishable) {
   const listed = pages.filter(
@@ -395,6 +415,7 @@ async function buildDerivedPages(publishable) {
     ].join("\n  ");
 
   const out = [];
+  out.push({ path: "search-index.json", loc: null, html: JSON.stringify(await buildSearchIndex(withFm)) });
   if (products.length) {
     const t = "起重机产品目录 | DGCRANE";
     const d = `DGCRANE 起重机产品目录：${products.map(({ pg }) => pg.title.split("|")[0].trim()).join("、")}。`;
@@ -415,6 +436,52 @@ async function buildDerivedPages(publishable) {
         wrap(listingSection("案例与文章", posts.map(({ pg, fm }) => cardHtml(pg, fm))), "案例与文章", `共 ${posts.length} 篇`),
         { title: t, description: d, seo: seoFor("posts/", t, d) },
       ),
+    });
+  }
+  {
+    // 站内搜索结果页（noindex，不进 sitemap）：自包含 HTML + 页内 JS 读静态索引，零运行时组装。
+    const t = "站内搜索 | DGCRANE";
+    const body = `<div class="wrap" style="max-width:900px;margin:40px auto 80px;padding:0 20px">
+  <h1 style="font-size:26px;color:#001A4F;margin:0 0 24px">站内搜索</h1>
+  <div id="search-results"><p style="color:#666">加载中…</p></div>
+</div>
+<script>
+(function () {
+  var q = (new URLSearchParams(location.search).get("s") || "").trim();
+  var box = document.getElementById("search-results");
+  var input = document.getElementById("s");
+  if (input) input.value = q;
+  if (!q) { box.innerHTML = '<p style="color:#666">请输入关键词后搜索。</p>'; return; }
+  fetch("/search-index.json").then(function (r) { return r.json(); }).then(function (idx) {
+    var terms = q.toLowerCase().split(/\\s+/).filter(Boolean);
+    var hits = idx.filter(function (e) {
+      var hay = (e.title + " " + e.description + " " + e.text).toLowerCase();
+      return terms.every(function (t) { return hay.indexOf(t) !== -1; });
+    });
+    box.textContent = "";
+    var head = document.createElement("p");
+    head.style.cssText = "color:#666;margin:0 0 20px";
+    head.textContent = "“" + q + "” 共 " + hits.length + " 条结果";
+    box.appendChild(head);
+    hits.forEach(function (e) {
+      var item = document.createElement("div");
+      item.style.cssText = "margin:0 0 22px";
+      var a = document.createElement("a");
+      a.href = "/" + e.slug + "/";
+      a.style.cssText = "font-size:17px;color:#036AAE;font-weight:600";
+      a.textContent = e.title;
+      var snip = document.createElement("p");
+      snip.style.cssText = "margin:6px 0 0;color:#555;font-size:13px;line-height:1.7";
+      var hay = e.text || e.description, pos = hay.toLowerCase().indexOf(terms[0]);
+      snip.textContent = pos >= 0 ? (pos > 40 ? "…" : "") + hay.slice(Math.max(0, pos - 40), pos + 90) + "…" : e.description.slice(0, 130);
+      item.appendChild(a); item.appendChild(snip); box.appendChild(item);
+    });
+  }).catch(function () { box.innerHTML = '<p style="color:#c62828">索引加载失败，请刷新重试。</p>'; });
+})();
+</script>`;
+    out.push({
+      path: "search/index.html", loc: null,
+      html: await composeChrome(body, { title: t, description: "DGCRANE 站内搜索", seo: `<meta name="robots" content="noindex">` }),
     });
   }
   {
@@ -466,13 +533,13 @@ async function build() {
       sitemapEntries.push({ loc: pageUrl(page), lastmod: contentLastmod(page) });
   }
 
-  // 派生页：首页 + 产品目录 + 案例文章列表（从登记派生，进 sitemap）
+  // 派生页：首页 + 产品目录 + 案例文章列表 + 搜索页/索引（从登记派生；loc 为 null 的不进 sitemap）
   for (const d of await buildDerivedPages(publishableSlugs)) {
     const out = p("dist", d.path);
     await mkdir(dirname(out), { recursive: true });
     await writeFile(out, d.html, "utf8");
     console.log("built", d.path, `(${d.html.length} bytes)`);
-    sitemapEntries.push({ loc: d.loc, lastmod: new Date().toISOString().slice(0, 10) });
+    if (d.loc) sitemapEntries.push({ loc: d.loc, lastmod: new Date().toISOString().slice(0, 10) });
   }
 
   await writeFile(p("dist", "sitemap.xml"), sitemapXml(sitemapEntries), "utf8");
