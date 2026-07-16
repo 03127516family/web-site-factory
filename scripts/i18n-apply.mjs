@@ -73,7 +73,22 @@ async function apply(targetSlug, fromPath) {
   for (const field of fields) {
     // "text"（非 rich）→ applyPatch 逐字写：fm 忽略 kind；mdbody 走 String(value)。译文本就是 MD、
     // 非编辑器 HTML，绝不能触发 htmlToMd。坐标由源 doc 重算，外部传什么都不信。
-    await patchMarkdown(p(target.content), fieldCoord(srcDoc, field), "text", translations[field]);
+    const coord = fieldCoord(srcDoc, field);
+    let value = translations[field];
+    // 结构化 fm 字段（源是列表/对象，如 hero.highlights）：fieldValue 用 JSON.stringify 序列化，
+    // 故译文按同一 JSON 形态传入；此处 parse 回结构再写——patchFrontmatter 的 doc.setIn 直接落
+    // 结构会写成 YAML 列表，若把 JSON 字符串原样 setIn 则被当普通字符串，列表结构被压塌（数据损坏）。
+    if (coord.startsWith("fm:")) {
+      const srcVal = field.split(".").reduce((o, s) => (o == null ? undefined : o[s]), srcDoc.fm);
+      if (srcVal !== null && typeof srcVal === "object") {
+        try {
+          value = JSON.parse(translations[field]);
+        } catch {
+          throw new Error(`字段 ${field} 是结构化数据（列表/对象），译文须是合法 JSON：${String(translations[field]).slice(0, 80)}`);
+        }
+      }
+    }
+    await patchMarkdown(p(target.content), coord, "text", value);
   }
   await markTranslated(target, fields); // 一次抬 translated_rev 到源戳 + 一条 translate 事件
   return { target: targetSlug, applied: fields };
