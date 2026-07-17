@@ -43,6 +43,33 @@ body:
   img_result2: /assets/img/post/32T-Rail-Mounted-Container-Gantry-Crane-for-Russia.png
 inquiry_form:
   title: 填写您的详细资料，我们将在24小时内给您答复!
+i18n_rev:
+  breadcrumb.current: 1
+  title: 1
+  author.name: 1
+  lead: 1
+  body.h_req: 1
+  req: 1
+  body.h_solution: 1
+  body.h_lowtemp: 1
+  lowtemp: 1
+  body.h_localization: 1
+  localization: 1
+  body.h_safety: 1
+  safety: 1
+  body.h_transport: 1
+  transport: 1
+  body.h_delivery: 1
+  delivery: 1
+  body.h_summary: 1
+  summary: 1
+  body.h_getquote: 1
+  getquote: 1
+  author.title: 1
+  author.bio: 1
+  inquiry_form.title: 1
+  page.title: 1
+  page.description: 1
 ---
 
 ## 导言 <!--block:lead-->
