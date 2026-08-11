@@ -26,6 +26,13 @@ export function extractImages(rawText) {
 
 // ---------- URL 剥壳（启发式，对 dgcrane 旧站调优；剥不好用户改贴文本） ----------
 export function stripHtml(html) {
+  // dgcrane 旧站产品页：优先抽 #product 主容器（§7：标题→询盘在其内，related-products 在其外）；抽不到回退整页剥
+  const start = html.match(/<div[^>]*id=["']product["'][^>]*>/i)
+  if (start) {
+    const rest = html.slice(start.index)
+    const end = rest.match(/<div[^>]*id=["']related-products["'][^>]*>/i)
+    html = end ? rest.slice(0, end.index) : rest
+  }
   const images = []
   for (const m of html.matchAll(/<img[^>]+src=["'][^"']*?\/([\w.-]+\.(?:jpe?g|png|webp))["'?\s]/gi))
     images.push(m[1])

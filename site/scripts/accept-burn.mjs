@@ -299,6 +299,16 @@ const lib = await import('../src/burn-lib.mjs')
   ok('合并后内容齐全（两块正文都在）', r5.json.overview.body && lib.verifyTree(r5.json.overview.body, blocks[1].text + '\n' + blocks[4].text).ok)
 }
 
+// ---------- T-url 容器预切钉 ----------
+{
+  const wp = '<html><body><nav>菜单</nav><div id="product"><h1>标题</h1><p>正文一</p><p>正文二 <img src="/wp-content/uploads/inner.jpg"></p></div><div id="related-products"><p>相关产品一</p><img src="/wp-content/uploads/related.jpg"></div><footer>脚</footer></body></html>'
+  const r = lib.stripHtml(wp)
+  ok('剥壳优先抽 #product 容器', r.text.includes('正文一') && !r.text.includes('相关产品一') && !r.text.includes('菜单'), '')
+  ok('容器外图片不收', r.images.includes('inner.jpg') && !r.images.includes('related.jpg'))
+  const fallback = lib.stripHtml('<html><body><p>无容器页正文</p></body></html>')
+  ok('无 #product 回退整页剥', fallback.text.includes('无容器页正文'))
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

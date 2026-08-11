@@ -101,6 +101,7 @@ export async function burn({ text, url, slug, productName }, { callAI } = {}) {
   }
   report.plan = { fields: check.fields } // 报告展示实际执行的形态（合并后），合并事件已在 notes 记录
   report.uncovered = check.uncovered
+  if (blocks.length > 200) report.notes.push(`剥壳后块数异常多（${blocks.length}），页面可能带噪，建议改贴裸文本`)
   if (check.merged?.length) report.notes.push(`同字段多条目已自动合并：${check.merged.join('、')}`)
 
   // 阶段 2：逐段烧（每段独立重修，失败段缺席标红）；消费合并后字段——同字段只烧一次、内容不丢
