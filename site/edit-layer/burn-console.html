@@ -31,7 +31,7 @@ details{margin:12px 0}pre{white-space:pre-wrap;word-break:break-all;font-size:12
 <div id="out" hidden>
   <div class="rep" id="report"></div>
   <h3>结构预览（近似；真实页面存草稿后看）</h3>
-  <iframe id="pv"></iframe>
+  <iframe id="pv" sandbox></iframe>
   <details><summary>格式化 JSON 原文</summary><pre id="json"></pre></details>
   <div class="actions">
     <button id="save">存草稿（落 content/products/，可进编辑器精修）</button>
@@ -42,6 +42,7 @@ details{margin:12px 0}pre{white-space:pre-wrap;word-break:break-all;font-size:12
 </div>
 <script>
 const $ = id => document.getElementById(id)
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 let current = null
 $('go').onclick = async () => {
   const payload = { text: $('text').value.trim() || undefined, url: $('url').value.trim() || undefined, slug: $('slug').value.trim(), productName: $('name').value.trim() }
@@ -53,11 +54,11 @@ $('go').onclick = async () => {
     const d = await r.json()
     if (!r.ok) throw new Error(d.error || r.status)
     current = { slug: payload.slug, json: d.json }
-    const sec = d.report.sections.map(s => `<div class="${s.status === 'ok' ? 'ok2' : s.status === 'repaired' ? 'rep2' : 'fail2'}">${s.key}：${s.status}（${s.attempts} 次）${s.issues.length ? ' — ' + s.issues.join('；') : ''}</div>`).join('')
+    const sec = d.report.sections.map(s => `<div class="${s.status === 'ok' ? 'ok2' : s.status === 'repaired' ? 'rep2' : 'fail2'}">${esc(s.key)}：${esc(s.status)}（${esc(s.attempts)} 次）${s.issues.length ? ' — ' + esc(s.issues.join('；')) : ''}</div>`).join('')
     $('report').innerHTML = `<b>校验报告</b>${sec}
-      <div>未覆盖原文块：${d.report.uncovered.join(', ') || '无'}（漏内容风险，人工判断）</div>
-      <div>图池：${d.report.images.join(', ') || '空'}</div>
-      ${d.report.notes.map(n => `<div>⚠ ${n}</div>`).join('')}`
+      <div>未覆盖原文块：${esc(d.report.uncovered.join(', ')) || '无'}（漏内容风险，人工判断）</div>
+      <div>图池：${esc(d.report.images.join(', ')) || '空'}</div>
+      ${d.report.notes.map(n => `<div>⚠ ${esc(n)}</div>`).join('')}`
     $('pv').srcdoc = d.previewHtml
     $('json').textContent = JSON.stringify(d.json, null, 2)
     $('out').hidden = false; $('status').textContent = '✅ 烧完，请过目后决定'
@@ -67,11 +68,12 @@ $('go').onclick = async () => {
 $('save').onclick = async () => {
   if (!current) return
   $('save').disabled = true
-  const r = await fetch('/__burn-save', { method: 'POST', body: JSON.stringify(current) })
-  const d = await r.json()
-  $('save').disabled = false
-  if (!r.ok) { $('saved').textContent = '❌ ' + (d.error || r.status); return }
-  $('saved').innerHTML = `✅ 已落 draft：<b>${d.slug}.json</b>，已重建。<a href="${d.editUrl}" target="_blank">打开编辑器精修 →</a>`
+  try {
+    const r = await fetch('/__burn-save', { method: 'POST', body: JSON.stringify(current) })
+    const d = await r.json()
+    if (!r.ok) { $('saved').textContent = '❌ ' + (d.error || r.status); return }
+    $('saved').innerHTML = `✅ 已落 draft：<b>${esc(d.slug)}.json</b>，已重建。<a href="${esc(d.editUrl)}" target="_blank">打开编辑器精修 →</a>`
+  } catch (e) { $('saved').textContent = '❌ ' + e.message } finally { $('save').disabled = false }
 }
 $('redo').onclick = () => { $('out').hidden = true; $('status').textContent = '调整输入后再点「开始烧制」' }
 $('drop').onclick = () => { current = null; $('out').hidden = true; $('status').textContent = '已丢弃，未落盘' }

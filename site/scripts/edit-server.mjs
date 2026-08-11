@@ -2,7 +2,7 @@
 // POC-5 编辑服务（8092）：静态(dist) + 编辑层注入 + /__save 写回端点。
 // 写回链：应用补丁 → schema 校验（V4 拒收在此）→ 落盘 → astro build 重建 → 响应。
 import http from 'node:http'
-import { readFileSync, writeFileSync, existsSync, statSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, statSync, rmSync } from 'node:fs'
 import { join, dirname, extname, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
@@ -219,7 +219,9 @@ const server = http.createServer(async (req, res) => {
       const { text, url, slug, productName } = JSON.parse(body)
       if ((!text && !url) || !slug || !productName) throw new Error('缺参数：text/url 二选一 + slug + productName')
       if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('slug 非法')
+      console.log(`  [burn] 开始烧制 slug=${slug}`)
       const { json, report, previewHtml } = await burn({ text, url, slug, productName })
+      console.log(`  [burn] 烧制完成 slug=${slug}`)
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true, json, report, previewHtml }))
       return
@@ -228,9 +230,15 @@ const server = http.createServer(async (req, res) => {
       let body = ''
       for await (const chunk of req) body += chunk
       const { slug, json } = JSON.parse(body)
+      if (!json || typeof json !== 'object' || !json.page) throw new Error('json 缺失或非法')
       const final = writeDraft(json, slug) // 撞名加序号 + 全树 schema + 强制 draft
       console.log(`  [burn] 落 draft: content/products/${final}.json`)
-      await rebuild()
+      try {
+        await rebuild()
+      } catch (e) {
+        rmSync(join(SITE, 'content/products', `${final}.json`)) // 毒草稿不留在盘上祸害后续 rebuild
+        throw new Error(`落盘成功但重建失败，已自动删除该草稿：${e.message}`)
+      }
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true, slug: final, editUrl: `/products/${final}/` }))
       return
@@ -261,4 +269,4 @@ const server = http.createServer(async (req, res) => {
   }
 })
 server.requestTimeout = 600_000
-server.listen(PORT, () => console.log(`编辑服务 → http://localhost:${PORT}/products/single-girder-eot-cranes/`))
+server.listen(PORT, '127.0.0.1', () => console.log(`编辑服务 → http://localhost:${PORT}/products/single-girder-eot-cranes/`))
