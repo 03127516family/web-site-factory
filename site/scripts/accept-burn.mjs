@@ -102,6 +102,41 @@ const lib = await import('../src/burn-lib.mjs')
   ok('similarToAny 不命中', !lib.similarToAny('企业实力展示', ['概述', '主要参数：'], 0.8))
 }
 
+// ---------- T3.1 审查补钉：schema 拒收路径 + 表格块溯源 ----------
+{
+  let threw = false
+  try { lib.verifyTree({ type: 'doc', content: [{ type: 'bogus' }] }, '任何原文') } catch (e) { threw = /schema 拒收/.test(e.message) }
+  ok('verifyTree 畸形树先过 schema 拒收', threw)
+  const tbl = lib.mdToDoc('| 容量 | 跨度 |\n| --- | --- |\n| 3.2-80吨 | 4-31.5米 |')
+  const v = lib.verifyTree(tbl, '容量 3.2-80吨，跨度 4-31.5米。')
+  ok('表格树逐单元格溯源通过', v.ok, v.failures[0])
+}
+
+// ---------- T4 组装 / 预览 ----------
+{
+  const sectionResults = [
+    { key: 'overview', shape: 'section', data: { title: '概述', body_md: '欧式桥式起重机广泛用于机械制造、石油、石化等行业。' } },
+    { key: 'specs', shape: 'list', data: { items: ['容量 3.2-80吨', '跨度长度 4-31.5米'] } },
+    { key: 'hero.headline', shape: 'text', data: { text: '欧式桥式起重机' } },
+    { key: 'page.description', shape: 'seo', data: { text: '欧式桥式起重机制造商，3.2-80吨，出口经验丰富。' } },
+  ]
+  const j = await lib.assemble({
+    slug: 'overhead-cranes-for-sale-burn', productName: '欧式桥式起重机',
+    sectionResults, imagePool: [{ caption: '横梁', name: 'cross-girder3.jpg' }],
+  })
+  ok('组装 page 骨架', j.page.slug === 'products/overhead-cranes-for-sale-burn' && j.page.status === 'draft' && j.page.family === 'product@1' && j.page.type === 'product')
+  ok('page.title 站级拼法', j.page.title === '欧式桥式起重机 - DGCRANE')
+  ok('chrome 站级默认', j.inquiry_form.form_id === 713 && j.breadcrumb.trail[0].label === '首页' && j.breadcrumb.current === '欧式桥式起重机')
+  ok('section 落 title+树', j.overview.title === '概述' && j.overview.body.type === 'doc')
+  ok('specs 落 [{text}]', j.specs.length === 2 && j.specs[0].text === '容量 3.2-80吨')
+  ok('gallery 吃图池且带 alt', j.gallery[0].image === 'cross-girder3.jpg' && j.gallery[0].alt === '横梁')
+  ok('summary.cta 站级默认', j.summary.cta === '报价要求')
+  ok('version=1 且无杂键', j.version === 1 && !('_notes' in j))
+
+  const html = lib.previewHtml(j)
+  ok('预览含标题/正文/规格/图', html.includes('欧式桥式起重机') && html.includes('机械制造') && html.includes('3.2-80吨') && html.includes('cross-girder3.jpg'))
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

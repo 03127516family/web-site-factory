@@ -181,3 +181,70 @@ export function similarToAny(title, candidates, threshold = 0.9) {
     return t === s || (t.length >= 2 && s.includes(t)) || (s.length >= 2 && t.includes(s)) || similarity(t, s) >= threshold
   })
 }
+
+// ---------- 组装：结构归代码，AI 的值栽进产品超集骨架；只返回 JSON 本体 ----------
+export async function assemble({ slug, productName, sectionResults, imagePool = [] }) {
+  const j = {
+    version: 1,
+    page: {
+      slug: `products/${slug}`, type: 'product', lang: 'zh-CN',
+      title: `${productName} - DGCRANE`,
+      description: '', family: 'product@1', status: 'draft',
+    },
+    title: productName,
+    breadcrumb: { current: productName, trail: [{ label: '首页', url: 'https://www.dgcrane.com/zh/' }] },
+    inquiry_form: { type: 'inquiry-form', form_id: 713, title: '填写您的详细资料，我们将在24小时内给您答复!' },
+    summary: { cta: '报价要求' },
+    hero: {},
+  }
+  for (const r of sectionResults) {
+    if (!r.data) continue // 失败段缺席（超集裁剪天然支持）
+    if (r.shape === 'section') {
+      const tree = mdToDoc(r.data.body_md)
+      validateDoc(tree, `${r.key}.body`)
+      j[r.key] = { title: r.data.title, body: tree }
+    } else if (r.key === 'specs') {
+      j.specs = r.data.items.map(text => ({ text }))
+    } else if (r.key === 'summary.intro') {
+      j.summary.intro = r.data.text
+    } else if (r.key === 'hero.headline') {
+      j.hero.headline = r.data.text
+    } else if (r.key === 'hero.highlights') {
+      j.hero.highlights = r.data.items
+    } else if (r.key === 'page.description') {
+      j.page.description = r.data.text
+    }
+  }
+  if (imagePool.length) {
+    j.gallery = []
+    for (const { caption, name } of imagePool) {
+      const dims = await probe(name) // 缺图 {} —— known-leftover 惯例
+      j.gallery.push({ image: name, alt: caption || productName, ...dims })
+    }
+  }
+  return j
+}
+
+// ---------- 近似预览（结构预览非像素级；真实页面存草稿后 dist-edit 看） ----------
+export function previewHtml(j) {
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const sections = SECTION_CATALOG.filter(c => c.shape === 'section' && j[c.key])
+    .map(c => `<section><h3>${esc(j[c.key].title)}</h3>${renderDoc(j[c.key].body)}</section>`).join('\n')
+  const specs = j.specs?.length ? `<section><h3>主要参数</h3><ul>${j.specs.map(s => `<li>${esc(s.text)}</li>`).join('')}</ul></section>` : ''
+  const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="/assets/img/product/${esc(g.image)}" alt="${esc(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
+  return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
+body{font:14px/1.7 -apple-system,"PingFang SC",sans-serif;max-width:860px;margin:20px auto;padding:0 16px;color:#222}
+h1{border-bottom:2px solid #2563eb;padding-bottom:8px}h3{color:#1e40af;margin-top:28px}
+.meta{background:#f6f7f9;border-radius:8px;padding:10px 14px;font-size:13px;color:#555}
+table{border-collapse:collapse}td,th{border:1px solid #ccc;padding:4px 10px}
+</style></head><body>
+<h1>${esc(j.title)}</h1>
+<div class="meta">slug: ${esc(j.page.slug)} ｜ status: draft ｜ SEO: ${esc(j.page.description || '（缺）')}</div>
+${j.hero?.headline ? `<p><b>${esc(j.hero.headline)}</b></p>` : ''}
+${j.hero?.highlights?.length ? `<ul>${j.hero.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+${j.summary?.intro ? `<p>${esc(j.summary.intro)}</p>` : ''}
+${specs}
+${sections}
+${gallery}
+</body></html>`
+}
