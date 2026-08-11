@@ -81,6 +81,27 @@ const lib = await import('../src/burn-lib.mjs')
   ok('越界高值不冤枉后续字段', r5.errors.some(e => /越界/.test(e)) && !r5.errors.some(e => /单调|顺序/.test(e)))
 }
 
+// ---------- T3 规范化 / 相似度 / 溯源 ----------
+{
+  ok('normalizeText 全角半角空白归一', lib.normalizeText('容量： ３．２-80吨　IP54') === '容量:3.2-80吨ip54')
+
+  const slice = '欧式桥式起重机广泛用于机械制造、石油、石化等行业的车间和仓库。容量 3.2-80吨，跨度 4-31.5米。'
+  const goodTree = lib.mdToDoc('广泛用于机械制造、石油、石化等行业的车间和仓库。\n\n- 容量 3.2-80吨\n- 跨度 4-31.5米')
+  const v1 = lib.verifyTree(goodTree, slice)
+  ok('逐字树通过', v1.ok, v1.failures[0])
+
+  const badTree = lib.mdToDoc('起重能力 100 吨，全球最大。') // 编造：原文没有
+  const v2 = lib.verifyTree(badTree, slice)
+  ok('凑字段树被溯源拒收', !v2.ok && v2.failures.length === 1, v2.failures[0])
+
+  ok('similarity 近义高分（纯 Dice）', lib.similarity('欧式桥式起重机', '欧式桥式起重机！') >= 0.9)
+  ok('similarity 相异低分', lib.similarity('欧式桥式起重机', '门式起重机参数表') < 0.9)
+
+  ok('similarToAny 包含即中', lib.similarToAny('主要参数', ['概述', '主要参数：', '简介'], 0.8))
+  ok('similarToAny 完全一致', lib.similarToAny('概述', ['概述', '主要参数：'], 0.9))
+  ok('similarToAny 不命中', !lib.similarToAny('企业实力展示', ['概述', '主要参数：'], 0.8))
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

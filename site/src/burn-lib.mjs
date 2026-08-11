@@ -130,3 +130,54 @@ export function checkPlan(plan, blocks) {
   for (const b of blocks) if (!seen.has(b.n)) uncovered.push(b.n)
   return { errors, uncovered }
 }
+
+// ---------- 规范化：溯源比较的唯一口径（全角→半角、标点归一、去空白、拉丁小写） ----------
+const FW = s => s.replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+export function normalizeText(s) {
+  return FW(String(s))
+    .replace(/[，。：；、（）【】％～？！]/g, c => ({ '，': ',', '。': '.', '：': ':', '；': ';', '、': ',', '（': '(', '）': ')', '【': '[', '】': ']', '％': '%', '～': '~', '？': '?', '！': '!' }[c]))
+    .replace(/\s+/g, '')
+    .toLowerCase()
+}
+
+// ---------- 树 → 块级文字数组（段落/标题/列表项/单元格各一条；图跳过） ----------
+export function treeBlocks(node, out = []) {
+  if (node.type === 'text') return out
+  if (node.type === 'paragraph' || node.type === 'heading' || node.type === 'listItem'
+    || node.type === 'tableCell' || node.type === 'tableHeader') {
+    const t = (function flat(n) { return n.type === 'text' ? n.text : (n.content ?? []).map(flat).join('') })(node)
+    if (t.trim()) out.push(t)
+    return out
+  }
+  for (const c of node.content ?? []) treeBlocks(c, out)
+  return out
+}
+
+// ---------- 逐字溯源：树里每个块级文字，规范化后必须是原文切片的子串 ----------
+export function verifyTree(tree, srcSlice) {
+  validateDoc(tree, 'verify') // 顺手过 schema——畸形树与凑字段同罪
+  const hay = normalizeText(srcSlice)
+  const failures = treeBlocks(tree).filter(t => !hay.includes(normalizeText(t)))
+  return { ok: failures.length === 0, failures }
+}
+
+// ---------- 相似度（纯 Dice bigram；包含关系归 similarToAny 管，不在这里特判） ----------
+export function similarity(a, b) {
+  const [x, y] = [normalizeText(a), normalizeText(b)]
+  if (x === y) return 1
+  if (x.length < 2 || y.length < 2) return 0
+  const bg = s => { const m = new Map(); for (let i = 0; i < s.length - 1; i++) { const k = s.slice(i, i + 2); m.set(k, (m.get(k) ?? 0) + 1) } return m }
+  const [mx, my] = [bg(x), bg(y)]
+  let hit = 0
+  for (const [k, v] of mx) hit += Math.min(v, my.get(k) ?? 0)
+  return (2 * hit) / (x.length - 1 + y.length - 1)
+}
+
+// ---------- 标题级判定：规范化后互相包含 或 Dice ≥ 阈值，任一即中 ----------
+export function similarToAny(title, candidates, threshold = 0.9) {
+  const t = normalizeText(title)
+  return candidates.some(c => {
+    const s = normalizeText(c)
+    return t === s || (t.length >= 2 && s.includes(t)) || (s.length >= 2 && t.includes(s)) || similarity(t, s) >= threshold
+  })
+}
