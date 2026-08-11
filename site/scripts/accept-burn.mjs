@@ -152,6 +152,50 @@ const lib = await import('../src/burn-lib.mjs')
   ok('未知字段/shape 组装即炸不静默丢', dropped)
 }
 
+// ---------- T5 burn() 编排（注入假 callAI，无 key 全链） ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+  const raw = readFileSync(RAW, 'utf8')
+  const blocks = lib.numberBlocks(raw)
+
+  // 假 DeepSeek：规划按出现顺序；值从原文切片取（天然逐字）；标题用产品名（规则允许）
+  const fake = async (messages, tag) => {
+    if (tag === 'plan') return { fields: [{ field: 'hero.headline', blocks: [1] }, { field: 'overview', blocks: [2] }, { field: 'specs', blocks: [3] }] }
+    if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text.split('。').slice(0, 2).join('。') + '。' }
+    if (tag === 'specs') return { items: ['容量 3.2-80吨', '跨度长度 4-31.5米'] }
+    if (tag === 'hero.headline') return { text: '欧式桥式起重机' }
+    throw new Error('假 caller 未覆盖: ' + tag)
+  }
+  const { json: j, report } = await burner.burn(
+    { text: raw, slug: 't5-smoke', productName: '欧式桥式起重机' },
+    { callAI: fake })
+  ok('burn 返回整页 JSON', j.page.slug === 'products/t5-smoke' && j.overview?.body?.type === 'doc' && j.specs?.length === 2)
+  ok('report 三段全 ok', report.sections.every(s => s.status === 'ok'), report.sections.map(s => `${s.key}:${s.status}`).join(','))
+  ok('report 携带未覆盖块清单', Array.isArray(report.uncovered) && report.uncovered.length > 0)
+
+  // 假 caller 先凑字段、被退货后修好：验证段级重修循环
+  let calls = 0
+  let sawRepair = false
+  const liarThenFix = async (messages, tag) => {
+    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
+    calls++
+    if (messages.at(-1).content.includes('溯源拒收')) sawRepair = true
+    if (calls === 1) return { title: '欧式桥式起重机', body_md: '本公司成立于 1990 年，是全球最大的起重机制造商。' } // 编造
+    return { title: '欧式桥式起重机', body_md: blocks[1].text }
+  }
+  const r2 = await burner.burn({ text: raw, slug: 't5-repair', productName: '欧式桥式起重机' }, { callAI: liarThenFix })
+  ok('凑字段触发重修且最终修复', r2.report.sections[0].status === 'repaired' && calls >= 2, `calls=${calls}`)
+  ok('重修提示带了拒收原因', sawRepair)
+
+  // 屡教不改：段标 failed 且缺席，不静默出货
+  const alwaysLiar = async (messages, tag) => tag === 'plan'
+    ? { fields: [{ field: 'overview', blocks: [2] }] }
+    : { title: '欧式桥式起重机', body_md: '纯属编造的内容，原文绝对没有这句话。' }
+  const r3 = await burner.burn({ text: raw, slug: 't5-fail', productName: '欧式桥式起重机' }, { callAI: alwaysLiar })
+  ok('屡教不改段 failed 且 JSON 中缺席', r3.report.sections[0].status === 'failed' && r3.json.overview === undefined)
+  ok('failed 段进 notes 提示', r3.report.notes.some(n => /烧败|缺席|标红/.test(n)))
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)
