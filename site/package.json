@@ -1,0 +1,36 @@
+{
+  "name": "dgcrane-site",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/link-assets.mjs",
+    "preview": "astro preview",
+    "geom": "node scripts/geom-check.mjs",
+    "i18n:status": "node scripts/i18n-status.mjs",
+    "i18n:touch": "node scripts/i18n-touch.mjs",
+    "i18n:apply": "node scripts/i18n-apply.mjs",
+    "i18n:registry": "node scripts/i18n-registry.mjs",
+    "accept:poc5": "node scripts/accept-poc5.mjs",
+    "accept:f3": "node scripts/accept-f3.mjs",
+    "accept:burn": "node scripts/accept-burn.mjs",
+    "bundle:edit": "esbuild edit-layer/edit-layer.js --bundle --format=iife --outfile=edit-layer/dist/edit-layer.js",
+    "edit": "npm run bundle:edit && node scripts/edit-server.mjs"
+  },
+  "dependencies": {
+    "astro": "^6.0.5"
+  },
+  "devDependencies": {
+    "@tiptap/core": "^3.29.2",
+    "@tiptap/extension-document": "^3.29.2",
+    "@tiptap/extension-image": "^3.29.2",
+    "@tiptap/extension-link": "^3.29.2",
+    "@tiptap/extension-table": "^3.29.2",
+    "@tiptap/extension-table-cell": "^3.29.2",
+    "@tiptap/extension-table-header": "^3.29.2",
+    "@tiptap/extension-table-row": "^3.29.2",
+    "@tiptap/starter-kit": "^3.29.2",
+    "playwright-core": "^1.62.1"
+  }
+}
