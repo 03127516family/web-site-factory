@@ -30,7 +30,7 @@ export function stripHtml(html) {
   const start = html.match(/<div[^>]*id=["']product["'][^>]*>/i)
   if (start) {
     const rest = html.slice(start.index)
-    const end = rest.match(/<div[^>]*id=["']related-products["'][^>]*>/i)
+    const end = rest.match(/<div[^>]*id=["'](?:related-products|crane-related|footer)["'][^>]*>/i) // 旧站模版的正文终止标记（相关区或 #footer div）
     html = end ? rest.slice(0, end.index) : rest
   }
   const images = []
