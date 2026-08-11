@@ -21,7 +21,7 @@ export function extractImages(rawText) {
   const re = /（\s*配图\s*[:：]?\s*([^）]*?)([\w.-]+\.(?:jpe?g|png|webp))\s*）/gi
   for (const m of rawText.matchAll(re))
     out.push({ caption: m[1].trim(), name: m[2] })
-  return out
+  return [...new Map(out.map(i => [i.name, i])).values()] // 同名图去重（重复配图标记不重复进 gallery）
 }
 
 // ---------- URL 剥壳（启发式，对 dgcrane 旧站调优；剥不好用户改贴文本） ----------

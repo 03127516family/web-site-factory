@@ -255,19 +255,29 @@ const lib = await import('../src/burn-lib.mjs')
   const r4 = await burner.burn({ text: raw, slug: 't51-seo', productName: '欧式桥式起重机' }, { callAI: withSeo })
   ok('seo 字段烧出后进 notes 标出', r4.json.page.description === 'AI 概括的描述。' && r4.report.notes.some(n => /概括|豁免|人工/.test(n)))
 
-  // writeDraft：撞名序号 / 强制 draft / 非法 slug（写完清理）
+  // writeDraft：撞名序号 / 强制 draft / 非法 slug（try/finally 保证清理，钉炸了也不留毒草稿）
   const jx = await lib.assemble({ slug: 'wd-test', productName: '写回测试', sectionResults: [], imagePool: [] })
   const f1 = burner.writeDraft(jx, 'wd-test')
   const jx2 = await lib.assemble({ slug: 'wd-test', productName: '写回测试2', sectionResults: [], imagePool: [] })
   const f2 = burner.writeDraft(jx2, 'wd-test')
   const p1 = join(SITE, 'content/products', f1 + '.json')
   const p2 = join(SITE, 'content/products', f2 + '.json')
-  ok('writeDraft 撞名加序号', f1 === 'wd-test' && f2 === 'wd-test-2' && existsSync(p1) && existsSync(p2))
-  ok('writeDraft 强制 draft', JSON.parse(readFileSync(p1, 'utf8')).page.status === 'draft')
-  let badSlug = false
-  try { burner.writeDraft(jx, '坏 slug!') } catch { badSlug = true }
-  ok('writeDraft 非法 slug 拒收', badSlug)
-  rmSync(p1); rmSync(p2)
+  try {
+    ok('writeDraft 撞名加序号', f1 === 'wd-test' && f2 === 'wd-test-2' && existsSync(p1) && existsSync(p2))
+    ok('writeDraft 强制 draft', JSON.parse(readFileSync(p1, 'utf8')).page.status === 'draft')
+    let badSlug = false
+    try { burner.writeDraft(jx, '坏 slug!') } catch { badSlug = true }
+    ok('writeDraft 非法 slug 拒收', badSlug)
+  } finally { rmSync(p1, { force: true }); rmSync(p2, { force: true }) }
+}
+
+// ---------- T8.5 终审补丁钉 ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+  ok('plan 提示词含 few-shot 示例', burner.planMessages('[1] 甲', ['overview']).at(-1).content.includes('示例'))
+  ok('section 提示词含示例输出', burner.sectionMessages('overview', 'section', '原文', '名').at(-1).content.includes('示例输出'))
+  const dup = lib.extractImages('（配图：一 a.jpg）\n\n（配图：一 a.jpg）\n\n（配图：二 b.jpg）')
+  ok('extractImages 按名去重', dup.length === 2 && dup[0].name === 'a.jpg' && dup[1].name === 'b.jpg')
 }
 
 // ---------- 汇总 ----------

@@ -22,7 +22,7 @@ const RULES = `你是内容结构化器，把起重机产品原料文章映射�
 export function planMessages(numbered, catalogKeys) {
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `下面是按空行预编号的产品文章块。可选字段白名单（别的字段禁止发明）：\n${catalogKeys.join('、')}\n\n把文章映射为字段计划，返回 JSON：{"fields":[{"field":"字段名","blocks":[块号…]}…]}。字段按原文出现顺序排列；每个原文块最多归一个字段；不确定的块宁可不归。\n\n${numbered}` },
+    { role: 'user', content: `下面是按空行预编号的产品文章块。可选字段白名单（别的字段禁止发明）：\n${catalogKeys.join('、')}\n\n把文章映射为字段计划，返回 JSON：{"fields":[{"field":"字段名","blocks":[块号…]}…]}。字段按原文出现顺序排列；每个原文块最多归一个字段；不确定的块宁可不归。\n\n示例（仅示意格式，内容不许照抄）：\n输入块：\n[1] 5吨单梁起重机\n[2] 5吨单梁起重机广泛用于车间物料搬运。\n[3] 主要参数：\n起重量 5吨\n跨度 3-16米\n对应返回：\n{"fields":[{"field":"hero.headline","blocks":[1]},{"field":"overview","blocks":[2]},{"field":"specs","blocks":[3]}]}\n\n现在处理真实文章：\n${numbered}` },
   ]
 }
 
@@ -33,9 +33,15 @@ export function sectionMessages(key, shape, sliceText, productName) {
     text: `返回 {"text":"一句话"}`,
     seo: `返回 {"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余禁止）"}`,
   }[shape]
+  const example = {
+    section: `示例输出：{"title":"概述","body_md":"第一段原文。\\n\\n第二段原文。"}`,
+    list: `示例输出：{"items":["起重量 5吨","跨度 3-16米"]}`,
+    text: `示例输出：{"text":"5吨单梁起重机"}`,
+    seo: `示例输出：{"text":"5吨单梁起重机制造商，跨度3-16米，出口120国。"}`,
+  }[shape]
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `产品名：${productName}\n字段：${key}\n${contract}\n\n原文块：\n${sliceText}` },
+    { role: 'user', content: `产品名：${productName}\n字段：${key}\n${contract}\n${example}\n\n原文块：\n${sliceText}` },
   ]
 }
 

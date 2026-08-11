@@ -250,8 +250,10 @@ const server = http.createServer(async (req, res) => {
       return
     }
     if (req.url === '/__burn') {
+      let html = readFileSync(join(SITE, 'edit-layer/burn-console.html'), 'utf8')
+      if (!process.env.DEEPSEEK_API_KEY) html = html.replace('</body>', '<div style="position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#dc2626;padding:10px 16px;font:14px sans-serif;text-align:center;z-index:99999">未配置 DEEPSEEK_API_KEY（服务端环境变量）——配置后重启服务再烧制</div></body>')
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      res.end(readFileSync(join(SITE, 'edit-layer/burn-console.html')))
+      res.end(html)
       return
     }
     let pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname)
@@ -269,4 +271,6 @@ const server = http.createServer(async (req, res) => {
   }
 })
 server.requestTimeout = 600_000
+const [NODE_MAJOR] = process.versions.node.split('.').map(Number)
+if (NODE_MAJOR < 22) console.warn(`⚠ 当前 node ${process.version} <22：astro rebuild 会失败（/__save、/__burn-save 的重建链路），请用 node 22+ 启动本服务`)
 server.listen(PORT, '127.0.0.1', () => console.log(`编辑服务 → http://localhost:${PORT}/products/single-girder-eot-cranes/`))
