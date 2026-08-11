@@ -40,8 +40,9 @@ export function sectionMessages(key, shape, sliceText, productName) {
 }
 
 // ---------- DeepSeek 客户端（OpenAI 兼容；单次 120s 超时；失败重试 2 次；json_object 模式） ----------
-export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, model = process.env.DEEPSEEK_MODEL || 'deepseek-chat', baseUrl = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com' } = {}) {
+export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, model = process.env.DEEPSEEK_MODEL || 'deepseek-chat', baseUrl = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com', backoffMs = 1000 } = {}) {
   if (!apiKey) throw new Error('未配置 DEEPSEEK_API_KEY（服务端环境变量，浏览器永远见不到）')
+  const fatal = msg => { const e = new Error(msg); e.noRetry = true; return e }
   return async function callAI(messages, tag) {
     let lastErr
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -52,12 +53,19 @@ export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, mo
           headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
           body: JSON.stringify({ model, temperature: 0, response_format: { type: 'json_object' }, max_tokens: 4096, messages }),
         })
-        if (!res.ok) throw new Error(`DeepSeek HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
+        if (!res.ok) {
+          const body = (await res.text()).slice(0, 200)
+          if (res.status >= 400 && res.status < 500 && res.status !== 408 && res.status !== 429)
+            throw fatal(`DeepSeek HTTP ${res.status}（确定性错误，不重试）: ${body}`)
+          throw new Error(`DeepSeek HTTP ${res.status}: ${body}`)
+        }
         const data = await res.json()
-        return JSON.parse(data.choices?.[0]?.message?.content ?? '') // 非法 JSON 进 catch → 重试
+        if (data.choices?.[0]?.finish_reason === 'length') throw fatal('输出被 max_tokens 截断（段太长，重试无义）')
+        return JSON.parse(data.choices?.[0]?.message?.content ?? '')
       } catch (e) {
+        if (e.noRetry) throw new Error(`DeepSeek 调用失败（${tag}）: ${e.message}`)
         lastErr = e
-        if (attempt < 2) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+        if (attempt < 2) await new Promise(r => setTimeout(r, backoffMs * (attempt + 1)))
       }
     }
     throw new Error(`DeepSeek 调用失败（${tag}，已重试 2 次）: ${lastErr.message}`)
@@ -98,7 +106,15 @@ export async function burn({ text, url, slug, productName }, { callAI } = {}) {
     for (let attempt = 0; attempt < 3; attempt++) {
       const msgs = sectionMessages(f.field, spec.shape, src, productName)
       if (attempt > 0) msgs.push({ role: 'user', content: `上次返回被代码溯源拒收：${rec.issues.at(-1)}。只允许逐字搬运原文，请重发。` })
-      data = await callAI(msgs, f.field)
+      try {
+        data = await callAI(msgs, f.field)
+      } catch (e) {
+        rec.attempts = attempt + 1
+        rec.issues.push(`调用失败：${e.message}`) // 段级硬失败降级：不拖垮整次烧（设计契约=失败段缺席标红）
+        rec.status = 'failed'
+        data = null
+        break
+      }
       rec.attempts = attempt + 1
       const bad = verifyByShape(spec, data, src, productName, blocks, f.blocks)
       if (!bad) { if (attempt > 0) rec.status = 'repaired'; break }
@@ -111,6 +127,7 @@ export async function burn({ text, url, slug, productName }, { callAI } = {}) {
 
   const json = await lib.assemble({ slug, productName, sectionResults, imagePool: images })
   if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
+  if (sectionResults.some(r => r.key === 'page.description' && r.data)) report.notes.push('page.description 为 AI 概括（溯源豁免），人工过目')
   report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
   report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
   if (report.sections.some(s => s.status === 'failed')) report.notes.push('有段烧败缺席（标红），可在编辑器人工补或重新烧')
@@ -118,7 +135,7 @@ export async function burn({ text, url, slug, productName }, { callAI } = {}) {
 }
 
 // 按 shape 分级校验：返回 null=过；字符串=拒收原因
-function verifyByShape(spec, data, src, productName, blocks, ns) {
+export function verifyByShape(spec, data, src, productName, blocks, ns) {
   const firstLines = ns.map(n => blocks[n - 1].text.split('\n')[0])
   try {
     if (spec.shape === 'section') {
@@ -132,6 +149,8 @@ function verifyByShape(spec, data, src, productName, blocks, ns) {
     }
     if (spec.shape === 'list') {
       if (!Array.isArray(data?.items) || !data.items.length) return 'items 为空'
+      const badType = data.items.find(t => typeof t !== 'string' || !t.trim())
+      if (badType !== undefined) return 'items 含非字符串或空条目'
       if (spec.level === 'verbatim') {
         const hay = lib.normalizeText(src)
         const badItem = data.items.find(t => !hay.includes(lib.normalizeText(t)))
@@ -156,7 +175,7 @@ function verifyByShape(spec, data, src, productName, blocks, ns) {
 
 // ---------- 落 draft（撞名加序号；写前全树过 schema；强制 draft 不信客户端） ----------
 export function writeDraft(json, slug) {
-  if (!/^[a-z0-9][\w-]*$/.test(slug)) throw new Error('slug 非法（小写字母数字连字符）')
+  if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('slug 非法（小写字母数字连字符）')
   let final = slug, i = 2
   while (existsSync(join(SITE, 'content/products', `${final}.json`))) final = `${slug}-${i++}`
   json.page.slug = `products/${final}`
@@ -176,9 +195,11 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     console.error('用法: DEEPSEEK_API_KEY=xxx node scripts/deepseek-burn.mjs (--text 文件 | --url 地址) --slug 裸slug --name 产品名 [--save]')
     process.exit(1)
   }
-  const input = opt('text') ? { text: readFileSync(opt('text'), 'utf8') } : { url: opt('url') }
-  const { json, report } = await burn({ ...input, slug: opt('slug'), productName: opt('name') })
-  console.log(JSON.stringify(report, null, 2))
-  if (has('save')) console.log('已落 draft:', writeDraft(json, opt('slug')))
-  else console.log('（未落盘；加 --save 落 draft）')
+  try {
+    const input = opt('text') ? { text: readFileSync(opt('text'), 'utf8') } : { url: opt('url') }
+    const { json, report } = await burn({ ...input, slug: opt('slug'), productName: opt('name') })
+    console.log(JSON.stringify(report, null, 2))
+    if (has('save')) console.log('已落 draft:', writeDraft(json, opt('slug')))
+    else console.log('（未落盘；加 --save 落 draft）')
+  } catch (e) { console.error('❌ ' + e.message); process.exit(1) }
 }

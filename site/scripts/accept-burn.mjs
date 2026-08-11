@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // DeepSeek 烧制台验收（无 key 全链 mock；真 key 验收为手动步骤，见计划 Task 9）。
 // 惯例同 accept-poc5/f3：ok() 累计，结尾非零退出。
-import { readFileSync } from 'node:fs'
+import { readFileSync, existsSync, rmSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -194,6 +194,80 @@ const lib = await import('../src/burn-lib.mjs')
   const r3 = await burner.burn({ text: raw, slug: 't5-fail', productName: '欧式桥式起重机' }, { callAI: alwaysLiar })
   ok('屡教不改段 failed 且 JSON 中缺席', r3.report.sections[0].status === 'failed' && r3.json.overview === undefined)
   ok('failed 段进 notes 提示', r3.report.notes.some(n => /烧败|缺席|标红/.test(n)))
+}
+
+// ---------- T5.1 审查修复钉：降级/快败/重复字段/items 守卫/seo 标出/writeDraft ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+  const raw = readFileSync(RAW, 'utf8')
+  const blocks = lib.numberBlocks(raw)
+
+  // 段级硬失败降级 failed，不拖垮整次
+  const hardFail = async (messages, tag) => {
+    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }, { field: 'specs', blocks: [3] }] }
+    if (tag === 'overview') throw new Error('网络超时（模拟）')
+    if (tag === 'specs') return { items: ['容量 3.2-80吨'] }
+    throw new Error('未覆盖 ' + tag)
+  }
+  const r = await burner.burn({ text: raw, slug: 't51-degrade', productName: '欧式桥式起重机' }, { callAI: hardFail })
+  const ov = r.report.sections.find(s => s.key === 'overview')
+  const sp = r.report.sections.find(s => s.key === 'specs')
+  ok('段级硬失败降级 failed 不整次崩', ov.status === 'failed' && /调用失败/.test(ov.issues[0] ?? '') && sp.status === 'ok' && r.json.overview === undefined && r.json.specs.length === 1)
+
+  // 4xx 快败 / 5xx 重试满 / 截断快败（mock 全局 fetch，backoffMs:1 不等真秒）
+  const origFetch = globalThis.fetch
+  let c1 = 0
+  globalThis.fetch = async () => { c1++; return new Response('{"error":"bad key"}', { status: 401 }) }
+  let m1 = ''
+  try { await burner.createDeepseekCaller({ apiKey: 'fake', backoffMs: 1 })([], 't') } catch (e) { m1 = e.message }
+  globalThis.fetch = origFetch
+  ok('401 不重试快速失败', c1 === 1 && /401/.test(m1), `calls=${c1}`)
+
+  let c5 = 0
+  globalThis.fetch = async () => { c5++; return new Response('err', { status: 500 }) }
+  let m5 = ''
+  try { await burner.createDeepseekCaller({ apiKey: 'fake', backoffMs: 1 })([], 't') } catch (e) { m5 = e.message }
+  globalThis.fetch = origFetch
+  ok('5xx 重试满 3 次', c5 === 3 && /重试 2 次/.test(m5), `calls=${c5}`)
+
+  let cL = 0
+  globalThis.fetch = async () => { cL++; return new Response(JSON.stringify({ choices: [{ message: { content: '{"a":' }, finish_reason: 'length' }] }), { status: 200 }) }
+  let mL = ''
+  try { await burner.createDeepseekCaller({ apiKey: 'fake', backoffMs: 1 })([], 't') } catch (e) { mL = e.message }
+  globalThis.fetch = origFetch
+  ok('max_tokens 截断不重试报段太长', cL === 1 && /截断/.test(mL), `calls=${cL}`)
+
+  // 重复字段打回
+  const dup = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [5] }] }, blocks)
+  ok('重复字段被打回', dup.errors.some(e => /重复/.test(e)))
+
+  // items 类型/空守卫（verifyByShape 已 named export）
+  const specList = { key: 'specs', shape: 'list', level: 'verbatim' }
+  ok('list 空条目被拒', burner.verifyByShape(specList, { items: ['容量 3.2-80吨', ''] }, '容量 3.2-80吨', '名', blocks, [3]) !== null)
+  ok('list 非字符串条目被拒', burner.verifyByShape(specList, { items: [5] }, '容量 5 吨', '名', blocks, [3]) !== null)
+
+  // seo 概括字段进 notes 标出
+  const withSeo = async (messages, tag) => {
+    if (tag === 'plan') return { fields: [{ field: 'page.description', blocks: [2] }] }
+    if (tag === 'page.description') return { text: 'AI 概括的描述。' }
+    throw new Error('未覆盖 ' + tag)
+  }
+  const r4 = await burner.burn({ text: raw, slug: 't51-seo', productName: '欧式桥式起重机' }, { callAI: withSeo })
+  ok('seo 字段烧出后进 notes 标出', r4.json.page.description === 'AI 概括的描述。' && r4.report.notes.some(n => /概括|豁免|人工/.test(n)))
+
+  // writeDraft：撞名序号 / 强制 draft / 非法 slug（写完清理）
+  const jx = await lib.assemble({ slug: 'wd-test', productName: '写回测试', sectionResults: [], imagePool: [] })
+  const f1 = burner.writeDraft(jx, 'wd-test')
+  const jx2 = await lib.assemble({ slug: 'wd-test', productName: '写回测试2', sectionResults: [], imagePool: [] })
+  const f2 = burner.writeDraft(jx2, 'wd-test')
+  const p1 = join(SITE, 'content/products', f1 + '.json')
+  const p2 = join(SITE, 'content/products', f2 + '.json')
+  ok('writeDraft 撞名加序号', f1 === 'wd-test' && f2 === 'wd-test-2' && existsSync(p1) && existsSync(p2))
+  ok('writeDraft 强制 draft', JSON.parse(readFileSync(p1, 'utf8')).page.status === 'draft')
+  let badSlug = false
+  try { burner.writeDraft(jx, '坏 slug!') } catch { badSlug = true }
+  ok('writeDraft 非法 slug 拒收', badSlug)
+  rmSync(p1); rmSync(p2)
 }
 
 // ---------- 汇总 ----------

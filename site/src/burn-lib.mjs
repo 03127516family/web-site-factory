@@ -99,6 +99,7 @@ export function loadCatalog(astroPath, refJsonPath) {
 // ---------- 规划表硬查（纯集合运算 + specs 数字启发式；AI 输出边界，畸形输入一律转可喂回的错误） ----------
 export function checkPlan(plan, blocks) {
   const errors = []
+  const seenFields = new Set()
   if (!plan || typeof plan !== 'object' || !Array.isArray(plan.fields))
     return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n) }
   if (plan.fields.length === 0)
@@ -110,6 +111,8 @@ export function checkPlan(plan, blocks) {
   for (const f of plan.fields) {
     if (!f || typeof f !== 'object') { errors.push('规划条目不是对象'); continue }
     if (!known.has(f.field)) { errors.push(`未知字段 "${f.field}"`); continue }
+    if (seenFields.has(f.field)) { errors.push(`字段重复 "${f.field}"`); continue }
+    seenFields.add(f.field)
     if (!Array.isArray(f.blocks) || !f.blocks.length) { errors.push(`${f.field}: blocks 为空`); continue }
     const valid = []
     for (const b of f.blocks) {
