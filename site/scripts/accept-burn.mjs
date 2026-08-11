@@ -28,6 +28,44 @@ const lib = await import('../src/burn-lib.mjs')
   ok('stripHtml 去脚本样式导航页脚、留正文、收图', text.includes('第一段') && text.includes('第二段') && !text.includes('菜单') && !text.includes('脚') && !text.includes('y()') && images.includes('ab-c.jpg'))
 }
 
+// ---------- T2 字段目录 / 规划表硬查 ----------
+{
+  const blocks = lib.numberBlocks(readFileSync(RAW, 'utf8'))
+  const catalog = lib.loadCatalog(
+    join(SITE, 'src/components/ProductPage.astro'),
+    join(SITE, 'content/products/single-girder-eot-cranes.json'))
+  const keys = catalog.map(c => c.key)
+  for (const k of ['overview', 'introduction', 'advantages', 'protection', 'specs', 'hero.headline', 'page.description'])
+    ok(`目录含 ${k} 且已核验`, keys.includes(k) && catalog.find(c => c.key === k).verified)
+
+  const good = { fields: [
+    { field: 'hero.headline', blocks: [1] },
+    { field: 'overview', blocks: [2] },
+    { field: 'specs', blocks: [3] },
+    { field: 'introduction', blocks: [6] },
+  ] }
+  const r1 = lib.checkPlan(good, blocks)
+  ok('合法规划表零 error', r1.errors.length === 0, r1.errors[0])
+
+  const bad = { fields: [
+    { field: 'overview', blocks: [2, 3] },
+    { field: 'specs', blocks: [3, 4] },            // 重叠
+    { field: 'no_such_field', blocks: [5] },       // 未知字段
+    { field: 'introduction', blocks: [1, 9999] },  // 越界 + 顺序在 overview 前（非单调）
+  ] }
+  const r2 = lib.checkPlan(bad, blocks)
+  const msg = r2.errors.join(';')
+  ok('重叠被抓', /重叠/.test(msg))
+  ok('未知字段被抓', /未知字段/.test(msg))
+  ok('块号越界被抓', /越界/.test(msg))
+  ok('非单调被抓', /单调|顺序/.test(msg))
+  ok('未覆盖块进 uncovered', r2.uncovered.length > 0 && r2.uncovered.includes(7))
+
+  const noDigit = { fields: [{ field: 'specs', blocks: [2] }] } // 块2是纯散文无数字
+  const r3 = lib.checkPlan(noDigit, blocks)
+  ok('specs 映射无数字块被打回', r3.errors.some(e => /数字/.test(e)), r3.errors[0])
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

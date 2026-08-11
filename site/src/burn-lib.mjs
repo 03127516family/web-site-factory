@@ -55,3 +55,68 @@ export async function fetchSource({ text, url }) {
     return { rawText, images: images.map(name => ({ caption: '', name })) }
   } finally { clearTimeout(timer) }
 }
+
+// ---------- 字段目录（spec §5）：结构真相=ProductPage.astro + 参照 JSON，装载时自校验 ----------
+// shape: section={title,body_md} | list=文本数组 | text=单文本 | seo=概括豁免
+export const SECTION_CATALOG = [
+  // 正文段（title 相似级 + body 逐字级树），全部可选——缺段=缺席
+  { key: 'overview',      shape: 'section', level: 'verbatim' },
+  { key: 'introduction',  shape: 'section', level: 'verbatim' },
+  { key: 'advantages',    shape: 'section', level: 'verbatim' },
+  { key: 'protection',    shape: 'section', level: 'verbatim' },
+  { key: 'main_features', shape: 'section', level: 'verbatim' },
+  { key: 'basic_params',  shape: 'section', level: 'verbatim' },
+  { key: 'spec_compare',  shape: 'section', level: 'verbatim' },
+  { key: 'spec_detail',   shape: 'section', level: 'verbatim' },
+  { key: 'which_better',  shape: 'section', level: 'verbatim' },
+  { key: 'summary_intro', shape: 'section', level: 'verbatim' }, // 组件只渲 body（无 title 槽，loadCatalog 特判）
+  { key: 'installation',  shape: 'section', level: 'verbatim' },
+  // 特殊字段
+  { key: 'specs',           shape: 'list', level: 'verbatim' }, // [{text}]，规格数字逐字
+  { key: 'summary.intro',   shape: 'text', level: 'verbatim' },
+  { key: 'hero.headline',   shape: 'text', level: 'similar' },  // 允许等于产品名
+  { key: 'hero.highlights', shape: 'list', level: 'similar' },
+  { key: 'page.description',shape: 'seo',  level: 'summary' },  // 概括豁免+报告标出
+]
+// v1 不烧（缺席或站级默认，报告注明）：gallery 以外的图组、related_products、case、
+// production_flow、components_images、crane_types_images、breadcrumb.trail、inquiry_form
+
+// 双源核验：组件字段看 .astro data-field（specs 特判 spec.text）；page.* 等 chrome 层看参照 JSON 实际键
+export function loadCatalog(astroPath, refJsonPath) {
+  const fields = new Set([...readFileSync(astroPath, 'utf8').matchAll(/data-field="([^"]+)"/g)].map(m => m[1]))
+  const ref = JSON.parse(readFileSync(refJsonPath, 'utf8'))
+  return SECTION_CATALOG.map(c => {
+    let verified
+    if (c.key === 'summary_intro') verified = fields.has('summary_intro.body') // 组件/旧模版均只渲 body（title 为存量死数据，烧 title 仅为与存量 JSON 同构）
+    else if (c.shape === 'section') verified = fields.has(`${c.key}.title`) && fields.has(`${c.key}.body`)
+    else if (c.key === 'specs') verified = fields.has('spec.text')
+    else verified = fields.has(c.key) || getIn(ref, c.key) !== undefined
+    if (!verified) throw new Error(`目录键 ${c.key} 双源核验失败（.astro 与参照 JSON 都没有）——先对齐组件或目录`)
+    return { ...c, verified }
+  })
+}
+
+// ---------- 规划表硬查（纯集合运算 + specs 数字启发式） ----------
+export function checkPlan(plan, blocks) {
+  const errors = []
+  const known = new Set(SECTION_CATALOG.map(c => c.key))
+  const seen = new Map() // 块号 → field
+  let lastFirst = 0
+  const sliceOf = ns => blocks.filter(b => ns.includes(b.n)).map(b => b.text).join('\n')
+  for (const f of plan.fields ?? []) {
+    if (!known.has(f.field)) { errors.push(`未知字段 "${f.field}"`); continue }
+    if (!Array.isArray(f.blocks) || !f.blocks.length) { errors.push(`${f.field}: blocks 为空`); continue }
+    for (const b of f.blocks) {
+      if (!Number.isInteger(b) || b < 1 || b > blocks.length) { errors.push(`${f.field}: 块号越界 ${b}`); continue }
+      if (seen.has(b)) errors.push(`块 ${b} 重叠（${seen.get(b)} 与 ${f.field}）`)
+      seen.set(b, f.field)
+    }
+    const first = Math.min(...f.blocks)
+    if (first < lastFirst) errors.push(`${f.field}: 顺序非单调（出现在更前面的字段之前）`)
+    lastFirst = Math.max(lastFirst, first)
+    if (f.field === 'specs' && !/\d/.test(sliceOf(f.blocks))) errors.push('specs 映射的原文块里没有数字——疑似指错位置')
+  }
+  const uncovered = []
+  for (const b of blocks) if (!seen.has(b.n)) uncovered.push(b.n)
+  return { errors, uncovered }
+}
