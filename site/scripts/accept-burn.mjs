@@ -66,6 +66,21 @@ const lib = await import('../src/burn-lib.mjs')
   ok('specs 映射无数字块被打回', r3.errors.some(e => /数字/.test(e)), r3.errors[0])
 }
 
+// ---------- T2.1 checkPlan 边界加固（质量审查 Important 修复的回归钉） ----------
+{
+  const blocks = lib.numberBlocks(readFileSync(RAW, 'utf8'))
+  const r1 = lib.checkPlan(null, blocks)
+  ok('null 规划不崩且报结构非法', r1.errors.length > 0 && /结构非法/.test(r1.errors[0]))
+  const r2 = lib.checkPlan({ fields: [] }, blocks)
+  ok('空 fields 报错', r2.errors.some(e => /为空/.test(e)))
+  const r3 = lib.checkPlan({ fields: [null, { field: 'overview', blocks: [2] }] }, blocks)
+  ok('null 条目报错跳过不崩', r3.errors.some(e => /不是对象/.test(e)))
+  const r4 = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2, 'x'] }, { field: 'introduction', blocks: [1] }] }, blocks)
+  ok('脏值不污染单调判定（该抓还抓）', r4.errors.some(e => /越界/.test(e)) && r4.errors.some(e => /单调|顺序/.test(e)))
+  const r5 = lib.checkPlan({ fields: [{ field: 'overview', blocks: [9999] }, { field: 'introduction', blocks: [2] }] }, blocks)
+  ok('越界高值不冤枉后续字段', r5.errors.some(e => /越界/.test(e)) && !r5.errors.some(e => /单调|顺序/.test(e)))
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

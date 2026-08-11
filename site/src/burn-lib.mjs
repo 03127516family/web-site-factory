@@ -96,25 +96,35 @@ export function loadCatalog(astroPath, refJsonPath) {
   })
 }
 
-// ---------- 规划表硬查（纯集合运算 + specs 数字启发式） ----------
+// ---------- 规划表硬查（纯集合运算 + specs 数字启发式；AI 输出边界，畸形输入一律转可喂回的错误） ----------
 export function checkPlan(plan, blocks) {
   const errors = []
+  if (!plan || typeof plan !== 'object' || !Array.isArray(plan.fields))
+    return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n) }
+  if (plan.fields.length === 0)
+    return { errors: ['规划表 fields 为空'], uncovered: blocks.map(b => b.n) }
   const known = new Set(SECTION_CATALOG.map(c => c.key))
   const seen = new Map() // 块号 → field
   let lastFirst = 0
   const sliceOf = ns => blocks.filter(b => ns.includes(b.n)).map(b => b.text).join('\n')
-  for (const f of plan.fields ?? []) {
+  for (const f of plan.fields) {
+    if (!f || typeof f !== 'object') { errors.push('规划条目不是对象'); continue }
     if (!known.has(f.field)) { errors.push(`未知字段 "${f.field}"`); continue }
     if (!Array.isArray(f.blocks) || !f.blocks.length) { errors.push(`${f.field}: blocks 为空`); continue }
+    const valid = []
     for (const b of f.blocks) {
       if (!Number.isInteger(b) || b < 1 || b > blocks.length) { errors.push(`${f.field}: 块号越界 ${b}`); continue }
       if (seen.has(b)) errors.push(`块 ${b} 重叠（${seen.get(b)} 与 ${f.field}）`)
       seen.set(b, f.field)
+      valid.push(b)
     }
-    const first = Math.min(...f.blocks)
-    if (first < lastFirst) errors.push(`${f.field}: 顺序非单调（出现在更前面的字段之前）`)
-    lastFirst = Math.max(lastFirst, first)
-    if (f.field === 'specs' && !/\d/.test(sliceOf(f.blocks))) errors.push('specs 映射的原文块里没有数字——疑似指错位置')
+    // 单调判定只消费校验过的块号——脏值不污染后续字段（审查 Important #1）
+    if (valid.length) {
+      const first = Math.min(...valid)
+      if (first < lastFirst) errors.push(`${f.field}: 顺序非单调（出现在更前面的字段之前）`)
+      lastFirst = Math.max(lastFirst, first)
+      if (f.field === 'specs' && !/\p{Nd}/u.test(sliceOf(valid))) errors.push('specs 映射的原文块里没有数字——疑似指错位置')
+    }
   }
   const uncovered = []
   for (const b of blocks) if (!seen.has(b.n)) uncovered.push(b.n)
