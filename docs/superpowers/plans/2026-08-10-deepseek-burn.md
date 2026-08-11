@@ -28,7 +28,8 @@
 **关键设计决定（计划内锁定）：**
 - **AI 产 markdown，不产树**：rich 字段 AI 返回 `body_md` 字符串，代码 `mdToDoc` 转树 + `validateDoc`。AI 接触不到树结构，爆不了骨架。
 - **原文预编号**：`numberBlocks()` 按空行切块编 `[1][2]…`，AI 只许引用块号；规划表硬查是纯集合运算。
-- **v1 图只进 gallery**：`（配图：说明 文件名.jpg）` 标记由代码提取（说明当 alt），probe 补尺寸；`components_images`/`crane_types_images`/`production_flow`/`related_products`/`case` v1 不烧（缺席或站级默认，报告注明）。
+- **v1 图只进 gallery**：`（配图：说明 文件名.jpg）` 标记由代码提取（说明当 alt），probe 补尺寸；`components_images`/`crane_types_images`/`production_flow`/`case` v1 不烧（缺席，报告注明）。
+- **渲染器无守卫字段 = 站级默认，不许缺席**（T4 审查实证修正）：`related_products`（默认 `{type:'related-products',title:'相关产品',category:'',limit:4,seed:[]}`）、`specs`（默认 `[]`）、`hero.highlights`（默认 `[]`）、`installation.cases`（烧了 installation 则补 `[]`）——`ProductPage.astro` 对这 4 处无守卫 `.map`/属性读取，缺席即 TypeError 炸 rebuild。
 - **chrome 字段站级默认**：`breadcrumb.trail`=[首页]，`inquiry_form`=`{type:'inquiry-form',form_id:713,title:'填写您的详细资料，我们将在24小时内给您答复!'}`，`page.title`=`<产品名> - DGCRANE`，均 assemble 填、AI 不碰，报告标「需人工确认」。
 - **slug 是不带前缀的裸名**（`/^[a-z0-9][\w-]*$/`），`page.slug` = `products/<slug>`。
 - **目录自校验用双源**：组件内字段看 `.astro` 的 `data-field`（section 查 `key.title`+`key.body`，`specs` 特判 `spec.text`）；`page.*` 这类 chrome 层字段看参照 JSON（`content/products/single-girder-eot-cranes.json`）实际键。两源都不在 → 装载即抛错（结构漂移不当场炸就会静默烧歪）。
@@ -1091,3 +1092,13 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 6. `extractImages` 断言硬等 8 张太脆 → 改 `>=5` 且含已知图。
 
 另加：DeepSeek 单次调用 120s 超时（`AbortSignal.timeout`）；`assemble` 只返回 JSON 本体（notes 归 report，删掉别扭写法）；T4 断言加「无杂键」。
+
+## 执行期偏差记录（实现者发现、控制器裁决，均实证）
+
+1. **T1**：`extractImages` 正则冒号改可选（`[:：]?`）——真实裸文章 8 个配图标记中 6 个是无冒号格式 `（配图 Main-girder.jpg）`，原正则只中 2 个、过不了自己的 ≥5 断言。
+2. **T2**：`loadCatalog` 加 `summary_intro` 特判只核 `summary_intro.body`——组件与旧模版的结构真相都是 body-only（存量 JSON 的 title 是不渲染的死数据，烧 title 仅为与存量同构）；原「section 必核 title+body」对它必炸。
+3. **T2**：good 计划测试块号 `[4,5]`→真实结构 `[1]/[2]/[3]/[6]`——真实文章块 3 才是带数字规格块（「主要参数：容量…」），块 4 是「概述」标题块；计划原块号会触发 specs 数字启发式 + 与 overview 重叠。
+4. **T2 质量审查加固（Important）**：`checkPlan` 单调判定原消费未校验块号，NaN/越界高值会污染后续字段判定 → 只用 valid 块号；畸形规划（null/非对象/fields 非数组/空）原直接 TypeError → 改返回可喂回重修的错误（AI 输出边界不许崩）；条目非对象报错跳过；数字启发式 `\d`→`\p{Nd}/u` 认全角数字。回归钉 = 验收 T2.1 五条断言。
+5. **T4 质量审查（Critical，实 build 实证）**：「失败段缺席」前提对 4 个字段不成立——`ProductPage.astro` 无守卫读 `related_products.title/.seed.map`（:228-230，每烧出页必炸）、`hero.highlights.map`（:35）、`specs.map`（:53）、`installation.cases.map`（:204）→ 这 4 个改站级默认（设计决定行已同步修正），否则毒草稿会让 /__burn-save 后的每次 rebuild 全挂。另：`previewHtml` 属性插值补 `escAttr`（防 `"` 脱出 srcdoc 属性）；assemble 字段分派加终支 throw（未知 key/shape 不静默丢）。回归钉 = T4.1 五条断言。T3 审查 Minor 补钉（schema 拒收路径 + 表格溯源）= T3.1 两条断言。
+6. **T5 质量审查（2 Important + Minor 打包，实证触发场景）**：①段级 callAI 硬失败（网络超时/max_tokens 截断）原会拖垮整次烧、丢失部分报告 → 降级为该段 failed 整次继续（回归设计契约）；②4xx（除 408/429）与 `finish_reason==='length'` 属确定性失败，重试无义 → 快败（`noRetry` 标记），`backoffMs` 可注入（测试不等真秒）；③checkPlan 补重复字段打回；verifyByShape 改 named export + list 类型/空守卫；page.description 烧出进 notes 标出（补 spec §5「报告标出」的账）；writeDraft slug 收紧 `/^[a-z0-9][a-z0-9-]*$/`（原定 T7 的活提前）；CLI 包 try/catch 干净退出。回归钉 = T5.1 十一条断言（含 mock fetch 验重试次数、writeDraft 落盘自清理）。
+7. **T7 质量审查（3 Important，安全面）**：①控制台报告区 `s.issues` 嵌被拒收的 AI 原文进 innerHTML——对抗路径零点击 XSS（同源挂着 /__save 等写端点）→ 全插值过 `esc()`；②预览 iframe 无 sandbox，link mark 的 href 不查协议（`javascript:` 可混入 srcdoc）→ 加空 token `sandbox`；③服务绑 0.0.0.0，配 key 后 /__burn 的 url 参数 = 带读回 SSRF → 绑 `127.0.0.1`。Minor 打包：/__burn-save 加 null json 守卫 + rebuild 失败自动删毒草稿（防"一次坏次次挂"）、save 按钮 try/finally、burn 起止日志。另记运维注意：Astro rebuild 需 **node ≥22**（本机默认 node20 下 /__save、/__burn-save 的重建会失败）——T9 真 key 验收与日常 `npm run edit` 须用 node 22+ 起服务。
