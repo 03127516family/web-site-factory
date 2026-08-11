@@ -251,7 +251,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.url === '/__burn') {
       let html = readFileSync(join(SITE, 'edit-layer/burn-console.html'), 'utf8')
-      if (!process.env.DEEPSEEK_API_KEY) html = html.replace('</body>', '<div style="position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#dc2626;padding:10px 16px;font:14px sans-serif;text-align:center;z-index:99999">未配置 DEEPSEEK_API_KEY（服务端环境变量）——配置后重启服务再烧制</div></body>')
+      if (!process.env.DEEPSEEK_API_KEY) html = html.replace('</body>', '<style>body{padding-top:44px}</style><div style="position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#dc2626;padding:10px 16px;font:14px sans-serif;text-align:center;z-index:99999">未配置 DEEPSEEK_API_KEY（服务端环境变量）——配置后重启服务再烧制</div></body>')
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(html)
       return
