@@ -237,9 +237,11 @@ const lib = await import('../src/burn-lib.mjs')
   globalThis.fetch = origFetch
   ok('max_tokens 截断不重试报段太长', cL === 1 && /截断/.test(mL), `calls=${cL}`)
 
-  // 重复字段打回
+  // 同字段多条目：合并（不重叠）/ 仍抓（重叠）
   const dup = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [5] }] }, blocks)
-  ok('重复字段被打回', dup.errors.some(e => /重复/.test(e)))
+  ok('同字段多条目合并并记录', dup.errors.length === 0 && dup.merged?.includes('overview'), JSON.stringify(dup.merged))
+  const dupBad = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [2, 3] }] }, blocks)
+  ok('同字段块重叠仍被抓', dupBad.errors.some(e => /重叠/.test(e)))
 
   // items 类型/空守卫（verifyByShape 已 named export）
   const specList = { key: 'specs', shape: 'list', level: 'verbatim' }

@@ -99,20 +99,28 @@ export function loadCatalog(astroPath, refJsonPath) {
 // ---------- 规划表硬查（纯集合运算 + specs 数字启发式；AI 输出边界，畸形输入一律转可喂回的错误） ----------
 export function checkPlan(plan, blocks) {
   const errors = []
-  const seenFields = new Set()
   if (!plan || typeof plan !== 'object' || !Array.isArray(plan.fields))
-    return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n) }
+    return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n), merged: [] }
   if (plan.fields.length === 0)
-    return { errors: ['规划表 fields 为空'], uncovered: blocks.map(b => b.n) }
+    return { errors: ['规划表 fields 为空'], uncovered: blocks.map(b => b.n), merged: [] }
   const known = new Set(SECTION_CATALOG.map(c => c.key))
+
+  // 同字段多条目先合并（块取并集，无损——模型按块逐条表达是自然形态）；重叠块仍由主循环抓
+  const mergedList = [], byField = new Map(), merged = []
+  for (const f of plan.fields) {
+    if (f && typeof f === 'object' && known.has(f.field) && Array.isArray(f.blocks) && f.blocks.length) {
+      if (byField.has(f.field)) { byField.get(f.field).blocks.push(...f.blocks); merged.push(f.field); continue }
+      const copy = { field: f.field, blocks: [...f.blocks] }
+      byField.set(f.field, copy); mergedList.push(copy)
+    } else mergedList.push(f) // 畸形条目原样进主循环报错
+  }
+
   const seen = new Map() // 块号 → field
   let lastFirst = 0
   const sliceOf = ns => blocks.filter(b => ns.includes(b.n)).map(b => b.text).join('\n')
-  for (const f of plan.fields) {
+  for (const f of mergedList) {
     if (!f || typeof f !== 'object') { errors.push('规划条目不是对象'); continue }
     if (!known.has(f.field)) { errors.push(`未知字段 "${f.field}"`); continue }
-    if (seenFields.has(f.field)) { errors.push(`字段重复 "${f.field}"`); continue }
-    seenFields.add(f.field)
     if (!Array.isArray(f.blocks) || !f.blocks.length) { errors.push(`${f.field}: blocks 为空`); continue }
     const valid = []
     for (const b of f.blocks) {
@@ -131,7 +139,7 @@ export function checkPlan(plan, blocks) {
   }
   const uncovered = []
   for (const b of blocks) if (!seen.has(b.n)) uncovered.push(b.n)
-  return { errors, uncovered }
+  return { errors, uncovered, merged: [...new Set(merged)] }
 }
 
 // ---------- 规范化：溯源比较的唯一口径（全角→半角、标点归一、去空白、拉丁小写） ----------
