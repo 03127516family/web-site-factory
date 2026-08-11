@@ -137,6 +137,21 @@ const lib = await import('../src/burn-lib.mjs')
   ok('预览含标题/正文/规格/图', html.includes('欧式桥式起重机') && html.includes('机械制造') && html.includes('3.2-80吨') && html.includes('cross-girder3.jpg'))
 }
 
+// ---------- T4.1 审查修复钉：渲染器无守卫字段的站级默认 ----------
+{
+  const j2 = await lib.assemble({ slug: 'bare', productName: '裸烧测试', sectionResults: [], imagePool: [] })
+  ok('specs 默认空数组不炸渲染器', Array.isArray(j2.specs) && j2.specs.length === 0)
+  ok('hero.highlights 默认空数组', Array.isArray(j2.hero.highlights))
+  ok('related_products 站级默认', j2.related_products?.type === 'related-products' && Array.isArray(j2.related_products.seed))
+  const j3 = await lib.assemble({ slug: 'inst', productName: '安装段测试', sectionResults: [
+    { key: 'installation', shape: 'section', data: { title: '安装', body_md: '按图纸安装。' } },
+  ], imagePool: [] })
+  ok('installation 自动补 cases 空数组', Array.isArray(j3.installation.cases))
+  let dropped = false
+  try { await lib.assemble({ slug: 'x', productName: 'x', sectionResults: [{ key: 'mystery', shape: 'weird', data: { text: 'x' } }], imagePool: [] }) } catch (e) { dropped = /未处理/.test(e.message) }
+  ok('未知字段/shape 组装即炸不静默丢', dropped)
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

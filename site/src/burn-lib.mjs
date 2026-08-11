@@ -195,7 +195,9 @@ export async function assemble({ slug, productName, sectionResults, imagePool = 
     breadcrumb: { current: productName, trail: [{ label: '首页', url: 'https://www.dgcrane.com/zh/' }] },
     inquiry_form: { type: 'inquiry-form', form_id: 713, title: '填写您的详细资料，我们将在24小时内给您答复!' },
     summary: { cta: '报价要求' },
-    hero: {},
+    specs: [],
+    related_products: { type: 'related-products', title: '相关产品', category: '', limit: 4, seed: [] },
+    hero: { headline: '', highlights: [] },
   }
   for (const r of sectionResults) {
     if (!r.data) continue // 失败段缺席（超集裁剪天然支持）
@@ -213,8 +215,9 @@ export async function assemble({ slug, productName, sectionResults, imagePool = 
       j.hero.highlights = r.data.items
     } else if (r.key === 'page.description') {
       j.page.description = r.data.text
-    }
+    } else throw new Error(`assemble 未处理的字段: ${r.key}（${r.shape}）——先对齐目录或组装，不静默丢`)
   }
+  if (j.installation && !j.installation.cases) j.installation.cases = [] // 组件无守卫读 .cases.map
   if (imagePool.length) {
     j.gallery = []
     for (const { caption, name } of imagePool) {
@@ -228,10 +231,11 @@ export async function assemble({ slug, productName, sectionResults, imagePool = 
 // ---------- 近似预览（结构预览非像素级；真实页面存草稿后 dist-edit 看） ----------
 export function previewHtml(j) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const escAttr = s => esc(s).replace(/"/g, '&quot;')
   const sections = SECTION_CATALOG.filter(c => c.shape === 'section' && j[c.key])
     .map(c => `<section><h3>${esc(j[c.key].title)}</h3>${renderDoc(j[c.key].body)}</section>`).join('\n')
   const specs = j.specs?.length ? `<section><h3>主要参数</h3><ul>${j.specs.map(s => `<li>${esc(s.text)}</li>`).join('')}</ul></section>` : ''
-  const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="/assets/img/product/${esc(g.image)}" alt="${esc(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
+  const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="/assets/img/product/${escAttr(g.image)}" alt="${escAttr(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
 body{font:14px/1.7 -apple-system,"PingFang SC",sans-serif;max-width:860px;margin:20px auto;padding:0 16px;color:#222}
 h1{border-bottom:2px solid #2563eb;padding-bottom:8px}h3{color:#1e40af;margin-top:28px}
