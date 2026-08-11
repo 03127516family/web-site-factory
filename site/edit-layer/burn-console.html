@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>AI 烧制台 · DeepSeek</title>
+<style>
+body{font:14px/1.6 -apple-system,"PingFang SC",sans-serif;max-width:1080px;margin:24px auto;padding:0 16px;color:#1f2430}
+h1{font-size:20px}.row{margin-bottom:12px}label{display:block;font-size:12px;color:#666;margin-bottom:4px}
+input[type=text],textarea{width:100%;box-sizing:border-box;padding:8px;border:1px solid #ddd;border-radius:8px;font:inherit}
+textarea{min-height:180px;font-family:ui-monospace,monospace;font-size:13px}
+button{border:0;border-radius:8px;padding:9px 20px;background:#2563eb;color:#fff;cursor:pointer;font-size:14px}
+button.ghost{background:#e5e7eb;color:#333}button:disabled{opacity:.5;cursor:wait}
+#status{margin:12px 0;font-size:13px;color:#555}
+.rep{background:#f6f7f9;border-radius:10px;padding:12px 16px;font-size:13px;margin:12px 0}
+.rep .ok2{color:#16a34a}.rep .rep2{color:#d97706}.rep .fail2{color:#dc2626;font-weight:600}
+iframe{width:100%;height:520px;border:1px solid #e5e7eb;border-radius:10px;background:#fff}
+details{margin:12px 0}pre{white-space:pre-wrap;word-break:break-all;font-size:12px;max-height:360px;overflow:auto;background:#0f172a;color:#e2e8f0;padding:12px;border-radius:8px}
+.actions{display:flex;gap:10px;margin:14px 0}
+</style>
+</head>
+<body>
+<h1>🔥 AI 烧制台 <small style="font-weight:400;color:#888">产品页族 · DeepSeek · 落 draft 人工转正</small></h1>
+<div class="row"><label>裸文章（与 URL 二选一，都填则以裸文章为准）</label><textarea id="text" placeholder="把原料文章粘贴到这里…"></textarea></div>
+<div class="row"><label>或旧站页面 URL</label><input type="text" id="url" placeholder="https://www.dgcrane.com/zh/…"></div>
+<div class="row" style="display:flex;gap:12px">
+  <div style="flex:1"><label>slug（英文裸名，如 5t-eot-crane）</label><input type="text" id="slug"></div>
+  <div style="flex:1"><label>产品名（中文）</label><input type="text" id="name"></div>
+</div>
+<button id="go">开始烧制</button>
+<div id="status"></div>
+<div id="out" hidden>
+  <div class="rep" id="report"></div>
+  <h3>结构预览（近似；真实页面存草稿后看）</h3>
+  <iframe id="pv"></iframe>
+  <details><summary>格式化 JSON 原文</summary><pre id="json"></pre></details>
+  <div class="actions">
+    <button id="save">存草稿（落 content/products/，可进编辑器精修）</button>
+    <button class="ghost" id="redo">重新烧</button>
+    <button class="ghost" id="drop">丢弃</button>
+  </div>
+  <div id="saved"></div>
+</div>
+<script>
+const $ = id => document.getElementById(id)
+let current = null
+$('go').onclick = async () => {
+  const payload = { text: $('text').value.trim() || undefined, url: $('url').value.trim() || undefined, slug: $('slug').value.trim(), productName: $('name').value.trim() }
+  if ((!payload.text && !payload.url) || !payload.slug || !payload.productName) { $('status').textContent = '请填：裸文章或 URL 二选一 + slug + 产品名'; return }
+  $('go').disabled = true; $('out').hidden = true
+  $('status').textContent = '🔥 烧制中（两阶段调用 DeepSeek，约 1-3 分钟）…'
+  try {
+    const r = await fetch('/__burn', { method: 'POST', body: JSON.stringify(payload) })
+    const d = await r.json()
+    if (!r.ok) throw new Error(d.error || r.status)
+    current = { slug: payload.slug, json: d.json }
+    const sec = d.report.sections.map(s => `<div class="${s.status === 'ok' ? 'ok2' : s.status === 'repaired' ? 'rep2' : 'fail2'}">${s.key}：${s.status}（${s.attempts} 次）${s.issues.length ? ' — ' + s.issues.join('；') : ''}</div>`).join('')
+    $('report').innerHTML = `<b>校验报告</b>${sec}
+      <div>未覆盖原文块：${d.report.uncovered.join(', ') || '无'}（漏内容风险，人工判断）</div>
+      <div>图池：${d.report.images.join(', ') || '空'}</div>
+      ${d.report.notes.map(n => `<div>⚠ ${n}</div>`).join('')}`
+    $('pv').srcdoc = d.previewHtml
+    $('json').textContent = JSON.stringify(d.json, null, 2)
+    $('out').hidden = false; $('status').textContent = '✅ 烧完，请过目后决定'
+  } catch (e) { $('status').textContent = '❌ ' + e.message }
+  $('go').disabled = false
+}
+$('save').onclick = async () => {
+  if (!current) return
+  $('save').disabled = true
+  const r = await fetch('/__burn-save', { method: 'POST', body: JSON.stringify(current) })
+  const d = await r.json()
+  $('save').disabled = false
+  if (!r.ok) { $('saved').textContent = '❌ ' + (d.error || r.status); return }
+  $('saved').innerHTML = `✅ 已落 draft：<b>${d.slug}.json</b>，已重建。<a href="${d.editUrl}" target="_blank">打开编辑器精修 →</a>`
+}
+$('redo').onclick = () => { $('out').hidden = true; $('status').textContent = '调整输入后再点「开始烧制」' }
+$('drop').onclick = () => { current = null; $('out').hidden = true; $('status').textContent = '已丢弃，未落盘' }
+</script>
+</body>
+</html>
