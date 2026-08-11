@@ -282,6 +282,23 @@ const lib = await import('../src/burn-lib.mjs')
   ok('extractImages 按名去重', dup.length === 2 && dup[0].name === 'a.jpg' && dup[1].name === 'b.jpg')
 }
 
+// ---------- T-merge 闭环钉：阶段 2 消费合并后字段 ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+  const raw = readFileSync(RAW, 'utf8')
+  const blocks = lib.numberBlocks(raw)
+  let overviewCalls = 0
+  const counting = async (messages, tag) => {
+    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [5] }] }
+    if (tag === 'overview') { overviewCalls++; return { title: '欧式桥式起重机', body_md: blocks[1].text + '\n\n' + blocks[4].text } }
+    throw new Error('未覆盖 ' + tag)
+  }
+  const r5 = await burner.burn({ text: raw, slug: 't-merge', productName: '欧式桥式起重机' }, { callAI: counting })
+  ok('同字段多条目只烧一次', overviewCalls === 1 && r5.report.sections.filter(s => s.key === 'overview').length === 1, `calls=${overviewCalls}`)
+  ok('合并事件进 notes', r5.report.notes.some(n => /合并/.test(n)))
+  ok('合并后内容齐全（两块正文都在）', r5.json.overview.body && lib.verifyTree(r5.json.overview.body, blocks[1].text + '\n' + blocks[4].text).ok)
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

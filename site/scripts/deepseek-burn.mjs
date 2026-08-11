@@ -99,13 +99,13 @@ export async function burn({ text, url, slug, productName }, { callAI } = {}) {
     if (check.errors.length === 0) break
     if (attempt === 2) throw new Error(`段映射表 3 次仍不合法：${check.errors.join('；')}`)
   }
-  report.plan = plan
+  report.plan = { fields: check.fields } // 报告展示实际执行的形态（合并后），合并事件已在 notes 记录
   report.uncovered = check.uncovered
   if (check.merged?.length) report.notes.push(`同字段多条目已自动合并：${check.merged.join('、')}`)
 
-  // 阶段 2：逐段烧（每段独立重修，失败段缺席标红）
+  // 阶段 2：逐段烧（每段独立重修，失败段缺席标红）；消费合并后字段——同字段只烧一次、内容不丢
   const sectionResults = []
-  for (const f of plan.fields) {
+  for (const f of check.fields) {
     const spec = catalog.find(c => c.key === f.field)
     const src = slice(f.blocks)
     const rec = { key: f.field, status: 'ok', attempts: 1, issues: [] }

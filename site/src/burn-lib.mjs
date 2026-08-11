@@ -100,9 +100,9 @@ export function loadCatalog(astroPath, refJsonPath) {
 export function checkPlan(plan, blocks) {
   const errors = []
   if (!plan || typeof plan !== 'object' || !Array.isArray(plan.fields))
-    return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n), merged: [] }
+    return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n), merged: [], fields: [] }
   if (plan.fields.length === 0)
-    return { errors: ['规划表 fields 为空'], uncovered: blocks.map(b => b.n), merged: [] }
+    return { errors: ['规划表 fields 为空'], uncovered: blocks.map(b => b.n), merged: [], fields: [] }
   const known = new Set(SECTION_CATALOG.map(c => c.key))
 
   // 同字段多条目先合并（块取并集，无损——模型按块逐条表达是自然形态）；重叠块仍由主循环抓
@@ -139,7 +139,7 @@ export function checkPlan(plan, blocks) {
   }
   const uncovered = []
   for (const b of blocks) if (!seen.has(b.n)) uncovered.push(b.n)
-  return { errors, uncovered, merged: [...new Set(merged)] }
+  return { errors, uncovered, merged: [...new Set(merged)], fields: mergedList }
 }
 
 // ---------- 规范化：溯源比较的唯一口径（全角→半角、标点归一、去空白、拉丁小写） ----------
