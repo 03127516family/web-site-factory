@@ -316,6 +316,37 @@ const lib = await import('../src/burn-lib.mjs')
   const w2 = lib.auditPositions([{ key: 'a', shape: 'text', data: { text: '原文没有的话' } }], '甲段\n\n乙段\n\n丙段', paras)
   ok('audit 未命中不告警', w2.warnings.length === 0)
   ok('audit 空段落不崩', Array.isArray(lib.auditPositions([], '', []).warnings))
+
+  // 14. 重叠硬闸：one-shot 两格全文重复 → 重烧修复
+  {
+    const dupShot = { fields: {
+      overview: { title: '欧式桥式起重机', body_md: blocks[1].text },
+      introduction: { title: '欧式桥式起重机', body_md: blocks[1].text }, // 与 overview 全同
+    } }
+    let repairCalls = 0
+    const fixer = async (m, tag) => {
+      if (tag === 'oneshot') return dupShot
+      repairCalls++
+      if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text.split('。').slice(0, 2).join('。') + '。' }
+      if (tag === 'introduction') return { title: '欧式桥式起重机', body_md: blocks[5].text }
+      throw new Error('未覆盖 ' + tag)
+    }
+    const r10 = await burner.burn({ text: raw, slug: 'to-dup', productName: '欧式桥式起重机', family: 'product' }, { callAI: fixer })
+    ok('重叠格触发重烧且修复', r10.report.sections.every(s => s.status === 'ok' || s.status === 'repaired') && repairCalls === 2 && r10.json.introduction?.body?.type === 'doc')
+    ok('重烧原因含重复提示', r10.report.sections.some(s => (s.issues[0] ?? '').includes('重复')) || repairCalls === 2)
+
+    // 15. 屡教不改的重叠 → 双格 failed 缺席
+    const alwaysDup = async (m, tag) => tag === 'oneshot' ? dupShot
+      : { title: '欧式桥式起重机', body_md: blocks[1].text } // 重烧还是给同一段
+    const r11 = await burner.burn({ text: raw, slug: 'to-dup2', productName: '欧式桥式起重机', family: 'product' }, { callAI: alwaysDup })
+    ok('屡犯重叠双格 failed 缺席', r11.report.sections.every(s => s.status === 'failed') && r11.json.overview === undefined && r11.json.introduction === undefined)
+
+    // 16. 判族提示词不含「起重机」
+    ok('判族提示词不限起重机', !burner.classifyMessages('x')[1].content.includes('起重机'))
+
+    // 17. RULES 含不重复条款
+    ok('RULES 含不重复条款', burner.oneShotMessages('原文', [{ key: 'overview', shape: 'section' }], '名')[0].content.includes('只许用于一个字段'))
+  }
 }
 
 // ---------- 汇总 ----------

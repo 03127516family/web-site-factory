@@ -157,6 +157,25 @@ export function auditPositions(filledResults, rawText, paragraphs) {
   return { warnings, fieldMap }
 }
 
+// ---------- 重叠检测（防全文塞多格）：section 格两两比，共享块/最大块数 > 0.5 判重复 ----------
+export function findDuplicates(filled) {
+  const bodies = new Map()
+  for (const r of filled) {
+    if (r.shape !== 'section' || !r.data?.body_md) continue
+    bodies.set(r.key, treeBlocks(mdToDoc(r.data.body_md)).map(normalizeText))
+  }
+  const out = []
+  const keys = [...bodies.keys()]
+  for (let i = 0; i < keys.length; i++) for (let j = i + 1; j < keys.length; j++) {
+    const A = bodies.get(keys[i]), B = bodies.get(keys[j])
+    const setB = new Set(B)
+    const shared = A.filter(t => setB.has(t)).length
+    const pct = shared / Math.max(A.length, B.length)
+    if (pct > 0.5) out.push({ a: keys[i], b: keys[j], pct: Math.round(pct * 100) })
+  }
+  return out
+}
+
 // ---------- 规范化：溯源比较的唯一口径（全角→半角、标点归一、去空白、拉丁小写） ----------
 const FW = s => s.replace(/[！-～]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
 export function normalizeText(s) {

@@ -17,7 +17,8 @@ const RULES = `你是内容结构化器，把起重机产品原料文章映射�
 2. 只许搬运原文文字，禁止用常识/行业知识补充任何原文没有的内容；没有就是缺席，不许凑；
 3. body_md 用 markdown 语法（段落空行分隔、- 列表、| 表格 |）；
 4. 标题允许轻微规范（去序号/标点），正文字句一律逐字；
-5. 文字必须逐字来自给定原文。`
+5. 文字必须逐字来自给定原文；
+6. 每段原文只许用于一个字段；严禁把同一段内容塞进两个字段，严禁把整篇或大段原文复制到多个字段里——你的角色是搬运工不是作者，只做对应和摘取。`
 
 // 一把梭：一次出整页 JSON（格子缺席合法；代码侧逐格验收，不过的单格重烧）
 // 格式契约按 shape 从 loadCatalog 目录分组生成——目录加段/加格时提示词不漂移
@@ -40,7 +41,7 @@ export function oneShotMessages(rawText, catalog, productName) {
 export function classifyMessages(sample) {
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `判断这份原料属于哪个页族。已建页族：product（产品页族：起重机产品的介绍/销售页，通常含参数表、优势、安装等栏目）。未建页族：post（文章族：案例/培训/指南/新闻类散文）。都不是则 unknown。\n\n返回 JSON：{"family":"product"|"post"|"unknown","reason":"一句话理由"}\n\n原料开头：\n${sample}` },
+    { role: 'user', content: `判断这份原料属于哪个页族。已建页族：product（产品页族：工业产品的介绍/销售页，通常含参数表、优势、安装等栏目）。未建页族：post（文章族：案例/培训/指南/新闻类散文）。都不是则 unknown。\n\n返回 JSON：{"family":"product"|"post"|"unknown","reason":"一句话理由"}\n\n原料开头：\n${sample}` },
   ]
 }
 
@@ -159,6 +160,38 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     if (bad) { rec.status = 'failed'; data = null }
     report.sections.push(rec)
     sectionResults.push({ key, shape: spec.shape, data })
+  }
+
+  // 重叠硬闸：两格正文重叠 >50% → 带原因重烧一轮；终检仍犯 → failed 缺席
+  const dupReason = d => `正文与其他格大面积重复（${d.a}×${d.b}，${d.pct}%）：每格只许用原文中属于它的那一部分，禁止多格共用同一段`
+  let dups = lib.findDuplicates(sectionResults.filter(r => r.data))
+  if (dups.length) {
+    const involved = [...new Set(dups.flatMap(d => [d.a, d.b]))]
+    for (const key of involved) {
+      const rec = report.sections.find(s => s.key === key)
+      const spec = catalog.find(c => c.key === key)
+      const idx = sectionResults.findIndex(r => r.key === key)
+      const reason = dupReason(dups.find(d => d.a === key || d.b === key))
+      let data = null
+      for (let attempt = 1; attempt < 3; attempt++) {
+        const msgs = sectionMessages(key, spec.shape, rawText, productName)
+        msgs.push({ role: 'user', content: `上次返回被代码拒收：${reason}。请重发。` })
+        try { data = await callAI(msgs, key) } catch (e) { data = null; rec.issues.push(`调用失败：${e.message}`); break }
+        rec.attempts += 1
+        const bad = verifyByShape(spec, data, rawText, productName, paragraphs)
+        if (!bad) { rec.status = 'repaired'; break }
+        rec.issues.push(bad)
+        if (attempt === 2) data = null
+      }
+      sectionResults[idx] = { key, shape: spec.shape, data }
+    }
+    dups = lib.findDuplicates(sectionResults.filter(r => r.data))
+    for (const d of dups) for (const key of [d.a, d.b]) {
+      const rec = report.sections.find(s => s.key === key)
+      rec.status = 'failed'; rec.issues.push(dupReason(d))
+      const idx = sectionResults.findIndex(r => r.key === key)
+      sectionResults[idx] = { key, shape: sectionResults[idx].shape, data: null }
+    }
   }
 
   // 位置审计（防错位）+ 反查漏段
