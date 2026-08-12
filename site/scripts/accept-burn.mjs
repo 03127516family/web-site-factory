@@ -28,57 +28,14 @@ const lib = await import('../src/burn-lib.mjs')
   ok('stripHtml 去脚本样式导航页脚、留正文、收图', text.includes('第一段') && text.includes('第二段') && !text.includes('菜单') && !text.includes('脚') && !text.includes('y()') && images.includes('ab-c.jpg'))
 }
 
-// ---------- T2 字段目录 / 规划表硬查 ----------
+// ---------- T2 字段目录 ----------
 {
-  const blocks = lib.numberBlocks(readFileSync(RAW, 'utf8'))
   const catalog = lib.loadCatalog(
     join(SITE, 'src/components/ProductPage.astro'),
     join(SITE, 'content/products/single-girder-eot-cranes.json'))
   const keys = catalog.map(c => c.key)
   for (const k of ['overview', 'introduction', 'advantages', 'protection', 'specs', 'hero.headline', 'page.description'])
     ok(`目录含 ${k} 且已核验`, keys.includes(k) && catalog.find(c => c.key === k).verified)
-
-  const good = { fields: [
-    { field: 'hero.headline', blocks: [1] },
-    { field: 'overview', blocks: [2] },
-    { field: 'specs', blocks: [3] },
-    { field: 'introduction', blocks: [6] },
-  ] }
-  const r1 = lib.checkPlan(good, blocks)
-  ok('合法规划表零 error', r1.errors.length === 0, r1.errors[0])
-
-  const bad = { fields: [
-    { field: 'overview', blocks: [2, 3] },
-    { field: 'specs', blocks: [3, 4] },            // 重叠
-    { field: 'no_such_field', blocks: [5] },       // 未知字段
-    { field: 'introduction', blocks: [1, 9999] },  // 越界 + 顺序在 overview 前（非单调）
-  ] }
-  const r2 = lib.checkPlan(bad, blocks)
-  const msg = r2.errors.join(';')
-  ok('重叠被抓', /重叠/.test(msg))
-  ok('未知字段被抓', /未知字段/.test(msg))
-  ok('块号越界被抓', /越界/.test(msg))
-  ok('非单调被抓', /单调|顺序/.test(msg))
-  ok('未覆盖块进 uncovered', r2.uncovered.length > 0 && r2.uncovered.includes(7))
-
-  const noDigit = { fields: [{ field: 'specs', blocks: [2] }] } // 块2是纯散文无数字
-  const r3 = lib.checkPlan(noDigit, blocks)
-  ok('specs 映射无数字块被打回', r3.errors.some(e => /数字/.test(e)), r3.errors[0])
-}
-
-// ---------- T2.1 checkPlan 边界加固（质量审查 Important 修复的回归钉） ----------
-{
-  const blocks = lib.numberBlocks(readFileSync(RAW, 'utf8'))
-  const r1 = lib.checkPlan(null, blocks)
-  ok('null 规划不崩且报结构非法', r1.errors.length > 0 && /结构非法/.test(r1.errors[0]))
-  const r2 = lib.checkPlan({ fields: [] }, blocks)
-  ok('空 fields 报错', r2.errors.some(e => /为空/.test(e)))
-  const r3 = lib.checkPlan({ fields: [null, { field: 'overview', blocks: [2] }] }, blocks)
-  ok('null 条目报错跳过不崩', r3.errors.some(e => /不是对象/.test(e)))
-  const r4 = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2, 'x'] }, { field: 'introduction', blocks: [1] }] }, blocks)
-  ok('脏值不污染单调判定（该抓还抓）', r4.errors.some(e => /越界/.test(e)) && r4.errors.some(e => /单调|顺序/.test(e)))
-  const r5 = lib.checkPlan({ fields: [{ field: 'overview', blocks: [9999] }, { field: 'introduction', blocks: [2] }] }, blocks)
-  ok('越界高值不冤枉后续字段', r5.errors.some(e => /越界/.test(e)) && !r5.errors.some(e => /单调|顺序/.test(e)))
 }
 
 // ---------- T3 规范化 / 相似度 / 溯源 ----------
@@ -152,72 +109,11 @@ const lib = await import('../src/burn-lib.mjs')
   ok('未知字段/shape 组装即炸不静默丢', dropped)
 }
 
-// ---------- T5 burn() 编排（注入假 callAI，无 key 全链） ----------
+// ---------- T5.1 审查修复钉：快败/items 守卫/seo 标出/writeDraft ----------
 {
   const burner = await import('./deepseek-burn.mjs')
   const raw = readFileSync(RAW, 'utf8')
   const blocks = lib.numberBlocks(raw)
-
-  // 假 DeepSeek：规划按出现顺序；值从原文切片取（天然逐字）；标题用产品名（规则允许）
-  const fake = async (messages, tag) => {
-    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
-    if (tag === 'plan') return { fields: [{ field: 'hero.headline', blocks: [1] }, { field: 'overview', blocks: [2] }, { field: 'specs', blocks: [3] }] }
-    if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text.split('。').slice(0, 2).join('。') + '。' }
-    if (tag === 'specs') return { items: ['容量 3.2-80吨', '跨度长度 4-31.5米'] }
-    if (tag === 'hero.headline') return { text: '欧式桥式起重机' }
-    throw new Error('假 caller 未覆盖: ' + tag)
-  }
-  const { json: j, report } = await burner.burn(
-    { text: raw, slug: 't5-smoke', productName: '欧式桥式起重机' },
-    { callAI: fake })
-  ok('burn 返回整页 JSON', j.page.slug === 'products/t5-smoke' && j.overview?.body?.type === 'doc' && j.specs?.length === 2)
-  ok('report 三段全 ok', report.sections.every(s => s.status === 'ok'), report.sections.map(s => `${s.key}:${s.status}`).join(','))
-  ok('report 携带未覆盖块清单', Array.isArray(report.uncovered) && report.uncovered.length > 0)
-
-  // 假 caller 先凑字段、被退货后修好：验证段级重修循环
-  let calls = 0
-  let sawRepair = false
-  const liarThenFix = async (messages, tag) => {
-    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
-    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
-    calls++
-    if (messages.at(-1).content.includes('溯源拒收')) sawRepair = true
-    if (calls === 1) return { title: '欧式桥式起重机', body_md: '本公司成立于 1990 年，是全球最大的起重机制造商。' } // 编造
-    return { title: '欧式桥式起重机', body_md: blocks[1].text }
-  }
-  const r2 = await burner.burn({ text: raw, slug: 't5-repair', productName: '欧式桥式起重机' }, { callAI: liarThenFix })
-  ok('凑字段触发重修且最终修复', r2.report.sections[0].status === 'repaired' && calls >= 2, `calls=${calls}`)
-  ok('重修提示带了拒收原因', sawRepair)
-
-  // 屡教不改：段标 failed 且缺席，不静默出货
-  const alwaysLiar = async (messages, tag) => tag === 'classify'
-    ? { family: 'product', reason: '含参数表与销售文案' }
-    : tag === 'plan'
-    ? { fields: [{ field: 'overview', blocks: [2] }] }
-    : { title: '欧式桥式起重机', body_md: '纯属编造的内容，原文绝对没有这句话。' }
-  const r3 = await burner.burn({ text: raw, slug: 't5-fail', productName: '欧式桥式起重机' }, { callAI: alwaysLiar })
-  ok('屡教不改段 failed 且 JSON 中缺席', r3.report.sections[0].status === 'failed' && r3.json.overview === undefined)
-  ok('failed 段进 notes 提示', r3.report.notes.some(n => /烧败|缺席|标红/.test(n)))
-}
-
-// ---------- T5.1 审查修复钉：降级/快败/重复字段/items 守卫/seo 标出/writeDraft ----------
-{
-  const burner = await import('./deepseek-burn.mjs')
-  const raw = readFileSync(RAW, 'utf8')
-  const blocks = lib.numberBlocks(raw)
-
-  // 段级硬失败降级 failed，不拖垮整次
-  const hardFail = async (messages, tag) => {
-    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
-    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }, { field: 'specs', blocks: [3] }] }
-    if (tag === 'overview') throw new Error('网络超时（模拟）')
-    if (tag === 'specs') return { items: ['容量 3.2-80吨'] }
-    throw new Error('未覆盖 ' + tag)
-  }
-  const r = await burner.burn({ text: raw, slug: 't51-degrade', productName: '欧式桥式起重机' }, { callAI: hardFail })
-  const ov = r.report.sections.find(s => s.key === 'overview')
-  const sp = r.report.sections.find(s => s.key === 'specs')
-  ok('段级硬失败降级 failed 不整次崩', ov.status === 'failed' && /调用失败/.test(ov.issues[0] ?? '') && sp.status === 'ok' && r.json.overview === undefined && r.json.specs.length === 1)
 
   // 4xx 快败 / 5xx 重试满 / 截断快败（mock 全局 fetch，backoffMs:1 不等真秒）
   const origFetch = globalThis.fetch
@@ -242,22 +138,15 @@ const lib = await import('../src/burn-lib.mjs')
   globalThis.fetch = origFetch
   ok('max_tokens 截断不重试报段太长', cL === 1 && /截断/.test(mL), `calls=${cL}`)
 
-  // 同字段多条目：合并（不重叠）/ 仍抓（重叠）
-  const dup = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [5] }] }, blocks)
-  ok('同字段多条目合并并记录', dup.errors.length === 0 && dup.merged?.includes('overview'), JSON.stringify(dup.merged))
-  const dupBad = lib.checkPlan({ fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [2, 3] }] }, blocks)
-  ok('同字段块重叠仍被抓', dupBad.errors.some(e => /重叠/.test(e)))
-
   // items 类型/空守卫（verifyByShape 已 named export）
   const specList = { key: 'specs', shape: 'list', level: 'verbatim' }
-  ok('list 空条目被拒', burner.verifyByShape(specList, { items: ['容量 3.2-80吨', ''] }, '容量 3.2-80吨', '名', blocks, [3]) !== null)
-  ok('list 非字符串条目被拒', burner.verifyByShape(specList, { items: [5] }, '容量 5 吨', '名', blocks, [3]) !== null)
+  ok('list 空条目被拒', burner.verifyByShape(specList, { items: ['容量 3.2-80吨', ''] }, '容量 3.2-80吨', '名', blocks) !== null)
+  ok('list 非字符串条目被拒', burner.verifyByShape(specList, { items: [5] }, '容量 5 吨', '名', blocks) !== null)
 
   // seo 概括字段进 notes 标出
   const withSeo = async (messages, tag) => {
     if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
-    if (tag === 'plan') return { fields: [{ field: 'page.description', blocks: [2] }] }
-    if (tag === 'page.description') return { text: 'AI 概括的描述。' }
+    if (tag === 'oneshot') return { fields: { 'page.description': { text: 'AI 概括的描述。' } } }
     throw new Error('未覆盖 ' + tag)
   }
   const r4 = await burner.burn({ text: raw, slug: 't51-seo', productName: '欧式桥式起重机' }, { callAI: withSeo })
@@ -282,28 +171,10 @@ const lib = await import('../src/burn-lib.mjs')
 // ---------- T8.5 终审补丁钉 ----------
 {
   const burner = await import('./deepseek-burn.mjs')
-  ok('plan 提示词含 few-shot 示例', burner.planMessages('[1] 甲', ['overview']).at(-1).content.includes('示例'))
+  ok('oneshot 提示词含白名单与 few-shot 示例', burner.oneShotMessages('原文', ['overview'], '名').at(-1).content.includes('示例') && burner.oneShotMessages('原文', ['overview'], '名').at(-1).content.includes('白名单'))
   ok('section 提示词含示例输出', burner.sectionMessages('overview', 'section', '原文', '名').at(-1).content.includes('示例输出'))
   const dup = lib.extractImages('（配图：一 a.jpg）\n\n（配图：一 a.jpg）\n\n（配图：二 b.jpg）')
   ok('extractImages 按名去重', dup.length === 2 && dup[0].name === 'a.jpg' && dup[1].name === 'b.jpg')
-}
-
-// ---------- T-merge 闭环钉：阶段 2 消费合并后字段 ----------
-{
-  const burner = await import('./deepseek-burn.mjs')
-  const raw = readFileSync(RAW, 'utf8')
-  const blocks = lib.numberBlocks(raw)
-  let overviewCalls = 0
-  const counting = async (messages, tag) => {
-    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
-    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [5] }] }
-    if (tag === 'overview') { overviewCalls++; return { title: '欧式桥式起重机', body_md: blocks[1].text + '\n\n' + blocks[4].text } }
-    throw new Error('未覆盖 ' + tag)
-  }
-  const r5 = await burner.burn({ text: raw, slug: 't-merge', productName: '欧式桥式起重机' }, { callAI: counting })
-  ok('同字段多条目只烧一次', overviewCalls === 1 && r5.report.sections.filter(s => s.key === 'overview').length === 1, `calls=${overviewCalls}`)
-  ok('合并事件进 notes', r5.report.notes.some(n => /合并/.test(n)))
-  ok('合并后内容齐全（两块正文都在）', r5.json.overview.body && lib.verifyTree(r5.json.overview.body, blocks[1].text + '\n' + blocks[4].text).ok)
 }
 
 // ---------- T-url 容器预切钉 ----------
@@ -325,8 +196,7 @@ const lib = await import('../src/burn-lib.mjs')
   let classifyCalls = 0
   const autoFake = async (m, tag) => {
     if (tag === 'classify') { classifyCalls++; return { family: 'product', reason: '含参数表与销售文案' } }
-    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
-    if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text }
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: blocks[1].text } } }
     throw new Error('未覆盖 ' + tag)
   }
   const ra = await burner.burn({ text: raw, slug: 'tf-auto', productName: '欧式桥式起重机' }, { callAI: autoFake })
@@ -343,8 +213,7 @@ const lib = await import('../src/burn-lib.mjs')
 
   const explicit = async (m, tag) => {
     if (tag === 'classify') throw new Error('不该判族')
-    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
-    if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text }
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: blocks[1].text } } }
   }
   const re = await burner.burn({ text: raw, slug: 'tf-exp', productName: '欧式桥式起重机', family: 'product' }, { callAI: explicit })
   ok('显式 product 跳过判族直烧', re.json.overview?.body?.type === 'doc')
@@ -352,6 +221,60 @@ const lib = await import('../src/burn-lib.mjs')
   let badFam = ''
   try { await burner.burn({ text: raw, slug: 'tf-bad', productName: 'x', family: 'post' }, { callAI: explicit }) } catch (e) { badFam = e.message }
   ok('显式选未建族直接拒', /未建/.test(badFam))
+}
+
+// ---------- T-oneshot 一把梭钉 ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+  const raw = readFileSync(RAW, 'utf8')
+  const blocks = lib.numberBlocks(raw)
+
+  // 1. 全过路径
+  const good = { fields: {
+    'hero.headline': { text: '欧式桥式起重机' },
+    overview: { title: '欧式桥式起重机', body_md: blocks[1].text },
+    specs: { items: ['容量 3.2-80吨', '跨度长度 4-31.5米'] },
+  } }
+  const r1 = await burner.burn({ text: raw, slug: 'to-ok', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => good })
+  ok('一把梭全过', r1.json.overview?.body?.type === 'doc' && r1.json.specs.length === 2 && r1.report.sections.every(s => s.status === 'ok'))
+  ok('未用段落列出（fake 只用了前两段）', r1.report.unused.length > 0 && r1.report.unused[0].preview.length > 0)
+
+  // 2. 编造句 → 重烧修复（逐格备胎）
+  let calls = 0
+  const liarThenFix = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '本公司是全球最大的起重机制造商。' } } }
+    calls++
+    return { title: '欧式桥式起重机', body_md: blocks[1].text }
+  }
+  const r2 = await burner.burn({ text: raw, slug: 'to-rep', productName: '欧式桥式起重机', family: 'product' }, { callAI: liarThenFix })
+  ok('编造句打回且逐格修复', r2.report.sections[0].status === 'repaired' && calls === 1, r2.report.sections[0].issues[0])
+  ok('打回原因带原句（人话）', /原文里找不到/.test(r2.report.sections[0].issues[0] ?? ''))
+
+  // 3. 屡败格 failed 且缺席
+  const alwaysLiar = async (m, tag) => tag === 'oneshot'
+    ? { fields: { overview: { title: '欧式桥式起重机', body_md: '纯属编造，原文绝对没有这句话。' } } }
+    : { title: '欧式桥式起重机', body_md: '还是编造的，原文照样没有。' }
+  const r3 = await burner.burn({ text: raw, slug: 'to-fail', productName: '欧式桥式起重机', family: 'product' }, { callAI: alwaysLiar })
+  ok('屡败格 failed 且 JSON 缺席', r3.report.sections[0].status === 'failed' && r3.json.overview === undefined)
+
+  // 4. 发明字段名：该格拒，其余照常，不整次崩
+  const withInvented = { fields: { overview: { title: '欧式桥式起重机', body_md: blocks[1].text }, customization: { title: '定制', body_md: blocks[1].text } } }
+  const r4 = await burner.burn({ text: raw, slug: 'to-inv', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => withInvented })
+  const inv = r4.report.sections.find(s => s.key === 'customization')
+  ok('发明字段格被拒、正常格照收', inv.status === 'failed' && /白名单/.test(inv.issues[0]) && r4.json.overview?.body?.type === 'doc' && r4.json.customization === undefined)
+
+  // 5. 位置审计：specs 条目被塞进 overview → 同段复用告警
+  const misplaced = { fields: {
+    overview: { title: '欧式桥式起重机', body_md: blocks[1].text + '\n\n容量 3.2-80吨' },
+    specs: { items: ['容量 3.2-80吨'] },
+  } }
+  const r5 = await burner.burn({ text: raw, slug: 'to-mis', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => misplaced })
+  ok('同段复用告警出现', r5.report.notes.some(n => /同时被|装错格/.test(n)), r5.report.notes.join(' | '))
+
+  // 6. 一把梭调用失败 → 干净报错
+  let msg = ''
+  try { await burner.burn({ text: raw, slug: 'to-err', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => { throw new Error('输出被 max_tokens 截断（段太长，重试无义）') } }) } catch (e) { msg = e.message }
+  ok('截断干净报错建议分段', /整页烧失败/.test(msg) && /分段/.test(msg))
 }
 
 // ---------- 汇总 ----------

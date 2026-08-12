@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// DeepSeek 烧制台·编排层：提示词组包 + HTTP 客户端 + burn() 流水线（段级重修）+ CLI。
+// DeepSeek 烧制台·编排层：提示词组包 + HTTP 客户端 + burn() 流水线（一把梭出整页 + 代码逐格验收 + 失败格单独重烧）+ CLI。
 // 纯逻辑全在 burn-lib；本文件只做「问 AI 要值」与「把值交给代码裁决」。
 // 用法: DEEPSEEK_API_KEY=xxx node scripts/deepseek-burn.mjs --text <文件> --slug xxx --name 产品名 [--save]
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
@@ -15,14 +15,15 @@ const REF_JSON = join(SITE, 'content/products/single-girder-eot-cranes.json')
 const RULES = `你是内容结构化器，把起重机产品原料文章映射为格式化数据。铁律：
 1. 只输出 JSON（不要解释、不要 markdown 围栏）；
 2. 只许搬运原文文字，禁止用常识/行业知识补充任何原文没有的内容；没有就是缺席，不许凑；
-3. body_md 用 markdown 语法（段落空行分隔、- 列表、| 表格 |），文字必须逐字来自给定原文块；
+3. body_md 用 markdown 语法（段落空行分隔、- 列表、| 表格 |）；
 4. 标题允许轻微规范（去序号/标点），正文字句一律逐字；
-5. 原文块用 [块号] 引用，块号只许用给定编号。`
+5. 文字必须逐字来自给定原文。`
 
-export function planMessages(numbered, catalogKeys) {
+// 一把梭：一次出整页 JSON（格子缺席合法；代码侧逐格验收，不过的单格重烧）
+export function oneShotMessages(rawText, catalogKeys, productName) {
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `下面是按空行预编号的产品文章块。可选字段白名单（别的字段禁止发明）：\n${catalogKeys.join('、')}\n\n把文章映射为字段计划，返回 JSON：{"fields":[{"field":"字段名","blocks":[块号…]}…]}。字段按原文出现顺序排列；每个原文块最多归一个字段；**每个字段只许出现一次——同字段的多个块全部放进它自己的 blocks 数组**；不确定的块宁可不归。\n\n注意：字段名必须与白名单**逐字一致**（例如只有 specs，没有 specification）；应用场景/用途类内容归 overview，产品介绍/总结类归 summary_intro，仍归不进去的块放弃归类（会由人工处理）。\n\n示例（仅示意格式，内容不许照抄）：\n输入块：\n[1] 5吨单梁起重机\n[2] 5吨单梁起重机广泛用于车间物料搬运。\n[3] 它结构紧凑、操作简便。\n[4] 主要参数：\n起重量 5吨\n跨度 3-16米\n对应返回：\n{"fields":[{"field":"hero.headline","blocks":[1]},{"field":"overview","blocks":[2,3]},{"field":"specs","blocks":[4]}]}\n\n现在处理真实文章：\n${numbered}` },
+    { role: 'user', content: `产品名：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalogKeys.join('、')}\n\n各字段返回格式：\n- 正文段（overview/introduction/advantages/protection/main_features/basic_params/spec_compare/spec_detail/which_better/summary_intro/installation）："字段名":{"title":"段标题","body_md":"markdown 正文"}\n- "specs":{"items":["逐字条目","…"]}\n- "summary.intro":{"text":"…"}\n- "hero.headline":{"text":"…"}　"hero.highlights":{"items":["…","…"]}\n- "page.description":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
   ]
 }
 
@@ -48,7 +49,7 @@ export function sectionMessages(key, shape, sliceText, productName) {
   }[shape]
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `产品名：${productName}\n字段：${key}\n${contract}\n${example}\n\n原文块：\n${sliceText}` },
+    { role: 'user', content: `产品名：${productName}\n字段：${key}\n${contract}\n${example}\n\n原文：\n${sliceText}` },
   ]
 }
 
@@ -85,7 +86,7 @@ export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, mo
   }
 }
 
-// ---------- 编排：两阶段 + 分级校验 + 段级重修（≤2 次/段） ----------
+// ---------- 编排：一把梭出整页 + 代码验收（逐字/位置/漏段）+ 失败格单独重烧（≤2 次/格） ----------
 export async function burn({ text, url, slug, productName, family = 'auto' }, { callAI } = {}) {
   callAI ??= createDeepseekCaller()
   const { rawText, images } = await lib.fetchSource({ text, url })
@@ -106,76 +107,71 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   }
 
   const catalog = lib.loadCatalog(ASTRO, REF_JSON)
-  const blocks = lib.numberBlocks(rawText)
-  const numbered = blocks.map(b => `[${b.n}] ${b.text}`).join('\n\n')
-  const slice = ns => blocks.filter(b => ns.includes(b.n)).map(b => b.text).join('\n\n')
+  const paragraphs = lib.numberBlocks(rawText) // 仅供反查漏段/位置审计，不给 AI 编号
+  const report = { slug, productName, family: resolved, images: images.map(i => i.name), sections: [], unused: [], notes: [...preNotes] }
 
-  const report = { slug, productName, family: resolved, images: images.map(i => i.name), uncovered: [], sections: [], notes: [...preNotes] }
-
-  // 阶段 1：规划（≤2 次重修；仍不合法 → 整次烧失败，不落任何东西）
-  let plan, check
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const msgs = planMessages(numbered, catalog.map(c => c.key))
-    if (attempt > 0) msgs.push({ role: 'user', content: `上次返回被代码拒收：${check.errors.join('；')}。请修正后重发 JSON。` })
-    plan = await callAI(msgs, 'plan')
-    check = lib.checkPlan(plan, blocks)
-    if (check.errors.length === 0) break
-    if (attempt === 2) throw new Error(`段映射表 3 次仍不合法：${check.errors.join('；')}`)
+  // 一把梭：一次出整页；调用失败（含截断）→ 干净报错（自动逐格降级是 roadmap）
+  let out
+  try {
+    out = await callAI(oneShotMessages(rawText, catalog.map(c => c.key), productName), 'oneshot')
+  } catch (e) {
+    throw new Error(`整页烧失败：${e.message}。原文过长可先分段贴（自动逐格降级在 roadmap）`)
   }
-  report.plan = { fields: check.fields } // 报告展示实际执行的形态（合并后），合并事件已在 notes 记录
-  report.uncovered = check.uncovered
-  if (blocks.length > 200) report.notes.push(`剥壳后块数异常多（${blocks.length}），页面可能带噪，建议改贴裸文本`)
-  if (check.merged?.length) report.notes.push(`同字段多条目已自动合并：${check.merged.join('、')}`)
+  const fields = out?.fields
+  if (!fields || typeof fields !== 'object' || Array.isArray(fields)) throw new Error('返回结构非法（须为 {fields:{…}}）')
 
-  // 阶段 2：逐段烧（每段独立重修，失败段缺席标红）；消费合并后字段——同字段只烧一次、内容不丢
+  // 逐格验收（全文逐字查）+ 失败格单独重烧（≤2 次，给全文只出这格）
   const sectionResults = []
-  for (const f of check.fields) {
-    const spec = catalog.find(c => c.key === f.field)
-    const src = slice(f.blocks)
-    const rec = { key: f.field, status: 'ok', attempts: 1, issues: [] }
-    let data = null
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const msgs = sectionMessages(f.field, spec.shape, src, productName)
-      if (attempt > 0) msgs.push({ role: 'user', content: `上次返回被代码溯源拒收：${rec.issues.at(-1)}。只允许逐字搬运原文，请重发。` })
-      try {
-        data = await callAI(msgs, f.field)
-      } catch (e) {
-        rec.attempts = attempt + 1
-        rec.issues.push(`调用失败：${e.message}`) // 段级硬失败降级：不拖垮整次烧（设计契约=失败段缺席标红）
-        rec.status = 'failed'
-        data = null
-        break
-      }
+  for (const [key, data0] of Object.entries(fields)) {
+    const spec = catalog.find(c => c.key === key)
+    const rec = { key, status: 'ok', attempts: 1, issues: [] }
+    if (!spec) { rec.status = 'failed'; rec.issues.push('格子名不在白名单（发明字段）'); report.sections.push(rec); continue }
+    let data = data0
+    let bad = verifyByShape(spec, data, rawText, productName, paragraphs)
+    if (bad) rec.issues.push(bad)
+    for (let attempt = 1; bad && attempt < 3; attempt++) {
+      const fix = await callAI(sectionMessages(key, spec.shape, rawText, productName), key)
       rec.attempts = attempt + 1
-      const bad = verifyByShape(spec, data, src, productName, blocks, f.blocks)
-      if (!bad) { if (attempt > 0) rec.status = 'repaired'; break }
-      rec.issues.push(bad)
-      if (attempt === 2) { rec.status = 'failed'; data = null }
+      bad = verifyByShape(spec, fix, rawText, productName, paragraphs)
+      if (!bad) { data = fix; rec.status = 'repaired' } else rec.issues.push(bad)
     }
+    if (bad) { rec.status = 'failed'; data = null }
     report.sections.push(rec)
-    sectionResults.push({ key: f.field, shape: spec.shape, data })
+    sectionResults.push({ key, shape: spec.shape, data })
   }
+
+  // 位置审计（防错位）+ 反查漏段
+  for (const w of lib.auditPositions(sectionResults.filter(r => r.data), rawText, paragraphs)) report.notes.push(w)
+  const acceptedTexts = [] // 所有已收格子的文字（段=标题+树块，list=条目，text/seo=text）
+  for (const r of sectionResults) {
+    if (!r.data) continue
+    if (r.shape === 'section') acceptedTexts.push(r.data.title, ...lib.treeBlocks(lib.mdToDoc(r.data.body_md)))
+    else if (r.shape === 'list') acceptedTexts.push(...r.data.items)
+    else if (r.data.text) acceptedTexts.push(r.data.text)
+  }
+  const jsonTextNorm = acceptedTexts.map(t => lib.normalizeText(t)).join('\n')
+  report.unused = paragraphs.filter(p => !jsonTextNorm.includes(lib.normalizeText(p.text))).map(p => ({ n: p.n, preview: p.text.slice(0, 40) }))
 
   const json = await lib.assemble({ slug, productName, sectionResults, imagePool: images })
   if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
-  if (sectionResults.some(r => r.key === 'page.description' && r.data)) report.notes.push('page.description 为 AI 概括（溯源豁免），人工过目')
   report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
   report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
-  if (report.sections.some(s => s.status === 'failed')) report.notes.push('有段烧败缺席（标红），可在编辑器人工补或重新烧')
+  if (sectionResults.some(r => r.key === 'page.description' && r.data)) report.notes.push('page.description 为 AI 概括（溯源豁免），人工过目')
+  if (report.sections.some(s => s.status === 'failed')) report.notes.push('有格烧败缺席（标红），可在编辑器人工补或重新烧')
   return { json, report, previewHtml: lib.previewHtml(json) }
 }
 
-// 按 shape 分级校验：返回 null=过；字符串=拒收原因
-export function verifyByShape(spec, data, src, productName, blocks, ns) {
-  const firstLines = ns.map(n => blocks[n - 1].text.split('\n')[0])
+// 按 shape 分级校验（对全文逐字查；标题候选=各段首行+产品名）：返回 null=过；字符串=拒收原因
+export function verifyByShape(spec, data, src, productName, paragraphs) {
+  const firstLines = paragraphs.map(p => p.text.split('\n')[0])
   try {
     if (spec.shape === 'section') {
       if (!data?.title || !data?.body_md) return '缺 title 或 body_md'
       const v = lib.verifyTree(lib.mdToDoc(data.body_md), src)
-      if (!v.ok) return `溯源拒收：${v.failures[0].slice(0, 40)}…`
-      if (!lib.similarToAny(data.title, [...firstLines, ...ns.map(n => blocks[n - 1].text)], 0.85)
+      if (!v.ok) return `原文里找不到：「${v.failures[0].slice(0, 40)}」`
+      if (!lib.similarToAny(data.title, [...firstLines, ...paragraphs.map(p => p.text)], 0.85)
         && lib.similarity(data.title, productName) < 0.85)
-        return `标题与原文相似度不足："${data.title}"`
+        return `标题与原文及产品名都不像：「${data.title}」`
       return null
     }
     if (spec.shape === 'list') {
@@ -185,18 +181,18 @@ export function verifyByShape(spec, data, src, productName, blocks, ns) {
       if (spec.level === 'verbatim') {
         const hay = lib.normalizeText(src)
         const badItem = data.items.find(t => !hay.includes(lib.normalizeText(t)))
-        if (badItem) return `溯源拒收：条目"${badItem.slice(0, 40)}"非原文`
+        if (badItem) return `原文里找不到：「${badItem.slice(0, 40)}」`
       }
       return null
     }
     if (spec.shape === 'text') {
       if (!data?.text) return '缺 text'
       if (spec.level === 'verbatim' && !lib.normalizeText(src).includes(lib.normalizeText(data.text)))
-        return `溯源拒收："${data.text.slice(0, 40)}"非原文`
+        return `原文里找不到：「${data.text.slice(0, 40)}」`
       if (spec.level === 'similar'
         && !lib.similarToAny(data.text, firstLines, 0.85)
         && lib.similarity(data.text, productName) < 0.85)
-        return `与原文及产品名相似度均不足："${data.text}"`
+        return `与原文及产品名都不像：「${data.text}」`
       return null
     }
     if (spec.shape === 'seo') return data?.text ? null : '缺 text'

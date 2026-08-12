@@ -54,16 +54,16 @@ $('go').onclick = async () => {
   const payload = { family: $('family').value, text: $('text').value.trim() || undefined, url: $('url').value.trim() || undefined, slug: $('slug').value.trim(), productName: $('name').value.trim() }
   if ((!payload.text && !payload.url) || !payload.slug || !payload.productName) { $('status').textContent = '请填：裸文章或 URL 二选一 + slug + 产品名'; return }
   $('go').disabled = true; $('out').hidden = true
-  $('status').textContent = '🔥 烧制中（两阶段调用 DeepSeek，约 1-3 分钟）…'
+  $('status').textContent = '🔥 烧制中（一次调用 DeepSeek 出整页 + 代码逐字验收，约 1-3 分钟）…'
   try {
     const r = await fetch('/__burn', { method: 'POST', body: JSON.stringify(payload) })
     const d = await r.json()
     if (!r.ok) throw new Error(d.error || r.status)
     current = { slug: payload.slug, json: d.json }
     const sec = d.report.sections.map(s => `<div class="${s.status === 'ok' ? 'ok2' : s.status === 'repaired' ? 'rep2' : 'fail2'}">${esc(s.key)}：${esc(s.status)}（${esc(s.attempts)} 次）${s.issues.length ? ' — ' + esc(s.issues.join('；')) : ''}</div>`).join('')
-    const planRows = (d.report.plan?.fields ?? []).map(f => `${esc(f.field)} ← 块[${f.blocks.join(',')}]`).join('<br>')
-    $('report').innerHTML = `<b>校验报告</b><div style="margin:6px 0"><b>段映射表</b>（哪个字段吃了哪些原文块）<br>${planRows}</div>${sec}
-      <div>未覆盖原文块：${esc(d.report.uncovered.join(', ')) || '无'}（漏内容风险，人工判断）</div>
+    const unusedRows = (d.report.unused ?? []).map(u => `第${u.n}段：${esc(u.preview)}…`).join('<br>')
+    $('report').innerHTML = `<b>校验报告</b>${sec}
+      <div>${unusedRows ? `⚠ 原文这些段落没被用上（人工判断要不要紧）：<br>${unusedRows}` : '无——原文全部用上'}</div>
       <div>图池：${esc(d.report.images.join(', ')) || '空'}</div>
       ${d.report.notes.map(n => `<div>⚠ ${esc(n)}</div>`).join('')}`
     $('pv').srcdoc = d.previewHtml

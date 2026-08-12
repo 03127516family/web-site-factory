@@ -9,7 +9,7 @@ import { probe } from '../scripts/img-probe.mjs'
 
 export { mdToDoc, validateDoc, getIn }
 
-// ---------- 原文切块编号（AI 只许引用块号，span 校验=纯集合运算） ----------
+// ---------- 原文分段编号（不给 AI；仅供代码侧反查漏段/位置审计） ----------
 export function numberBlocks(rawText) {
   return rawText.split(/\n\s*\n/).map(t => t.trim()).filter(Boolean)
     .map((text, i) => ({ n: i + 1, text }))
@@ -109,50 +109,51 @@ export function loadCatalog(astroPath, refJsonPath) {
   })
 }
 
-// ---------- 规划表硬查（纯集合运算 + specs 数字启发式；AI 输出边界，畸形输入一律转可喂回的错误） ----------
-export function checkPlan(plan, blocks) {
-  const errors = []
-  if (!plan || typeof plan !== 'object' || !Array.isArray(plan.fields))
-    return { errors: ['规划表结构非法（须为 {fields:[…]}）'], uncovered: blocks.map(b => b.n), merged: [], fields: [] }
-  if (plan.fields.length === 0)
-    return { errors: ['规划表 fields 为空'], uncovered: blocks.map(b => b.n), merged: [], fields: [] }
-  const known = new Set(SECTION_CATALOG.map(c => c.key))
-
-  // 同字段多条目先合并（块取并集，无损——模型按块逐条表达是自然形态）；重叠块仍由主循环抓
-  const mergedList = [], byField = new Map(), merged = []
-  for (const f of plan.fields) {
-    if (f && typeof f === 'object' && known.has(f.field) && Array.isArray(f.blocks) && f.blocks.length) {
-      if (byField.has(f.field)) { byField.get(f.field).blocks.push(...f.blocks); merged.push(f.field); continue }
-      const copy = { field: f.field, blocks: [...f.blocks] }
-      byField.set(f.field, copy); mergedList.push(copy)
-    } else mergedList.push(f) // 畸形条目原样进主循环报错
+// ---------- 位置审计（防错位）：命中位置机器算，不经 AI 认领 ----------
+// 返回 warning 字符串数组：同段复用 / 顺序颠倒
+export function auditPositions(filledResults, rawText, paragraphs) {
+  const normSrc = normalizeText(rawText)
+  // 段落规范化区间（normSrc ≡ 各段规范化串的顺序拼接，区间严格相邻）
+  const spans = []
+  let cursor = 0
+  for (const p of paragraphs) {
+    const t = normalizeText(p.text)
+    const at = normSrc.indexOf(t, cursor)
+    spans.push({ n: p.n, from: at >= 0 ? at : cursor, to: at >= 0 ? at + t.length : cursor })
+    if (at >= 0) cursor = at + t.length
   }
+  const paraOf = pos => spans.find(s => pos >= s.from && pos < s.to)?.n
 
-  const seen = new Map() // 块号 → field
-  let lastFirst = 0
-  const sliceOf = ns => blocks.filter(b => ns.includes(b.n)).map(b => b.text).join('\n')
-  for (const f of mergedList) {
-    if (!f || typeof f !== 'object') { errors.push('规划条目不是对象'); continue }
-    if (!known.has(f.field)) { errors.push(`未知字段 "${f.field}"`); continue }
-    if (!Array.isArray(f.blocks) || !f.blocks.length) { errors.push(`${f.field}: blocks 为空`); continue }
-    const valid = []
-    for (const b of f.blocks) {
-      if (!Number.isInteger(b) || b < 1 || b > blocks.length) { errors.push(`${f.field}: 块号越界 ${b}`); continue }
-      if (seen.has(b)) errors.push(`块 ${b} 重叠（${seen.get(b)} 与 ${f.field}）`)
-      seen.set(b, f.field)
-      valid.push(b)
-    }
-    // 单调判定只消费校验过的块号——脏值不污染后续字段（审查 Important #1）
-    if (valid.length) {
-      const first = Math.min(...valid)
-      if (first < lastFirst) errors.push(`${f.field}: 顺序非单调（出现在更前面的字段之前）`)
-      lastFirst = Math.max(lastFirst, first)
-      if (f.field === 'specs' && !/\p{Nd}/u.test(sliceOf(valid))) errors.push('specs 映射的原文块里没有数字——疑似指错位置')
+  const hits = [] // {key, pos}
+  for (const r of filledResults) {
+    const texts = r.shape === 'section' ? treeBlocks(mdToDoc(r.data.body_md))
+      : r.shape === 'list' ? r.data.items
+      : [r.data.text].filter(Boolean)
+    for (const t of texts) {
+      const at = normSrc.indexOf(normalizeText(t))
+      if (at >= 0) hits.push({ key: r.key, pos: at })
     }
   }
-  const uncovered = []
-  for (const b of blocks) if (!seen.has(b.n)) uncovered.push(b.n)
-  return { errors, uncovered, merged: [...new Set(merged)], fields: mergedList }
+  const warnings = []
+  // 同段复用：不同格子命中同一原文段落
+  const byPara = new Map()
+  for (const h of hits) {
+    const n = paraOf(h.pos)
+    if (n === undefined) continue
+    if (!byPara.has(n)) byPara.set(n, new Set())
+    byPara.get(n).add(h.key)
+  }
+  for (const [n, keys] of byPara) if (keys.size > 1) warnings.push(`原文第 ${n} 段同时被 ${[...keys].join('、')} 使用——疑似装错格，人工确认`)
+  // 顺序颠倒：按格子返回顺序各格最小命中位置应非递减
+  let last = -1, lastKey = ''
+  for (const r of filledResults) {
+    const mine = hits.filter(h => h.key === r.key).map(h => h.pos)
+    if (!mine.length) continue
+    const first = Math.min(...mine)
+    if (first < last) warnings.push(`${r.key} 的内容在原文中出现在 ${lastKey} 之前——顺序与格子排列颠倒，人工确认`)
+    last = Math.max(last, first); lastKey = r.key
+  }
+  return warnings
 }
 
 // ---------- 规范化：溯源比较的唯一口径（全角→半角、标点归一、去空白、拉丁小写） ----------
@@ -177,7 +178,7 @@ export function treeBlocks(node, out = []) {
   return out
 }
 
-// ---------- 逐字溯源：树里每个块级文字，规范化后必须是原文切片的子串 ----------
+// ---------- 逐字溯源：树里每个块级文字，规范化后必须是原文全文的子串 ----------
 export function verifyTree(tree, srcSlice) {
   validateDoc(tree, 'verify') // 顺手过 schema——畸形树与凑字段同罪
   const hay = normalizeText(srcSlice)
