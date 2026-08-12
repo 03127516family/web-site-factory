@@ -110,7 +110,7 @@ export function loadCatalog(astroPath, refJsonPath) {
 }
 
 // ---------- 位置审计（防错位）：命中位置机器算，不经 AI 认领 ----------
-// 返回 warning 字符串数组：同段复用 / 顺序颠倒
+// 返回 { warnings: string[]（同段复用/顺序颠倒）, fieldMap: [{key, paras:[n…]}]（每格命中段号，人审辅助） }
 export function auditPositions(filledResults, rawText, paragraphs) {
   const normSrc = normalizeText(rawText)
   // 段落规范化区间（normSrc ≡ 各段规范化串的顺序拼接，区间严格相邻）
@@ -124,36 +124,44 @@ export function auditPositions(filledResults, rawText, paragraphs) {
   }
   const paraOf = pos => spans.find(s => pos >= s.from && pos < s.to)?.n
 
-  const hits = [] // {key, pos}
+  const hits = [] // {key, shape, pos}
   for (const r of filledResults) {
     const texts = r.shape === 'section' ? treeBlocks(mdToDoc(r.data.body_md))
       : r.shape === 'list' ? r.data.items
       : [r.data.text].filter(Boolean)
     for (const t of texts) {
       const at = normSrc.indexOf(normalizeText(t))
-      if (at >= 0) hits.push({ key: r.key, pos: at })
+      if (at >= 0) hits.push({ key: r.key, shape: r.shape, pos: at })
     }
   }
   const warnings = []
-  // 同段复用：不同格子命中同一原文段落
-  const byPara = new Map()
+  // 人审辅助：每格命中的段号（去重排序）
+  const fieldMap = filledResults.map(r => ({
+    key: r.key,
+    paras: [...new Set(hits.filter(h => h.key === r.key).map(h => paraOf(h.pos)).filter(n => n !== undefined))].sort((a, b) => a - b),
+  }))
+  // 同段复用：同类格子（正文类 section/list ｜ chrome 类 text/seo）≥2 个命中同一原文段落才告警——
+  // 跨类不算：headline/intro 引用正文首段是正常修辞，全 shape 混算会系统性误报
+  const kindOf = shape => (shape === 'section' || shape === 'list') ? 'content' : 'chrome'
+  const byPara = new Map() // n → {content:Set, chrome:Set}
   for (const h of hits) {
     const n = paraOf(h.pos)
     if (n === undefined) continue
-    if (!byPara.has(n)) byPara.set(n, new Set())
-    byPara.get(n).add(h.key)
+    if (!byPara.has(n)) byPara.set(n, { content: new Set(), chrome: new Set() })
+    byPara.get(n)[kindOf(h.shape)].add(h.key)
   }
-  for (const [n, keys] of byPara) if (keys.size > 1) warnings.push(`原文第 ${n} 段同时被 ${[...keys].join('、')} 使用——疑似装错格，人工确认`)
-  // 顺序颠倒：按格子返回顺序各格最小命中位置应非递减
+  for (const [n, kinds] of byPara) for (const keys of [kinds.content, kinds.chrome])
+    if (keys.size > 1) warnings.push(`原文第 ${n} 段同时被 ${[...keys].join('、')} 使用——疑似装错格，人工确认`)
+  // 顺序颠倒：只跑正文段格（chrome 格在白名单序与原文序本就不同）；各格最小命中位置应非递减
   let last = -1, lastKey = ''
-  for (const r of filledResults) {
+  for (const r of filledResults.filter(r => r.shape === 'section')) {
     const mine = hits.filter(h => h.key === r.key).map(h => h.pos)
     if (!mine.length) continue
     const first = Math.min(...mine)
     if (first < last) warnings.push(`${r.key} 的内容在原文中出现在 ${lastKey} 之前——顺序与格子排列颠倒，人工确认`)
     last = Math.max(last, first); lastKey = r.key
   }
-  return warnings
+  return { warnings, fieldMap }
 }
 
 // ---------- 规范化：溯源比较的唯一口径（全角→半角、标点归一、去空白、拉丁小写） ----------

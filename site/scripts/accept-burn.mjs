@@ -307,6 +307,20 @@ const lib = await import('../src/burn-lib.mjs')
   const bigText = Array.from({ length: 210 }, (_, i) => `第${i}段内容`).join('\n\n')
   const r9 = await burner.burn({ text: bigText, slug: 'to-noise', productName: '测试', family: 'product' }, { callAI: async () => ({ fields: { overview: { title: '测试', body_md: '第0段内容' } } }) })
   ok('段数带噪提示', r9.report.notes.some(n => /带噪/.test(n)))
+
+  // 11. 全过路径零告警（防误报回归钉）
+  ok('全过路径零告警', r1.report.notes.filter(n => /颠倒|同时被/.test(n)).length === 0, r1.report.notes.join(' | '))
+
+  // 12. fieldMap 进报告
+  ok('fieldMap 呈现格子对应段落', Array.isArray(r1.report.fieldMap) && r1.report.fieldMap.some(f => f.key === 'overview'))
+
+  // 13. auditPositions 直接钉
+  const paras = lib.numberBlocks('甲段\n\n乙段\n\n丙段')
+  const w1 = lib.auditPositions([{ key: 'a', shape: 'text', data: { text: '甲段' } }, { key: 'b', shape: 'text', data: { text: '甲段' } }], '甲段\n\n乙段\n\n丙段', paras)
+  ok('audit 同段复用告警', w1.warnings.some(w => /同时被/.test(w)))
+  const w2 = lib.auditPositions([{ key: 'a', shape: 'text', data: { text: '原文没有的话' } }], '甲段\n\n乙段\n\n丙段', paras)
+  ok('audit 未命中不告警', w2.warnings.length === 0)
+  ok('audit 空段落不崩', Array.isArray(lib.auditPositions([], '', []).warnings))
 }
 
 // ---------- 汇总 ----------

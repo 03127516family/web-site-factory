@@ -62,7 +62,8 @@ $('go').onclick = async () => {
     current = { slug: payload.slug, json: d.json }
     const sec = d.report.sections.map(s => `<div class="${s.status === 'ok' ? 'ok2' : s.status === 'repaired' ? 'rep2' : 'fail2'}">${esc(s.key)}：${esc(s.status)}（${esc(s.attempts)} 次）${s.issues.length ? ' — ' + esc(s.issues.join('；')) : ''}</div>`).join('')
     const unusedRows = (d.report.unused ?? []).map(u => `第${u.n}段：${esc(u.preview)}…`).join('<br>')
-    $('report').innerHTML = `<b>校验报告</b>${sec}
+    const fieldMapLine = d.report.fieldMap?.length ? `<div>格子对应原文：${d.report.fieldMap.map(f => `${esc(f.key)}←第${f.paras.join(',')}段`).join('；')}</div>` : ''
+    $('report').innerHTML = `<b>校验报告</b>${fieldMapLine}${sec}
       <div>${unusedRows ? `⚠ 原文这些段落没被用上（人工判断要不要紧）：<br>${unusedRows}` : '无——原文全部用上'}</div>
       <div>图池：${esc(d.report.images.join(', ')) || '空'}</div>
       ${d.report.notes.map(n => `<div>⚠ ${esc(n)}</div>`).join('')}`

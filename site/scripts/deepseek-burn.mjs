@@ -20,12 +20,20 @@ const RULES = `你是内容结构化器，把起重机产品原料文章映射�
 5. 文字必须逐字来自给定原文。`
 
 // 一把梭：一次出整页 JSON（格子缺席合法；代码侧逐格验收，不过的单格重烧）
-// 格式契约随 loadCatalog 目录生成——目录加段时提示词不漂移
+// 格式契约按 shape 从 loadCatalog 目录分组生成——目录加段/加格时提示词不漂移
 export function oneShotMessages(rawText, catalog, productName) {
-  const sectionKeys = catalog.filter(c => c.shape === 'section').map(c => c.key).join('/')
+  const contract = [
+    ['section', '正文段', '"字段名":{"title":"段标题","body_md":"markdown 正文"}'],
+    ['list', '列表', '"字段名":{"items":["逐字条目","…"]}'],
+    ['text', '单句', '"字段名":{"text":"…"}'],
+    ['seo', 'SEO', '"字段名":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}'],
+  ].map(([shape, label, fmt]) => {
+    const keys = catalog.filter(c => c.shape === shape).map(c => c.key)
+    return keys.length ? `- ${label}（${keys.join('/')}）：${fmt}` : null
+  }).filter(Boolean).join('\n')
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `产品名：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n- 正文段（${sectionKeys}）："字段名":{"title":"段标题","body_md":"markdown 正文"}\n- "specs":{"items":["逐字条目","…"]}\n- "summary.intro":{"text":"…"}\n- "hero.headline":{"text":"…"}　"hero.highlights":{"items":["…","…"]}\n- "page.description":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
+    { role: 'user', content: `产品名：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
   ]
 }
 
@@ -67,7 +75,7 @@ export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, mo
           method: 'POST',
           signal: AbortSignal.timeout(120_000),
           headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ model, temperature: 0, response_format: { type: 'json_object' }, max_tokens: 4096, messages }),
+          body: JSON.stringify({ model, temperature: 0, response_format: { type: 'json_object' }, max_tokens: tag === 'oneshot' ? 8192 : 4096, messages }),
         })
         if (!res.ok) {
           const body = (await res.text()).slice(0, 200)
@@ -134,7 +142,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     if (bad) rec.issues.push(bad)
     for (let attempt = 1; bad && attempt < 3; attempt++) {
       const msgs = sectionMessages(key, spec.shape, rawText, productName)
-      if (attempt > 0) msgs.push({ role: 'user', content: `上次返回被代码拒收：${bad}。只允许逐字搬运原文，请重发。` }) // 喂回拒收原因：温度 0 下同消息重发是确定性重放
+      msgs.push({ role: 'user', content: `上次返回被代码拒收：${bad}。只允许逐字搬运原文，请重发。` }) // 喂回拒收原因：温度 0 下同消息重发是确定性重放
       rec.attempts = attempt + 1
       let fix
       try {
@@ -154,7 +162,9 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   }
 
   // 位置审计（防错位）+ 反查漏段
-  for (const w of lib.auditPositions(sectionResults.filter(r => r.data), rawText, paragraphs)) report.notes.push(w)
+  const audit = lib.auditPositions(sectionResults.filter(r => r.data), rawText, paragraphs)
+  for (const w of audit.warnings) report.notes.push(w)
+  report.fieldMap = audit.fieldMap // 人审辅助：每格命中的原文段号
   const acceptedTexts = [] // 所有已收格子的文字（段=标题+树块，list=条目，text/seo=text）
   for (const r of sectionResults) {
     if (!r.data) continue
