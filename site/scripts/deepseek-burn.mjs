@@ -26,6 +26,13 @@ export function planMessages(numbered, catalogKeys) {
   ]
 }
 
+export function classifyMessages(sample) {
+  return [
+    { role: 'system', content: RULES },
+    { role: 'user', content: `判断这份原料属于哪个页族。已建页族：product（产品页族：起重机产品的介绍/销售页，通常含参数表、优势、安装等栏目）。未建页族：post（文章族：案例/培训/指南/新闻类散文）。都不是则 unknown。\n\n返回 JSON：{"family":"product"|"post"|"unknown","reason":"一句话理由"}\n\n原料开头：\n${sample}` },
+  ]
+}
+
 export function sectionMessages(key, shape, sliceText, productName) {
   const contract = {
     section: `返回 {"title":"段标题","body_md":"markdown 正文"}`,
@@ -79,15 +86,31 @@ export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, mo
 }
 
 // ---------- 编排：两阶段 + 分级校验 + 段级重修（≤2 次/段） ----------
-export async function burn({ text, url, slug, productName }, { callAI } = {}) {
+export async function burn({ text, url, slug, productName, family = 'auto' }, { callAI } = {}) {
   callAI ??= createDeepseekCaller()
-  const catalog = lib.loadCatalog(ASTRO, REF_JSON)
   const { rawText, images } = await lib.fetchSource({ text, url })
+
+  // 判族：人工显式指定跳过；auto 让 AI 判；未建族/无法识别干净拒绝（不硬烧）
+  let resolved = family
+  const preNotes = []
+  if (family === 'auto') {
+    const verdict = await callAI(classifyMessages(rawText.slice(0, 3000)), 'classify')
+    resolved = verdict?.family
+    if (resolved !== 'product') {
+      const label = lib.FAMILIES[resolved]?.label ?? '无法识别'
+      throw new Error(`自动判族：这份原料像「${label}」——${verdict?.reason ?? '无理由'}。该族烧制未建；若确为产品页原料，请人工改选「产品页族」重试`)
+    }
+    preNotes.push(`自动判族：产品页族（${verdict.reason}）`)
+  } else if (!lib.FAMILIES[family]?.built) {
+    throw new Error(`页族「${lib.FAMILIES[family]?.label ?? family}」烧制未建`)
+  }
+
+  const catalog = lib.loadCatalog(ASTRO, REF_JSON)
   const blocks = lib.numberBlocks(rawText)
   const numbered = blocks.map(b => `[${b.n}] ${b.text}`).join('\n\n')
   const slice = ns => blocks.filter(b => ns.includes(b.n)).map(b => b.text).join('\n\n')
 
-  const report = { slug, productName, images: images.map(i => i.name), uncovered: [], sections: [], notes: [] }
+  const report = { slug, productName, family: resolved, images: images.map(i => i.name), uncovered: [], sections: [], notes: [...preNotes] }
 
   // 阶段 1：规划（≤2 次重修；仍不合法 → 整次烧失败，不落任何东西）
   let plan, check

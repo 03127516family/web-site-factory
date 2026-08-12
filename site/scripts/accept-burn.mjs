@@ -160,6 +160,7 @@ const lib = await import('../src/burn-lib.mjs')
 
   // 假 DeepSeek：规划按出现顺序；值从原文切片取（天然逐字）；标题用产品名（规则允许）
   const fake = async (messages, tag) => {
+    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
     if (tag === 'plan') return { fields: [{ field: 'hero.headline', blocks: [1] }, { field: 'overview', blocks: [2] }, { field: 'specs', blocks: [3] }] }
     if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text.split('。').slice(0, 2).join('。') + '。' }
     if (tag === 'specs') return { items: ['容量 3.2-80吨', '跨度长度 4-31.5米'] }
@@ -177,6 +178,7 @@ const lib = await import('../src/burn-lib.mjs')
   let calls = 0
   let sawRepair = false
   const liarThenFix = async (messages, tag) => {
+    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
     if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
     calls++
     if (messages.at(-1).content.includes('溯源拒收')) sawRepair = true
@@ -188,7 +190,9 @@ const lib = await import('../src/burn-lib.mjs')
   ok('重修提示带了拒收原因', sawRepair)
 
   // 屡教不改：段标 failed 且缺席，不静默出货
-  const alwaysLiar = async (messages, tag) => tag === 'plan'
+  const alwaysLiar = async (messages, tag) => tag === 'classify'
+    ? { family: 'product', reason: '含参数表与销售文案' }
+    : tag === 'plan'
     ? { fields: [{ field: 'overview', blocks: [2] }] }
     : { title: '欧式桥式起重机', body_md: '纯属编造的内容，原文绝对没有这句话。' }
   const r3 = await burner.burn({ text: raw, slug: 't5-fail', productName: '欧式桥式起重机' }, { callAI: alwaysLiar })
@@ -204,6 +208,7 @@ const lib = await import('../src/burn-lib.mjs')
 
   // 段级硬失败降级 failed，不拖垮整次
   const hardFail = async (messages, tag) => {
+    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
     if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }, { field: 'specs', blocks: [3] }] }
     if (tag === 'overview') throw new Error('网络超时（模拟）')
     if (tag === 'specs') return { items: ['容量 3.2-80吨'] }
@@ -250,6 +255,7 @@ const lib = await import('../src/burn-lib.mjs')
 
   // seo 概括字段进 notes 标出
   const withSeo = async (messages, tag) => {
+    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
     if (tag === 'plan') return { fields: [{ field: 'page.description', blocks: [2] }] }
     if (tag === 'page.description') return { text: 'AI 概括的描述。' }
     throw new Error('未覆盖 ' + tag)
@@ -289,6 +295,7 @@ const lib = await import('../src/burn-lib.mjs')
   const blocks = lib.numberBlocks(raw)
   let overviewCalls = 0
   const counting = async (messages, tag) => {
+    if (tag === 'classify') return { family: 'product', reason: '含参数表与销售文案' }
     if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }, { field: 'overview', blocks: [5] }] }
     if (tag === 'overview') { overviewCalls++; return { title: '欧式桥式起重机', body_md: blocks[1].text + '\n\n' + blocks[4].text } }
     throw new Error('未覆盖 ' + tag)
@@ -307,6 +314,44 @@ const lib = await import('../src/burn-lib.mjs')
   ok('容器外图片不收', r.images.includes('inner.jpg') && !r.images.includes('related.jpg'))
   const fallback = lib.stripHtml('<html><body><p>无容器页正文</p></body></html>')
   ok('无 #product 回退整页剥', fallback.text.includes('无容器页正文'))
+}
+
+// ---------- T-family 选族/判族钉 ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+  const raw = readFileSync(RAW, 'utf8')
+  const blocks = lib.numberBlocks(raw)
+
+  let classifyCalls = 0
+  const autoFake = async (m, tag) => {
+    if (tag === 'classify') { classifyCalls++; return { family: 'product', reason: '含参数表与销售文案' } }
+    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
+    if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text }
+    throw new Error('未覆盖 ' + tag)
+  }
+  const ra = await burner.burn({ text: raw, slug: 'tf-auto', productName: '欧式桥式起重机' }, { callAI: autoFake })
+  ok('auto 默认判族且判中 product 继续烧', classifyCalls === 1 && ra.report.family === 'product' && ra.json.overview?.body?.type === 'doc')
+  ok('auto 判族理由进 notes', ra.report.notes.some(n => /自动判族/.test(n)))
+
+  const postFake = async (m, tag) => {
+    if (tag === 'classify') return { family: 'post', reason: '散文体培训文章' }
+    throw new Error('不应走到 ' + tag)
+  }
+  let refused = ''
+  try { await burner.burn({ text: raw, slug: 'tf-post', productName: 'x' }, { callAI: postFake }) } catch (e) { refused = e.message }
+  ok('auto 判为未建族干净拒绝', /未建/.test(refused))
+
+  const explicit = async (m, tag) => {
+    if (tag === 'classify') throw new Error('不该判族')
+    if (tag === 'plan') return { fields: [{ field: 'overview', blocks: [2] }] }
+    if (tag === 'overview') return { title: '欧式桥式起重机', body_md: blocks[1].text }
+  }
+  const re = await burner.burn({ text: raw, slug: 'tf-exp', productName: '欧式桥式起重机', family: 'product' }, { callAI: explicit })
+  ok('显式 product 跳过判族直烧', re.json.overview?.body?.type === 'doc')
+
+  let badFam = ''
+  try { await burner.burn({ text: raw, slug: 'tf-bad', productName: 'x', family: 'post' }, { callAI: explicit }) } catch (e) { badFam = e.message }
+  ok('显式选未建族直接拒', /未建/.test(badFam))
 }
 
 // ---------- 汇总 ----------

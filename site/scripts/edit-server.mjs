@@ -216,11 +216,11 @@ const server = http.createServer(async (req, res) => {
       if (!process.env.DEEPSEEK_API_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: '未配置 DEEPSEEK_API_KEY（服务端环境变量）' })); return }
       let body = ''
       for await (const chunk of req) body += chunk
-      const { text, url, slug, productName } = JSON.parse(body)
+      const { text, url, slug, productName, family } = JSON.parse(body)
       if ((!text && !url) || !slug || !productName) throw new Error('缺参数：text/url 二选一 + slug + productName')
       if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('slug 非法')
       console.log(`  [burn] 开始烧制 slug=${slug}`)
-      const { json, report, previewHtml } = await burn({ text, url, slug, productName })
+      const { json, report, previewHtml } = await burn({ text, url, slug, productName, family })
       console.log(`  [burn] 烧制完成 slug=${slug}`)
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true, json, report, previewHtml }))

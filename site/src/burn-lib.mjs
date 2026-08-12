@@ -88,6 +88,12 @@ export const SECTION_CATALOG = [
 // v1 不烧（缺席或站级默认，报告注明）：gallery 以外的图组、related_products、case、
 // production_flow、components_images、crane_types_images、breadcrumb.trail、inquiry_form
 
+// ---------- 页族注册表（built=false 的族选了直接拒，不硬烧） ----------
+export const FAMILIES = {
+  product: { label: '产品页族', built: true },
+  post: { label: '文章页族', built: false },
+}
+
 // 双源核验：组件字段看 .astro data-field（specs 特判 spec.text）；page.* 等 chrome 层看参照 JSON 实际键
 export function loadCatalog(astroPath, refJsonPath) {
   const fields = new Set([...readFileSync(astroPath, 'utf8').matchAll(/data-field="([^"]+)"/g)].map(m => m[1]))
