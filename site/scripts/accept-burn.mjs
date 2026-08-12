@@ -171,7 +171,8 @@ const lib = await import('../src/burn-lib.mjs')
 // ---------- T8.5 终审补丁钉 ----------
 {
   const burner = await import('./deepseek-burn.mjs')
-  ok('oneshot 提示词含白名单与 few-shot 示例', burner.oneShotMessages('原文', ['overview'], '名').at(-1).content.includes('示例') && burner.oneShotMessages('原文', ['overview'], '名').at(-1).content.includes('白名单'))
+  const om = burner.oneShotMessages('原文', [{ key: 'overview', shape: 'section' }], '名').at(-1).content
+  ok('oneshot 提示词含白名单与 few-shot 示例', om.includes('示例') && om.includes('overview'))
   ok('section 提示词含示例输出', burner.sectionMessages('overview', 'section', '原文', '名').at(-1).content.includes('示例输出'))
   const dup = lib.extractImages('（配图：一 a.jpg）\n\n（配图：一 a.jpg）\n\n（配图：二 b.jpg）')
   ok('extractImages 按名去重', dup.length === 2 && dup[0].name === 'a.jpg' && dup[1].name === 'b.jpg')
@@ -275,6 +276,37 @@ const lib = await import('../src/burn-lib.mjs')
   let msg = ''
   try { await burner.burn({ text: raw, slug: 'to-err', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => { throw new Error('输出被 max_tokens 截断（段太长，重试无义）') } }) } catch (e) { msg = e.message }
   ok('截断干净报错建议分段', /整页烧失败/.test(msg) && /分段/.test(msg))
+
+  // 7. 顺序颠倒告警
+  const reversed = { fields: {
+    overview: { title: '欧式桥式起重机', body_md: blocks[4].text },
+    introduction: { title: '欧式桥式起重机', body_md: blocks[1].text },
+  } }
+  const r6 = await burner.burn({ text: raw, slug: 'to-rev', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => reversed })
+  ok('顺序颠倒告警出现', r6.report.notes.some(n => /颠倒/.test(n)), r6.report.notes.join(' | '))
+
+  // 8. 重烧喂回拒收原因
+  let sawReason = false
+  const checkFeedback = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '本公司是全球最大的起重机制造商。' } } }
+    if (m.at(-1).content.includes('原文里找不到')) sawReason = true
+    return { title: '欧式桥式起重机', body_md: blocks[1].text }
+  }
+  const r7 = await burner.burn({ text: raw, slug: 'to-fb', productName: '欧式桥式起重机', family: 'product' }, { callAI: checkFeedback })
+  ok('重烧喂回拒收原因', sawReason && r7.report.sections[0].status === 'repaired')
+
+  // 9. 重烧途中硬失败 → 该格降级不拖垮整次
+  const hardFailRepair = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '本公司是全球最大的起重机制造商。' }, specs: { items: ['容量 3.2-80吨'] } } }
+    throw new Error('网络超时（模拟）')
+  }
+  const r8 = await burner.burn({ text: raw, slug: 'to-hf', productName: '欧式桥式起重机', family: 'product' }, { callAI: hardFailRepair })
+  ok('重烧硬失败降级不拖垮整次', r8.report.sections.find(s => s.key === 'overview').status === 'failed' && r8.json.specs.length === 1)
+
+  // 10. 段数带噪提示恢复
+  const bigText = Array.from({ length: 210 }, (_, i) => `第${i}段内容`).join('\n\n')
+  const r9 = await burner.burn({ text: bigText, slug: 'to-noise', productName: '测试', family: 'product' }, { callAI: async () => ({ fields: { overview: { title: '测试', body_md: '第0段内容' } } }) })
+  ok('段数带噪提示', r9.report.notes.some(n => /带噪/.test(n)))
 }
 
 // ---------- 汇总 ----------

@@ -20,10 +20,12 @@ const RULES = `你是内容结构化器，把起重机产品原料文章映射�
 5. 文字必须逐字来自给定原文。`
 
 // 一把梭：一次出整页 JSON（格子缺席合法；代码侧逐格验收，不过的单格重烧）
-export function oneShotMessages(rawText, catalogKeys, productName) {
+// 格式契约随 loadCatalog 目录生成——目录加段时提示词不漂移
+export function oneShotMessages(rawText, catalog, productName) {
+  const sectionKeys = catalog.filter(c => c.shape === 'section').map(c => c.key).join('/')
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `产品名：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalogKeys.join('、')}\n\n各字段返回格式：\n- 正文段（overview/introduction/advantages/protection/main_features/basic_params/spec_compare/spec_detail/which_better/summary_intro/installation）："字段名":{"title":"段标题","body_md":"markdown 正文"}\n- "specs":{"items":["逐字条目","…"]}\n- "summary.intro":{"text":"…"}\n- "hero.headline":{"text":"…"}　"hero.highlights":{"items":["…","…"]}\n- "page.description":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
+    { role: 'user', content: `产品名：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n- 正文段（${sectionKeys}）："字段名":{"title":"段标题","body_md":"markdown 正文"}\n- "specs":{"items":["逐字条目","…"]}\n- "summary.intro":{"text":"…"}\n- "hero.headline":{"text":"…"}　"hero.highlights":{"items":["…","…"]}\n- "page.description":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
   ]
 }
 
@@ -109,11 +111,12 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const catalog = lib.loadCatalog(ASTRO, REF_JSON)
   const paragraphs = lib.numberBlocks(rawText) // 仅供反查漏段/位置审计，不给 AI 编号
   const report = { slug, productName, family: resolved, images: images.map(i => i.name), sections: [], unused: [], notes: [...preNotes] }
+  if (paragraphs.length > 200) report.notes.push(`剥壳后段数异常多（${paragraphs.length}），页面可能带噪，建议改贴裸文本`)
 
   // 一把梭：一次出整页；调用失败（含截断）→ 干净报错（自动逐格降级是 roadmap）
   let out
   try {
-    out = await callAI(oneShotMessages(rawText, catalog.map(c => c.key), productName), 'oneshot')
+    out = await callAI(oneShotMessages(rawText, catalog, productName), 'oneshot')
   } catch (e) {
     throw new Error(`整页烧失败：${e.message}。原文过长可先分段贴（自动逐格降级在 roadmap）`)
   }
@@ -130,8 +133,18 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     let bad = verifyByShape(spec, data, rawText, productName, paragraphs)
     if (bad) rec.issues.push(bad)
     for (let attempt = 1; bad && attempt < 3; attempt++) {
-      const fix = await callAI(sectionMessages(key, spec.shape, rawText, productName), key)
+      const msgs = sectionMessages(key, spec.shape, rawText, productName)
+      if (attempt > 0) msgs.push({ role: 'user', content: `上次返回被代码拒收：${bad}。只允许逐字搬运原文，请重发。` }) // 喂回拒收原因：温度 0 下同消息重发是确定性重放
       rec.attempts = attempt + 1
+      let fix
+      try {
+        fix = await callAI(msgs, key)
+      } catch (e) {
+        rec.issues.push(`调用失败：${e.message}`) // 重烧硬失败降级：该格 failed 缺席，不拖垮整次
+        rec.status = 'failed'
+        data = null
+        break
+      }
       bad = verifyByShape(spec, fix, rawText, productName, paragraphs)
       if (!bad) { data = fix; rec.status = 'repaired' } else rec.issues.push(bad)
     }
