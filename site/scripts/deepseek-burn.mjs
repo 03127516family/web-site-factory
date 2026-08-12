@@ -183,6 +183,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
         rec.issues.push(bad)
         if (attempt === 2) data = null
       }
+      if (!data) { rec.status = 'failed'; rec.issues.push(reason) } // 重烧全败=格子缺席，状态必须跟上，不留假 repaired
       sectionResults[idx] = { key, shape: spec.shape, data }
     }
     dups = lib.findDuplicates(sectionResults.filter(r => r.data))

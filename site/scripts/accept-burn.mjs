@@ -346,6 +346,21 @@ const lib = await import('../src/burn-lib.mjs')
 
     // 17. RULES 含不重复条款
     ok('RULES 含不重复条款', burner.oneShotMessages('原文', [{ key: 'overview', shape: 'section' }], '名')[0].content.includes('只许用于一个字段'))
+
+    // 18. 重叠硬闸重烧全败：状态必须 failed（假 repaired 漏洞钉）
+    const dupShot2 = { fields: {
+      overview: { title: '欧式桥式起重机', body_md: blocks[1].text },
+      introduction: { title: '欧式桥式起重机', body_md: blocks[1].text },
+    } }
+    const fixer2 = async (m, tag) => {
+      if (tag === 'oneshot') return dupShot2
+      if (tag === 'overview') return { title: '原文里不存在的标题', body_md: blocks[2].text } // 重烧仍不过关（标题假）
+      if (tag === 'introduction') return { title: '欧式桥式起重机', body_md: blocks[5].text }
+      throw new Error('未覆盖 ' + tag)
+    }
+    const r12 = await burner.burn({ text: raw, slug: 'to-dup3', productName: '欧式桥式起重机', family: 'product' }, { callAI: fixer2 })
+    const ov = r12.report.sections.find(s => s.key === 'overview')
+    ok('硬闸重烧全败状态为 failed 且缺席', ov.status === 'failed' && r12.json.overview === undefined && r12.json.introduction?.body?.type === 'doc', ov.status)
   }
 }
 
