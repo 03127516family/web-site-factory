@@ -67,7 +67,7 @@ $('go').onclick = async () => {
       <div>${unusedRows ? `⚠ 原文这些段落没被用上（人工判断要不要紧）：<br>${unusedRows}` : '无——原文全部用上'}</div>
       <div>图池：${esc(d.report.images.join(', ')) || '空'}</div>
       ${d.report.notes.map(n => `<div>⚠ ${esc(n)}</div>`).join('')}`
-    $('pv').srcdoc = d.previewHtml
+    $('pv').src = d.previewUrl
     $('json').textContent = JSON.stringify(d.json, null, 2)
     $('out').hidden = false; $('status').textContent = '✅ 烧完，请过目后决定'
   } catch (e) { $('status').textContent = '❌ ' + e.message }

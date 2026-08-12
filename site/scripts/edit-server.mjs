@@ -16,6 +16,7 @@ import sharp from 'sharp'
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const DIST = join(SITE, 'dist-edit') // 编辑/预览服「含草稿」产物（R33）；生产站另服 dist
 const PORT = 8092
+const PREVIEWS = new Map() // 烧制预览暂存（内存，重启即清；上限 20 份 FIFO）
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json', '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.mp4': 'video/mp4' }
 
 // 注入编辑 UI（编辑服务专用；生产 dist 永远干净）
@@ -222,8 +223,12 @@ const server = http.createServer(async (req, res) => {
       console.log(`  [burn] 开始烧制 slug=${slug}`)
       const { json, report, previewHtml } = await burn({ text, url, slug, productName, family })
       console.log(`  [burn] 烧制完成 slug=${slug}`)
+      // 预览走暂存+网址（srcdoc 在用户 Chrome 实证空白，换成浏览器任何内核都稳的加载方式）
+      const pid = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+      PREVIEWS.set(pid, previewHtml)
+      if (PREVIEWS.size > 20) PREVIEWS.delete(PREVIEWS.keys().next().value) // FIFO 上限 20 份
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ ok: true, json, report, previewHtml }))
+      res.end(JSON.stringify({ ok: true, json, report, previewUrl: `/__burn-preview/${pid}` }))
       return
     }
     if (req.method === 'POST' && req.url === '/__burn-save') {
@@ -252,6 +257,14 @@ const server = http.createServer(async (req, res) => {
     if (req.url === '/__burn') {
       let html = readFileSync(join(SITE, 'edit-layer/burn-console.html'), 'utf8')
       if (!process.env.DEEPSEEK_API_KEY) html = html.replace('</body>', '<style>body{padding-top:44px}</style><div style="position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#dc2626;padding:10px 16px;font:14px sans-serif;text-align:center;z-index:99999">未配置 DEEPSEEK_API_KEY（服务端环境变量）——配置后重启服务再烧制</div></body>')
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+      res.end(html)
+      return
+    }
+    if (req.url?.startsWith('/__burn-preview/')) {
+      const pid = req.url.split('/').pop()
+      const html = PREVIEWS.get(pid)
+      if (!html) { res.writeHead(404); res.end('预览不存在或已过期（服务重启即清），请重新烧制'); return }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(html)
       return
