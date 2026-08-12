@@ -152,15 +152,8 @@ export function auditPositions(filledResults, rawText, paragraphs) {
   }
   for (const [n, kinds] of byPara) for (const keys of [kinds.content, kinds.chrome])
     if (keys.size > 1) warnings.push(`原文第 ${n} 段同时被 ${[...keys].join('、')} 使用——疑似装错格，人工确认`)
-  // 顺序颠倒：只跑正文段格（chrome 格在白名单序与原文序本就不同）；各格最小命中位置应非递减
-  let last = -1, lastKey = ''
-  for (const r of filledResults.filter(r => r.shape === 'section')) {
-    const mine = hits.filter(h => h.key === r.key).map(h => h.pos)
-    if (!mine.length) continue
-    const first = Math.min(...mine)
-    if (first < last) warnings.push(`${r.key} 的内容在原文中出现在 ${lastKey} 之前——顺序与格子排列颠倒，人工确认`)
-    last = Math.max(last, first); lastKey = r.key
-  }
+  // 顺序颠倒审计已退役（真 key 复验实证误报）：页面栏序由组件固定，文章的栏目顺序与目录不同是
+  // 合法内容排布，不是装错格的信号；「真句错位」由同段复用 + fieldMap 人审兜。
   return { warnings, fieldMap }
 }
 

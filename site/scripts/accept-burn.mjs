@@ -277,13 +277,8 @@ const lib = await import('../src/burn-lib.mjs')
   try { await burner.burn({ text: raw, slug: 'to-err', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => { throw new Error('输出被 max_tokens 截断（段太长，重试无义）') } }) } catch (e) { msg = e.message }
   ok('截断干净报错建议分段', /整页烧失败/.test(msg) && /分段/.test(msg))
 
-  // 7. 顺序颠倒告警
-  const reversed = { fields: {
-    overview: { title: '欧式桥式起重机', body_md: blocks[4].text },
-    introduction: { title: '欧式桥式起重机', body_md: blocks[1].text },
-  } }
-  const r6 = await burner.burn({ text: raw, slug: 'to-rev', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => reversed })
-  ok('顺序颠倒告警出现', r6.report.notes.some(n => /颠倒/.test(n)), r6.report.notes.join(' | '))
+  // 7.（已退役）顺序颠倒审计——真 key 复验实证：页面栏序由组件固定，文章栏序与目录不同是合法排布，
+  //    该告警全是误报。对应的「reversed」用例与断言已删。
 
   // 8. 重烧喂回拒收原因
   let sawReason = false
