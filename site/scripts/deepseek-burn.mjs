@@ -176,7 +176,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
       for (let attempt = 1; attempt < 3; attempt++) {
         const msgs = sectionMessages(key, spec.shape, rawText, productName)
         msgs.push({ role: 'user', content: `上次返回被代码拒收：${reason}。请重发。` })
-        try { data = await callAI(msgs, key) } catch (e) { data = null; rec.issues.push(`调用失败：${e.message}`); break }
+        try { data = await callAI(msgs, key) } catch (e) { data = null; rec.issues.push(`调用失败：${e.message}`); rec.status = 'failed'; break }
         rec.attempts += 1
         const bad = verifyByShape(spec, data, rawText, productName, paragraphs)
         if (!bad) { rec.status = 'repaired'; break }
