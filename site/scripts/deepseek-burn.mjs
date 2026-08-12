@@ -24,7 +24,7 @@ const RULES = `你是内容结构化器，把起重机产品原料文章映射�
 // 格式契约按 shape 从 loadCatalog 目录分组生成——目录加段/加格时提示词不漂移
 export function oneShotMessages(rawText, catalog, productName) {
   const contract = [
-    ['section', '正文段', '"字段名":{"title":"段标题","body_md":"markdown 正文"}'],
+    ['section', '正文段', '"字段名":{"title":"段标题（原文有栏目名用栏目名；没有栏目名就用产品名，禁止自创）","body_md":"markdown 正文"}'],
     ['list', '列表', '"字段名":{"items":["逐字条目","…"]}'],
     ['text', '单句', '"字段名":{"text":"…"}'],
     ['seo', 'SEO', '"字段名":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}'],
