@@ -1,4 +1,5 @@
 // 句级切分（D5）：翻译单元 = 句。指纹 = 源句归一文本 sha1 前 12，位置无关（重排/跨页免疫）。
+// 本文件 fp = 句级归一指纹；src/i18n-fields.mjs 的 fp 是旧 F3 字段级指纹，Task 12 退役旧文件时归并（escMd/wrapMarks 亦与旧文件重复，同期归并）。
 // 护栏：小数点不切（3.5）；字母缩写不切（U.S.A.）；英文句点须跟空格/换行/结尾；
 // hardBreak 强制成界；链接跨句不硬切（合并为一单元，保 marks 不烂）。
 import { createHash } from 'node:crypto'
@@ -11,7 +12,7 @@ export const fp = text => createHash('sha1').update(norm(text)).digest('hex').sl
 export function splitPlain(text) {
   const s = String(text ?? '')
   const cuts = [0]
-  const pushCut = from => { let j = from; while (j < s.length && (s[j] === ' ' || s[j] === '\n')) j++; cuts.push(j) }
+  const pushCut = from => { let j = from; while (j < s.length && /[\s　]/.test(s[j])) j++; cuts.push(j) }
   for (let i = 0; i < s.length; i++) {
     const c = s[i]
     if (c === '。' || c === '！' || c === '？' || c === '…' || c === '!' || c === '?') { pushCut(i + 1); continue }
@@ -88,26 +89,29 @@ export function extractInlineUnits(nodes) {
   return spans.map((sp, si) => ({ si, md: sliceInlineMd(nodes, sp.start, sp.end) })).filter(u => u.md)
 }
 
-// 译文回植：第 si 句替换为 inlineMdToNodes(newMd)，其余原样（保序保 marks）
+// 译文回植：第 si 句替换为 inlineMdToNodes(newMd)，其余原样（保序保 marks）。
+// 多次回植同一段落须按 si 降序——译文句数与源不同时 si 会漂移。
 export function applyInlineUnit(nodes, si, newMd) {
-  const { spans } = inlineSpans(nodes)
+  const { spans, text } = inlineSpans(nodes)
   const sp = spans[si]
   if (!sp) throw new Error(`句序号越界 si=${si}（共 ${spans.length} 句）`)
+  // 分隔符保护：span 尾随空白/hardBreak 字符不进替换区（「空白归前句」契约的逆操作——只换文字芯，分隔符原样留）
+  const end = Math.max(sp.start, sp.start + text.slice(sp.start, sp.end).replace(/[\s　]+$/, '').length)
   const fresh = inlineMdToNodes(newMd)
   const out = []
   let pos = 0, inserted = false
   for (const n of nodes ?? []) {
     if (n.type === 'hardBreak') {
       const p = pos; pos += 1
-      if (p + 1 <= sp.start || p >= sp.end) out.push(n)
-      else if (!inserted) { out.push(...fresh); inserted = true }
+      if (p + 1 <= sp.start || p >= end) { out.push(n); continue }
+      if (!inserted) { out.push(...fresh); inserted = true }
       continue
     }
     const len = n.text.length
     const headTo = Math.min(sp.start, pos + len)
     if (pos < headTo) out.push({ ...n, text: n.text.slice(0, headTo - pos) })
-    if (pos + len > sp.start && pos < sp.end && !inserted) { out.push(...fresh); inserted = true }
-    const tailFrom = Math.max(sp.end, pos)
+    if (pos + len > sp.start && pos < end && !inserted) { out.push(...fresh); inserted = true }
+    const tailFrom = Math.max(end, pos)
     if (tailFrom < pos + len) out.push({ ...n, text: n.text.slice(tailFrom - pos) })
     pos += len
   }

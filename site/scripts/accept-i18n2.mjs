@@ -39,6 +39,18 @@ test('行内:加粗内切片+回植往返', () => {
   const out = applyInlineUnit(nodes, 1, 'Second sentence.')
   assert.equal(out.map(n => n.text ?? '').join(''), '这台起重机很好。Second sentence.')
 })
+test('行内:hardBreak 强制界+回植保 hardBreak', () => {
+  const nodes = [{ type: 'text', text: '起重量：3吨' }, { type: 'hardBreak' }, { type: 'text', text: '跨度：7.5米' }]
+  const units = extractInlineUnits(nodes)
+  assert.equal(units.length, 2)
+  const out = applyInlineUnit(nodes, 0, 'Capacity: 3t')
+  assert.equal(out.map(n => n.type === 'hardBreak' ? '\n' : n.text).join(''), 'Capacity: 3t\n跨度：7.5米')
+})
+test('行内:回植保尾随空格', () => {
+  const nodes = [{ type: 'text', text: 'Made in U.S.A. standard. It works.' }]
+  const out = applyInlineUnit(nodes, 0, '中国制造。')
+  assert.equal(out.map(n => n.text).join(''), '中国制造。 It works.')
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0
