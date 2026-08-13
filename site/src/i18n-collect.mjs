@@ -2,11 +2,12 @@
 // 判形不判名：doc 树→树单元；字符串→文本单元；结构性键与 URL/文件形态值排除（U-1 沿用）。
 import { fp, extractInlineUnits, sliceInlineMd, inlineSpans } from './i18n-sent.mjs'
 
-const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'family', 'geomBaseline', 'image', 'src', 'href', 'url', 'video', 'pdf'])
+export const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'family', 'geomBaseline', 'category', 'dataSize', 'image', 'src', 'href', 'url', 'video', 'pdf'])
 const SKIP_TOP = new Set(['i18n', 'i18n_rev', 'i18n_fp'])
 const SKIP_PATHS = new Set(['breadcrumb.trail']) // 分语言手写结构（旧 STRUCTURAL_EXCLUDE）
-export const skipPath = p => [...SKIP_PATHS].some(sp => p === sp || p.startsWith(sp + '.') || p.startsWith(sp + '[')) // 前缀命中整棵子树都跳（投影器复用）
-const VALUE_SKIP = v => /^(https?:)?\/\//.test(v) || v.startsWith('/assets/') || /^[\w.-]+\.\w{2,4}$/.test(v)
+const SKIP_PATH_LIST = [...SKIP_PATHS]
+export const skipPath = p => SKIP_PATH_LIST.some(sp => p === sp || p.startsWith(sp + '.') || p.startsWith(sp + '[')) // 前缀命中整棵子树都跳（投影器复用）
+export const VALUE_SKIP = v => /^(https?:)?\/\//.test(v) || v.startsWith('/assets/') || v.startsWith('#') || /^\d+(\.\d+)?x\d+(\.\d+)?$/.test(v) || /^[\w.-]+\.\w{2,4}$/.test(v)
 
 // 树 → 单元。段落逐句；标题/单元格整体一句；图片 alt 一句；其余容器递归。
 export function collectTreeUnits(node, field, out, path = '') {
@@ -16,6 +17,7 @@ export function collectTreeUnits(node, field, out, path = '') {
     return
   }
   if (node.type === 'heading' || node.type === 'tableHeader' || node.type === 'tableCell') {
+    if (node.type !== 'heading' && (node.content ?? []).length > 1) throw new Error(`多段单元格暂不支持采集（先定语义再扩）：${field}:${path}`) // 守卫只限单元格：heading 的 content 是行内节点，多节点属常态
     const inner = node.type === 'heading' ? (node.content ?? []) : (node.content?.[0]?.content ?? []) // 单元格单段解包
     const { spans } = inlineSpans(inner)
     const md = sliceInlineMd(inner, spans[0]?.start ?? 0, spans[spans.length - 1]?.end ?? 0)

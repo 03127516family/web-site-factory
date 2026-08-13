@@ -2,7 +2,7 @@
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
-import { rmSync } from 'node:fs'
+import { rmSync, readFileSync, readdirSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 const cases = []
@@ -129,6 +129,35 @@ test('采集:产品页配置键不进翻译（family/geomBaseline）', () => {
   const j = { page: { slug: 'products/x', lang: 'zh-CN', title: '产品页', family: 'product@1', template: 'src/templates/product.html', geomBaseline: 'src/templates/product.html' }, title: '产品标题' }
   const ids = collectUnits(j).map(u => u.id)
   assert.deepEqual(ids.sort(), ['page.title', 'title'].sort())
+})
+test('采集:值形态排除各分支钉死', () => {
+  const j = {
+    avatar: '/assets/img/product/x.jpg',   // /assets/ 前缀
+    doc: 'manual.pdf',                      // 文件名形态
+    dead: '#',                              // 死链占位
+    size: '2400x1600',                      // 尺寸串
+    prose: '这是正经散文，必须进翻译。',
+  }
+  const ids = collectUnits(j).map(u => u.id)
+  assert.deepEqual(ids, ['prose'])
+})
+test('采集:真实内容零垃圾单元', () => {
+  // 全量 zh 页实测：采集结果不得含尺寸串/死链/配置键
+  const dir = join(process.cwd(), 'content')
+  const files = []
+  for (const t of ['posts', 'products']) for (const f of readdirSync(join(dir, t))) if (f.endsWith('.json')) files.push(join(t, f))
+  for (const f of files) {
+    const units = collectUnits(JSON.parse(readFileSync(join(dir, f), 'utf8')))
+    for (const u of units) {
+      assert.ok(!/^\d+(\.\d+)?x\d+(\.\d+)?$/.test(u.text), `${f} 尺寸串漏排: ${u.id}`)
+      assert.ok(u.text !== '#', `${f} 死链漏排: ${u.id}`)
+      assert.ok(!/family|geomBaseline|breadcrumb\.trail/.test(u.id), `${f} 配置键漏排: ${u.id}`)
+    }
+  }
+})
+test('采集:多段单元格抛错不静默', () => {
+  const doc = { type: 'doc', content: [{ type: 'table', content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text: '一' }] }, { type: 'paragraph', content: [{ type: 'text', text: '二' }] }] }] }] }] }
+  assert.throws(() => collectTreeUnits(doc, 'sec', []), /多段单元格/)
 })
 
 // ---------- 汇总（勿动） ----------
