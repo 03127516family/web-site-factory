@@ -31,6 +31,7 @@ const lib = await import('../src/burn-lib.mjs')
 // ---------- T2 字段目录 ----------
 {
   const catalog = lib.loadCatalog(
+    join(SITE, 'src/components/ProductPage.meta.json'),
     join(SITE, 'src/components/ProductPage.astro'),
     join(SITE, 'content/products/single-girder-eot-cranes.json'))
   const keys = catalog.map(c => c.key)

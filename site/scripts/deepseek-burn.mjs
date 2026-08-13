@@ -10,6 +10,7 @@ import * as lib from '../src/burn-lib.mjs'
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const ASTRO = join(SITE, 'src/components/ProductPage.astro')
 const REF_JSON = join(SITE, 'content/products/single-girder-eot-cranes.json')
+const META = join(SITE, 'src/components/ProductPage.meta.json')
 
 // ---------- 提示词（白名单自组件推导；AI 产 markdown，不产树） ----------
 const RULES = `你是内容结构化器，把起重机产品原料文章映射为格式化数据。铁律：
@@ -117,7 +118,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     throw new Error(`页族「${lib.FAMILIES[family]?.label ?? family}」烧制未建`)
   }
 
-  const catalog = lib.loadCatalog(ASTRO, REF_JSON)
+  const catalog = lib.loadCatalog(META, ASTRO, REF_JSON)
   const paragraphs = lib.numberBlocks(rawText) // 仅供反查漏段/位置审计，不给 AI 编号
   const report = { slug, productName, family: resolved, images: images.map(i => i.name), sections: [], unused: [], notes: [...preNotes] }
   if (paragraphs.length > 200) report.notes.push(`剥壳后段数异常多（${paragraphs.length}），页面可能带噪，建议改贴裸文本`)

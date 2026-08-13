@@ -102,17 +102,18 @@ export const FAMILIES = {
   post: { label: '文章页族', built: false },
 }
 
-// 双源核验：组件字段看 .astro data-field（specs 特判 spec.text）；page.* 等 chrome 层看参照 JSON 实际键
-export function loadCatalog(astroPath, refJsonPath) {
+// 双源核验：字段清单读 meta；组件字段看 .astro data-field（specs 特判 spec.text）；page.* 等 chrome 层看参照 JSON 实际键
+export function loadCatalog(metaPath, astroPath, refJsonPath) {
+  const catalog = loadMeta(metaPath)
   const fields = new Set([...readFileSync(astroPath, 'utf8').matchAll(/data-field="([^"]+)"/g)].map(m => m[1]))
   const ref = JSON.parse(readFileSync(refJsonPath, 'utf8'))
-  return SECTION_CATALOG.map(c => {
+  return catalog.map(c => {
     let verified
     if (c.key === 'summary_intro') verified = fields.has('summary_intro.body') // 组件/旧模版均只渲 body（title 为存量死数据，烧 title 仅为与存量 JSON 同构）
     else if (c.shape === 'section') verified = fields.has(`${c.key}.title`) && fields.has(`${c.key}.body`)
     else if (c.key === 'specs') verified = fields.has('spec.text')
     else verified = fields.has(c.key) || getIn(ref, c.key) !== undefined
-    if (!verified) throw new Error(`目录键 ${c.key} 双源核验失败（.astro 与参照 JSON 都没有）——先对齐组件或目录`)
+    if (!verified) throw new Error(`目录键 ${c.key} 双源核验失败（.astro 与参照 JSON 都没有）——先对齐组件或 meta`)
     return { ...c, verified }
   })
 }
