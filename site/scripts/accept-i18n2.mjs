@@ -374,6 +374,26 @@ test('验收:覆盖率不齐', () => {
   const r = checkCoverage(['a', 'b', 'c'], { a: 'A', c: 'C' })
   assert.deepEqual(r.missing, ['b'])
 })
+test('验收:map 表层归一（小写行文不误报）', () => {
+  const r = checkSentence('单梁桥式起重机制造商', 'single girder overhead crane manufacturer', TERMS)
+  assert.equal(r.ok, true)
+})
+test('验收:非 map 中文残留打回（第六道）', () => {
+  const r = checkSentence('广泛应用于机械加工', 'widely used in 机械加工', { lock: [], map: {} })
+  assert.ok(r.fails.includes('cjk-residual'))
+})
+test('验收:中文日期英译不误报', () => {
+  assert.equal(checkSentence('2024年5月发货', 'shipped in May 2024', { lock: [], map: {} }).ok, true)
+})
+test('验收:千分位归一不误报', () => {
+  assert.equal(checkSentence('帮助10,000+客户', 'helped 10000+ clients', { lock: [], map: {} }).ok, true)
+})
+test('验收:URL 丢失打回（正向）', () => {
+  assert.ok(checkSentence('见 https://dgcrane.com/x 详情', 'see details', { lock: [], map: {} }).fails.some(f => f.startsWith('url:')))
+})
+test('验收:覆盖率畸形值不抛记 missing', () => {
+  assert.deepEqual(checkCoverage(['a'], { a: 123 }).missing, ['a'])
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0
