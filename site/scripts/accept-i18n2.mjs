@@ -8,6 +8,7 @@ import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
+import { translateSegments } from '../src/i18n-engine.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -394,6 +395,50 @@ test('验收:URL 丢失打回（正向）', () => {
 test('验收:覆盖率畸形值不抛记 missing', () => {
   assert.deepEqual(checkCoverage(['a'], { a: 123 }).missing, ['a'])
 })
+
+// ---------- Task 7: 引擎层 ----------
+{ // 裸块隔离：TERMS/SEGS 与 Task 6 的 TERMS 同模块去重（T5.1 节已有此前例）
+const TERMS = { lock: ['HD'], map: { 桥式起重机: 'Overhead Crane' } }
+const SEGS = [
+  { id: 'a#0', text: 'HD 桥式起重机。', before: null, after: '下一句。' },
+  { id: 'a#1', text: '下一句。', before: 'HD 桥式起重机。', after: null },
+]
+
+test('引擎:正常翻译+术语提示词注入', async () => {
+  let seenUser = ''
+  const callAI = async messages => { // callAI 契约 = 返回解析后的 content 对象（与真 caller 一致）
+    seenUser = messages[1].content
+    return { translations: { 'a#0': 'HD Overhead Crane.', 'a#1': 'Next sentence.' } }
+  }
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.equal(r.ok['a#0'], 'HD Overhead Crane.')
+  assert.ok(seenUser.includes('HD') && seenUser.includes('Overhead Crane')) // 术语进了提示词
+})
+test('引擎:机器验收打回→带原因重翻→成功', async () => {
+  let calls = 0
+  const callAI = async () => {
+    calls++
+    const good = calls >= 2
+    return { translations: { 'a#0': good ? 'HD Overhead Crane.' : 'overhead crane.', 'a#1': 'Next.' } }
+  }
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.equal(calls, 2)
+  assert.equal(r.ok['a#0'], 'HD Overhead Crane.')
+})
+test('引擎:屡败→failed 不静默；覆盖不齐→failed', async () => {
+  const callAI = async () => ({ translations: { 'a#0': 'no lock word' } }) // a#1 缺+a#0 验收不过
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.ok(r.fail['a#0']?.includes('lock:HD'))
+  assert.ok(r.fail['a#1']?.includes('coverage'))
+})
+test('引擎:noRetry 快败不重试', async () => {
+  let calls = 0
+  const callAI = async () => { calls++; const e = new Error('401'); e.noRetry = true; throw e }
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.equal(calls, 1)
+  assert.ok(r.fail['a#0'])
+})
+}
 
 // ---------- 汇总（勿动） ----------
 let pass = 0
