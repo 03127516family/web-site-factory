@@ -16,7 +16,7 @@ export function checkSentence(srcText, tgtMd, terms) {
     if (i === -1) fails.push(`number:${n}`)
     else rest.splice(i, 1)
   }
-  for (const u of String(srcText).match(/https?:\/\/[^\s)\]]+/g) ?? [])
+  for (const u of String(srcText).match(/https?:\/\/[^\s)\]。，；！？…」』）]+/g) ?? [])
     if (!tgtMd.includes(u)) fails.push(`url:${u}`)
   return { ok: fails.length === 0, fails }
 }

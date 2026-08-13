@@ -366,6 +366,10 @@ test('验收:固定译法错/中文残留→打回', () => {
 test('验收:数字丢→打回', () => {
   assert.ok(checkSentence('3吨 7.5米', '3 tons', TERMS).fails.includes('number:7.5'))
 })
+test('验收:URL 尾跟中文标点不误报', () => {
+  const r = checkSentence('详见 https://dgcrane.com/x。谢谢', 'See https://dgcrane.com/x. Thanks', { lock: [], map: {} })
+  assert.equal(r.ok, true)
+})
 test('验收:覆盖率不齐', () => {
   const r = checkCoverage(['a', 'b', 'c'], { a: 'A', c: 'C' })
   assert.deepEqual(r.missing, ['b'])
