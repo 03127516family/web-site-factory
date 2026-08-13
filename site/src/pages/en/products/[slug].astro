@@ -1,0 +1,32 @@
+---
+// en 镜像产品路由：content/en/products/*.json（镜像树，R35）。
+// 与 zh 源共用 ProductPage 族组件；生产构建双闸门（R30 状态门 + R43 i18n 门禁）。
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+import Chrome from '../../../layouts/Chrome.astro'
+import ProductPage from '../../../components/ProductPage.astro'
+import { scanPages, buildGroups, isPublishable } from '../../../i18n.mjs'
+
+export function getStaticPaths() {
+  const dir = join(process.cwd(), 'content/en/products')
+  if (!existsSync(dir)) return [] // 该语言还没有产品镜像
+  const pages = scanPages({ withJson: true })
+  const groups = buildGroups(pages)
+  const bySlug = new Map(pages.map(p => [p.slug, p]))
+  return readdirSync(dir)
+    .filter(f => f.endsWith('.json'))
+    .map(f => ({ params: { slug: f.replace('.json', '') }, j: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
+    .filter(p => {
+      if (process.env.INCLUDE_DRAFTS === '1') return true
+      if (p.j.page.status !== 'published') return false
+      const me = bySlug.get(p.j.page.slug)
+      return me && isPublishable(me, groups, pages)
+    })
+    .map(({ params, j }) => ({ params, props: { j } }))
+}
+
+const { j } = Astro.props
+---
+<Chrome j={j}>
+  <ProductPage j={j} />
+</Chrome>

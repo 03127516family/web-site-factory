@@ -1,0 +1,114 @@
+---
+// post@1 — 本篇独立布局组件（T2 落定）：机械移植自旧 posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.html；值 = JSON。
+import { renderDoc } from '../../render-doc.mjs'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+const { j } = Astro.props
+const repoFrag = name => readFileSync(join(process.cwd(), `../src/fragments/${name}.html`), 'utf8')
+const WALK = { headingOffset: 1 }
+---
+-->
+
+<!-- ============ 蓝底标题横幅：面包屑 + 标题 + 作者 ============ -->
+<div class="toptitle">
+	<div class="wrap">
+		<div class="title">
+			<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map(t => <Fragment><span class="crumb"><a data-field="crumb.url" href={t.url}><span data-field="crumb.label">{t.label}</span></a><span class="symbol">&gt;</span></span>{' '}</Fragment>)}</span>{' '}<span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
+			<h1 data-field="title" data-required>{j.title}</h1>
+			<div class="info-top">
+				<div class="author"><svg viewBox="0 0 24 18"><path d="M12 12c2.7 0 8 1.34 8 4v2H4v-2c0-2.66 5.3-4 8-4zm0-2a4 4 0 110-8 4 4 0 010 8z"/></svg><span data-field="author.name">赵卓拉</span></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- ============ 文章正文区：左 TOC + 右正文（float 两栏） ============ -->
+<div id="Topics">
+	<div class="TopicsInfo wrap">
+		<div class="craneinfo">
+
+			<!-- 左栏目录：JS 扫 .craneinfo 内 h2/h3[id] 动态生成，随可编辑标题同步 -->
+			<div id="rank-math-toc" class="wp-block-rank-math-toc-block">
+				<p>目录</p>
+				<nav><ul></ul></nav>
+			</div>
+
+			<!-- 导言（无标题，正文起首段） -->
+			<div data-field="lead.body" data-edit="rich" set:html={renderDoc(j.lead.body, WALK)} />
+
+			<!-- hero 铺满图 -->
+			<figure class="wp-block-image size-full"><img data-field="body.img_hero" data-edit="image" src={j.body.img_hero} alt="32吨轨道式集装箱龙门起重机出口俄罗斯" width="880" height="495" /></figure>
+
+			<!-- H2 核心采购要求 -->
+			<h2 id="core-procurement-requirements" class="wp-block-heading" data-field="body.h_req" data-edit="text">{j.body.h_req}</h2>
+			<div data-field="req.body" data-edit="rich" set:html={renderDoc(j.req.body, WALK)} />
+
+			<!-- H2 定制化解决方案（仅标题，无正文块） -->
+			<h2 id="customized-solution" class="wp-block-heading" data-field="body.h_solution" data-edit="text">{j.body.h_solution}</h2>
+
+			<!-- H3 低温适应性设计 -->
+			<h3 id="low-temperature-adaptability-design" class="wp-block-heading" data-field="body.h_lowtemp" data-edit="text">{j.body.h_lowtemp}</h3>
+			<div data-field="lowtemp.body" data-edit="rich" set:html={renderDoc(j.lowtemp.body, WALK)} />
+			<figure class="wp-block-image size-full"><img data-field="body.img_mainbeam" data-edit="image" src={j.body.img_mainbeam} alt="主梁" width="880" height="495" /></figure>
+			<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-1 wp-block-columns-is-layout-flex">
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_cabin" data-edit="image" src={j.body.img_cabin} alt="驾驶室" width="424" height="300" /></figure></div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_travmotor" data-edit="image" src={j.body.img_travmotor} alt="行走电机" width="424" height="300" /></figure></div>
+			</div>
+
+			<!-- H3 本地化设计 -->
+			<h3 id="localization-design" class="wp-block-heading" data-field="body.h_localization" data-edit="text">{j.body.h_localization}</h3>
+			<div data-field="localization.body" data-edit="rich" set:html={renderDoc(j.localization.body, WALK)} />
+			<figure class="wp-block-image size-full"><img data-field="body.img_control" data-edit="image" src={j.body.img_control} alt="控制系统" width="880" height="495" /></figure>
+
+			<!-- H3 安全保护系统 -->
+			<h3 id="safety-protection-system" class="wp-block-heading" data-field="body.h_safety" data-edit="text">{j.body.h_safety}</h3>
+			<div data-field="safety.body" data-edit="rich" set:html={renderDoc(j.safety.body, WALK)} />
+
+			<!-- H3 运输保护设计 -->
+			<h3 id="transport-protection-design" class="wp-block-heading" data-field="body.h_transport" data-edit="text">{j.body.h_transport}</h3>
+			<div data-field="transport.body" data-edit="rich" set:html={renderDoc(j.transport.body, WALK)} />
+			<figure class="wp-block-image size-full"><img data-field="body.img_travmech" data-edit="image" src={j.body.img_travmech} alt="行走机构包装" width="880" height="495" /></figure>
+			<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-2 wp-block-columns-is-layout-flex">
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_trolley" data-edit="image" src={j.body.img_trolley} alt="台车包装" width="424" height="300" /></figure></div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_spreader" data-edit="image" src={j.body.img_spreader} alt="集装箱吊具包装" width="424" height="300" /></figure></div>
+			</div>
+
+			<!-- H2 交付结果 -->
+			<h2 id="delivery-results" class="wp-block-heading" data-field="body.h_delivery" data-edit="text">{j.body.h_delivery}</h2>
+			<div data-field="delivery.body" data-edit="rich" set:html={renderDoc(j.delivery.body, WALK)} />
+			<div class="wp-block-columns is-layout-flex wp-container-core-columns-is-layout-3 wp-block-columns-is-layout-flex">
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_result1" data-edit="image" src={j.body.img_result1} alt="32吨轨道式集装箱龙门起重机" width="424" height="300" /></figure></div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.img_result2" data-edit="image" src={j.body.img_result2} alt="32吨轨道式集装箱龙门起重机 俄罗斯" width="424" height="300" /></figure></div>
+			</div>
+
+			<!-- H2 项目概要 -->
+			<h2 id="project-summary" class="wp-block-heading" data-field="body.h_summary" data-edit="text">{j.body.h_summary}</h2>
+			<div data-field="summary.body" data-edit="rich" set:html={renderDoc(j.summary.body, WALK)} />
+
+			<!-- H2 获取报价 -->
+			<h2 id="get-customized-crane-solutions-and-quotation" class="wp-block-heading" data-field="body.h_getquote" data-edit="text">{j.body.h_getquote}</h2>
+			<div data-field="getquote.body" data-edit="rich" set:html={renderDoc(j.getquote.body, WALK)} />
+
+			<!-- 作者盒 -->
+			<div id="p_author">
+				<img class="authorphoto" data-field="author.avatar" data-edit="image" alt="赵卓拉" width="158" height="182" />
+				<div class="rightname">
+					<p class="name" data-field="author.name" data-edit="text">{j.author.name}</p>
+					<p class="title" data-field="author.title" data-edit="text">{j.author.title}</p>
+					<p data-field="author.bio" data-edit="text">{j.author.bio}</p>
+				</div>
+			</div>
+
+		</div><!-- /.craneinfo -->
+	</div><!-- /.TopicsInfo -->
+</div><!-- /#Topics -->
+
+<!-- ============ 询盘表单（复用产品页动态块） ============ -->
+<section data-template="inquiry-form@1" data-dynamic="inquiry-form" data-form-id="713" data-block-id="inquiry-form" class="post-inquiry wrap" id="from-single">
+	<h3 data-field="inquiry_form.title">填写您的详细资料，我们将在24小时内给您答复!</h3>
+	<Fragment set:html={repoFrag('inquiry-form')} />
+</section>
+
+<!-- ============ photoswipe 灯箱（chrome，逐字复用，默认隐藏） ============ -->
+<Fragment set:html={repoFrag('photoswipe')} />

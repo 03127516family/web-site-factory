@@ -1,0 +1,55 @@
+# 站点层术语/锁词表（U-1 行内保护词 + U-2 术语表，合一）——决策 2026-07-07 拍定。
+# 命名：terms.<源语言>.<目标语言>.yaml，由 i18n-terms.mjs::loadTerms 按语言对加载。
+#   lock: 原样保留的锁词（型号/标准/品牌/零件码）——译文必须逐字含（词边界匹配，CD/MD 不误伤）。
+#   map:  中文术语 → 固定英文译法——源含该中文键时，译文须含固定英文、且不得残留中文。
+# 用途：i18n:apply --emit 时，代码扫本页源文本、把出现的 lock/map 挑出来注入翻译提示，交翻译
+# 节点（AI）遵守——纯提示词，不做后置校验（决策 07-08 简化）。变更走评审（决策 #8）。随翻译推进增补。
+
+lock:
+  # 品牌 / 站名
+  - DGCRANE
+  - Schneider
+  - ABM
+  - SEW
+  # 型号 / 标准代号（试点已定：一律不译）
+  - LD
+  - LDC
+  - LX
+  - LH
+  - QD
+  - HD
+  - CD
+  - MD
+  - MG
+  - FEM
+  - Monorail
+
+map:
+  # 起重机类型
+  桥式起重机: Overhead Crane
+  门式起重机: Gantry Crane
+  悬臂起重机: Jib Crane
+  单梁: Single Girder
+  双梁: Double Girder
+  低净空: Low Headroom
+  欧式: European-style
+  # 部件 / 机构
+  电动葫芦: Electric Hoist
+  钢丝绳葫芦: Wire-rope Hoist
+  卷扬机: Winch
+  主梁: Main Girder
+  端梁: End Carriage
+  # 参数 / 规格
+  起重量: Lifting Capacity
+  跨度: Span
+  起升高度: Lifting Height
+  起升速度: Lifting Speed
+  工作级别: Duty Class
+  电源: Power Supply
+  控制方式: Control Method
+  # 特性 / 工艺
+  变频: Variable Frequency
+  防爆: Explosion-proof
+  防腐: Anti-corrosion
+  遥控: Remote Control
+  手柄: Pendant Control

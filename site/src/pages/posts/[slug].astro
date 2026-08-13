@@ -1,0 +1,25 @@
+---
+// 文章页路由：content/posts/*.json 每份数据出一个页（数据驱动路由）。
+// 组件派发 = 每篇独立布局组件（T2 拍定）：components/posts/<slug>.astro。
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import Chrome from '../../layouts/Chrome.astro'
+
+export function getStaticPaths() {
+  const dir = join(process.cwd(), 'content/posts')
+  const haveLayout = new Set(Object.keys(import.meta.glob('../../components/posts/*.astro'))
+    .map(p => p.split('/').pop().replace('.astro', ''))) // T2：布局组件落成的文章才出页
+  return readdirSync(dir)
+    .filter(f => f.endsWith('.json') && haveLayout.has(f.replace('.json', '')))
+    .map(f => ({ params: { slug: f.replace('.json', '') }, j: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
+    .filter(p => process.env.INCLUDE_DRAFTS === '1' || p.j.page.status === 'published') // 状态门（R30）
+    .map(({ params, j }) => ({ params, props: { j } }))
+}
+
+const { j } = Astro.props
+const layouts = import.meta.glob('../../components/posts/*.astro')
+const Comp = (await layouts[`../../components/posts/${Astro.params.slug}.astro`]()).default
+---
+<Chrome j={j}>
+	<Comp j={j} />
+</Chrome>

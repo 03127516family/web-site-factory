@@ -1,0 +1,37 @@
+---
+// en 镜像文章路由：content/en/posts/*.json（镜像树，R35：同一骨架不同文字）。
+// 布局组件与 zh 源共用——按 pageId（文件名）派发 components/posts/<pageId>.astro（T2）。
+// 生产构建双闸门：状态门（R30）+ i18n 发布门禁（R43：有「从未翻译」字段的镜像不出页）；
+// 编辑预览（INCLUDE_DRAFTS=1）全放行——占位中的镜像也要能预览。
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+import Chrome from '../../../layouts/Chrome.astro'
+import { scanPages, buildGroups, isPublishable } from '../../../i18n.mjs'
+
+export function getStaticPaths() {
+  const dir = join(process.cwd(), 'content/en/posts')
+  if (!existsSync(dir)) return [] // 该语言还没有此类型镜像
+  const haveLayout = new Set(Object.keys(import.meta.glob('../../../components/posts/*.astro'))
+    .map(p => p.split('/').pop().replace('.astro', '')))
+  const pages = scanPages({ withJson: true })
+  const groups = buildGroups(pages)
+  const bySlug = new Map(pages.map(p => [p.slug, p]))
+  return readdirSync(dir)
+    .filter(f => f.endsWith('.json') && haveLayout.has(f.replace('.json', '')))
+    .map(f => ({ params: { slug: f.replace('.json', '') }, j: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
+    .filter(p => {
+      if (process.env.INCLUDE_DRAFTS === '1') return true
+      if (p.j.page.status !== 'published') return false
+      const me = bySlug.get(p.j.page.slug)
+      return me && isPublishable(me, groups, pages)
+    })
+    .map(({ params, j }) => ({ params, props: { j } }))
+}
+
+const { j } = Astro.props
+const layouts = import.meta.glob('../../../components/posts/*.astro')
+const Comp = (await layouts[`../../../components/posts/${Astro.params.slug}.astro`]()).default
+---
+<Chrome j={j}>
+	<Comp j={j} />
+</Chrome>

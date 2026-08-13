@@ -1,0 +1,23 @@
+---
+// 产品页路由：content/products/*.json 每份数据出一个页（数据驱动路由）。
+// POC 范围：ProductPage 组件目前只覆盖 product@1 页族段落（单梁），
+// overhead 的超集段落（spec_compare 等 6 段）待 POC-3 后续扩展，先只出单梁。
+import { readFileSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import Chrome from '../../layouts/Chrome.astro'
+import ProductPage from '../../components/ProductPage.astro'
+
+export function getStaticPaths() {
+  const dir = join(process.cwd(), 'content/products')
+  return readdirSync(dir)
+    .filter(f => f.endsWith('.json')) // product 族全量：content/products/*.json 每份出一个页
+    .map(f => ({ params: { slug: f.replace('.json', '') }, j: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
+    .filter(p => process.env.INCLUDE_DRAFTS === '1' || p.j.page.status === 'published') // 状态门（R30）：draft 不出生产站；编辑预览构建放行（R33）
+    .map(({ params, j }) => ({ params, props: { j } }))
+}
+
+const { j } = Astro.props
+---
+<Chrome j={j}>
+  <ProductPage j={j} />
+</Chrome>

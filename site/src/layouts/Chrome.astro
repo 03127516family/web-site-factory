@@ -1,0 +1,38 @@
+---
+// 页面外壳：直接复用旧系统 fragments（chrome 逐字平移，R17）。
+// {{LANG}} 按页语言填；{{LANG_SWITCH}} 由族谱驱动生成（R38，平移旧 langSwitcher）：
+// 当前语言=禁用 pill，兄弟语言=真链接；生产构建只链过门禁的镜像（预览不设限）。
+// {{SEO}} 仍空 = F4（R46）平移。
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+import { scanPages, buildGroups, siblingsOf, langSwitcher, isPublishable } from '../i18n.mjs'
+
+const { j } = Astro.props
+const SITE = process.cwd() // Astro build 的 cwd = site 根
+const repoFrag = name => readFileSync(join(SITE, `../src/fragments/${name}.html`), 'utf8')
+const doc = readFileSync(join(SITE, '../src/layouts/document.html'), 'utf8')
+
+// 本页在族谱里的坐标（slug 全站唯一：zh=posts/xxx，镜像=en/posts/xxx）
+const pages = scanPages({ withJson: true })
+const groups = buildGroups(pages)
+const me = pages.find(p => p.slug === j.page.slug)
+if (!me) throw new Error(`族谱里找不到本页 slug：${j.page.slug}（content 树与路由数据不一致，改坏不静默）`)
+// 生产构建：切换器只链「状态 published 且过 i18n 门禁」真实出页的镜像；编辑预览（INCLUDE_DRAFTS）不设限。
+const publishable = process.env.INCLUDE_DRAFTS === '1'
+  ? null
+  : new Set(pages.filter(p => p.status === 'published' && isPublishable(p, groups, pages)).map(p => p.slug))
+const switcher = langSwitcher(me, siblingsOf(me, groups, publishable))
+
+const composed = doc
+  .replaceAll('{{LANG}}', j.page.lang)
+  .replaceAll('{{TITLE}}', j.page.title)
+  .replaceAll('{{DESCRIPTION}}', j.page.description)
+  .replaceAll('{{SEO}}', '') // SEO 头（canonical/OG/JSON-LD）= F4（R46）平移，现先空
+  .replace('{{HEADER}}', repoFrag('header'))
+  .replace('{{FOOTER}}', repoFrag('footer'))
+  .replaceAll('{{LANG_SWITCH}}', switcher)
+const [head, tail] = composed.split('{{BODY}}')
+---
+<Fragment set:html={head} />
+<slot />
+<Fragment set:html={tail} />
