@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
-import { loadTm, saveTm, upsert, loadConfig } from '../src/i18n-tm.mjs'
+import { join } from 'node:path'
+import { rmSync } from 'node:fs'
+import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -71,6 +73,23 @@ test('配置:缺文件给默认', () => {
   const c = loadConfig()
   assert.equal(typeof c.auto, 'boolean')
   assert.equal(c.review.en, 'required')
+})
+test('TM:saveTm/loadTm 真落盘往返', () => {
+  const f = join(process.cwd(), 'src', 'i18n', 'tm.t-x.t-y.json')
+  const tm = loadTm('t-x', 't-y')
+  upsert(tm, 'k1', { text: '源', translation: '译', status: 'draft', origin: 'engine' })
+  saveTm('t-x', 't-y', tm)
+  assert.equal(loadTm('t-x', 't-y').sentences['k1'].translation, '译')
+  rmSync(f) // 清理，不留测试残留
+})
+test('配置:saveConfig review 深合并不丢键', () => {
+  const f = join(process.cwd(), 'src', 'i18n', 'config.json')
+  saveConfig({ review: { de: 'auto' } })
+  saveConfig({ review: { en: 'auto' } })
+  const c = loadConfig()
+  assert.equal(c.review.de, 'auto')  // de 不被顶掉
+  assert.equal(c.review.en, 'auto')
+  rmSync(f) // 还原「缺文件」初始态（前面用例依赖它）
 })
 
 // ---------- 汇总（勿动） ----------

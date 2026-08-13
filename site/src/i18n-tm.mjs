@@ -25,11 +25,14 @@ const CONFIG = () => join(process.cwd(), 'src', 'i18n', 'config.json')
 const DEFAULTS = { auto: true, review: { en: 'required' } }
 export function loadConfig() {
   if (!existsSync(CONFIG())) return structuredClone(DEFAULTS)
-  const j = JSON.parse(readFileSync(CONFIG(), 'utf8'))
+  let j
+  try { j = JSON.parse(readFileSync(CONFIG(), 'utf8')) } catch (e) { throw new Error(`i18n 配置文件损坏 ${CONFIG()}: ${e.message}`) }
+  if (!j || typeof j !== 'object') throw new Error(`i18n 配置文件非法（须为对象）: ${CONFIG()}`)
   return { ...structuredClone(DEFAULTS), ...j, review: { ...DEFAULTS.review, ...(j.review ?? {}) } }
 }
 export function saveConfig(patch) {
-  const next = { ...loadConfig(), ...patch }
+  const cur = loadConfig()
+  const next = { ...cur, ...patch, review: { ...cur.review, ...(patch.review ?? {}) } }
   mkdirSync(dirname(CONFIG()), { recursive: true })
   writeFileSync(CONFIG(), JSON.stringify(next, null, 2) + '\n')
   return next

@@ -15,6 +15,7 @@
     "accept:poc5": "node scripts/accept-poc5.mjs",
     "accept:f3": "node scripts/accept-f3.mjs",
     "accept:burn": "node scripts/accept-burn.mjs",
+    "accept:i18n2": "node scripts/accept-i18n2.mjs",
     "bundle:edit": "esbuild edit-layer/edit-layer.js --bundle --format=iife --outfile=edit-layer/dist/edit-layer.js",
     "edit": "npm run bundle:edit && node scripts/edit-server.mjs"
   },
