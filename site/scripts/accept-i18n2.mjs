@@ -4,6 +4,7 @@ import assert from 'node:assert/strict'
 import { join } from 'node:path'
 import { rmSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
+import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -90,6 +91,39 @@ test('配置:saveConfig review 深合并不丢键', () => {
   assert.equal(c.review.de, 'auto')  // de 不被顶掉
   assert.equal(c.review.en, 'auto')
   rmSync(f) // 还原「缺文件」初始态（前面用例依赖它）
+})
+
+// ---------- Task 3: 可译采集 ----------
+test('采集:文本字段+结构性排除', () => {
+  const j = {
+    page: { slug: 'posts/x', lang: 'zh-CN', title: '页面标题' },
+    title: '文章标题',
+    breadcrumb: { current: '当前', trail: [{ label: '首页', url: 'https://x.com/zh/' }] },
+    hero: { image: 'a.jpg', link: 'https://x.com/', alt: '一张图' },
+  }
+  const units = collectUnits(j)
+  const ids = units.map(u => u.id)
+  assert.ok(ids.includes('title') && ids.includes('page.title') && ids.includes('breadcrumb.current') && ids.includes('hero.alt'))
+  assert.ok(!ids.some(i => i.includes('slug') || i.includes('trail') || i.includes('image') || i.includes('link') || i.includes('lang')))
+})
+test('采集:树段落逐句+坐标', () => {
+  const doc = { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '第一句。第二句。' }] }] }
+  const out = []
+  collectTreeUnits(doc, 'overview', out)
+  assert.equal(out.length, 2)
+  assert.equal(out[0].id, 'overview:content[0]#0')
+  assert.equal(out[1].text, '第二句。')
+})
+test('采集:标题/单元格/alt 整体一句', () => {
+  const doc = { type: 'doc', content: [
+    { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: '标题有句点。仍一句' }] },
+    { type: 'table', content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text: '起重量 5吨' }] }] }] }] },
+    { type: 'image', attrs: { src: 'a.jpg', alt: '产品图' } },
+  ] }
+  const out = []
+  collectTreeUnits(doc, 'sec', out)
+  assert.deepEqual(out.map(u => u.kind), ['block', 'cell', 'alt'])
+  assert.equal(out[0].text, '标题有句点。仍一句')
 })
 
 // ---------- 汇总（勿动） ----------
