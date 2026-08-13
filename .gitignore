@@ -6,3 +6,8 @@ dist/
 i18n-lead.json
 # 本地模拟件（后台管理台 / mock 云）——草稿形态，不入库（用户拍定 2026-07-11）
 app/
+
+# 新系统（site/）构建产物 / 缓存 / 开发软链，不入库
+site/.astro/
+site/dist-edit/
+site/public
