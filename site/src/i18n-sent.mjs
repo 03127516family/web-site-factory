@@ -92,7 +92,7 @@ export function extractInlineUnits(nodes) {
 // 译文回植：第 si 句替换为 inlineMdToNodes(newMd)，其余原样（保序保 marks）。
 // 多次回植同一段落须按 si 降序——译文句数与源不同时 si 会漂移。
 // newMd 空串 = 删除该句（分隔符留原位）；annoMarks = 给回植节点追加标记（i18n-pending 注解用）。
-export function applyInlineUnit(nodes, si, newMd, { annoMarks = [] } = {}) {
+export function applyInlineUnit(nodes, si, newMd, { annoMarks = [], trail = '' } = {}) {
   const { spans, text } = inlineSpans(nodes)
   const sp = spans[si]
   if (!sp) throw new Error(`句序号越界 si=${si}（共 ${spans.length} 句）`)
@@ -100,6 +100,7 @@ export function applyInlineUnit(nodes, si, newMd, { annoMarks = [] } = {}) {
   const end = Math.max(sp.start, sp.start + text.slice(sp.start, sp.end).replace(/[\s　]+$/, '').length)
   const raw = newMd?.trim() ? inlineMdToNodes(newMd) : [] // 空串 = 删除该句（分隔符留原位）
   const fresh = annoMarks.length ? raw.map(n => n.type === 'text' ? { ...n, marks: [...(n.marks ?? []), ...annoMarks] } : n) : raw
+  if (trail) fresh.push({ type: 'text', text: trail }) // 句间空格合成（源无分隔符时给英文补气口）
   const out = []
   let pos = 0, inserted = false
   for (const n of nodes ?? []) {

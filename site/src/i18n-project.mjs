@@ -22,17 +22,27 @@ function sentNodes(text, sentenceFp, tm, mode) {
   return anno(inlineMdToNodes(text)) // 未译/failed → 中文占位（full 模式）
 }
 
-// 树投影：逐节点重建。返回值 null = 该节点整体不出。
-function projNode(node, tm, mode) {
+// 树投影：逐节点重建。返回值 null = 该节点整体不出。lang = 目标语言（句间空格合成判 CJK 用）
+function projNode(node, tm, mode, lang) {
   if (node.type === 'paragraph') {
     let nodes = node.content ?? []
+    const { spans, text } = inlineSpans(nodes)
     const units = extractInlineUnits(nodes)
+    const sepless = sp => !/[\s　]$/.test(text.slice(sp.start, sp.end)) // 源 span 无尾随分隔符（hardBreak 字符 \n 算有）
+    const cjk = /^(zh|ja|ko)/.test(lang ?? '')
+    let keptAfter = false
     for (let si = units.length - 1; si >= 0; si--) { // 降序回植防 si 漂移
       const e = tm.sentences[fp(units[si].md)]
-      if (e?.status === 'approved') nodes = applyInlineUnit(nodes, si, e.translation)
-      else if (mode === 'approved') nodes = applyInlineUnit(nodes, si, '') // 未审句删除
-      else if (e?.status === 'draft') nodes = applyInlineUnit(nodes, si, e.translation, { annoMarks: [PENDING_MARK] })
-      else nodes = applyInlineUnit(nodes, si, units[si].md, { annoMarks: [PENDING_MARK] }) // 未译中文占位+注解
+      if (mode === 'approved' && e?.status !== 'approved') { nodes = applyInlineUnit(nodes, si, ''); continue } // 未审句删除
+      const replacement = e?.status === 'approved' ? e.translation : e?.status === 'draft' ? e.translation : units[si].md
+      const anno = e?.status === 'approved' ? [] : [PENDING_MARK]
+      const trail = keptAfter && sepless(spans[si]) && !cjk ? ' ' : '' // 合成句间空格（保留句之后还有保留句才补）
+      nodes = applyInlineUnit(nodes, si, replacement, { annoMarks: anno, trail })
+      keptAfter = true
+    }
+    if (mode === 'approved') { // 删句后悬空分隔符清边（段首孤 <br>/首尾纯空白节点）
+      while (nodes.length && ((nodes[0].type === 'text' && !nodes[0].text.trim()) || nodes[0].type === 'hardBreak')) nodes.shift()
+      while (nodes.length && ((nodes[nodes.length - 1].type === 'text' && !nodes[nodes.length - 1].text.trim()) || nodes[nodes.length - 1].type === 'hardBreak')) nodes.pop()
     }
     return nodes.length ? { ...node, content: nodes } : null
   }
@@ -54,7 +64,7 @@ function projNode(node, tm, mode) {
     return { ...node, attrs: { ...node.attrs, alt: t } } // alt 未审保中文（属性位，不破阅读面）
   }
   if (node.content) {
-    const kids = (node.content ?? []).map(c => projNode(c, tm, mode)).filter(Boolean)
+    const kids = (node.content ?? []).map(c => projNode(c, tm, mode, lang)).filter(Boolean)
     if (!kids.length && node.type !== 'doc') return null
     return { ...node, content: kids }
   }
@@ -90,7 +100,7 @@ export function projectPage(srcJ, tm, mode, { lang, existingStatus, existingTrai
       return walk(v, `${path}[${i}]`)
     }).filter(v => v !== null && !(v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0)) // null 项与空壳项都剔（规格审 #2 一并收）
     if (node.type === 'doc') {
-      const doc = projNode(node, tm, mode)
+      const doc = projNode(node, tm, mode, lang)
       return doc && doc.content.length ? doc : null // 空 body → 段删信号
     }
     const out = {}

@@ -211,7 +211,7 @@ test('投影:full 草稿/未译都出+带 pending 注解', () => {
   const tm = tmWith([{ text: '第一句。', translation: 'First draft.', status: 'draft', origin: 'engine' }])
   const j = projectPage(SRC(), tm, 'full', { lang: 't1' })
   const para = j.overview.body.content[0]
-  assert.equal(para.content.map(n => n.text).join(''), 'First draft.第二句。') // 草稿+中文占位
+  assert.equal(para.content.map(n => n.text).join(''), 'First draft. 第二句。') // 草稿+中文占位（句间空格 = C1 合成半：预览与生产同形）
   const spans = para.content.flatMap(n => (n.marks ?? []).filter(m => m.type === 'span' && m.attrs?.class === PENDING_CLASS))
   assert.ok(spans.length >= 2)                                          // 草稿句与未译句都标 pending
 })
@@ -288,6 +288,35 @@ test('投影:approved 未审句删除无残留', () => {
   ])
   const j = projectPage(src, tm, 'approved', { lang: 't1' })
   assert.equal(j.overview.body.content[0].content.map(n => n.text).join('').trim(), 'Second.')
+})
+test('投影:源无分隔符→合成英文空格', () => {
+  const src = SRC() // '第一句。第二句。' 源无空格
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '概述', translation: 'O', status: 'approved', origin: 'engine' },
+    { text: '第一句。', translation: 'First.', status: 'approved', origin: 'engine' },
+    { text: '第二句。', translation: 'Second.', status: 'approved', origin: 'engine' },
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  assert.equal(j.overview.body.content[0].content.map(n => n.text).join(''), 'First. Second.')
+})
+test('投影:删句不留段首悬空 hardBreak', () => {
+  const src = SRC(); src.overview.body.content[0].content = [{ type: 'text', text: '起重量：3吨' }, { type: 'hardBreak' }, { type: 'text', text: '跨度：7.5米' }]
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '概述', translation: 'O', status: 'approved', origin: 'engine' },
+    { text: '跨度：7.5米', translation: 'Span: 7.5m', status: 'approved', origin: 'engine' }, // 首句未审
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  const c = j.overview.body.content[0].content
+  assert.equal(c[0].type, 'text')
+  assert.equal(c.map(n => n.type === 'hardBreak' ? '\n' : n.text).join(''), 'Span: 7.5m')
 })
 
 // ---------- 汇总（勿动） ----------
