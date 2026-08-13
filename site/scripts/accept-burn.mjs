@@ -42,7 +42,6 @@ const lib = await import('../src/burn-lib.mjs')
   ok('loadMeta 返回 16 项', meta.length === 16, `${meta.length} 项`)
   ok('loadMeta 含 overview(section/verbatim)', meta.some(c => c.key === 'overview' && c.shape === 'section' && c.level === 'verbatim'))
   ok('loadMeta 含 page.description(seo/summary)', meta.some(c => c.key === 'page.description' && c.shape === 'seo' && c.level === 'summary'))
-  ok('meta.json ≡ SECTION_CATALOG(过渡期锁,Task 5 删）', JSON.stringify(meta) === JSON.stringify(lib.SECTION_CATALOG.map(c => ({key:c.key,shape:c.shape,level:c.level}))))
 }
 
 // ---------- loadMeta 异常分支 ----------

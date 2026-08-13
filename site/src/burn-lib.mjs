@@ -63,32 +63,10 @@ export async function fetchSource({ text, url }) {
   } finally { clearTimeout(timer) }
 }
 
-// ---------- 字段目录（spec §5）：结构真相=ProductPage.astro + 参照 JSON，装载时自校验 ----------
-// shape: section={title,body_md} | list=文本数组 | text=单文本 | seo=概括豁免
-export const SECTION_CATALOG = [
-  // 正文段（title 相似级 + body 逐字级树），全部可选——缺段=缺席
-  { key: 'overview',      shape: 'section', level: 'verbatim' },
-  { key: 'introduction',  shape: 'section', level: 'verbatim' },
-  { key: 'advantages',    shape: 'section', level: 'verbatim' },
-  { key: 'protection',    shape: 'section', level: 'verbatim' },
-  { key: 'main_features', shape: 'section', level: 'verbatim' },
-  { key: 'basic_params',  shape: 'section', level: 'verbatim' },
-  { key: 'spec_compare',  shape: 'section', level: 'verbatim' },
-  { key: 'spec_detail',   shape: 'section', level: 'verbatim' },
-  { key: 'which_better',  shape: 'section', level: 'verbatim' },
-  { key: 'summary_intro', shape: 'section', level: 'verbatim' }, // 组件只渲 body（无 title 槽，loadCatalog 特判）
-  { key: 'installation',  shape: 'section', level: 'verbatim' },
-  // 特殊字段
-  { key: 'specs',           shape: 'list', level: 'verbatim' }, // [{text}]，规格数字逐字
-  { key: 'summary.intro',   shape: 'text', level: 'verbatim' },
-  { key: 'hero.headline',   shape: 'text', level: 'similar' },  // 允许等于产品名
-  { key: 'hero.highlights', shape: 'list', level: 'similar' },
-  { key: 'page.description',shape: 'seo',  level: 'summary' },  // 概括豁免+报告标出
-]
-// v1 不烧（缺席或站级默认，报告注明）：gallery 以外的图组、related_products、case、
-// production_flow、components_images、crane_types_images、breadcrumb.trail、inquiry_form
+// ---------- 字段目录：结构真相=ProductPage.astro + 参照 JSON，装载时自校验 ----------
+// 字段清单及其语义依据见同目录 ProductPage.meta.json + ProductPage.meta.md（单一真相）
 
-// 读模板旁边的 meta 文件，返回字段清单 [{key,shape,level}]（取代中心 SECTION_CATALOG）
+// 读模板旁边的 meta 文件，返回字段清单 [{key,shape,level}]
 export function loadMeta(metaPath) {
   const meta = JSON.parse(readFileSync(metaPath, 'utf8'))
   if (!Array.isArray(meta) || !meta.every(c => c.key && c.shape && c.level))
