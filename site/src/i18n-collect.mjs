@@ -2,7 +2,7 @@
 // 判形不判名：doc 树→树单元；字符串→文本单元；结构性键与 URL/文件形态值排除（U-1 沿用）。
 import { fp, extractInlineUnits, sliceInlineMd, inlineSpans } from './i18n-sent.mjs'
 
-const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'image', 'src', 'href', 'url', 'video', 'pdf'])
+const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'family', 'geomBaseline', 'image', 'src', 'href', 'url', 'video', 'pdf'])
 const SKIP_TOP = new Set(['i18n', 'i18n_rev', 'i18n_fp'])
 const SKIP_PATHS = new Set(['breadcrumb.trail']) // 分语言手写结构（旧 STRUCTURAL_EXCLUDE）
 export const skipPath = p => [...SKIP_PATHS].some(sp => p === sp || p.startsWith(sp + '.') || p.startsWith(sp + '[')) // 前缀命中整棵子树都跳（投影器复用）

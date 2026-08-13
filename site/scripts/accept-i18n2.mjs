@@ -125,6 +125,11 @@ test('采集:标题/单元格/alt 整体一句', () => {
   assert.deepEqual(out.map(u => u.kind), ['block', 'cell', 'alt'])
   assert.equal(out[0].text, '标题有句点。仍一句')
 })
+test('采集:产品页配置键不进翻译（family/geomBaseline）', () => {
+  const j = { page: { slug: 'products/x', lang: 'zh-CN', title: '产品页', family: 'product@1', template: 'src/templates/product.html', geomBaseline: 'src/templates/product.html' }, title: '产品标题' }
+  const ids = collectUnits(j).map(u => u.id)
+  assert.deepEqual(ids.sort(), ['page.title', 'title'].sort())
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0
