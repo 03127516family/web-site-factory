@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { rmSync, readFileSync, readdirSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
+import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -158,6 +159,67 @@ test('采集:真实内容零垃圾单元', () => {
 test('采集:多段单元格抛错不静默', () => {
   const doc = { type: 'doc', content: [{ type: 'table', content: [{ type: 'tableRow', content: [{ type: 'tableCell', content: [{ type: 'paragraph', content: [{ type: 'text', text: '一' }] }, { type: 'paragraph', content: [{ type: 'text', text: '二' }] }] }] }] }] }
   assert.throws(() => collectTreeUnits(doc, 'sec', []), /多段单元格/)
+})
+
+// ---------- Task 4: 投影 ----------
+const SRC = () => ({
+  version: '1',
+  page: { slug: 'posts/x', type: 'post', lang: 'zh-CN', title: '页标题', description: '页描述', status: 'published' },
+  title: '文章标题',
+  breadcrumb: { current: '当前', trail: [{ label: '首页', url: 'https://x/' }] },
+  overview: { title: '概述', body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '第一句。第二句。' }] }] } },
+  empty_sec: { title: '空段', body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '没翻的句子。' }] }] } },
+})
+const tmWith = entries => { const tm = loadTm('zh-CN', 't1'); for (const e of entries) upsert(tm, fp(e.text), e); return tm }
+
+test('投影:approved 模式 draft 句不出（核心已审则页可发）', () => {
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '第一句。', translation: 'First.', status: 'draft', origin: 'engine' }, // draft → 不出
+  ])
+  const j = projectPage(SRC(), tm, 'approved', { lang: 't1' })
+  assert.ok(j)                          // 核心已审 → 页可发
+  assert.equal(j.overview, undefined)   // overview 段标题未审 → 整段删
+})
+test('投影:核心字段未审 → null（不可发）', () => {
+  const tm = tmWith([{ text: '第一句。', translation: 'First.', status: 'approved', origin: 'engine' }])
+  assert.equal(projectPage(SRC(), tm, 'approved', { lang: 't1' }), null)
+})
+test('投影:approved 全齐 → 骨架≡源+译文+无注解 span', () => {
+  const tm = tmWith([
+    { text: '页标题', translation: 'Page T', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'Article T', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'Desc', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'Current', status: 'approved', origin: 'engine' },
+    { text: '概述', translation: 'Overview', status: 'approved', origin: 'engine' },
+    { text: '第一句。', translation: 'First.', status: 'approved', origin: 'engine' },
+    // '第二句。' 与 '空段' 段未审
+  ])
+  const j = projectPage(SRC(), tm, 'approved', { lang: 't1' })
+  assert.ok(j)
+  const para = j.overview.body.content[0]
+  assert.equal(para.content.map(n => n.text).join(''), 'First.')       // 第二句被剔除
+  assert.equal(j.empty_sec, undefined)                                  // 整段无一句已审 → 段删
+  assert.equal(j.breadcrumb.trail[0].label, '首页')                     // trail 不译不动
+  assert.equal(JSON.stringify(j).includes(PENDING_CLASS), false)        // 生产无注解
+  assert.equal(j.page.slug, 't1/posts/x')                               // 镜像 slug 前缀
+})
+test('投影:full 草稿/未译都出+带 pending 注解', () => {
+  const tm = tmWith([{ text: '第一句。', translation: 'First draft.', status: 'draft', origin: 'engine' }])
+  const j = projectPage(SRC(), tm, 'full', { lang: 't1' })
+  const para = j.overview.body.content[0]
+  assert.equal(para.content.map(n => n.text).join(''), 'First draft.第二句。') // 草稿+中文占位
+  const spans = para.content.flatMap(n => (n.marks ?? []).filter(m => m.type === 'span' && m.attrs?.class === PENDING_CLASS))
+  assert.ok(spans.length >= 2)                                          // 草稿句与未译句都标 pending
+})
+test('投影:full 保 mirror 现有 status', () => {
+  const tm = tmWith([])
+  const j = projectPage(SRC(), tm, 'full', { lang: 't1', existingStatus: 'published' })
+  assert.equal(j.page.status, 'published')
+  assert.equal(j.page.lang, 't1')
 })
 
 // ---------- 汇总（勿动） ----------
