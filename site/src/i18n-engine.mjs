@@ -2,7 +2,7 @@
 // 句级送翻：批次 30 句/次；每句带前后句上下文（仅供连贯，回写只写目标句）；
 // 术语注入提示词 + 机器验收硬校验（不过→带原因重翻 ≤2 → failed）。
 // callAI 契约（与真 caller 一致）：callAI(messages, tag) → 解析后的 content 对象。
-import { checkSentence, checkCoverage } from './i18n-checks.mjs'
+import { checkSentence } from './i18n-checks.mjs'
 
 const RULES = `你是工业起重机外贸网站的翻译引擎（中→英）。铁律：
 1. 只输出 JSON（不要解释、不要 markdown 围栏）；
