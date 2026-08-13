@@ -7,6 +7,7 @@ import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.m
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
+import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -346,6 +347,28 @@ test('术语:saveTerms 校验拒收空值/重复', () => {
   } finally {
     if (existsSync(f)) rmSync(f) // 成败都清理
   }
+})
+
+// ---------- Task 6: 机器验收 ----------
+const TERMS = { lock: ['HD', 'Schneider'], map: { 桥式起重机: 'Overhead Crane', 起重量: 'Lifting Capacity' } }
+
+test('验收:全过', () => {
+  const r = checkSentence('HD 桥式起重机起重量为3吨，跨度7.5米', 'HD Overhead Crane, Lifting Capacity 3 tons, span 7.5m', TERMS)
+  assert.equal(r.ok, true)
+})
+test('验收:锁词丢→打回', () => {
+  assert.equal(checkSentence('HD 型', 'High Definition type', TERMS).fails.join(','), 'lock:HD')
+})
+test('验收:固定译法错/中文残留→打回', () => {
+  assert.ok(checkSentence('桥式起重机', 'bridge crane', TERMS).fails.some(f => f.startsWith('map-missing')))
+  assert.ok(checkSentence('桥式起重机', 'Overhead Crane 桥式起重机', TERMS).fails.some(f => f.startsWith('map-residual')))
+})
+test('验收:数字丢→打回', () => {
+  assert.ok(checkSentence('3吨 7.5米', '3 tons', TERMS).fails.includes('number:7.5'))
+})
+test('验收:覆盖率不齐', () => {
+  const r = checkCoverage(['a', 'b', 'c'], { a: 'A', c: 'C' })
+  assert.deepEqual(r.missing, ['b'])
 })
 
 // ---------- 汇总（勿动） ----------
