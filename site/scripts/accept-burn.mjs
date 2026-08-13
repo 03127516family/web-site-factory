@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // DeepSeek 烧制台验收（无 key 全链 mock；真 key 验收为手动步骤，见计划 Task 9）。
 // 惯例同 accept-poc5/f3：ok() 累计，结尾非零退出。
-import { readFileSync, existsSync, rmSync } from 'node:fs'
+import { readFileSync, existsSync, rmSync, writeFileSync, unlinkSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -36,6 +36,22 @@ const lib = await import('../src/burn-lib.mjs')
   const keys = catalog.map(c => c.key)
   for (const k of ['overview', 'introduction', 'advantages', 'protection', 'specs', 'hero.headline', 'page.description'])
     ok(`目录含 ${k} 且已核验`, keys.includes(k) && catalog.find(c => c.key === k).verified)
+
+  const meta = lib.loadMeta(join(SITE, 'src/components/ProductPage.meta.json'))
+  ok('loadMeta 返回 16 项', meta.length === 16, `${meta.length} 项`)
+  ok('loadMeta 含 overview(section/verbatim)', meta.some(c => c.key === 'overview' && c.shape === 'section' && c.level === 'verbatim'))
+  ok('loadMeta 含 page.description(seo/summary)', meta.some(c => c.key === 'page.description' && c.shape === 'seo' && c.level === 'summary'))
+  ok('meta.json ≡ SECTION_CATALOG(过渡期锁,Task 5 删）', JSON.stringify(meta) === JSON.stringify(lib.SECTION_CATALOG.map(c => ({key:c.key,shape:c.shape,level:c.level}))))
+}
+
+// ---------- loadMeta 异常分支 ----------
+{
+  const bad = join(SITE, '.tmp-bad-meta.json')
+  writeFileSync(bad, '[{"key":"x","shape":"section"}]')
+  let threw = false
+  try { lib.loadMeta(bad) } catch { threw = true }
+  ok('loadMeta 缺 level 抛错', threw)
+  unlinkSync(bad)
 }
 
 // ---------- T3 规范化 / 相似度 / 溯源 ----------

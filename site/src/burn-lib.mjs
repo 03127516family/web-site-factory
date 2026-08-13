@@ -88,6 +88,14 @@ export const SECTION_CATALOG = [
 // v1 不烧（缺席或站级默认，报告注明）：gallery 以外的图组、related_products、case、
 // production_flow、components_images、crane_types_images、breadcrumb.trail、inquiry_form
 
+// 读模板旁边的 meta 文件，返回字段清单 [{key,shape,level}]（取代中心 SECTION_CATALOG）
+export function loadMeta(metaPath) {
+  const meta = JSON.parse(readFileSync(metaPath, 'utf8'))
+  if (!Array.isArray(meta) || !meta.every(c => c.key && c.shape && c.level))
+    throw new Error(`meta 格式非法(须为 [{key,shape,level}]):${metaPath}`)
+  return meta
+}
+
 // ---------- 页族注册表（built=false 的族选了直接拒，不硬烧） ----------
 export const FAMILIES = {
   product: { label: '产品页族', built: true },
