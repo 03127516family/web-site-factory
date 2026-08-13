@@ -265,7 +265,7 @@ export function writeDraft(json, slug) {
   while (existsSync(join(SITE, 'content/products', `${final}.json`))) final = `${slug}-${i++}`
   json.page.slug = `products/${final}`
   json.page.status = 'draft'
-  for (const c of lib.SECTION_CATALOG.filter(c => c.shape === 'section' && json[c.key]))
+  for (const c of lib.loadMeta(META).filter(c => c.shape === 'section' && json[c.key]))
     lib.validateDoc(json[c.key].body, `${c.key}.body`)
   writeFileSync(join(SITE, 'content/products', `${final}.json`), JSON.stringify(json, null, 2) + '\n')
   return final
