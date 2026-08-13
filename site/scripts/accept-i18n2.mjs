@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
+import { loadTm, saveTm, upsert, loadConfig } from '../src/i18n-tm.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -50,6 +51,26 @@ test('行内:回植保尾随空格', () => {
   const nodes = [{ type: 'text', text: 'Made in U.S.A. standard. It works.' }]
   const out = applyInlineUnit(nodes, 0, '中国制造。')
   assert.equal(out.map(n => n.text).join(''), '中国制造。 It works.')
+})
+
+// ---------- Task 2: TM 库 ----------
+test('TM:空语言对=空表', () => {
+  const tm = loadTm('zh-CN', 'xx-nonexist')
+  assert.deepEqual(tm.sentences, {})
+})
+test('TM:upsert 写读往返+状态机', () => {
+  const tm = loadTm('zh-CN', 'xx-nonexist')
+  upsert(tm, 'abc123', { text: '源句', translation: 'draft one', status: 'draft', origin: 'engine' })
+  assert.equal(tm.sentences['abc123'].status, 'draft')
+  upsert(tm, 'abc123', { status: 'approved' }) // 部分更新不丢字段
+  assert.equal(tm.sentences['abc123'].translation, 'draft one')
+  assert.equal(tm.sentences['abc123'].status, 'approved')
+  assert.ok(tm.sentences['abc123'].updatedAt)
+})
+test('配置:缺文件给默认', () => {
+  const c = loadConfig()
+  assert.equal(typeof c.auto, 'boolean')
+  assert.equal(c.review.en, 'required')
 })
 
 // ---------- 汇总（勿动） ----------
