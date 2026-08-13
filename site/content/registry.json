@@ -1,0 +1,102 @@
+{
+  "pages": {
+    "32t-rail-mounted-container-gantry-crane-exported-to-russia": {
+      "type": "post",
+      "langs": {
+        "zh-CN": {
+          "slug": "posts/32t-rail-mounted-container-gantry-crane-exported-to-russia",
+          "file": "content/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.json",
+          "status": "published",
+          "source": true
+        },
+        "en": {
+          "slug": "en/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia",
+          "file": "content/en/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.json",
+          "status": "published"
+        }
+      }
+    },
+    "5-ton-overhead-crane": {
+      "type": "post",
+      "langs": {
+        "zh-CN": {
+          "slug": "posts/5-ton-overhead-crane",
+          "file": "content/posts/5-ton-overhead-crane.json",
+          "status": "published",
+          "source": true
+        },
+        "en": {
+          "slug": "en/posts/5-ton-overhead-crane",
+          "file": "content/en/posts/5-ton-overhead-crane.json",
+          "status": "published"
+        }
+      }
+    },
+    "crane-lifting-safety-training": {
+      "type": "post",
+      "langs": {
+        "zh-CN": {
+          "slug": "posts/crane-lifting-safety-training",
+          "file": "content/posts/crane-lifting-safety-training.json",
+          "status": "published",
+          "source": true
+        }
+      }
+    },
+    "free-standing-jib-cranes": {
+      "type": "product",
+      "langs": {
+        "zh-CN": {
+          "slug": "products/free-standing-jib-cranes",
+          "file": "content/products/free-standing-jib-cranes.json",
+          "status": "published",
+          "source": true
+        }
+      }
+    },
+    "gantry-cranes-for-sale": {
+      "type": "post",
+      "langs": {
+        "zh-CN": {
+          "slug": "posts/gantry-cranes-for-sale",
+          "file": "content/posts/gantry-cranes-for-sale.json",
+          "status": "published",
+          "source": true
+        }
+      }
+    },
+    "multi-point-suspension-cranes": {
+      "type": "product",
+      "langs": {
+        "zh-CN": {
+          "slug": "products/multi-point-suspension-cranes",
+          "file": "content/products/multi-point-suspension-cranes.json",
+          "status": "published",
+          "source": true
+        }
+      }
+    },
+    "overhead-cranes-for-sale": {
+      "type": "product",
+      "langs": {
+        "zh-CN": {
+          "slug": "products/overhead-cranes-for-sale",
+          "file": "content/products/overhead-cranes-for-sale.json",
+          "status": "published",
+          "source": true
+        }
+      }
+    },
+    "single-girder-eot-cranes": {
+      "type": "product",
+      "langs": {
+        "zh-CN": {
+          "slug": "products/single-girder-eot-cranes",
+          "file": "content/products/single-girder-eot-cranes.json",
+          "status": "published",
+          "source": true
+        }
+      }
+    }
+  }
+}
