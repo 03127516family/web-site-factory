@@ -72,7 +72,7 @@ export function projectPage(srcJ, tm, mode, { lang, existingStatus, existingTrai
     if (node == null) return node
     if (skipPath(path)) return node // breadcrumb.trail 等：整棵子树原样保留（随后可被 existingTrail 覆盖）
     if (typeof node !== 'object') return node
-    if (Array.isArray(node)) return node.map((v, i) => walk(v, `${path}[${i}]`))
+    if (Array.isArray(node)) return node.map((v, i) => walk(v, `${path}[${i}]`)).filter(v => !(v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0)) // 数组项字段全删 → 空壳项剔除（approved 模式防空卡片）
     if (node.type === 'doc') {
       const doc = projNode(node, tm, mode)
       return doc && doc.content.length ? doc : null // 空 body → 段删信号

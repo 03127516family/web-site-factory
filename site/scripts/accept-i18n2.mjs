@@ -221,6 +221,19 @@ test('投影:full 保 mirror 现有 status', () => {
   assert.equal(j.page.status, 'published')
   assert.equal(j.page.lang, 't1')
 })
+test('投影:approved 数组空壳项剔除', () => {
+  const src = { ...SRC(), faq: [{ q: '问题一', a: '答案一' }, { q: '问题二', a: '答案二' }] }
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '问题一', translation: 'Q1', status: 'approved', origin: 'engine' },
+    { text: '答案一', translation: 'A1', status: 'approved', origin: 'engine' },
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  assert.deepEqual(j.faq, [{ q: 'Q1', a: 'A1' }]) // 第二项全未审 → 剔除而非空壳
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0
