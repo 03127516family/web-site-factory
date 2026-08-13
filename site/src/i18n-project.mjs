@@ -72,7 +72,17 @@ export function projectPage(srcJ, tm, mode, { lang, existingStatus, existingTrai
     if (node == null) return node
     if (skipPath(path)) return node // breadcrumb.trail 等：整棵子树原样保留（随后可被 existingTrail 覆盖）
     if (typeof node !== 'object') return node
-    if (Array.isArray(node)) return node.map((v, i) => walk(v, `${path}[${i}]`)).filter(v => !(v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0)) // 数组项字段全删 → 空壳项剔除（approved 模式防空卡片）
+    if (Array.isArray(node)) return node.map((v, i) => {
+      if (typeof v === 'string') {
+        const key = path.split('.').pop() // 数组项无键名，用父键判排除（与采集器同口径）
+        if (SKIP_KEYS.has(key) || VALUE_SKIP(v) || !v.trim()) return v // 直通
+        const e = tm.sentences[fp(v)]
+        if (e?.status === 'approved') return e.translation
+        if (mode === 'approved') return null // 未审串项剔除（中文不进生产）
+        return e?.status === 'draft' ? e.translation : v // full：draft 出译文/未译出中文（裸串挂不了 span，pending 高亮只覆盖树句——有意简化）
+      }
+      return walk(v, `${path}[${i}]`)
+    }).filter(v => v !== null && !(v && typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0)) // null 项与空壳项都剔（规格审 #2 一并收）
     if (node.type === 'doc') {
       const doc = projNode(node, tm, mode)
       return doc && doc.content.length ? doc : null // 空 body → 段删信号

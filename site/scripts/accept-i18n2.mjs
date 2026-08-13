@@ -234,6 +234,18 @@ test('投影:approved 数组空壳项剔除', () => {
   const j = projectPage(src, tm, 'approved', { lang: 't1' })
   assert.deepEqual(j.faq, [{ q: 'Q1', a: 'A1' }]) // 第二项全未审 → 剔除而非空壳
 })
+test('投影:字符串数组项走 TM（approved 不漏中文）', () => {
+  const src = { ...SRC(), hero: { highlights: ['卖点一', '卖点二'] } }
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '卖点一', translation: 'Point One', status: 'approved', origin: 'engine' },
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  assert.deepEqual(j.hero.highlights, ['Point One']) // 卖点二未审 → 剔除而非漏中文
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0
