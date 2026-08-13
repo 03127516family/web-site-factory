@@ -6,6 +6,7 @@ import { rmSync, readFileSync, readdirSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
+import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -317,6 +318,28 @@ test('投影:删句不留段首悬空 hardBreak', () => {
   const c = j.overview.body.content[0].content
   assert.equal(c[0].type, 'text')
   assert.equal(c.map(n => n.type === 'hardBreak' ? '\n' : n.text).join(''), 'Span: 7.5m')
+})
+
+// ---------- Task 5: 术语表 JSON ----------
+test('术语:JSON 加载+相关选料', () => {
+  const t = loadTerms('zh-CN', 'en')
+  assert.ok(Array.isArray(t.lock) && typeof t.map === 'object')
+  const r = relevantTerms(t, '这台桥式起重机起重量5吨，HD 型')
+  assert.equal(r.map['桥式起重机'], 'Overhead Crane')
+  assert.ok(r.lock.includes('HD'))
+})
+test('术语:hasToken 词边界（CD 不误伤 LDC）', () => {
+  assert.ok(hasToken('HD 型', 'HD'))
+  assert.ok(!hasToken('LDC 型', 'CD'))
+})
+test('术语:saveTerms 校验拒收空值/重复', () => {
+  assert.throws(() => saveTerms('t-a', 't-b', { lock: ['HD', 'HD'], map: {} }), /重复/)
+  assert.throws(() => saveTerms('t-a', 't-b', { lock: [' '], map: {} }), /空/)
+  assert.throws(() => saveTerms('t-a', 't-b', { lock: [], map: { '桥式起重机': ' ' } }), /空/)
+  saveTerms('t-a', 't-b', { lock: ['HD'], map: { 桥式起重机: 'Overhead Crane' } }) // 合法落盘
+  const t = loadTerms('t-a', 't-b')
+  assert.equal(t.map['桥式起重机'], 'Overhead Crane')
+  rmSync(join(process.cwd(), 'src', 'i18n', 'terms.t-a.t-b.json')) // 清理测试残留
 })
 
 // ---------- 汇总（勿动） ----------
