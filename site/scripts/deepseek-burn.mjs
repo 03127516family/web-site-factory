@@ -216,7 +216,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
   if (sectionResults.some(r => r.key === 'page.description' && r.data)) report.notes.push('page.description 为 AI 概括（溯源豁免），人工过目')
   if (report.sections.some(s => s.status === 'failed')) report.notes.push('有格烧败缺席（标红），可在编辑器人工补或重新烧')
-  return { json, report, previewHtml: lib.previewHtml(json) }
+  return { json, report, previewHtml: lib.previewHtml(json, catalog) }
 }
 
 // 按 shape 分级校验（对全文逐字查；标题候选=各段首行+产品名）：返回 null=过；字符串=拒收原因

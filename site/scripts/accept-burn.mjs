@@ -107,7 +107,11 @@ const lib = await import('../src/burn-lib.mjs')
   ok('summary.cta 站级默认', j.summary.cta === '报价要求')
   ok('version=1 且无杂键', j.version === 1 && !('_notes' in j))
 
-  const html = lib.previewHtml(j)
+  const catalog = lib.loadCatalog(
+    join(SITE, 'src/components/ProductPage.meta.json'),
+    join(SITE, 'src/components/ProductPage.astro'),
+    join(SITE, 'content/products/single-girder-eot-cranes.json'))
+  const html = lib.previewHtml(j, catalog)
   ok('预览含标题/正文/规格/图', html.includes('欧式桥式起重机') && html.includes('机械制造') && html.includes('3.2-80吨') && html.includes('cross-girder3.jpg'))
 }
 

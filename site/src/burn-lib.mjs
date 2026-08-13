@@ -283,10 +283,10 @@ export async function assemble({ slug, productName, sectionResults, imagePool = 
 }
 
 // ---------- 近似预览（结构预览非像素级；真实页面存草稿后 dist-edit 看） ----------
-export function previewHtml(j) {
+export function previewHtml(j, catalog) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const escAttr = s => esc(s).replace(/"/g, '&quot;')
-  const sections = SECTION_CATALOG.filter(c => c.shape === 'section' && j[c.key])
+  const sections = catalog.filter(c => c.shape === 'section' && j[c.key])
     .map(c => `<section><h3>${esc(j[c.key].title)}</h3>${renderDoc(j[c.key].body)}</section>`).join('\n')
   const specs = j.specs?.length ? `<section><h3>主要参数</h3><ul>${j.specs.map(s => `<li>${esc(s.text)}</li>`).join('')}</ul></section>` : ''
   const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="/assets/img/product/${escAttr(g.image)}" alt="${escAttr(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
