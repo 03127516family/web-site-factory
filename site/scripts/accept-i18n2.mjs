@@ -2,7 +2,7 @@
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
-import { rmSync, readFileSync, readdirSync } from 'node:fs'
+import { rmSync, readFileSync, readdirSync, existsSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
@@ -333,13 +333,19 @@ test('术语:hasToken 词边界（CD 不误伤 LDC）', () => {
   assert.ok(!hasToken('LDC 型', 'CD'))
 })
 test('术语:saveTerms 校验拒收空值/重复', () => {
-  assert.throws(() => saveTerms('t-a', 't-b', { lock: ['HD', 'HD'], map: {} }), /重复/)
-  assert.throws(() => saveTerms('t-a', 't-b', { lock: [' '], map: {} }), /空/)
-  assert.throws(() => saveTerms('t-a', 't-b', { lock: [], map: { '桥式起重机': ' ' } }), /空/)
-  saveTerms('t-a', 't-b', { lock: ['HD'], map: { 桥式起重机: 'Overhead Crane' } }) // 合法落盘
-  const t = loadTerms('t-a', 't-b')
-  assert.equal(t.map['桥式起重机'], 'Overhead Crane')
-  rmSync(join(process.cwd(), 'src', 'i18n', 'terms.t-a.t-b.json')) // 清理测试残留
+  const f = join(process.cwd(), 'src', 'i18n', 'terms.t-a.t-b.json')
+  try {
+    assert.throws(() => saveTerms('t-a', 't-b', { lock: ['HD', 'HD'], map: {} }), /重复/)
+    assert.throws(() => saveTerms('t-a', 't-b', { lock: [' '], map: {} }), /空/)
+    assert.throws(() => saveTerms('t-a', 't-b', { lock: [], map: { '桥式起重机': ' ' } }), /空/)
+    assert.ok(!existsSync(f)) // 拒收不落盘
+    saveTerms('t-a', 't-b', { lock: [' HD '], map: { ' 桥式起重机': 'Overhead Crane ' } }) // 空白归一后落盘
+    const t = loadTerms('t-a', 't-b')
+    assert.deepEqual(t.lock, ['HD'])
+    assert.equal(t.map['桥式起重机'], 'Overhead Crane')
+  } finally {
+    if (existsSync(f)) rmSync(f) // 成败都清理
+  }
 })
 
 // ---------- 汇总（勿动） ----------
