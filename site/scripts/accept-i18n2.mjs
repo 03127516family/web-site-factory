@@ -246,6 +246,49 @@ test('投影:字符串数组项走 TM（approved 不漏中文）', () => {
   const j = projectPage(src, tm, 'approved', { lang: 't1' })
   assert.deepEqual(j.hero.highlights, ['Point One']) // 卖点二未审 → 剔除而非漏中文
 })
+test('投影:句间空格保留（英文必须）', () => {
+  const src = SRC(); src.overview.body.content[0].content[0].text = '第一句。 第二句。'
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '概述', translation: 'O', status: 'approved', origin: 'engine' },
+    { text: '第一句。', translation: 'First.', status: 'approved', origin: 'engine' },
+    { text: '第二句。', translation: 'Second.', status: 'approved', origin: 'engine' },
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  assert.equal(j.overview.body.content[0].content.map(n => n.text).join(''), 'First. Second.')
+})
+test('投影:hardBreak 保留', () => {
+  const src = SRC(); src.overview.body.content[0].content = [{ type: 'text', text: '起重量：3吨' }, { type: 'hardBreak' }, { type: 'text', text: '跨度：7.5米' }]
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '概述', translation: 'O', status: 'approved', origin: 'engine' },
+    { text: '起重量：3吨', translation: 'Capacity: 3t', status: 'approved', origin: 'engine' },
+    { text: '跨度：7.5米', translation: 'Span: 7.5m', status: 'approved', origin: 'engine' },
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  const c = j.overview.body.content[0].content
+  assert.ok(c.some(n => n.type === 'hardBreak'))
+  assert.equal(c.map(n => n.type === 'hardBreak' ? '\n' : n.text).join(''), 'Capacity: 3t\nSpan: 7.5m')
+})
+test('投影:approved 未审句删除无残留', () => {
+  const src = SRC(); src.overview.body.content[0].content[0].text = '第一句。 第二句。'
+  const tm = tmWith([
+    { text: '页标题', translation: 'P', status: 'approved', origin: 'engine' },
+    { text: '文章标题', translation: 'A', status: 'approved', origin: 'engine' },
+    { text: '页描述', translation: 'D', status: 'approved', origin: 'engine' },
+    { text: '当前', translation: 'C', status: 'approved', origin: 'engine' },
+    { text: '概述', translation: 'O', status: 'approved', origin: 'engine' },
+    { text: '第二句。', translation: 'Second.', status: 'approved', origin: 'engine' },
+  ])
+  const j = projectPage(src, tm, 'approved', { lang: 't1' })
+  assert.equal(j.overview.body.content[0].content.map(n => n.text).join('').trim(), 'Second.')
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0

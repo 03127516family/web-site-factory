@@ -1,11 +1,12 @@
 // 投影器（§2/§6）：镜像 = project(源树, TM)。full=预览/编辑（草稿+占位+pending 注解）；
 // approved=生产（只出已审，空段删，核心字段未审→null 不可发）。纯函数，零 IO。
-import { fp, extractInlineUnits, sliceInlineMd, inlineSpans } from './i18n-sent.mjs'
+import { fp, extractInlineUnits, sliceInlineMd, inlineSpans, applyInlineUnit } from './i18n-sent.mjs'
 import { inlineMdToNodes } from './mdast-tree.mjs'
 import { validateDoc } from './content-schema.mjs'
 import { SKIP_KEYS, skipPath, VALUE_SKIP } from './i18n-collect.mjs' // 同一套排除：键+路径前缀+值形态（值形态命中的串直通保留——它们永远不进 TM，删了就是生产镜像丢图）
 
 export const PENDING_CLASS = 'i18n-pending'
+const PENDING_MARK = { type: 'span', attrs: { class: PENDING_CLASS } }
 const CORE_FIELDS = ['title', 'page.title', 'page.description', 'breadcrumb.current']
 
 const anno = nodes => nodes.map(n => n.type === 'text'
@@ -24,12 +25,16 @@ function sentNodes(text, sentenceFp, tm, mode) {
 // 树投影：逐节点重建。返回值 null = 该节点整体不出。
 function projNode(node, tm, mode) {
   if (node.type === 'paragraph') {
-    const out = []
-    for (const u of extractInlineUnits(node.content ?? [])) {
-      const nodes = sentNodes(u.md, fp(u.md), tm, mode)
-      if (nodes) out.push(...nodes)
+    let nodes = node.content ?? []
+    const units = extractInlineUnits(nodes)
+    for (let si = units.length - 1; si >= 0; si--) { // 降序回植防 si 漂移
+      const e = tm.sentences[fp(units[si].md)]
+      if (e?.status === 'approved') nodes = applyInlineUnit(nodes, si, e.translation)
+      else if (mode === 'approved') nodes = applyInlineUnit(nodes, si, '') // 未审句删除
+      else if (e?.status === 'draft') nodes = applyInlineUnit(nodes, si, e.translation, { annoMarks: [PENDING_MARK] })
+      else nodes = applyInlineUnit(nodes, si, units[si].md, { annoMarks: [PENDING_MARK] }) // 未译中文占位+注解
     }
-    return out.length ? { ...node, content: out } : null
+    return nodes.length ? { ...node, content: nodes } : null
   }
   if (node.type === 'heading' || node.type === 'tableHeader' || node.type === 'tableCell') {
     if (node.type !== 'heading' && (node.content ?? []).length > 1) throw new Error('多段单元格暂不支持投影（先定语义再扩）')
@@ -57,6 +62,7 @@ function projNode(node, tm, mode) {
 }
 
 export function projectPage(srcJ, tm, mode, { lang, existingStatus, existingTrail } = {}) {
+  if (mode !== 'full' && mode !== 'approved') throw new Error(`projectPage mode 非法: ${mode}`)
   const j = structuredClone(srcJ)
   delete j.i18n_rev; delete j.i18n_fp
   j.page = { ...j.page, slug: `${lang}/${srcJ.page.slug}`, lang, status: existingStatus ?? 'draft' }
@@ -91,7 +97,7 @@ export function projectPage(srcJ, tm, mode, { lang, existingStatus, existingTrai
     for (const [k, v] of Object.entries(node)) {
       const p = path ? `${path}.${k}` : k
       if (!path && k === 'i18n') continue
-      if (typeof v === 'string' && !SKIP_KEYS.has(k) && !VALUE_SKIP(v) && v.trim()) {
+      if (typeof v === 'string' && !SKIP_KEYS.has(k) && !VALUE_SKIP(v) && v.trim() && !skipPath(p)) {
         const e = tm.sentences[fp(v)]
         if (e?.status === 'approved') out[k] = e.translation
         else if (mode === 'approved') continue            // 非核心文本未审 → 删字段
@@ -103,9 +109,9 @@ export function projectPage(srcJ, tm, mode, { lang, existingStatus, existingTrai
       if (typeof r === 'object' && !Array.isArray(r) && Object.keys(r).length === 0) continue // 空对象段删
       out[k] = r
     }
-    // 段一致性：有 body 的段，body 投影没了 → 整段删；段标题未审（被删）→ 整段删
+    // 段一致性：有 body 的段，body 投影没了 → 整段删；任何带 title 对象标题未审（被删）→ 整体删
     if (node.body?.type === 'doc' && out.body === undefined) return null
-    if (node.body?.type === 'doc' && typeof node.title === 'string' && out.title === undefined) return null
+    if (typeof node.title === 'string' && out.title === undefined) return null // inquiry_form/related_products 同款，防空 h2/h3 残页
     return out
   }
   const result = walk(j, '')
