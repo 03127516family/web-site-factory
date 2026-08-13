@@ -13,11 +13,12 @@ const RULES = `你是工业起重机外贸网站的翻译引擎（中→英）�
 6. 只翻译 sentences 里 id 对应的 text；before/after 是上下文仅供把握连贯，绝不翻译它们；
 7. B2B 工业营销腔：简洁、专业、直接。`
 
-export function translateMessages(batch, terms) {
+export function translateMessages(batch, terms, lastFails = {}) {
   const sentences = batch.map(s => ({ id: s.id, text: s.text, before: s.before ?? null, after: s.after ?? null }))
+  const retryNote = Object.keys(lastFails).length ? `\n\n上次这些 id 被机器验收拒收：${JSON.stringify(lastFails)}——逐条修正后重发。` : '' // 温度 0 下不喂原因=确定性重放（烧制台 2026-08-11 教训）
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `lock 锁词：${JSON.stringify(terms.lock)}\nmap 固定译法：${JSON.stringify(terms.map)}\n\nsentences：\n${JSON.stringify(sentences)}\n\n返回：{"translations":{"<id>":"<译文>"}}，必须覆盖每个 id` },
+    { role: 'user', content: `lock 锁词：${JSON.stringify(terms.lock)}\nmap 固定译法：${JSON.stringify(terms.map)}\n\nsentences：\n${JSON.stringify(sentences)}\n\n返回：{"translations":{"<id>":"<译文>"}}，必须覆盖每个 id${retryNote}` },
   ]
 }
 
@@ -29,9 +30,10 @@ export async function translateSegments(segments, terms, { callAI, batchSize = 3
     const batch = segments.slice(off, off + batchSize)
     let pending = [...batch]
     for (let round = 0; round <= maxRetries && pending.length; round++) {
+      const lastFails = Object.fromEntries(pending.map(s => [s.id, fail[s.id]]).filter(([, v]) => v)) // 上轮原因（round=0 全空 → 提示词不追加）
       let translations = {}
       try {
-        const res = await callAI(translateMessages(pending, terms), 'i18n')
+        const res = await callAI(translateMessages(pending, terms, lastFails), 'i18n')
         translations = res?.translations ?? {} // callAI 契约 = 解析后的 content 对象
       } catch (e) {
         for (const s of pending) fail[s.id] = `engine:${e.message}`
@@ -44,7 +46,7 @@ export async function translateSegments(segments, terms, { callAI, batchSize = 3
         if (typeof md !== 'string' || !md.trim()) { fail[s.id] = 'coverage:无译文'; next.push(s); continue }
         const chk = checkSentence(s.text, md, terms)
         if (chk.ok) { ok[s.id] = md.trim(); delete fail[s.id] }
-        else { fail[s.id] = chk.fails.join(';'); next.push(s) } // 带原因重翻（提示词输入已变，非确定性重放）
+        else { fail[s.id] = chk.fails.join(';'); next.push(s) } // 记原因，下轮经 lastFails 喂回提示词重翻
       }
       pending = next
     }

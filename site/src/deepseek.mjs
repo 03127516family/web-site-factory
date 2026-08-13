@@ -10,7 +10,7 @@ export function createDeepseekCaller({ apiKey = process.env.DEEPSEEK_API_KEY, mo
           method: 'POST',
           signal: AbortSignal.timeout(120_000),
           headers: { 'content-type': 'application/json', authorization: `Bearer ${apiKey}` },
-          body: JSON.stringify({ model, temperature: 0, response_format: { type: 'json_object' }, max_tokens: tag === 'oneshot' ? 8192 : 4096, messages }),
+          body: JSON.stringify({ model, temperature: 0, response_format: { type: 'json_object' }, max_tokens: ['oneshot', 'i18n'].includes(tag) ? 8192 : 4096, messages }),
         })
         if (!res.ok) {
           const body = (await res.text()).slice(0, 200)

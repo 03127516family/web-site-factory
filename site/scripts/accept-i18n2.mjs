@@ -438,6 +438,27 @@ test('引擎:noRetry 快败不重试', async () => {
   assert.equal(calls, 1)
   assert.ok(r.fail['a#0'])
 })
+test('引擎:重翻提示词带上轮拒收原因', async () => {
+  const seen = []
+  const callAI = async messages => {
+    seen.push(messages[1].content)
+    if (seen.length === 1) return { translations: { 'a#0': 'no lock', 'a#1': 'Next.' } } // a#0 首轮败
+    return { translations: { 'a#0': 'HD Overhead Crane.' } }
+  }
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.ok(seen[1].includes('lock:HD')) // 第二轮提示词含上轮原因
+  assert.equal(r.ok['a#0'], 'HD Overhead Crane.')
+})
+test('引擎:瞬时错误→下轮成功→fail 清账', async () => {
+  let calls = 0
+  const callAI = async () => {
+    if (++calls === 1) throw new Error('HTTP 500') // 可重试瞬时错
+    return { translations: { 'a#0': 'HD Overhead Crane.', 'a#1': 'Next.' } }
+  }
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.equal(calls, 2)
+  assert.equal(r.fail['a#0'], undefined) // 成功后清账
+})
 }
 
 // ---------- 汇总（勿动） ----------

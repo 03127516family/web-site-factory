@@ -139,10 +139,11 @@ const lib = await import('../src/burn-lib.mjs')
   const origFetch = globalThis.fetch
   let c1 = 0
   globalThis.fetch = async () => { c1++; return new Response('{"error":"bad key"}', { status: 401 }) }
-  let m1 = ''
-  try { await burner.createDeepseekCaller({ apiKey: 'fake', backoffMs: 1 })([], 't') } catch (e) { m1 = e.message }
+  let m1 = '', e1 = null
+  try { await burner.createDeepseekCaller({ apiKey: 'fake', backoffMs: 1 })([], 't') } catch (e) { m1 = e.message; e1 = e }
   globalThis.fetch = origFetch
   ok('401 不重试快速失败', c1 === 1 && /401/.test(m1), `calls=${c1}`)
+  ok('401 包装错误透传 noRetry 标志（外层快败用）', e1?.noRetry === true)
 
   let c5 = 0
   globalThis.fetch = async () => { c5++; return new Response('err', { status: 500 }) }
