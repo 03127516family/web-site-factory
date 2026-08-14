@@ -11,3 +11,6 @@ app/
 site/.astro/
 site/dist-edit/
 site/public
+
+# 服务端密钥（edit-server 烧制用，--env-file 装载；永不入库）
+.env
