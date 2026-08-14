@@ -1,0 +1,5 @@
+[
+  { "key": "title",           "shape": "text",     "level": "similar"  },
+  { "key": "body.sections",   "shape": "sections", "level": "verbatim" },
+  { "key": "page.description", "shape": "seo",     "level": "summary"  }
+]

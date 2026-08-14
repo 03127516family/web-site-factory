@@ -1,0 +1,64 @@
+---
+// posts/PostPage — 标准文章版式套件（spec B）：烧「新」文章的通用骨架。
+// 与旧 4 篇（一篇一模版，T2）的区别：那 4 篇槽位是各自文章专属语义名，不可复用；
+// 本套件只认「N 段顺序章节」这一公共形态（body.sections 重复区），任意文章可烧。
+// chrome（toptitle/TOC/询盘/photoswipe）逐字照抄 post@1 家族；TOC 由全站 post-toc.js 扫
+// .craneinfo 内带 id 的 h2/h3 自动生成——章节 h2 必须带 id（sec-N）。
+import { renderDoc } from '../../../render-doc.mjs'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+const { j } = Astro.props
+const repoFrag = name => readFileSync(join(process.cwd(), `../src/fragments/${name}.html`), 'utf8')
+const IMG = '/assets/img/product/' // 烧制图池/编辑器上传共用产品图目录（上传端点落点，known 惯例）
+const WALK = { imgBase: IMG, headingOffset: 1 } // 章节标题占 h2，正文内标题 +1 起 h3（同 post@1）
+
+// 守卫纪律（T9 同款）：heading 与 body 同守——哪个缺都整章不出（防 renderDoc 炸 + 防空标题进 TOC）
+const sections = (j.body?.sections ?? []).filter(s => s?.heading && s?.body)
+---
+
+<!-- ============ 蓝底标题横幅：面包屑 + 标题（post@1 chrome 逐字） ============ -->
+<div class="toptitle">
+	<div class="wrap">
+		<div class="title">
+			<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map(t => <Fragment><span class="crumb"><a data-field="crumb.url" href={t.url}><span data-field="crumb.label">{t.label}</span></a><span class="symbol">&gt;</span></span>{' '}</Fragment>)}</span>{' '}<span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
+			<h1 data-field="title" data-required>{j.title}</h1>
+		</div>
+	</div>
+</div>
+
+<!-- ============ 文章正文：左 TOC + 右顺序章节（float 两栏） ============ -->
+<div id="Topics">
+	<div class="TopicsInfo wrap">
+		<div class="craneinfo">
+
+			<div id="rank-math-toc" class="wp-block-rank-math-toc-block">
+				<p>目录</p>
+				<nav><ul></ul></nav>
+			</div>
+
+			<!-- 重复区：N 段顺序章节（标题 + 正文树 + 可选配图） -->
+			<div data-repeat="sections" data-array="body.sections">
+				{sections.map((s, i) => (
+				<Fragment>
+					<h2 id={`sec-${i + 1}`} class="wp-block-heading" data-field="section.heading" data-edit="text">{s.heading}</h2>
+					<div data-field="section.body" data-edit="rich" set:html={renderDoc(s.body, WALK)} />
+					{s.image && (
+					<figure class="wp-block-image size-full"><img data-field="section.image" data-edit="image" src={IMG + s.image} alt={s.alt ?? s.heading} width={s.width || 880} height={s.height || 495} /></figure>
+					)}
+				</Fragment>
+				))}
+			</div>
+
+		</div><!-- /.craneinfo -->
+	</div><!-- /.TopicsInfo -->
+</div><!-- /#Topics -->
+
+<!-- ============ 询盘表单（复用动态块） ============ -->
+<section data-template="inquiry-form@1" data-dynamic="inquiry-form" data-form-id="713" data-block-id="inquiry-form" class="post-inquiry wrap" id="from-single">
+	<h3 data-field="inquiry_form.title">填写您的详细资料，我们将在24小时内给您答复!</h3>
+	<Fragment set:html={repoFrag('inquiry-form')} />
+</section>
+
+<!-- ============ photoswipe 灯箱（chrome，逐字复用） ============ -->
+<Fragment set:html={repoFrag('photoswipe')} />
