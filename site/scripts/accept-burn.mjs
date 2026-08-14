@@ -28,6 +28,19 @@ const lib = await import('../src/burn-lib.mjs')
   ok('stripHtml 去脚本样式导航页脚、留正文、收图', text.includes('第一段') && text.includes('第二段') && !text.includes('菜单') && !text.includes('脚') && !text.includes('y()') && images.includes('ab-c.jpg'))
 }
 
+// ---------- T1 套件文件夹 ----------
+{
+  const kitDir = join(SITE, 'src/components/products/ProductPage')
+  ok('套件 index.astro 在位', existsSync(join(kitDir, 'index.astro')))
+  ok('套件 meta.json 在位', existsSync(join(kitDir, 'meta.json')))
+  ok('套件 example.json 在位', existsSync(join(kitDir, 'example.json')))
+  const ex = JSON.parse(readFileSync(join(kitDir, 'example.json'), 'utf8'))
+  ok('example 是填好的产品 JSON（含 hero）', ex.hero && ex.page)
+  const cat = lib.loadCatalog(
+    join(kitDir, 'meta.json'), join(kitDir, 'index.astro'), join(kitDir, 'example.json'))
+  ok('套件内双源核验过（16 字段全 verified）', cat.length === 16 && cat.every(c => c.verified))
+}
+
 // ---------- T2 字段目录 ----------
 {
   const catalog = lib.loadCatalog(

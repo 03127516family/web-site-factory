@@ -1,0 +1,253 @@
+---
+// 产品页组件（product@1 页族）：模版翻译自 src/templates/product.html——骨架逐标签照抄，
+// 固定字段挖洞填值，body 槽接 walker（render-doc.mjs），可选段按 JSON「在不在」裁剪（R16）。
+// data-* 坐标本期保留（geom 测量 + 后续编辑层挂载）；产物净化是构建开关，后议。
+import { renderDoc, renderSlot } from '../render-doc.mjs'
+import { splitByHeading } from '../tree-utils.mjs'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+const { j } = Astro.props
+const repoFrag = name => readFileSync(join(process.cwd(), `../src/fragments/${name}.html`), 'utf8')
+const inquiryForm = repoFrag('inquiry-form')
+const photoswipe = repoFrag('photoswipe')
+const IMG = '/assets/img/product/'
+const WALK = { imgBase: IMG, headingOffset: 1 } // 正文标题 +1：section 标题占 h3（站点约定）
+
+// 双处结构拼合（迁移期忠实形态，收单处是后续 schema 演进）：
+// components/crane_types 的 fm 图片清单 × body 树（按 ### 切段）→ 逐卡 {name,image,body树}
+// 守卫纪律（T9）：镜像 approved 投影会删未审段（i18n-project 段一致性），凡「投影可删 → 裸读即炸/残」
+// 的段一律 {j.X && (...)} 包守——zh 源恒有这些段，守卫对 zh 渲染零影响（geom 兜底）。
+const chunksOf = doc => splitByHeading(doc).map(p => ({ type: 'doc', content: p.nodes }))
+const compBodies = j.components?.body ? chunksOf(j.components.body) : []
+const components = (j.components_images ?? []).map((c, i) => ({
+  ...c,
+  body: compBodies[i],
+  singleBody: compBodies[i]?.content?.length === 1 && compBodies[i].content[0].type === 'paragraph',
+}))
+const typeBodies = j.crane_types?.body ? chunksOf(j.crane_types.body) : []
+const craneTypes = (j.crane_types_images ?? []).map((t, i) => ({ ...t, body: typeBodies[i] }))
+---
+
+<section data-template="hero@1" data-block-id="hero" data-kind="shared" class="banner">
+	<p><img fetchpriority="high" decoding="async" data-field="hero.image" src={IMG + j.hero.image} alt={j.title} width={j.hero.width} height={j.hero.height} /></p>
+	<div class="con">
+		<h2 data-field="hero.headline">{j.hero.headline}</h2>
+		<ul data-field="hero.highlights">
+			{j.hero.highlights.map(h => <li>{h}</li>)}
+		</ul>
+	</div>
+</section><!--banner-->
+
+<section data-template="product-summary@1" data-block-id="product-summary" class="wrap" style="margin: 60px auto 50px;">
+	<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map(t => <Fragment><span class="crumb"><a data-field="crumb.url" href={t.url}><span data-field="crumb.label">{t.label}</span></a><span class="symbol">&gt;</span></span>{' '}</Fragment>)}</span>{' '}<span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
+</section><!--breadcrumb-->
+
+<section data-template="product-summary@1" data-block-id="product-summary-main" id="product" class="wrap">
+
+	<div class="pcon clearfix">
+		<div class="lt"><h1 data-field="title" data-required>{j.title}</h1></div>
+		<div class="rt">
+			{j.summary_intro
+				? <div data-field="summary_intro.body" set:html={renderDoc(j.summary_intro.body, WALK)} />
+				: j.summary && <p data-field="summary.intro">{j.summary.intro}</p>}
+			<ul data-repeat="specs" data-array="specs">
+				{j.specs.map((s, i) => <li data-field="spec.text" data-block-id={`spec-${i + 1}`} set:html={s.text} />)}
+			</ul>
+			<!--  parameter -->
+		</div>
+
+		{j.summary && (
+		<div class="prort">
+			<a href="#from-single" class="button2">
+				<svg class="icon"><use xlink:href="/assets/img/product/symbol-defs.svg#icon-tianxie"></use></svg>
+				<span data-field="summary.cta">{j.summary.cta}</span>
+			</a>
+		</div><!-- prort button-->
+		)}
+	</div><!-- pcon -->
+
+	{j.gallery && (
+	<div data-template="gallery@1" data-block-id="gallery" data-optional="gallery" class="ltgallery clearfix">
+	<div class="swiper-container gallery-top" style="pointer-events: none;">
+		<div class="swiper-wrapper" data-repeat="gallery" data-array="gallery">
+			{j.gallery.map((g, i) => <div class="swiper-slide" data-block-id={`gallery-${i + 1}`}><img data-field="gallery.image" src={IMG + g.image} alt={g.alt} width="870" height="580" /></div>)}
+		</div>
+	</div><!-- gallery-top -->
+	<div class="swiper-container gallery-thumbs">
+		<div class="swiper-wrapper" style="display: block;float: left;" data-repeat="gallery-thumbs" data-array="gallery">
+			{j.gallery.map((g, i) => <div class="swiper-slide" data-block-id={`gallery-thumb-${i + 1}`}><img data-field="gallery.image" src={IMG + g.image} alt={g.alt} width="95" height="63" /></div>)}
+		</div>
+	</div>
+	</div><!-- ltmirror -->
+	)}
+
+<div class="content wrap">
+
+	{j.overview && (
+	<section data-template="overview@1" data-block-id="overview" data-optional="overview" class="pro-info clearfix">
+		<h3 data-field="overview.title">{j.overview.title}</h3>
+		<div data-field="overview.body" set:html={renderDoc(j.overview.body, WALK)} />
+	</section>
+	)}
+
+	{j.basic_params && (
+	<section data-template="basic-params@1" data-block-id="basic-params" data-optional="basic_params" class="pro-info clearfix">
+		<h3 data-field="basic_params.title">{j.basic_params.title}</h3>
+		<div data-field="basic_params.body" set:html={renderDoc(j.basic_params.body, WALK)} />
+	</section>
+	)}
+
+	{j.advantages && (
+	<section data-template="advantages@1" data-block-id="advantages" data-optional="advantages" class="pro-info clearfix">
+		<h3 data-field="advantages.title">{j.advantages.title}</h3>
+		<div data-field="advantages.body" set:html={renderDoc(j.advantages.body, WALK)} />
+	</section>
+	)}
+
+	{j.protection && (
+	<section data-template="protection@1" data-block-id="protection" data-optional="protection" class="pro-info clearfix">
+		<h3 data-field="protection.title">{j.protection.title}</h3>
+		<div data-field="protection.body" set:html={renderDoc(j.protection.body, WALK)} />
+	</section>
+	)}
+
+	{j.main_features && (
+	<section data-template="main-features@1" data-block-id="main-features" data-optional="main_features" class="pro-info clearfix">
+		<h3 data-field="main_features.title">{j.main_features.title}</h3>
+		<div data-field="main_features.body" set:html={renderDoc(j.main_features.body, WALK)} />
+	</section>
+	)}
+
+	{j.introduction && (
+	<section data-template="introduction@1" data-block-id="introduction" data-optional="introduction" class="pro-info clearfix">
+		<h3 data-field="introduction.title">{j.introduction.title}</h3>
+		<div data-field="introduction.body" set:html={renderDoc(j.introduction.body, WALK)} />
+	</section>
+	)}
+
+	{j.spec_compare && (
+	<section data-template="spec-compare@1" data-block-id="spec-compare" data-optional="spec_compare" class="pro-info clearfix">
+		<h3 data-field="spec_compare.title">{j.spec_compare.title}</h3>
+		<div data-field="spec_compare.body" set:html={renderDoc(j.spec_compare.body, WALK)} />
+	</section>
+	)}
+
+	{j.spec_detail && (
+	<section data-template="spec-detail@1" data-block-id="spec-detail" data-optional="spec_detail" class="pro-info clearfix">
+		<h3 data-field="spec_detail.title">{j.spec_detail.title}</h3>
+		<div data-field="spec_detail.body" set:html={renderDoc(j.spec_detail.body, WALK)} />
+	</section>
+	)}
+
+	{j.which_better && (
+	<section data-template="which-better@1" data-block-id="which-better" data-optional="which_better" class="pro-info clearfix">
+		<h3 data-field="which_better.title">{j.which_better.title}</h3>
+		<div data-field="which_better.body" set:html={renderDoc(j.which_better.body, WALK)} />
+	</section>
+	)}
+
+	{j.components && components.length > 0 && (
+	<section data-template="components@1" data-block-id="components" data-optional="components" class="pro-info clearfix">
+		<h3 data-field="components.title">{j.components.title}</h3>
+		<div class="craneparts"><div id="parts" data-repeat="components" data-array="components_images" data-array-body="components.body">
+			{components.map((c, i) => (
+			<div class="faq_block" data-block-id={`components-${i + 1}`}>
+				<div class="faq_q"><dd data-field="component.name">{c.name}</dd></div>
+				<div class="faq_a">{c.image && <p class="photo"><img loading="lazy" decoding="async" data-field="component.image" src={IMG + c.image} alt={c.name} width={c.width} height={c.height} /></p>}
+				{c.body && (c.singleBody
+				? <p data-field="component.body" set:html={renderSlot(c.body, WALK)} />
+				: <div data-field="component.body" set:html={renderDoc(c.body, WALK)} />)}</div>
+			</div>
+			))}
+		</div></div>
+	</section>
+	)}
+
+	{j.production_flow && (
+	<section data-template="production-flow@1" data-block-id="production-flow" data-kind="shared" class="pro-info clearfix">
+		<h3 data-field="production_flow.title">{j.production_flow.title}</h3>
+		<div><div class="process">
+		<div class="grid demo-gallery" data-repeat="production-flow" data-array="production_flow.steps">
+			{j.production_flow.steps.map((f, i) => (
+			<Fragment><a href={IMG + f.image} data-block-id={`flow-${i + 1}`} data-size={f.dataSize} class="grid3"> <img loading="lazy" decoding="async" data-field="flow.image" src={IMG + f.image} alt={f.label} width="285" height="190" />
+			<h4><i></i><span data-field="flow.label">{f.label}</span></h4>
+			</a></Fragment>
+			))}
+		</div>
+		<div class="tips clearfix">
+		<h5>提示。</h5>
+		<span data-field="production_flow.tips">{j.production_flow.tips}</span>
+		</div>
+		</div></div>
+	</section>
+	)}
+
+	{j.crane_types && craneTypes.length > 0 && (
+	<section data-template="crane-types@1" data-block-id="crane-types" data-optional="crane_types" class="pro-info clearfix">
+		<h3 data-field="crane_types.title">{j.crane_types.title}</h3>
+		<div class="types">
+		<div class="types_info" data-repeat="crane-types" data-array="crane_types_images" data-array-body="crane_types.body">
+			{craneTypes.map((t, i) => (
+			<Fragment><div class="grid_3" data-block-id={`crane-type-${i + 1}`}><img loading="lazy" decoding="async" data-field="crane_type.image" src={IMG + t.image} width="285" height="190" alt={t.name} />
+			<h4 data-field="crane_type.name">{t.name}</h4>
+			{t.body && <div data-field="crane_type.body" set:html={renderDoc(t.body, WALK)} />}
+			</div>
+			</Fragment>
+			))}
+		</div>
+		</div>
+	</section>
+	)}
+
+	{j.installation && (
+	<section data-template="installation@1" data-block-id="installation" data-optional="installation" class="pro-info clearfix" style="margin-bottom: 60px;">
+		<h3 data-field="installation.title">{j.installation.title}</h3>
+		<div class="cases">
+			<p data-field="installation.body" set:html={renderSlot(j.installation.body, WALK)} />
+			<div class="grid" data-repeat="cases" data-array="installation.cases">
+				{j.installation.cases.map((c, i) => (
+				<div class="grid_2" data-block-id={`cases-${i + 1}`}>
+					<a href={c.url} target="_blank" class="news_block clearfix" data-field="case.url">
+						<img class="lt" data-field="case.image" src={IMG + c.image} alt={c.title} width="156" height="104" />
+						<h4 data-field="case.title">{c.title}</h4>
+					</a>
+				</div>
+				))}
+			</div>
+		</div>
+	</section>
+	)}
+
+	{j.inquiry_form && (
+	<section data-template="inquiry-form@1" data-dynamic="inquiry-form" data-form-id="713" data-block-id="inquiry-form" class="pro-info clearfix" id="from-single">
+		<h3 data-field="inquiry_form.title">{j.inquiry_form.title}</h3>
+		<Fragment set:html={inquiryForm} />
+	</section>
+	)}
+
+</div>
+</section><!-- #product 在此闭合；related 在 #product 外，为全宽 -->
+
+{j.related_products && (
+<section data-block-id="related-products" class="related">
+	<div class="product wrap">
+		<h2 data-field="related_products.title">{j.related_products.title}</h2>
+		<div class="grid" data-repeat="related-products" data-array="related_products.seed">
+			{j.related_products.seed.map((r, i) => (
+			<div class="grid_4" data-block-id={`related-${i + 1}`}>
+				<a href={r.url} target="_blank" data-field="related.url">
+					<img data-field="related.image" src={IMG + r.image} alt={r.title} width="276" height="184" />
+					<h4 data-field="related.title">{r.title}</h4>
+					<p data-field="related.summary">{r.summary}</p>
+					<h5>了解更多</h5>
+				</a>
+			</div>
+			))}
+		</div>
+	</div>
+</section><!--related-->
+)}
+
+<!-- PhotoSwipe 灯箱容器（gallery / production-flow 共用，非内容） -->
+<Fragment set:html={photoswipe} />
