@@ -34,11 +34,26 @@ const lib = await import('../src/burn-lib.mjs')
   ok('套件 index.astro 在位', existsSync(join(kitDir, 'index.astro')))
   ok('套件 meta.json 在位', existsSync(join(kitDir, 'meta.json')))
   ok('套件 example.json 在位', existsSync(join(kitDir, 'example.json')))
+  ok('套件 meta.md 在位', existsSync(join(kitDir, 'meta.md')))
   const ex = JSON.parse(readFileSync(join(kitDir, 'example.json'), 'utf8'))
   ok('example 是填好的产品 JSON（含 hero）', ex.hero && ex.page)
   const cat = lib.loadCatalog(
     join(kitDir, 'meta.json'), join(kitDir, 'index.astro'), join(kitDir, 'example.json'))
   ok('套件内双源核验过（16 字段全 verified）', cat.length === 16 && cat.every(c => c.verified))
+}
+
+// ---------- T-scan 套件扫描 ----------
+{
+  const kits = lib.scanKits(join(SITE, 'src/components'))
+  const pp = kits.find(k => k.family === 'products' && k.name === 'ProductPage')
+  ok('scanKits 扫到 products/ProductPage', !!pp)
+  ok('ProductPage 套件 complete（齐三件）', pp && pp.complete)
+  ok('scanKits 不收无 index.astro 的空文件夹', !kits.some(k => !k.hasAstro))
+  const found = lib.findKit(join(SITE, 'src/components'), 'products', 'ProductPage')
+  ok('findKit 返回套件目录', found && found.endsWith('products/ProductPage'))
+  let threw = false
+  try { lib.findKit(join(SITE, 'src/components'), 'products', '不存在') } catch { threw = true }
+  ok('findKit 找不到抛错', threw)
 }
 
 // ---------- T2 字段目录 ----------

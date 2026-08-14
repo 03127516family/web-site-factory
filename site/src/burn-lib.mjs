@@ -1,6 +1,7 @@
 // DeepSeek 烧制台·纯逻辑库（零网络零 AI，全部可单测）。
 // AI 只产 markdown/简单 JSON；树转换、校验、组装全在这里——结构归代码。
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { mdToDoc } from './mdast-tree.mjs'
 import { validateDoc } from './content-schema.mjs'
 import { renderDoc } from './render-doc.mjs'
@@ -72,6 +73,37 @@ export function loadMeta(metaPath) {
   if (!Array.isArray(meta) || !meta.every(c => c.key && c.shape && c.level))
     throw new Error(`meta 格式非法(须为 [{key,shape,level}]):${metaPath}`)
   return meta
+}
+
+// ---------- 套件扫描发现：扫 components/<族>/<名>/，同名三件齐=完整套件 ----------
+export function scanKits(componentsDir) {
+  const kits = []
+  const fams = readdirSync(componentsDir, { withFileTypes: true }).filter(d => d.isDirectory())
+  for (const fd of fams) {
+    const famDir = join(componentsDir, fd.name)
+    for (const nd of readdirSync(famDir, { withFileTypes: true }).filter(d => d.isDirectory())) {
+      const dir = join(famDir, nd.name)
+      kits.push({
+        family: fd.name, name: nd.name, dir,
+        hasAstro: existsSync(join(dir, 'index.astro')),
+        hasMeta: existsSync(join(dir, 'meta.json')),
+        hasExample: existsSync(join(dir, 'example.json')),
+      })
+    }
+  }
+  return kits.map(k => ({ ...k, complete: k.hasAstro && k.hasMeta && k.hasExample }))
+}
+
+// 取指定族/名的完整套件；不存在或不完整→抛错（缺哪样明说）
+export function findKit(componentsDir, family, name) {
+  const k = scanKits(componentsDir).find(x => x.family === family && x.name === name)
+  if (!k) throw new Error(`套件不存在：${family}/${name}`)
+  if (!k.complete) {
+    const miss = [['index.astro', k.hasAstro], ['meta.json', k.hasMeta], ['example.json', k.hasExample]]
+      .filter(([, h]) => !h).map(([f]) => f)
+    throw new Error(`套件不完整：${family}/${name} 缺 ${miss.join('、')}`)
+  }
+  return k.dir
 }
 
 // ---------- 页族注册表（built=false 的族选了直接拒，不硬烧） ----------
