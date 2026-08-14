@@ -5,7 +5,6 @@
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '../../layouts/Chrome.astro'
-import ProductPage from '../../components/ProductPage.astro'
 
 export function getStaticPaths() {
   const dir = join(process.cwd(), 'content/products')
@@ -17,7 +16,9 @@ export function getStaticPaths() {
 }
 
 const { j } = Astro.props
+const layouts = import.meta.glob('../../components/products/*/index.astro')
+const Comp = (await layouts[`../../components/products/${j.page.template}/index.astro`]()).default
 ---
 <Chrome j={j}>
-  <ProductPage j={j} />
+  <Comp j={j} />
 </Chrome>

@@ -130,8 +130,8 @@ test('采集:标题/单元格/alt 整体一句', () => {
   assert.deepEqual(out.map(u => u.kind), ['block', 'cell', 'alt'])
   assert.equal(out[0].text, '标题有句点。仍一句')
 })
-test('采集:产品页配置键不进翻译（family/geomBaseline）', () => {
-  const j = { page: { slug: 'products/x', lang: 'zh-CN', title: '产品页', family: 'product@1', template: 'src/templates/product.html', geomBaseline: 'src/templates/product.html' }, title: '产品标题' }
+test('采集:产品页配置键不进翻译（family/template）', () => {
+  const j = { page: { slug: 'products/x', lang: 'zh-CN', title: '产品页', family: 'product@1', template: 'src/templates/product.html' }, title: '产品标题' }
   const ids = collectUnits(j).map(u => u.id)
   assert.deepEqual(ids.sort(), ['page.title', 'title'].sort())
 })
@@ -156,7 +156,7 @@ test('采集:真实内容零垃圾单元', () => {
     for (const u of units) {
       assert.ok(!/^\d+(\.\d+)?x\d+(\.\d+)?$/.test(u.text), `${f} 尺寸串漏排: ${u.id}`)
       assert.ok(u.text !== '#', `${f} 死链漏排: ${u.id}`)
-      assert.ok(!/family|geomBaseline|breadcrumb\.trail/.test(u.id), `${f} 配置键漏排: ${u.id}`)
+      assert.ok(!/family|breadcrumb\.trail/.test(u.id), `${f} 配置键漏排: ${u.id}`)
     }
   }
 })

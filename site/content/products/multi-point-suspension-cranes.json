@@ -6,7 +6,7 @@
     "lang": "zh-CN",
     "title": "多点悬挂式起重机：适用于大跨度工业车间 - DGCRANE",
     "description": "多点悬挂式起重机专为大跨度工业车间和仓库（如飞机制造与维修厂）设计，通过多个悬挂点分散载荷，起重 3-40 吨，最大跨度可达 80 米。",
-    "template": "src/templates/product-superset.html",
+    "template": "ProductPage",
     "family": "product-superset@1",
     "status": "published"
   },

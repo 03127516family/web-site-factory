@@ -6,7 +6,7 @@
     "lang": "zh-CN",
     "title": "独立式旋臂起重机 - DGCRANE",
     "description": "独立式（自由站立式）旋臂起重机制造商与出口商，容量高达16吨、臂长高达16米、旋转120-360°，结构轻巧、占地小、易安装，适用于短距离密集作业单元。",
-    "template": "src/templates/product-superset.html",
+    "template": "ProductPage",
     "family": "product-superset@1",
     "status": "published"
   },
