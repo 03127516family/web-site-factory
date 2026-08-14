@@ -74,7 +74,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const { rawText, images } = await lib.fetchSource({ text, url })
 
   // 判族：人工显式指定跳过；auto 让 AI 判；族能不能烧 = 有没有完整套件（scanKits 现算，注册表退役）
-  let resolved = family
+  let resolved
   const preNotes = []
   const kits = lib.scanKits(COMPONENTS)
   const familyKit = (fam) => kits.find(k => k.family === fam && k.complete)
@@ -82,7 +82,8 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     const verdict = await callAI(classifyMessages(rawText.slice(0, 3000)), 'classify')
     resolved = verdict?.family === 'product' ? 'products' : null   // AI 返回 product；映射到族目录名 products
     if (!resolved || !familyKit(resolved)) {
-      throw new Error(`自动判族：这份原料像「${verdict?.family ?? '无法识别'}」——${verdict?.reason ?? '无理由'}。该族烧制未建`)
+      const label = verdict?.family && verdict.family !== 'unknown' ? verdict.family : '无法识别'
+      throw new Error(`自动判族：这份原料像「${label}」——${verdict?.reason ?? '无理由'}。该族烧制未建；若确为产品原料，请人工改选「产品页族」重试`)
     }
     preNotes.push(`自动判族：产品页族（${verdict.reason}）`)
   } else {
