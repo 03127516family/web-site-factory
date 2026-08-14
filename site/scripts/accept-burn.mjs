@@ -13,6 +13,10 @@ const ok = (name, cond, extra = '') => { results.push({ name, pass: !!cond }); c
 
 const lib = await import('../src/burn-lib.mjs')
 
+// 两族套件的 example（chrome 值真源；断言一律相对它，不写字面站名——引擎去站化钉）
+const EX_PROD = JSON.parse(readFileSync(join(SITE, 'src/components/products/ProductPage/example.json'), 'utf8'))
+const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPage/example.json'), 'utf8'))
+
 // ---------- T1 原文切块编号 / 图清单 / 剥壳 ----------
 {
   const blocks = lib.numberBlocks('甲段\n\n乙段\n\n\n丙段\n')
@@ -145,15 +149,17 @@ const lib = await import('../src/burn-lib.mjs')
   ]
   const j = await lib.assemble({
     slug: 'overhead-cranes-for-sale-burn', productName: '欧式桥式起重机',
-    sectionResults, imagePool: [{ caption: '横梁', name: 'cross-girder3.jpg' }],
+    sectionResults, imagePool: [{ caption: '横梁', name: 'cross-girder3.jpg' }], example: EX_PROD,
   })
-  ok('组装 page 骨架', j.page.slug === 'products/overhead-cranes-for-sale-burn' && j.page.status === 'draft' && j.page.family === 'product@1' && j.page.type === 'product')
-  ok('page.title 站级拼法', j.page.title === '欧式桥式起重机 - DGCRANE')
-  ok('chrome 站级默认', j.inquiry_form.form_id === 713 && j.breadcrumb.trail[0].label === '首页' && j.breadcrumb.current === '欧式桥式起重机')
+  ok('组装 page 骨架', j.page.slug === 'products/overhead-cranes-for-sale-burn' && j.page.status === 'draft' && j.page.family === EX_PROD.page.family && j.page.type === 'product')
+  ok('page.title 后缀保真（example 机械替换）', j.page.title === EX_PROD.page.title.replace(EX_PROD.title, '欧式桥式起重机'))
+  ok('chrome 值全自套件 example', j.inquiry_form.form_id === EX_PROD.inquiry_form.form_id
+    && j.breadcrumb.trail.length === EX_PROD.breadcrumb.trail.length && j.breadcrumb.current === '欧式桥式起重机')
   ok('section 落 title+树', j.overview.title === '概述' && j.overview.body.type === 'doc')
   ok('specs 落 [{text}]', j.specs.length === 2 && j.specs[0].text === '容量 3.2-80吨')
   ok('gallery 吃图池且带 alt', j.gallery[0].image === 'cross-girder3.jpg' && j.gallery[0].alt === '横梁')
-  ok('summary.cta 站级默认', j.summary.cta === '报价要求')
+  ok('summary.cta 自 example 且 example 内容不泄入', j.summary.cta === EX_PROD.summary.cta && j.summary.intro === undefined)
+  ok('related_products 壳自 example 且 seed 清空', j.related_products.title === EX_PROD.related_products.title && j.related_products.seed.length === 0)
   ok('version=1 且无杂键', j.version === 1 && !('_notes' in j))
 
   const catalog = lib.loadCatalog(
@@ -166,16 +172,16 @@ const lib = await import('../src/burn-lib.mjs')
 
 // ---------- T4.1 审查修复钉：渲染器无守卫字段的站级默认 ----------
 {
-  const j2 = await lib.assemble({ slug: 'bare', productName: '裸烧测试', sectionResults: [], imagePool: [] })
+  const j2 = await lib.assemble({ slug: 'bare', productName: '裸烧测试', sectionResults: [], imagePool: [], example: EX_PROD })
   ok('specs 默认空数组不炸渲染器', Array.isArray(j2.specs) && j2.specs.length === 0)
   ok('hero.highlights 默认空数组', Array.isArray(j2.hero.highlights))
   ok('related_products 站级默认', j2.related_products?.type === 'related-products' && Array.isArray(j2.related_products.seed))
-  const j3 = await lib.assemble({ slug: 'inst', productName: '安装段测试', sectionResults: [
+  const j3 = await lib.assemble({ slug: 'inst', productName: '安装段测试', example: EX_PROD, sectionResults: [
     { key: 'installation', shape: 'section', data: { title: '安装', body_md: '按图纸安装。' } },
   ], imagePool: [] })
   ok('installation 自动补 cases 空数组', Array.isArray(j3.installation.cases))
   let dropped = false
-  try { await lib.assemble({ slug: 'x', productName: 'x', sectionResults: [{ key: 'mystery', shape: 'weird', data: { text: 'x' } }], imagePool: [] }) } catch (e) { dropped = /未处理/.test(e.message) }
+  try { await lib.assemble({ slug: 'x', productName: 'x', sectionResults: [{ key: 'mystery', shape: 'weird', data: { text: 'x' } }], imagePool: [], example: EX_PROD }) } catch (e) { dropped = /未处理/.test(e.message) }
   ok('未知字段/shape 组装即炸不静默丢', dropped)
 }
 
@@ -224,9 +230,9 @@ const lib = await import('../src/burn-lib.mjs')
   ok('seo 字段烧出后进 notes 标出', r4.json.page.description === 'AI 概括的描述。' && r4.report.notes.some(n => /概括|豁免|人工/.test(n)))
 
   // writeDraft：撞名序号 / 强制 draft / 非法 slug（try/finally 保证清理，钉炸了也不留毒草稿）
-  const jx = await lib.assemble({ slug: 'wd-test', productName: '写回测试', sectionResults: [], imagePool: [] })
+  const jx = await lib.assemble({ slug: 'wd-test', productName: '写回测试', sectionResults: [], imagePool: [], example: EX_PROD })
   const f1 = burner.writeDraft(jx, 'wd-test')
-  const jx2 = await lib.assemble({ slug: 'wd-test', productName: '写回测试2', sectionResults: [], imagePool: [] })
+  const jx2 = await lib.assemble({ slug: 'wd-test', productName: '写回测试2', sectionResults: [], imagePool: [], example: EX_PROD })
   const f2 = burner.writeDraft(jx2, 'wd-test')
   const p1 = join(SITE, 'content/products', f1 + '.json')
   const p2 = join(SITE, 'content/products', f2 + '.json')
@@ -244,7 +250,9 @@ const lib = await import('../src/burn-lib.mjs')
 {
   const burner = await import('./deepseek-burn.mjs')
   const om = burner.oneShotMessages('原文', [{ key: 'overview', shape: 'section' }], '名').at(-1).content
-  ok('oneshot 提示词含白名单与 few-shot 示例', om.includes('示例') && om.includes('overview'))
+  ok('oneshot 提示词含白名单；无 sample 不带示例行（示例文字只从套件 example 现取）', om.includes('overview') && !om.includes('示例'))
+  const om2 = burner.oneShotMessages('原文', [{ key: 'overview', shape: 'section' }], '名', '{"fields":{"overview":{"title":"…","body_md":"…"}}}').at(-1).content
+  ok('onesot 带 sample 时注入示例行', om2.includes('示例') && om2.includes('overview'))
   ok('section 提示词含示例输出', burner.sectionMessages('overview', 'section', '原文', '名').at(-1).content.includes('示例输出'))
   const dup = lib.extractImages('（配图：一 a.jpg）\n\n（配图：一 a.jpg）\n\n（配图：二 b.jpg）')
   ok('extractImages 按名去重', dup.length === 2 && dup[0].name === 'a.jpg' && dup[1].name === 'b.jpg')
@@ -470,14 +478,17 @@ const lib = await import('../src/burn-lib.mjs')
   const jp = await lib.assemble({ slug: 'zzt', productName: '起重机安全培训', family: 'posts',
     sectionResults: [{ key: 'body.sections', shape: 'sections', data: good },
       { key: 'title', shape: 'text', data: { text: '起重机安全培训' } },
-      { key: 'page.description', shape: 'seo', data: { text: '起重机安全操作培训要点。' } }], imagePool: [] })
+      { key: 'page.description', shape: 'seo', data: { text: '起重机安全操作培训要点。' } }], imagePool: [], example: EX_POST })
   ok('assemblePost 文章骨架', jp.page.type === 'post' && jp.page.slug === 'posts/zzt' && jp.body.sections.length === 2
-    && jp.title === '起重机安全培训' && jp.breadcrumb.trail.length === 2 && jp.page.description === '起重机安全操作培训要点。')
+    && jp.title === '起重机安全培训' && jp.page.description === '起重机安全操作培训要点。')
+  ok('文章 chrome 值全自套件 example（trail/form 同源，current 换新名）',
+    jp.breadcrumb.trail.length === EX_POST.breadcrumb.trail.length && jp.breadcrumb.current === '起重机安全培训'
+    && jp.inquiry_form.form_id === EX_POST.inquiry_form.form_id && jp.page.title === EX_POST.page.title.replace(EX_POST.title, '起重机安全培训'))
   ok('文章预览渲出章节', lib.previewHtml(jp, pcat).includes('安全要求'))
 
   // 图池顺序配段（缺图 known-leftover 不炸、不带假尺寸）
   const ji = await lib.assemble({ slug: 'zzt2', productName: 'x', family: 'posts',
-    sectionResults: [{ key: 'body.sections', shape: 'sections', data: good }], imagePool: [{ caption: '', name: 'no-such.jpg' }] })
+    sectionResults: [{ key: 'body.sections', shape: 'sections', data: good }], imagePool: [{ caption: '', name: 'no-such.jpg' }], example: EX_POST })
   ok('图池顺序配段（缺图不炸）', ji.body.sections[0].image === 'no-such.jpg' && ji.body.sections[0].width === undefined)
 
   // writeDraft 按 page.type 落 content/posts + template 自带 + draft 强制

@@ -20,8 +20,9 @@ const RULES = `你是内容结构化器，把原料文章（产品页或文章�
 6. 每段原文只许用于一个字段；严禁把同一段内容塞进两个字段，严禁把整篇或大段原文复制到多个字段里——你的角色是搬运工不是作者，只做对应和摘取。`
 
 // 一把梭：一次出整页 JSON（格子缺席合法；代码侧逐格验收，不过的单格重烧）
-// 格式契约按 shape 从 loadCatalog 目录分组生成——目录加段/加格时提示词不漂移
-export function oneShotMessages(rawText, catalog, productName) {
+// 格式契约按 shape 从 loadCatalog 目录分组生成——目录加段/加格时提示词不漂移；
+// 示例文字从套件 example 现取（真字段真值，换站随模版走，引擎不内置站味）
+export function oneShotMessages(rawText, catalog, productName, sample) {
   const contract = [
     ['section', '正文段', '"字段名":{"title":"段标题（原文有栏目名用栏目名；没有栏目名就用产品名，禁止自创）","body_md":"markdown 正文"}'],
     ['sections', '章节序列', '"字段名":{"items":[{"heading":"章节标题（用原文小标题，逐字；无小标题的段落并入相邻章节，禁止自创标题）","body_md":"markdown 正文"}，按原文顺序]}'],
@@ -32,16 +33,31 @@ export function oneShotMessages(rawText, catalog, productName) {
     const keys = catalog.filter(c => c.shape === shape).map(c => c.key)
     return keys.length ? `- ${label}（${keys.join('/')}）：${fmt}` : null
   }).filter(Boolean).join('\n')
+  const sampleLine = sample ? `\n\n示例（仅示意格式）：${sample}` : ''
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `名称：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
+    { role: 'user', content: `名称：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}${sampleLine}\n\n原文：\n${rawText}` },
   ]
+}
+
+// 从套件 example 提一段真值当提示词示例（每 shape 取一，找不到就略）
+export function exampleSnippet(example, catalog) {
+  const fields = {}
+  const sec = catalog.find(c => c.shape === 'section' && example?.[c.key])
+  if (sec) fields[sec.key] = { title: example[sec.key].title, body_md: '（该段原文…）' }
+  const secs = catalog.find(c => c.shape === 'sections' && lib.getIn(example, c.key)?.length)
+  if (secs) fields[secs.key] = { items: [{ heading: lib.getIn(example, secs.key)[0].heading, body_md: '（该章原文…）' }] }
+  const list = catalog.find(c => c.shape === 'list' && lib.getIn(example, c.key)?.length)
+  if (list) fields[list.key] = { items: lib.getIn(example, list.key).slice(0, 2).map(x => x.text ?? x) }
+  if (example?.title) fields.title = { text: example.title }
+  if (example?.page?.description) fields['page.description'] = { text: example.page.description.slice(0, 50) + '…' }
+  return Object.keys(fields).length ? JSON.stringify({ fields }) : ''
 }
 
 // 族目录名 → 人话标签/描述（站点层文案，非引擎逻辑；判族契约直接用族目录名，省一层映射）
 const FAMILY_LABEL = { products: '产品页族', posts: '文章页族' }
 const FAMILY_DESC = {
-  products: '产品页族：工业产品的介绍/销售页，通常含参数表、优势、安装等栏目',
+  products: '产品页族：产品/服务的介绍销售页，通常含参数、优势、安装等栏目',
   posts: '文章页族：案例/培训/指南/新闻类散文',
 }
 
@@ -61,11 +77,11 @@ export function sectionMessages(key, shape, sliceText, productName) {
     seo: `返回 {"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余禁止）"}`,
   }[shape]
   const example = {
-    section: `示例输出：{"title":"概述","body_md":"第一段原文。\\n\\n第二段原文。"}`,
-    sections: `示例输出：{"items":[{"heading":"安全要求","body_md":"第一段原文。\\n\\n第二段原文。"}]}`,
-    list: `示例输出：{"items":["起重量 5吨","跨度 3-16米"]}`,
-    text: `示例输出：{"text":"5吨单梁起重机"}`,
-    seo: `示例输出：{"text":"5吨单梁起重机制造商，跨度3-16米，出口120国。"}`,
+    section: `示例输出：{"title":"<段标题>","body_md":"第一段原文。\\n\\n第二段原文。"}`,
+    sections: `示例输出：{"items":[{"heading":"<章节标题>","body_md":"第一段原文。\\n\\n第二段原文。"}]}`,
+    list: `示例输出：{"items":["<逐字条目1>","<逐字条目2>"]}`,
+    text: `示例输出：{"text":"<一句原文>"}`,
+    seo: `示例输出：{"text":"<150 字以内本页内容概括>"}`,
   }[shape]
   return [
     { role: 'system', content: RULES },
@@ -113,6 +129,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const kitDir = lib.findKit(COMPONENTS, resolved, kitName) // findKit 已返回套件目录（缺件明说：不存在/不完整带清单）
   const catalog = lib.loadCatalog(
     join(kitDir, 'meta.json'), join(kitDir, 'index.astro'), join(kitDir, 'example.json'))
+  const example = JSON.parse(readFileSync(join(kitDir, 'example.json'), 'utf8')) // chrome 值与提示词示例的真值源（套件自带，引擎不认站）
   const paragraphs = lib.numberBlocks(rawText) // 仅供反查漏段/位置审计，不给 AI 编号
   const report = { slug, productName, family: resolved, kit: kitName, images: images.map(i => i.name), sections: [], unused: [], notes: [...preNotes] }
   if (paragraphs.length > 200) report.notes.push(`剥壳后段数异常多（${paragraphs.length}），页面可能带噪，建议改贴裸文本`)
@@ -120,7 +137,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   // 一把梭：一次出整页；调用失败（含截断）→ 干净报错（自动逐格降级是 roadmap）
   let out
   try {
-    out = await callAI(oneShotMessages(rawText, catalog, productName), 'oneshot')
+    out = await callAI(oneShotMessages(rawText, catalog, productName, exampleSnippet(example, catalog)), 'oneshot')
   } catch (e) {
     throw new Error(`整页烧失败：${e.message}。原文过长可先分段贴（自动逐格降级在 roadmap）`)
   }
@@ -204,12 +221,12 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const jsonTextNorm = acceptedTexts.map(t => lib.normalizeText(t)).join('\n')
   report.unused = paragraphs.filter(p => !jsonTextNorm.includes(lib.normalizeText(p.text))).map(p => ({ n: p.n, preview: p.text.slice(0, 40) }))
 
-  const json = await lib.assemble({ slug, productName, family: resolved, sectionResults, imagePool: images })
+  const json = await lib.assemble({ slug, productName, family: resolved, sectionResults, imagePool: images, example })
   json.page.template = kitName // 草稿自带套件名：路由按它派发（writeDraft 的 ??= 不覆盖）
   if (resolved === 'products') {
     if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
     report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
-    report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
+    report.notes.push('breadcrumb.trail 克隆自套件 example，二级分类人工确认')
   } else {
     if (images.length) {
       if (catalog.some(c => c.shape === 'sections')) report.notes.push(`图池 ${images.length} 张按顺序配到第 i 段（余图挂末段），人工在编辑器确认`)

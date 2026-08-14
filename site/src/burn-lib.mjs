@@ -10,6 +10,9 @@ import { probe } from '../scripts/img-probe.mjs'
 
 export { mdToDoc, validateDoc, getIn, setIn }
 
+// ---------- 站点资产约定（换站唯一要改的一处；模版/chrome/内容全是数据自带） ----------
+export const SITE_ASSETS = { dir: '../public/assets/img/product', url: '/assets/img/product/' }
+
 // ---------- 原文分段编号（不给 AI；仅供代码侧反查漏段/位置审计） ----------
 export function numberBlocks(rawText) {
   return rawText.split(/\n\s*\n/).map(t => t.trim()).filter(Boolean)
@@ -25,7 +28,7 @@ export function extractImages(rawText) {
   return [...new Map(out.map(i => [i.name, i])).values()] // 同名图去重（重复配图标记不重复进 gallery）
 }
 
-// ---------- URL 剥壳（启发式，对 dgcrane 旧站调优；剥不好用户改贴文本） ----------
+// ---------- URL 剥壳（旧站迁移插件：对 dgcrane 旧站调优，换站不保证；贴裸文本路站点无关） ----------
 export function stripHtml(html) {
   // dgcrane 旧站产品页：优先抽 #product 主容器（§7：标题→询盘在其内，related-products 在其外）；抽不到回退整页剥
   const start = html.match(/<div[^>]*id=["']product["'][^>]*>/i)
@@ -246,10 +249,10 @@ export function similarToAny(title, candidates, threshold = 0.9) {
 // ---------- 组装：结构归代码，AI 的值栽进骨架；骨架跟族（产品超集 / 文章），只返回 JSON 本体 ----------
 // 族分支是骨架装配层的边界（骨架形态=族级差异，同「新族=新套件+新装配」）；
 // 值的栽种仍全按 shape/目录/meta 路径声明驱动，无字段名特判。
-export async function assemble({ slug, productName, family = 'products', sectionResults, imagePool = [] }) {
+export async function assemble({ slug, productName, family = 'products', sectionResults, imagePool = [], example }) {
   return family === 'posts'
-    ? assemblePost({ slug, productName, sectionResults, imagePool })
-    : assembleProduct({ slug, productName, sectionResults, imagePool })
+    ? assemblePost({ slug, productName, sectionResults, imagePool, example })
+    : assembleProduct({ slug, productName, sectionResults, imagePool, example })
 }
 
 // 通用栽种（meta 路径声明驱动，两族共用）：section 树落 <key>.body、标题按 titlePath
@@ -267,20 +270,33 @@ function plantField(j, r) {
   return false
 }
 
-async function assembleProduct({ slug, productName, sectionResults, imagePool = [] }) {
+// ---------- chrome 骨架：值全从套件 example.json 克隆（引擎只认契约路径，不认站） ----------
+// page.title 后缀 = 机械替换（example.page.title 含 example.title 则换名保后缀，否则裸标题）。
+function chromeOf(example, productName, slug, type) {
+  if (!example?.page) throw new Error('assemble 需要 example（套件参照 JSON）——chrome 值从它克隆，引擎不内置任何站点信息')
+  const famDir = type === 'post' ? 'posts' : 'products'
+  const suffixTitle = t => (example.page.title && example.title && example.page.title.includes(example.title))
+    ? example.page.title.replace(example.title, t)
+    : t
   const j = {
     version: 1,
     page: {
-      slug: `products/${slug}`, type: 'product', lang: 'zh-CN',
-      title: `${productName} - DGCRANE`,
-      description: '', family: 'product@1', status: 'draft',
+      slug: `${famDir}/${slug}`, type, lang: example.page.lang ?? 'zh-CN',
+      title: suffixTitle(productName), description: '', family: example.page.family, status: 'draft',
     },
     title: productName,
-    breadcrumb: { current: productName, trail: [{ label: '首页', url: 'https://www.dgcrane.com/zh/' }] },
-    inquiry_form: { type: 'inquiry-form', form_id: 713, title: '填写您的详细资料，我们将在24小时内给您答复!' },
-    summary: { cta: '报价要求' },
+  }
+  if (example.breadcrumb) j.breadcrumb = structuredClone({ ...example.breadcrumb, current: productName })
+  if (example.inquiry_form) j.inquiry_form = structuredClone(example.inquiry_form)
+  return j
+}
+
+async function assembleProduct({ slug, productName, sectionResults, imagePool = [], example }) {
+  const j = {
+    ...chromeOf(example, productName, slug, 'product'),
+    summary: example.summary ? { ...structuredClone(example.summary), intro: undefined } : {},
     specs: [],
-    related_products: { type: 'related-products', title: '相关产品', category: '', limit: 4, seed: [] },
+    related_products: example.related_products ? { ...structuredClone(example.related_products), seed: [] } : undefined,
     hero: { headline: '', highlights: [] },
   }
   for (const r of sectionResults) {
@@ -302,29 +318,18 @@ async function assembleProduct({ slug, productName, sectionResults, imagePool = 
   if (imagePool.length) {
     j.gallery = []
     for (const { caption, name } of imagePool) {
-      const dims = await probe(name) // 缺图 {} —— known-leftover 惯例
+      const dims = await probe(name, SITE_ASSETS.dir) // 缺图 {} —— known-leftover 惯例
       j.gallery.push({ image: name, alt: caption || productName, ...dims })
     }
   }
   return j
 }
 
-// ---------- 文章骨架：N 段顺序章节（body.sections）+ 文章 chrome；图池按顺序配段 ----------
-async function assemblePost({ slug, productName, sectionResults, imagePool = [] }) {
+// ---------- 文章骨架：值全从套件 example 克隆；PostPage 型 sections 重复章节；图池按顺序配段 ----------
+async function assemblePost({ slug, productName, sectionResults, imagePool = [], example }) {
   const j = {
-    version: 1,
-    page: {
-      slug: `posts/${slug}`, type: 'post', lang: 'zh-CN',
-      title: `${productName} | DGCRANE`,
-      description: '', family: 'post@1', status: 'draft',
-    },
-    title: productName,
-    breadcrumb: { current: productName, trail: [
-      { label: '首页', url: 'https://www.dgcrane.com/zh/' },
-      { label: '案例', url: 'https://www.dgcrane.com/zh/posts/' },
-    ] },
-    inquiry_form: { type: 'inquiry-form', form_id: 713, title: '填写您的详细资料，我们将在24小时内给您答复!' },
-    body: { sections: [] },
+    ...chromeOf(example, productName, slug, 'post'),
+    body: {},
   }
   for (const r of sectionResults) {
     if (!r.data) continue // 失败段缺席
@@ -337,7 +342,7 @@ async function assemblePost({ slug, productName, sectionResults, imagePool = [] 
     } else if (plantField(j, r)) continue
     else if (r.key === 'title') {
       j.title = r.data.text
-      j.page.title = `${r.data.text} | DGCRANE`
+      j.page.title = j.page.title.includes(productName) ? j.page.title.replace(productName, r.data.text) : r.data.text
     } else if (r.key === 'page.description') {
       j.page.description = r.data.text
     } else throw new Error(`assemblePost 未处理的字段: ${r.key}（${r.shape}）——先对齐目录或组装，不静默丢`)
@@ -346,7 +351,7 @@ async function assemblePost({ slug, productName, sectionResults, imagePool = [] 
   for (const [i, { caption, name }] of imagePool.entries()) {
     const target = j.body.sections[Math.min(i, j.body.sections.length - 1)]
     if (!target) break // 无章节则图无宿主，丢弃（报告的图池注记兜底）
-    const dims = await probe(name) // 缺图 {} —— known-leftover 惯例
+    const dims = await probe(name, SITE_ASSETS.dir) // 缺图 {} —— known-leftover 惯例
     Object.assign(target, { image: name, alt: caption || target.heading, ...dims })
   }
   return j
@@ -361,10 +366,10 @@ export function previewHtml(j, catalog) {
       return `<section><h3>${esc(t)}</h3>${renderDoc(j[c.key].body)}</section>` }).join('\n')
   const chapters = catalog.filter(c => c.shape === 'sections').flatMap(c => getIn(j, c.key) ?? [])
     .map(s => `<section><h3>${esc(s.heading)}</h3>${renderDoc(s.body)}${s.image
-      ? `<figure style="margin:6px 0"><img src="/assets/img/product/${escAttr(s.image)}" alt="${escAttr(s.alt ?? '')}" style="max-width:460px" width="${s.width ?? 880}" height="${s.height ?? 495}"></figure>` : ''}</section>`)
+      ? `<figure style="margin:6px 0"><img src="${SITE_ASSETS.url}/${escAttr(s.image)}" alt="${escAttr(s.alt ?? '')}" style="max-width:460px" width="${s.width ?? 880}" height="${s.height ?? 495}"></figure>` : ''}</section>`)
     .join('\n')
   const specs = j.specs?.length ? `<section><h3>主要参数</h3><ul>${j.specs.map(s => `<li>${esc(s.text)}</li>`).join('')}</ul></section>` : ''
-  const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="/assets/img/product/${escAttr(g.image)}" alt="${escAttr(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
+  const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="${SITE_ASSETS.url}/${escAttr(g.image)}" alt="${escAttr(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
 body{font:14px/1.7 -apple-system,"PingFang SC",sans-serif;max-width:860px;margin:20px auto;padding:0 16px;color:#222}
 h1{border-bottom:2px solid #2563eb;padding-bottom:8px}h3{color:#1e40af;margin-top:28px}
