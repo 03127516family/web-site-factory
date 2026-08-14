@@ -81,14 +81,14 @@ const lib = await import('../src/burn-lib.mjs')
 // ---------- T2 字段目录 ----------
 {
   const catalog = lib.loadCatalog(
-    join(SITE, 'src/components/ProductPage.meta.json'),
-    join(SITE, 'src/components/ProductPage.astro'),
+    join(SITE, 'src/components/products/ProductPage/meta.json'),
+    join(SITE, 'src/components/products/ProductPage/index.astro'),
     join(SITE, 'content/products/single-girder-eot-cranes.json'))
   const keys = catalog.map(c => c.key)
   for (const k of ['overview', 'introduction', 'advantages', 'protection', 'specs', 'hero.headline', 'page.description'])
     ok(`目录含 ${k} 且已核验`, keys.includes(k) && catalog.find(c => c.key === k).verified)
 
-  const meta = lib.loadMeta(join(SITE, 'src/components/ProductPage.meta.json'))
+  const meta = lib.loadMeta(join(SITE, 'src/components/products/ProductPage/meta.json'))
   ok('loadMeta 返回 16 项', meta.length === 16, `${meta.length} 项`)
   ok('loadMeta 含 overview(section/verbatim)', meta.some(c => c.key === 'overview' && c.shape === 'section' && c.level === 'verbatim'))
   ok('loadMeta 含 page.description(seo/summary)', meta.some(c => c.key === 'page.description' && c.shape === 'seo' && c.level === 'summary'))
@@ -157,8 +157,8 @@ const lib = await import('../src/burn-lib.mjs')
   ok('version=1 且无杂键', j.version === 1 && !('_notes' in j))
 
   const catalog = lib.loadCatalog(
-    join(SITE, 'src/components/ProductPage.meta.json'),
-    join(SITE, 'src/components/ProductPage.astro'),
+    join(SITE, 'src/components/products/ProductPage/meta.json'),
+    join(SITE, 'src/components/products/ProductPage/index.astro'),
     join(SITE, 'content/products/single-girder-eot-cranes.json'))
   const html = lib.previewHtml(j, catalog)
   ok('预览含标题/正文/规格/图', html.includes('欧式桥式起重机') && html.includes('机械制造') && html.includes('3.2-80吨') && html.includes('cross-girder3.jpg'))

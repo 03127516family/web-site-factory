@@ -64,8 +64,8 @@ export async function fetchSource({ text, url }) {
   } finally { clearTimeout(timer) }
 }
 
-// ---------- 字段目录：结构真相=ProductPage.astro + 参照 JSON，装载时自校验 ----------
-// 字段清单及其语义依据见同目录 ProductPage.meta.json + ProductPage.meta.md（单一真相）
+// ---------- 字段目录：结构真相=套件 index.astro + example 参照，装载时自校验 ----------
+// 字段清单及其语义依据见套件同目录 meta.json + meta.md（components/products/<名>/，单一真相）
 
 // 读模板旁边的 meta 文件，返回字段清单 [{key,shape,level}]
 export function loadMeta(metaPath) {
