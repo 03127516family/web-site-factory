@@ -11,7 +11,7 @@ const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const COMPONENTS = join(SITE, 'src/components')   // 套件根
 
 // ---------- 提示词（白名单自组件推导；AI 产 markdown，不产树） ----------
-const RULES = `你是内容结构化器，把起重机产品原料文章映射为格式化数据。铁律：
+const RULES = `你是内容结构化器，把原料文章（产品页或文章）映射为格式化数据。铁律：
 1. 只输出 JSON（不要解释、不要 markdown 围栏）；
 2. 只许搬运原文文字，禁止用常识/行业知识补充任何原文没有的内容；没有就是缺席，不许凑；
 3. body_md 用 markdown 语法（段落空行分隔、- 列表、| 表格 |）；
@@ -24,6 +24,7 @@ const RULES = `你是内容结构化器，把起重机产品原料文章映射�
 export function oneShotMessages(rawText, catalog, productName) {
   const contract = [
     ['section', '正文段', '"字段名":{"title":"段标题（原文有栏目名用栏目名；没有栏目名就用产品名，禁止自创）","body_md":"markdown 正文"}'],
+    ['sections', '章节序列', '"字段名":{"items":[{"heading":"章节标题（用原文小标题，逐字；无小标题的段落并入相邻章节，禁止自创标题）","body_md":"markdown 正文"}，按原文顺序]}'],
     ['list', '列表', '"字段名":{"items":["逐字条目","…"]}'],
     ['text', '单句', '"字段名":{"text":"…"}'],
     ['seo', 'SEO', '"字段名":{"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余一律逐字）"}'],
@@ -33,33 +34,42 @@ export function oneShotMessages(rawText, catalog, productName) {
   }).filter(Boolean).join('\n')
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `产品名：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
+    { role: 'user', content: `名称：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}\n\n示例（仅示意格式）：{"fields":{"hero.headline":{"text":"5吨单梁起重机"},"overview":{"title":"概述","body_md":"5吨单梁起重机广泛用于车间物料搬运。"},"specs":{"items":["起重量 5吨","跨度 3-16米"]}}}\n\n原文：\n${rawText}` },
   ]
 }
 
-export function classifyMessages(sample) {
+// 族目录名 → 人话标签/描述（站点层文案，非引擎逻辑；判族契约直接用族目录名，省一层映射）
+const FAMILY_LABEL = { products: '产品页族', posts: '文章页族' }
+const FAMILY_DESC = {
+  products: '产品页族：工业产品的介绍/销售页，通常含参数表、优势、安装等栏目',
+  posts: '文章页族：案例/培训/指南/新闻类散文',
+}
+
+export function classifyMessages(sample, builtFamilies) {
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `判断这份原料属于哪个页族。已建页族：product（产品页族：工业产品的介绍/销售页，通常含参数表、优势、安装等栏目）。未建页族：post（文章族：案例/培训/指南/新闻类散文）。都不是则 unknown。\n\n返回 JSON：{"family":"product"|"post"|"unknown","reason":"一句话理由"}\n\n原料开头：\n${sample}` },
+    { role: 'user', content: `判断这份原料属于哪个页族。已建页族：${builtFamilies.map(f => `${f}（${FAMILY_DESC[f] ?? ''}）`).join('；')}。都不属于则 unknown。\n\n返回 JSON：{"family":${builtFamilies.map(f => `"${f}"`).join('|')}|"unknown","reason":"一句话理由"}\n\n原料开头：\n${sample}` },
   ]
 }
 
 export function sectionMessages(key, shape, sliceText, productName) {
   const contract = {
     section: `返回 {"title":"段标题","body_md":"markdown 正文"}`,
+    sections: `返回 {"items":[{"heading":"章节标题","body_md":"markdown 正文"}，按原文顺序]}`,
     list: `返回 {"items":["逐字条目","…"]}`,
     text: `返回 {"text":"一句话"}`,
     seo: `返回 {"text":"150 字以内的中文 SEO 描述（本字段允许概括，其余禁止）"}`,
   }[shape]
   const example = {
     section: `示例输出：{"title":"概述","body_md":"第一段原文。\\n\\n第二段原文。"}`,
+    sections: `示例输出：{"items":[{"heading":"安全要求","body_md":"第一段原文。\\n\\n第二段原文。"}]}`,
     list: `示例输出：{"items":["起重量 5吨","跨度 3-16米"]}`,
     text: `示例输出：{"text":"5吨单梁起重机"}`,
     seo: `示例输出：{"text":"5吨单梁起重机制造商，跨度3-16米，出口120国。"}`,
   }[shape]
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `产品名：${productName}\n字段：${key}\n${contract}\n${example}\n\n原文：\n${sliceText}` },
+    { role: 'user', content: `名称：${productName}\n字段：${key}\n${contract}\n${example}\n\n原文：\n${sliceText}` },
   ]
 }
 
@@ -79,21 +89,22 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const kits = lib.scanKits(COMPONENTS)
   const familyKit = (fam) => kits.find(k => k.family === fam && k.complete)
   if (family === 'auto') {
-    const verdict = await callAI(classifyMessages(rawText.slice(0, 3000)), 'classify')
-    resolved = verdict?.family === 'product' ? 'products' : null   // AI 返回 product；映射到族目录名 products
+    const built = [...new Set(kits.filter(k => k.complete).map(k => k.family))]
+    const verdict = await callAI(classifyMessages(rawText.slice(0, 3000), built), 'classify')
+    resolved = { product: 'products', post: 'posts' }[verdict?.family] ?? verdict?.family // 契约用族目录名；短名别名兜一层防抖
     if (!resolved || !familyKit(resolved)) {
-      const label = verdict?.family && verdict.family !== 'unknown' ? verdict.family : '无法识别'
-      throw new Error(`自动判族：这份原料像「${label}」——${verdict?.reason ?? '无理由'}。该族烧制未建；若确为产品原料，请人工改选「产品页族」重试`)
+      const label = verdict?.family && verdict.family !== 'unknown' ? (FAMILY_LABEL[verdict.family] ?? verdict.family) : '无法识别'
+      throw new Error(`自动判族：这份原料像「${label}」——${verdict?.reason ?? '无理由'}。已建页族：${built.map(f => FAMILY_LABEL[f] ?? f).join('/')}；请人工改选或换原料`)
     }
-    preNotes.push(`自动判族：产品页族（${verdict.reason}）`)
+    preNotes.push(`自动判族：${FAMILY_LABEL[resolved] ?? resolved}（${verdict.reason}）`)
   } else {
-    // 手动选族：family 入参用族目录名(products)或旧名(product)，统一映射
-    const fam = family === 'product' ? 'products' : family
+    // 手动选族：入参用族目录名(products/posts)或控制台短名(product/post)，统一映射
+    const fam = { product: 'products', post: 'posts' }[family] ?? family
     if (!familyKit(fam)) throw new Error(`页族「${family}」烧制未建（无完整套件）`)
     resolved = fam
   }
 
-  const kitDir = lib.findKit(COMPONENTS, 'products', 'ProductPage')
+  const kitDir = familyKit(resolved).dir // 上面两路都验过 complete，此处必得完整套件
   const catalog = lib.loadCatalog(
     join(kitDir, 'meta.json'), join(kitDir, 'index.astro'), join(kitDir, 'example.json'))
   const paragraphs = lib.numberBlocks(rawText) // 仅供反查漏段/位置审计，不给 AI 编号
@@ -187,10 +198,15 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const jsonTextNorm = acceptedTexts.map(t => lib.normalizeText(t)).join('\n')
   report.unused = paragraphs.filter(p => !jsonTextNorm.includes(lib.normalizeText(p.text))).map(p => ({ n: p.n, preview: p.text.slice(0, 40) }))
 
-  const json = await lib.assemble({ slug, productName, sectionResults, imagePool: images })
-  if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
-  report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
-  report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
+  const json = await lib.assemble({ slug, productName, family: resolved, sectionResults, imagePool: images })
+  if (resolved === 'products') {
+    if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
+    report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
+    report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
+  } else {
+    if (images.length) report.notes.push(`图池 ${images.length} 张按顺序配到第 i 段（余图挂末段），人工在编辑器确认`)
+    else report.notes.push('图池为空：章节无配图，待编辑器补传（known-leftover）')
+  }
   if (sectionResults.some(r => r.key === 'page.description' && r.data)) report.notes.push('page.description 为 AI 概括（溯源豁免），人工过目')
   if (report.sections.some(s => s.status === 'failed')) report.notes.push('有格烧败缺席（标红），可在编辑器人工补或重新烧')
   return { json, report, previewHtml: lib.previewHtml(json, catalog) }
@@ -230,23 +246,49 @@ export function verifyByShape(spec, data, src, productName, paragraphs) {
         return `与原文及产品名都不像：「${data.text}」`
       return null
     }
+    if (spec.shape === 'sections') {
+      if (!Array.isArray(data?.items) || !data.items.length) return 'items 为空'
+      for (const [i, it] of data.items.entries()) {
+        if (!it?.heading || !it?.body_md) return `第 ${i + 1} 项缺 heading 或 body_md`
+        const v = lib.verifyTree(lib.mdToDoc(it.body_md), src)
+        if (!v.ok) return `第 ${i + 1} 项原文里找不到：「${v.failures[0].slice(0, 40)}」`
+        if (!lib.similarToAny(it.heading, [...firstLines, ...paragraphs.map(p => p.text)], 0.85))
+          return `第 ${i + 1} 项标题与原文不像：「${it.heading}」`
+      }
+      // 段间重叠闸（文章只有一个内容字段，闸收进字段内；产品侧在跨字段 findDuplicates 层）
+      const blocks = data.items.map(it => lib.treeBlocks(lib.mdToDoc(it.body_md)).map(lib.normalizeText))
+      for (let a = 0; a < blocks.length; a++) for (let b = a + 1; b < blocks.length; b++) {
+        const sb = new Set(blocks[b])
+        const shared = blocks[a].filter(t => sb.has(t)).length
+        if (shared / Math.max(blocks[a].length, blocks[b].length) > 0.5)
+          return `第 ${a + 1} 与第 ${b + 1} 项正文大面积重复——每章只许用原文中属于它的那部分`
+      }
+      return null
+    }
     if (spec.shape === 'seo') return data?.text ? null : '缺 text'
     return `未知 shape ${spec.shape}`
   } catch (e) { return `校验异常：${e.message}` }
 }
 
 // ---------- 落 draft（撞名加序号；写前全树过 schema；强制 draft 不信客户端） ----------
+// 页族从数据自带 page.type 推导（post→posts，缺省 products），edit-server 调用零改动。
 export function writeDraft(json, slug) {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('slug 非法（小写字母数字连字符）')
-  let final = slug, i = 2
-  while (existsSync(join(SITE, 'content/products', `${final}.json`))) final = `${slug}-${i++}`
-  json.page.slug = `products/${final}`
+  const famDir = json.page.type === 'post' ? 'posts' : 'products'
+  let final = slug, n = 2
+  while (existsSync(join(SITE, 'content', famDir, `${final}.json`))) final = `${slug}-${n++}`
+  json.page.slug = `${famDir}/${final}`
   json.page.status = 'draft'
-  const kitDir = lib.findKit(COMPONENTS, 'products', 'ProductPage')
-  json.page.template ??= basename(kitDir) // 草稿必须自带 template：路由按它 glob 套件（缺则预览构建炸）
-  for (const c of lib.loadMeta(join(kitDir, 'meta.json')).filter(c => c.shape === 'section' && json[c.key]))
-    lib.validateDoc(json[c.key].body, `${c.key}.body`)
-  writeFileSync(join(SITE, 'content/products', `${final}.json`), JSON.stringify(json, null, 2) + '\n')
+  const kit = lib.scanKits(COMPONENTS).find(k => k.family === famDir && k.complete)
+  if (!kit) throw new Error(`页族「${famDir}」无完整套件，无法落 draft`)
+  json.page.template ??= basename(kit.dir) // 草稿必须自带 template：路由按它 glob 套件（缺则预览构建炸）
+  const meta = lib.loadMeta(join(kit.dir, 'meta.json'))
+  for (const c of meta) { // 形态驱动：固定段验根树，重复章节验每项树
+    if (c.shape === 'section' && json[c.key]) lib.validateDoc(json[c.key].body, `${c.key}.body`)
+    else if (c.shape === 'sections')
+      for (const [idx, s] of (lib.getIn(json, c.key) ?? []).entries()) lib.validateDoc(s.body, `${c.key}[${idx}].body`)
+  }
+  writeFileSync(join(SITE, 'content', famDir, `${final}.json`), JSON.stringify(json, null, 2) + '\n')
   return final
 }
 

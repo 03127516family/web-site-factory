@@ -278,11 +278,20 @@ const lib = await import('../src/burn-lib.mjs')
 
   const postFake = async (m, tag) => {
     if (tag === 'classify') return { family: 'post', reason: '散文体培训文章' }
+    if (tag === 'oneshot') return { fields: { title: { text: '欧式桥式起重机' }, 'body.sections': { items: [
+      { heading: blocks[1].text.split('\n')[0], body_md: blocks[1].text } ] } } }
+    throw new Error('不应走到 ' + tag)
+  }
+  const rp = await burner.burn({ text: raw, slug: 'tf-post', productName: '欧式桥式起重机' }, { callAI: postFake })
+  ok('auto 判为文章族继续烧（posts 已建，spec B）', rp.report.family === 'posts' && rp.json.body?.sections?.length === 1)
+
+  const unbuiltFake = async (m, tag) => {
+    if (tag === 'classify') return { family: 'news', reason: '像新闻但该页族未建' }
     throw new Error('不应走到 ' + tag)
   }
   let refused = ''
-  try { await burner.burn({ text: raw, slug: 'tf-post', productName: 'x' }, { callAI: postFake }) } catch (e) { refused = e.message }
-  ok('auto 判为未建族干净拒绝', /未建/.test(refused))
+  try { await burner.burn({ text: raw, slug: 'tf-news', productName: 'x' }, { callAI: unbuiltFake }) } catch (e) { refused = e.message }
+  ok('auto 判为未建族干净拒绝', /已建页族/.test(refused))
 
   const explicit = async (m, tag) => {
     if (tag === 'classify') throw new Error('不该判族')
@@ -292,7 +301,7 @@ const lib = await import('../src/burn-lib.mjs')
   ok('显式 product 跳过判族直烧', re.json.overview?.body?.type === 'doc')
 
   let badFam = ''
-  try { await burner.burn({ text: raw, slug: 'tf-bad', productName: 'x', family: 'post' }, { callAI: explicit }) } catch (e) { badFam = e.message }
+  try { await burner.burn({ text: raw, slug: 'tf-bad', productName: 'x', family: 'news' }, { callAI: explicit }) } catch (e) { badFam = e.message }
   ok('显式选未建族直接拒', /未建/.test(badFam))
 }
 
@@ -413,8 +422,8 @@ const lib = await import('../src/burn-lib.mjs')
     const r11 = await burner.burn({ text: raw, slug: 'to-dup2', productName: '欧式桥式起重机', family: 'product' }, { callAI: alwaysDup })
     ok('屡犯重叠双格 failed 缺席', r11.report.sections.every(s => s.status === 'failed') && r11.json.overview === undefined && r11.json.introduction === undefined)
 
-    // 16. 判族提示词不含「起重机」
-    ok('判族提示词不限起重机', !burner.classifyMessages('x')[1].content.includes('起重机'))
+    // 16. 判族提示词不含「起重机」（已建族由调用方动态传入）
+    ok('判族提示词不限起重机', !burner.classifyMessages('x', ['products', 'posts'])[1].content.includes('起重机'))
 
     // 17. RULES 含不重复条款
     ok('RULES 含不重复条款', burner.oneShotMessages('原文', [{ key: 'overview', shape: 'section' }], '名')[0].content.includes('只许用于一个字段'))

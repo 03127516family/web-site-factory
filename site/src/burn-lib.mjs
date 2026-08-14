@@ -115,6 +115,7 @@ export function loadCatalog(metaPath, astroPath, refJsonPath) {
     let verified
     if (c.key === 'summary_intro') verified = fields.has('summary_intro.body') // 组件/旧模版均只渲 body（title 为存量死数据，烧 title 仅为与存量 JSON 同构）
     else if (c.shape === 'section') verified = fields.has(`${c.key}.title`) && fields.has(`${c.key}.body`)
+    else if (c.shape === 'sections') verified = fields.has('section.heading') && fields.has('section.body') // 重复章节：单元槽是套件 map 里的相对名（section.*）
     else if (c.key === 'specs') verified = fields.has('spec.text')
     else verified = fields.has(c.key) || getIn(ref, c.key) !== undefined
     if (!verified) throw new Error(`目录键 ${c.key} 双源核验失败（.astro 与参照 JSON 都没有）——先对齐组件或 meta`)
@@ -140,6 +141,7 @@ export function auditPositions(filledResults, rawText, paragraphs) {
   const hits = [] // {key, shape, pos}
   for (const r of filledResults) {
     const texts = r.shape === 'section' ? treeBlocks(mdToDoc(r.data.body_md))
+      : r.shape === 'sections' ? r.data.items.flatMap(it => [it.heading, ...treeBlocks(mdToDoc(it.body_md))])
       : r.shape === 'list' ? r.data.items
       : [r.data.text].filter(Boolean)
     for (const t of texts) {
@@ -155,7 +157,7 @@ export function auditPositions(filledResults, rawText, paragraphs) {
   }))
   // 同段复用：同类格子（正文类 section/list ｜ chrome 类 text/seo）≥2 个命中同一原文段落才告警——
   // 跨类不算：headline/intro 引用正文首段是正常修辞，全 shape 混算会系统性误报
-  const kindOf = shape => (shape === 'section' || shape === 'list') ? 'content' : 'chrome'
+  const kindOf = shape => (shape === 'section' || shape === 'list' || shape === 'sections') ? 'content' : 'chrome'
   const byPara = new Map() // n → {content:Set, chrome:Set}
   for (const h of hits) {
     const n = paraOf(h.pos)
@@ -240,8 +242,16 @@ export function similarToAny(title, candidates, threshold = 0.9) {
   })
 }
 
-// ---------- 组装：结构归代码，AI 的值栽进产品超集骨架；只返回 JSON 本体 ----------
-export async function assemble({ slug, productName, sectionResults, imagePool = [] }) {
+// ---------- 组装：结构归代码，AI 的值栽进骨架；骨架跟族（产品超集 / 标准文章），只返回 JSON 本体 ----------
+// 族分支是骨架装配层的边界（骨架形态=族级差异，同「新族=新套件+新装配」）；
+// 值的栽种仍全按 shape/目录驱动，无字段名特判。
+export async function assemble({ slug, productName, family = 'products', sectionResults, imagePool = [] }) {
+  return family === 'posts'
+    ? assemblePost({ slug, productName, sectionResults, imagePool })
+    : assembleProduct({ slug, productName, sectionResults, imagePool })
+}
+
+async function assembleProduct({ slug, productName, sectionResults, imagePool = [] }) {
   const j = {
     version: 1,
     page: {
@@ -286,12 +296,58 @@ export async function assemble({ slug, productName, sectionResults, imagePool = 
   return j
 }
 
+// ---------- 文章骨架：N 段顺序章节（body.sections）+ 文章 chrome；图池按顺序配段 ----------
+async function assemblePost({ slug, productName, sectionResults, imagePool = [] }) {
+  const j = {
+    version: 1,
+    page: {
+      slug: `posts/${slug}`, type: 'post', lang: 'zh-CN',
+      title: `${productName} | DGCRANE`,
+      description: '', family: 'post@1', status: 'draft',
+    },
+    title: productName,
+    breadcrumb: { current: productName, trail: [
+      { label: '首页', url: 'https://www.dgcrane.com/zh/' },
+      { label: '案例', url: 'https://www.dgcrane.com/zh/posts/' },
+    ] },
+    inquiry_form: { type: 'inquiry-form', form_id: 713, title: '填写您的详细资料，我们将在24小时内给您答复!' },
+    body: { sections: [] },
+  }
+  for (const r of sectionResults) {
+    if (!r.data) continue // 失败段缺席
+    if (r.shape === 'sections') {
+      j.body.sections = r.data.items.map(it => {
+        const tree = mdToDoc(it.body_md)
+        validateDoc(tree, 'body.sections.body')
+        return { heading: it.heading, body: tree }
+      })
+    } else if (r.key === 'title') {
+      j.title = r.data.text
+      j.page.title = `${r.data.text} | DGCRANE`
+    } else if (r.key === 'page.description') {
+      j.page.description = r.data.text
+    } else throw new Error(`assemblePost 未处理的字段: ${r.key}（${r.shape}）——先对齐目录或组装，不静默丢`)
+  }
+  // 图池顺序配段：第 i 图给第 i 段，余图挂末段（确定性分配，人工在编辑器再调；报告注明）
+  for (const [i, { caption, name }] of imagePool.entries()) {
+    const target = j.body.sections[Math.min(i, j.body.sections.length - 1)]
+    if (!target) break // 无章节则图无宿主，丢弃（报告的图池注记兜底）
+    const dims = await probe(name) // 缺图 {} —— known-leftover 惯例
+    Object.assign(target, { image: name, alt: caption || target.heading, ...dims })
+  }
+  return j
+}
+
 // ---------- 近似预览（结构预览非像素级；真实页面存草稿后 dist-edit 看） ----------
 export function previewHtml(j, catalog) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const escAttr = s => esc(s).replace(/"/g, '&quot;')
   const sections = catalog.filter(c => c.shape === 'section' && j[c.key])
     .map(c => `<section><h3>${esc(j[c.key].title)}</h3>${renderDoc(j[c.key].body)}</section>`).join('\n')
+  const chapters = catalog.filter(c => c.shape === 'sections').flatMap(c => getIn(j, c.key) ?? [])
+    .map(s => `<section><h3>${esc(s.heading)}</h3>${renderDoc(s.body)}${s.image
+      ? `<figure style="margin:6px 0"><img src="/assets/img/product/${escAttr(s.image)}" alt="${escAttr(s.alt ?? '')}" style="max-width:460px" width="${s.width ?? 880}" height="${s.height ?? 495}"></figure>` : ''}</section>`)
+    .join('\n')
   const specs = j.specs?.length ? `<section><h3>主要参数</h3><ul>${j.specs.map(s => `<li>${esc(s.text)}</li>`).join('')}</ul></section>` : ''
   const gallery = j.gallery?.length ? `<section><h3>图集</h3>${j.gallery.map(g => `<figure style="display:inline-block;margin:6px"><img src="/assets/img/product/${escAttr(g.image)}" alt="${escAttr(g.alt)}" style="max-width:220px" width="${g.width ?? 220}" height="${g.height ?? 150}"><figcaption style="font-size:12px;color:#666">${esc(g.image)}</figcaption></figure>`).join('')}</section>` : ''
   return `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><style>
@@ -307,6 +363,7 @@ ${j.hero?.highlights?.length ? `<ul>${j.hero.highlights.map(h => `<li>${esc(h)}<
 ${j.summary?.intro ? `<p>${esc(j.summary.intro)}</p>` : ''}
 ${specs}
 ${sections}
+${chapters}
 ${gallery}
 </body></html>`
 }
