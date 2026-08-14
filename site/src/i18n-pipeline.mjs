@@ -4,16 +4,19 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { scanPages, buildGroups } from './i18n.mjs'
 import { collectUnits } from './i18n-collect.mjs'
-import { projectPage } from './i18n-project.mjs'
+import { projectPage, PENDING_CLASS } from './i18n-project.mjs'
 import { loadTm, saveTm, upsert, loadConfig } from './i18n-tm.mjs'
 import { loadTerms } from './i18n-terms.mjs'
 import { translateSegments } from './i18n-engine.mjs'
-import { extractInlineUnits, norm } from './i18n-sent.mjs'
+import { extractInlineUnits, inlineSpans, sliceInlineMd, norm } from './i18n-sent.mjs'
 import { getIn } from './tree-utils.mjs'
 import { logEvent } from './i18n-events.mjs'
 
 const CONTENT = () => join(process.cwd(), 'content')
-const readJ = f => JSON.parse(readFileSync(join(CONTENT(), f), 'utf8'))
+const readJ = f => { // M-2：报错带文件路径（loadConfig 同款纪律）
+  const abs = join(CONTENT(), f)
+  try { return JSON.parse(readFileSync(abs, 'utf8')) } catch (e) { throw new Error(`内容 JSON 损坏/不可读 ${abs}: ${e.message}`) }
+}
 const writeJ = (f, j) => {
   const abs = join(CONTENT(), f)
   mkdirSync(dirname(abs), { recursive: true })
@@ -39,13 +42,14 @@ function withContext(units) {
   }))
 }
 
-// 主入口：中文「发布」事件（或手动送翻）。translate=false = 开关关：只检测+重投影
-export async function runPipeline(pageId, { lang = 'en', translate = true, callAI = null } = {}) {
+// 主入口：中文「发布」事件（或手动送翻）。translate=false = 开关关：只检测+重投影；
+// retryFailed=true = 人工救济通道（I-1）：failed 句重送——发布钩子默认 false 不反复烧钱。
+export async function runPipeline(pageId, { lang = 'en', translate = true, retryFailed = false, callAI = null } = {}) {
   const source = findSource(pageId)
   const srcJ = readJ(source.file)
   const tm = loadTm(srcJ.page.lang, lang)
   const units = collectUnits(srcJ)
-  const missing = withContext(units).filter(u => !tm.sentences[u.fp])
+  const missing = withContext(units).filter(u => !tm.sentences[u.fp] || (retryFailed && tm.sentences[u.fp]?.status === 'failed'))
   let translated = 0, failed = 0
   if (translate && missing.length) {
     const terms = loadTerms(srcJ.page.lang, lang)
@@ -61,33 +65,38 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, callA
   const mirFile = join(lang, source.file)
   const existing = existsSync(join(CONTENT(), mirFile)) ? readJ(mirFile) : null
   const cfg = loadConfig()
-  const status = existing?.page?.status ?? (cfg.review[lang] === 'auto' ? 'published' : 'draft')
+  // M-6：auto 直发还要求源本身 published——草稿源页的新镜像永 draft
+  const status = existing?.page?.status ?? (cfg.review[lang] === 'auto' && srcJ.page.status === 'published' ? 'published' : 'draft')
   const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: status, existingTrail: existing?.breadcrumb?.trail })
   writeJ(mirFile, mirror)
   return { pageId, lang, translated, failed, pending: units.filter(u => tm.sentences[u.fp]?.status !== 'approved').length }
 }
 
-// 全站批量（控制台③ / 存量补翻 D6）
+// 全站批量（控制台③ / 存量补翻 D6）：人工救济通道——failed 重送（I-1）；M-6：草稿源页不送翻不建镜像
 export async function translateAll({ lang = 'en', callAI } = {}) {
-  const pages = scanPages().filter(p => !p.langDir)
   const out = []
-  for (const pg of pages) out.push(await runPipeline(pg.pageId, { lang, translate: true, callAI }))
+  for (const pg of scanPages().filter(p => !p.langDir)) {
+    if (readJ(pg.file).page.status !== 'published') { out.push({ pageId: pg.pageId, lang, skipped: 'draft-source' }); continue }
+    out.push(await runPipeline(pg.pageId, { lang, translate: true, retryFailed: true, callAI }))
+  }
   return out
 }
 
 // 修正③（我已裁定，照此实现）：sameish 守卫——投影 artifact 与真人工编辑的区分线。
 // 重投影写镜像时句尾分隔符可能有合成/清边差异（T4 空格合成、approved 清边），
 // 严格不等会把自家投影误当人工审批（adoptMirror 空跑也 approve 全部=假审）。
+// M-1 代价明示：仅改句尾标点/引号的编辑会被当投影 artifact 丢弃（防误审的另一面，已裁定接受）。
 const sameish = (a, b) =>
   norm(a).replace(/[\s。！？）)」』.,;:!?]+$/g, '') === norm(b).replace(/[\s。！？）)」』.,;:!?]+$/g, '')
 
 // 镜像保存 = 人审写回（R44）：镜像句与 TM 不同 → approved；未译占位被改 → 新建 approved。返回写回句数。
 export function adoptMirror(mirrorJ, srcJ, tm, lang) {
   const units = collectUnits(srcJ)
+  const { aligned, skipped } = alignSentGroups(mirrorJ, units) // C-1：sent 句级必须先过段守卫
   let n = 0
   for (const u of units) {
-    const cur = mirrorSentence(mirrorJ, u)
-    if (cur === null) continue // 镜像里该坐标不存在（人删了）——重投影会恢复，跳过
+    const cur = u.kind === 'sent' ? aligned.get(`${u.field}|${u.path}`)?.[u.si] ?? null : mirrorSentence(mirrorJ, u)
+    if (cur === null) continue // 坐标不存在（人删了）或段守卫跳过——重投影会恢复，不猜
     const e = tm.sentences[u.fp]
     if (e) {
       if (sameish(cur, u.text)) continue // 仍是中文占位/未变
@@ -97,40 +106,73 @@ export function adoptMirror(mirrorJ, srcJ, tm, lang) {
       upsert(tm, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'human' }); n++
     }
   }
-  if (n) { saveTm(srcJ.page.lang, lang, tm); logEvent(srcJ.page.slug, 'review-edit', { lang, sentences: n }) }
+  if (n) { saveTm(srcJ.page.lang, lang, tm); logEvent(srcJ.page.slug, 'review-edit', { lang, sentences: n, skipped }) }
   return n
 }
 
-// 镜像某单元的当前句（字段=值；树=按坐标取句；剥 i18n-pending 注解）。取不到返 null。
+// sent 段级守卫（C-1）：按 (field,path) 分组——源段句数 = 该组单元数；镜像段重抽取句数 ≠ 源段句数
+// （一源拆两译/译文无句点并句/人删句）→ 整段跳过不猜：宁可漏收养错，不可 si 漂移张冠李戴错判 approved。
+// 返回 { aligned: Map(组键 → 句数组|null=跳过), skipped: 跳过句数 }。
+function alignSentGroups(mirrorJ, units) {
+  const groups = new Map()
+  for (const u of units) if (u.kind === 'sent') {
+    const key = `${u.field}|${u.path}`
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(u)
+  }
+  const aligned = new Map()
+  let skipped = 0
+  for (const [key, group] of groups) {
+    const cleaned = mirrorInline(mirrorJ, group[0])
+    const sents = cleaned ? extractInlineUnits(cleaned).map(x => x.md) : null
+    if (sents && sents.length === group.length) aligned.set(key, sents)
+    else { aligned.set(key, null); skipped += group.length }
+  }
+  return { aligned, skipped }
+}
+
+const stripPending = marks => (marks ?? []).filter(m => !(m.type === 'span' && m.attrs?.class === PENDING_CLASS)) // M-4：复用注册常量（不剥注解 wrapMarks 遇 span 抛错）
+
+// 镜像段行内容（剥 pending 注解）；坐标取不到返 null
+function mirrorInline(mirrorJ, u) {
+  const tree = getIn(mirrorJ, u.field)
+  if (tree?.type !== 'doc') return null
+  const node = getIn(tree, u.path)
+  if (!node) return null
+  const inner = (node.type === 'heading' || node.type === 'paragraph') ? (node.content ?? []) : (node.content?.[0]?.content ?? [])
+  return inner.map(x => x.type === 'text' ? { ...x, marks: stripPending(x.marks) } : x)
+}
+
+// 镜像某单元的当前文本：字段=值；alt=属性；block/cell=整段切——与 collectTreeUnits 严格对称
+// （spans 首到尾整段 sliceInlineMd，保句间空格；units.map(join) 吞空格把自家投影判成人工编辑=失效形态 A）。
+// sent 禁止走这里（句级必须过 alignSentGroups 段守卫）。取不到/空段返 null。
 function mirrorSentence(mirrorJ, u) {
   if (u.kind === 'field') {
     const v = getIn(mirrorJ, u.field)
     return typeof v === 'string' ? v : null
   }
-  const tree = getIn(mirrorJ, u.field)
-  if (tree?.type !== 'doc') return null
-  const node = getIn(tree, u.path)
-  if (!node) return null
-  const strip = marks => (marks ?? []).filter(m => !(m.type === 'span' && m.attrs?.class === 'i18n-pending'))
-  if (u.kind === 'alt') return node.attrs?.alt ?? null
-  const inner = (node.type === 'heading' || node.type === 'paragraph') ? (node.content ?? []) : (node.content?.[0]?.content ?? [])
-  const cleaned = inner.map(x => x.type === 'text' ? { ...x, marks: strip(x.marks) } : x)
-  if (u.kind === 'sent') {
-    const units = extractInlineUnits(cleaned)
-    return units[u.si]?.md ?? null
+  if (u.kind === 'sent') throw new Error('sent 句级取句必须过 alignSentGroups 段守卫，禁止绕守卫单句直取')
+  if (u.kind === 'alt') {
+    const tree = getIn(mirrorJ, u.field)
+    if (tree?.type !== 'doc') return null
+    return getIn(tree, u.path)?.attrs?.alt ?? null
   }
-  const units = extractInlineUnits(cleaned)
-  return units.map(x => x.md).join('') || null // block/cell 整体
+  const cleaned = mirrorInline(mirrorJ, u)
+  if (!cleaned) return null
+  const { spans } = inlineSpans(cleaned)
+  if (!spans.length) return null
+  return sliceInlineMd(cleaned, spans[0].start, spans[spans.length - 1].end) || null
 }
 
-// 通过并发布（审阅页按钮）：本页全部 draft → approved，failed 不动；镜像 status → published；重投影
+// 通过并发布（审阅页按钮）：本页全部 draft → approved，failed 不动；镜像 status → published；重投影。
+// M-3：返回 { approved, remainingFailed, remainingUntranslated }——remaining 按 collectUnits 全量对 TM 现算，供控制台如实提示。
 export function approvePage(pageId, lang, tm, readSrc) {
   const srcJ = readSrc(pageId)
   const units = collectUnits(srcJ)
-  let n = 0
+  let approved = 0
   for (const u of units) {
     const e = tm.sentences[u.fp]
-    if (e?.status === 'draft') { upsert(tm, u.fp, { status: 'approved', origin: 'human' }); n++ }
+    if (e?.status === 'draft') { upsert(tm, u.fp, { status: 'approved', origin: 'human' }); approved++ }
   }
   saveTm(srcJ.page.lang, lang, tm)
   const source = findSource(pageId)
@@ -138,16 +180,19 @@ export function approvePage(pageId, lang, tm, readSrc) {
   const existingTrail = existsSync(join(CONTENT(), mirFile)) ? readJ(mirFile).breadcrumb?.trail : null
   const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: 'published', existingTrail })
   writeJ(mirFile, mirror)
-  logEvent(source.slug, 'approve-publish', { lang, sentences: n })
-  return n
+  const remainingFailed = units.filter(u => tm.sentences[u.fp]?.status === 'failed').length
+  const remainingUntranslated = units.filter(u => !tm.sentences[u.fp]).length
+  logEvent(source.slug, 'approve-publish', { lang, sentences: approved, remainingFailed, remainingUntranslated })
+  return { approved, remainingFailed, remainingUntranslated }
 }
 
 // 控制台数据源：每页×每镜像语言 待审/失败/总数
 export function consoleData() {
   const cfg = loadConfig()
-  const groups = buildGroups(scanPages())
+  const all = scanPages() // M-6：一次扫描，族谱与源页循环共用
+  const groups = buildGroups(all)
   const pages = []
-  for (const pg of scanPages().filter(p => !p.langDir)) {
+  for (const pg of all.filter(p => !p.langDir)) {
     const srcJ = readJ(pg.file)
     const units = collectUnits(srcJ)
     const mirrors = (groups.get(pg.pageId) ?? []).filter(x => x.langDir)
@@ -173,14 +218,15 @@ export function harvestMirror(pageId, lang) {
   const mirrorJ = readJ(mirFile)
   const tm = loadTm(srcJ.page.lang, lang)
   const units = collectUnits(srcJ)
+  const { aligned, skipped } = alignSentGroups(mirrorJ, units) // C-1：sent 只在段对齐成立时收
   let n = 0
   for (const u of units) {
-    const cur = mirrorSentence(mirrorJ, u)
+    const cur = u.kind === 'sent' ? aligned.get(`${u.field}|${u.path}`)?.[u.si] ?? null : mirrorSentence(mirrorJ, u)
     if (cur && !sameish(cur, u.text) && !tm.sentences[u.fp]) { upsert(tm, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'harvest' }); n++ }
   }
   saveTm(srcJ.page.lang, lang, tm)
   const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: mirrorJ.page.status ?? 'published', existingTrail: mirrorJ.breadcrumb?.trail })
   writeJ(mirFile, mirror)
-  logEvent(source.slug, 'harvest', { lang, sentences: n })
+  logEvent(source.slug, 'harvest', { lang, sentences: n, skipped }) // 段不对齐跳过的句数留痕（宁可漏收养错）
   return n
 }

@@ -9,7 +9,7 @@ import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
-import { runPipeline, adoptMirror, approvePage, consoleData } from '../src/i18n-pipeline.mjs'
+import { runPipeline, adoptMirror, approvePage, consoleData, translateAll } from '../src/i18n-pipeline.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -550,7 +550,7 @@ test('流水线:adoptMirror 人审写回', async () => {
   mir.overview.body.content[0].content[0].text = 'Human fixed.'
   const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
   const n = adoptMirror(mir, srcJ, loadTm('zh-CN', 't9'), 't9')
-  assert.ok(n >= 1)
+  assert.equal(n, 1) // 恰好一句人审写回（I-2 收紧：>= 会放过连带误审）
   const tm = loadTm('zh-CN', 't9')
   const ent = tm.sentences[Object.keys(tm.sentences).find(k => tm.sentences[k].text === '第一句。')]
   assert.equal(ent?.status, 'approved')
@@ -561,7 +561,8 @@ test('流水线:approvePage 全 approved+status published', async () => {
   await runPipeline(FIX, { lang: 't9', callAI: mockAI })
   const tm = loadTm('zh-CN', 't9')
   const readSrc = id => JSON.parse(readFileSync(join(process.cwd(), 'content', 'posts', `${id}.json`), 'utf8'))
-  approvePage(FIX, 't9', tm, readSrc)
+  const res = approvePage(FIX, 't9', tm, readSrc)
+  assert.deepEqual(res, { approved: 7, remainingFailed: 0, remainingUntranslated: 0 }) // M-3 形状：控制台如实提示用
   assert.ok(Object.values(tm.sentences).every(e => e.status === 'approved'))
   const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
   assert.equal(mir.page.status, 'published')
@@ -576,11 +577,87 @@ test('控制台:consoleData 汇总待审', async () => {
   cleanup()
 })
 
-// ---------- 汇总（勿动） ----------
+// ---- T8 修复轮（C-1/I-1/I-2/M-6）：真实译文形态回归——质量审实证推翻「模块对真实译文是对的」 ----
+// 自定义 callAI 工厂（不动 mockAI 本体）：按源句文本覆盖特定译文，其余给正常英文句
+const aiWith = overrides => async messages => {
+  const ss = JSON.parse(messages[1].content.match(/sentences：\n(.+?)\n\n返回/s)[1])
+  const translations = {}
+  let i = 0
+  for (const s of ss) translations[s.id] = overrides[s.text] ?? `EN translation ${++i}.`
+  return { translations }
+}
+const adoptUnedited = () => adoptMirror(
+  JSON.parse(readFileSync(MIR_FILE(), 'utf8')),
+  JSON.parse(readFileSync(FIX_FILE(), 'utf8')),
+  loadTm('zh-CN', 't9'), 't9')
+
+test('流水线:防误审——block 译文含句点空格（整段对称取，不 join）', async () => {
+  cleanup(); fixture()
+  const j = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  j.overview.body.content.unshift({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: '产品特点' }] })
+  writeFileSync(FIX_FILE(), JSON.stringify(j, null, 2))
+  await runPipeline(FIX, { lang: 't9', callAI: aiWith({ 产品特点: 'Product Features. Details Inside' }) })
+  assert.equal(adoptUnedited(), 0) // join('') 吞空格会把自家投影当人工编辑（失效形态 A）
+  assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
+  cleanup()
+})
+test('流水线:防误审——一源句拆两译（段守卫整段跳过不猜）', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: aiWith({ '第一句。': 'First sentence. Extra clause.' }) })
+  assert.equal(adoptUnedited(), 0) // 镜像段 3 句 ≠ 源段 2 句 → 整段跳过（失效形态 B：si 漂移张冠李戴）
+  const tm = loadTm('zh-CN', 't9')
+  assert.ok(Object.values(tm.sentences).every(e => e.status === 'draft'))
+  cleanup()
+})
+test('流水线:防误审——译文无句尾标点（段守卫并句跳过）', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: aiWith({ '第一句。': 'First sentence' }) })
+  assert.equal(adoptUnedited(), 0) // 镜像段并成 1 句 ≠ 源段 2 句 → 整段跳过（失效形态 C）
+  assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
+  cleanup()
+})
+test('流水线:failed 句默认不重送、retryFailed 救济重送', async () => {
+  cleanup(); fixture()
+  let calls = 0
+  const alwaysFail = async () => { calls++; throw new Error('HTTP 500') } // 可重试瞬时错
+  const r1 = await runPipeline(FIX, { lang: 't9', callAI: alwaysFail })
+  assert.equal(r1.failed, 7)
+  assert.equal(r1.translated, 0)
+  const tm1 = loadTm('zh-CN', 't9')
+  assert.ok(Object.values(tm1.sentences).every(e => e.status === 'failed' && e.error)) // 带原因不静默
+  calls = 0
+  const r2 = await runPipeline(FIX, { lang: 't9', callAI: alwaysFail }) // 发布钩子默认不反复烧钱
+  assert.equal(calls, 0)                                               // 引擎零调用
+  assert.equal(r2.translated, 0)
+  const r3 = await runPipeline(FIX, { lang: 't9', callAI: mockAI, retryFailed: true }) // 人工救济通道
+  assert.equal(r3.translated, 7)
+  assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
+  cleanup()
+})
+test('流水线:translateAll 跳过 draft 源页', async () => {
+  cleanup()
+  writeFileSync(FIX_FILE(), JSON.stringify({
+    version: '1',
+    page: { slug: `posts/${FIX}`, type: 'post', lang: 'zh-CN', title: '草稿页标题', description: '草稿描述', status: 'draft' },
+    title: '草稿标题',
+    breadcrumb: { current: '草稿', trail: [] },
+    overview: { title: '概述', body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '草稿句。' }] }] } },
+  }, null, 2))
+  const out = await translateAll({ lang: 't9', callAI: mockAI })
+  const row = out.find(r => r.pageId === FIX)
+  assert.equal(row?.skipped, 'draft-source')
+  const tm = loadTm('zh-CN', 't9')
+  assert.ok(!Object.values(tm.sentences).some(e => e.text === '草稿页标题')) // 草稿页一句都没送
+  assert.ok(!existsSync(MIR_FILE()))                                         // 也不建镜像
+  cleanup()
+})
+
+// ---------- 汇总（结构勿动；M-5 增补 finally 一行兜底清夹具） ----------
 let pass = 0
 for (const [name, fn] of cases) {
   try { await fn(); pass++; console.log(`  ✓ ${name}`) }
   catch (e) { console.error(`  ✗ ${name}\n    ${e.message}`) }
+  finally { try { cleanup() } catch {} } // M-5：测试中途炸也不把夹具留进 content/
 }
 console.log(`\naccept-i18n2: ${pass}/${cases.length}`)
 process.exit(pass === cases.length ? 0 : 1)
