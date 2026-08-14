@@ -154,3 +154,59 @@ INCLUDE_DRAFTS 草稿构建套件页出页正常（sec-N 锚点进 TOC）。
 **遗留（下轮）**：重复区内富文本的编辑器写回坐标真机验证；en 镜像路由的 template 派发
 （等 en 路由文件的未提交改动落地后同步）；烧制台下拉本身仍是写死 HTML（单族单套件时与
 扫描结果恒重合；某族出现第二套件时需接扫描渲染）。
+
+---
+
+## 7. spec B2 附录（2026-08-14 晚）：一 astro 一模版 + 换站零改动
+
+> 本节修订 §6 的「旧 4 篇不 kit 化」判断——**作废**。用户拍定的 doctrine：
+> **「值不值得当模版」是用户的决定权，系统只验「填的字是真的」（逐字闸），不判 fit。**
+
+### 7.1 doctrine 四条（用户原话的机制化）
+
+1. **一 astro 一模版**：每个布局组件配齐三件（index/meta/example）即入可选列表，有几份列几份；
+2. **自己套自己**：每份 astro 天然是自己这类页面的模版，无需「证明可复用」；
+3. **通用件不吞并**：PostPage/ProductPage 是「合几个为一体」的可选项，合并后各原件保留在列表；
+4. **对不上就空着**：选了 gantry 版式烧新文章，29 格对上 5 格就渲 5 格，其余 T9 守卫裁掉（按需渲染）。
+
+与 WordPress 模版模型同构（Template Name 头 → 下拉一项，逐页选）。
+
+### 7.2 落地（commit b24e03a…83c95af）
+
+- **meta 路径声明**：`section.titlePath`（string=标题落点 / null=无标题槽 / 缺省=<key>.title）、
+  `text.path`（值落点）。loadCatalog/栽种/预览全按声明驱动，引擎零字段名特判。
+- **kit-init**（`scripts/kit-init.mjs`）：一条命令升格——标记顺序自动配对（h_ 后随 .body=section+titlePath；
+  孤立 .body=无标题槽；孤立 h_=text+path）+ import 深度改写 + 指站内 chrome + example 拷内容 JSON；
+  生成即跑双源核验，不过回滚。4 篇配对与人工推导逐项一致（12/8/10/8 成对）。
+- **指定套件烧制**：`family` 参数支持「族:套件名」；auto 判族默认通用件（`canonicalKitOf`，
+  命名约定 `<族名>Page`，writeDraft 无声明时同回退）。
+- **旧 4 篇已升格**为可选套件（astro 为工作区版本拷贝，含隔壁 T9 守卫；扁平原件未动——en 路由
+  在隔壁未提交改动里仍按扁平派发，其落地后删扁平件收单源）。
+
+### 7.3 换站零改动（用户拍定的验收标准）
+
+**换站 = 只带三样：模版套件（文件夹）+ 内容 JSON + 站点 chrome（src/chrome/ + CSS）。引擎与脚本零 diff。**
+
+- **S2 引擎去站化**：组装 chrome 值全从套件 example.json 克隆（DGCRANE 后缀→example 机械替换；
+  breadcrumb/inquiry/summary/related 壳克隆且内容清空防泄漏）；提示词示例文字从 example 现取
+  （引擎不再内置「起重机」）；图目录收成 `SITE_ASSETS` 常量；stripHtml 定性旧站迁移插件
+  （贴裸文本路站点无关）。引擎 grep 仅剩迁移插件注释。
+- **S3 chrome 站内化**：header/footer/inquiry-form/photoswipe/document 拷进 `site/src/chrome/`
+  （拷贝不搬移，旧系统照用）；Chrome.astro + 两套件改指站内；4 个 dirty 扁平件不动。
+  build 产物逐字节一致（diff 验过）。
+
+### 7.4 验收
+
+accept-burn **123/123**（新增 T-perkit 12 钉：6 套件扫描/双源核验/指定套件烧制全链/发明格拒收/
+titlePath 落位/chrome 自 example/草稿带套件名）；生产构建三阶段 diff=0（chrome 站内化后、
+4 套件加入后、全部完成后）；INCLUDE_DRAFTS 烟测：烧进 gantry 套件的草稿出页（h1/h2/询盘在，
+缺席槽裁掉）；geom 两产品页 1:1；8092 控制台列全 6 套件。
+
+### 7.5 换站剩余清单（如实）
+
+- `SITE_ASSETS`（burn-lib 顶部）一处常量；
+- `src/i18n.mjs` 站点配置簇（SITE_ROOT/DEPLOY_LANGS/LANG_LABEL 等）——文件在并行未提交改动中，
+  落地后随 site.config 外置；
+- 控制台选项仍为静态 HTML（edit-server 在并行改动中；落地后接 scanKits 动态渲染）；
+- 旧 4 篇扁平件与套件拷贝并存（隔壁落地后删扁平收单源）；
+- `link-assets.mjs` 软链仓库根 `public/`（资产=内容层，换站自带 public；脚本本身通用）。
