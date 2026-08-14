@@ -1,24 +1,34 @@
 ---
 // 文章页路由：content/posts/*.json 每份数据出一个页（数据驱动路由）。
-// 组件派发 = 每篇独立布局组件（T2 拍定）：components/posts/<slug>.astro。
+// 双派发：数据声明 page.template（套件名）→ components/posts/<名>/index.astro 套件
+// （烧制落的新页，spec B）；无/旧式 template → 每篇独立布局组件 components/posts/<slug>.astro
+// （T2 拍定，旧 4 篇继续走；旧 JSON 里残留的 src/templates/... 路径式 template 天然落空回退）。
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '../../layouts/Chrome.astro'
 
+const kitLayouts = import.meta.glob('../../components/posts/*/index.astro')
+const flatLayouts = import.meta.glob('../../components/posts/*.astro')
+
 export function getStaticPaths() {
   const dir = join(process.cwd(), 'content/posts')
-  const haveLayout = new Set(Object.keys(import.meta.glob('../../components/posts/*.astro'))
-    .map(p => p.split('/').pop().replace('.astro', ''))) // T2：布局组件落成的文章才出页
+  // glob 须在函数体内现调（Astro 构建把 getStaticPaths 提到独立 chunk，吃不到 frontmatter 顶层变量）
+  const haveLayout = new Set(Object.keys(import.meta.glob('../../components/posts/*.astro')).map(p => p.split('/').pop().replace('.astro', '')))
+  const kitNames = new Set(Object.keys(import.meta.glob('../../components/posts/*/index.astro')).map(p => p.split('/').at(-2)))
   return readdirSync(dir)
-    .filter(f => f.endsWith('.json') && haveLayout.has(f.replace('.json', '')))
+    .filter(f => f.endsWith('.json'))
     .map(f => ({ params: { slug: f.replace('.json', '') }, j: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
-    .filter(p => process.env.INCLUDE_DRAFTS === '1' || p.j.page.status === 'published') // 状态门（R30）
+    .filter(p => process.env.INCLUDE_DRAFTS === '1' || p.j.page.status === 'published') // 状态门（R30）；编辑预览构建放行（R33）
+    .filter(p => haveLayout.has(p.params.slug) || kitNames.has(p.j.page.template)) // 有骨架才出页：扁平组件或套件任一
     .map(({ params, j }) => ({ params, props: { j } }))
 }
 
 const { j } = Astro.props
-const layouts = import.meta.glob('../../components/posts/*.astro')
-const Comp = (await layouts[`../../components/posts/${Astro.params.slug}.astro`]()).default
+const slug = Astro.params.slug
+const kit = kitLayouts[`../../components/posts/${j.page.template}/index.astro`]
+const Comp = kit
+  ? (await kit()).default // 套件骨架（烧制新页）
+  : (await flatLayouts[`../../components/posts/${slug}.astro`]()).default // 每篇一模版（旧 4 篇）
 ---
 <Chrome j={j}>
 	<Comp j={j} />
