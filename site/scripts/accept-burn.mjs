@@ -445,6 +445,49 @@ const lib = await import('../src/burn-lib.mjs')
   }
 }
 
+// ---------- T-post 文章族钉（spec B：posts/PostPage + sections 形态） ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+
+  // 套件扫描 + 双源核验
+  const pk = lib.scanKits(join(SITE, 'src/components')).find(k => k.family === 'posts' && k.name === 'PostPage')
+  ok('scanKits 认出 posts/PostPage 完整套件', pk?.complete === true)
+  const pcat = lib.loadCatalog(join(pk.dir, 'meta.json'), join(pk.dir, 'index.astro'), join(pk.dir, 'example.json'))
+  ok('文章目录三键全核验', pcat.length === 3 && pcat.every(c => c.verified))
+
+  // sections 验收：逐项逐字 / 段间重叠 / 编造
+  const raw2 = '起重机安全培训\n\n安全要求\n\n操作人员必须持证上岗，作业前检查制动器。\n\n应急处理\n\n突发停电时应将控制器回零位并报警。'
+  const spec = { key: 'body.sections', shape: 'sections', level: 'verbatim' }
+  const paras = lib.numberBlocks(raw2)
+  const good = { items: [
+    { heading: '安全要求', body_md: '操作人员必须持证上岗，作业前检查制动器。' },
+    { heading: '应急处理', body_md: '突发停电时应将控制器回零位并报警。' } ] }
+  ok('sections 逐字搬运过验', burner.verifyByShape(spec, good, raw2, '起重机安全培训', paras) === null)
+  ok('sections 段间重叠拒收', /大面积重复/.test(burner.verifyByShape(spec, { items: [good.items[0], { heading: '应急处理', body_md: good.items[0].body_md }] }, raw2, 'x', paras)))
+  ok('sections 编造文字拒收', /原文里找不到/.test(burner.verifyByShape(spec, { items: [{ heading: '安全要求', body_md: '这个行业一般要穿劳保鞋。' }] }, raw2, 'x', paras)))
+
+  // 文章骨架组装 + 预览
+  const jp = await lib.assemble({ slug: 'zzt', productName: '起重机安全培训', family: 'posts',
+    sectionResults: [{ key: 'body.sections', shape: 'sections', data: good },
+      { key: 'title', shape: 'text', data: { text: '起重机安全培训' } },
+      { key: 'page.description', shape: 'seo', data: { text: '起重机安全操作培训要点。' } }], imagePool: [] })
+  ok('assemblePost 文章骨架', jp.page.type === 'post' && jp.page.slug === 'posts/zzt' && jp.body.sections.length === 2
+    && jp.title === '起重机安全培训' && jp.breadcrumb.trail.length === 2 && jp.page.description === '起重机安全操作培训要点。')
+  ok('文章预览渲出章节', lib.previewHtml(jp, pcat).includes('安全要求'))
+
+  // 图池顺序配段（缺图 known-leftover 不炸、不带假尺寸）
+  const ji = await lib.assemble({ slug: 'zzt2', productName: 'x', family: 'posts',
+    sectionResults: [{ key: 'body.sections', shape: 'sections', data: good }], imagePool: [{ caption: '', name: 'no-such.jpg' }] })
+  ok('图池顺序配段（缺图不炸）', ji.body.sections[0].image === 'no-such.jpg' && ji.body.sections[0].width === undefined)
+
+  // writeDraft 按 page.type 落 content/posts + template 自带 + draft 强制
+  const final = burner.writeDraft(jp, 'zz-accept-post')
+  const ppath = join(SITE, 'content/posts', `${final}.json`)
+  const saved = JSON.parse(readFileSync(ppath, 'utf8'))
+  ok('writeDraft 落 content/posts 带 template 且强制 draft', existsSync(ppath) && saved.page.template === 'PostPage' && saved.page.status === 'draft' && saved.page.slug.startsWith('posts/'))
+  rmSync(ppath)
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

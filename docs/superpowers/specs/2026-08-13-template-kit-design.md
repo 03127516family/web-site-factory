@@ -118,3 +118,39 @@ spec B（后续）：文章 4 篇补 meta+example、文章族上线。
 ## 5. 待用户确认的开放项
 
 - **批判点 1（双源核验）**：暂跳过细节，列为"可能问题"。plan 阶段必须落实——每个套件 meta 跟自己 astro 双源核验，不能丢上一轮重构的防漂移命门。
+
+---
+
+## 6. spec B 附录（2026-08-14 实施）：文章族上线
+
+> 实施时对 §2.5 的字面计划「文章 4 篇补 meta+example」做了一处**修正**，先行记录依据。
+
+**修正：不 kit 化旧 4 篇，新增通用套件 `posts/PostPage`。**
+
+- 旧 4 篇是 T2 拍定的「一篇一模版」：槽位（`body.h_price`、`card1_img`…）是**那篇文章
+  专属**的语义名。给它们补 meta+example 只能让它们「被再次烧」同一篇，**不能用来烧新文章**
+  （任意新文章的内容塞进另一篇文章的专属槽位 = 乱装格）。
+- 烧「新」文章需要的是「N 段顺序章节」这一公共形态 → 新套件 `posts/PostPage`
+  （`body.sections` 重复区：每段 heading + 正文树 + 可选配图；chrome 照抄 post@1）。
+- 旧 4 篇继续走扁平组件，路由**双派发**：数据声明 `page.template` 命中套件 glob → 套件；
+  否则按 slug 回退扁平组件（旧 JSON 残留的 `src/templates/...` 路径式 template 天然落空回退）。
+  生产构建旧 4 篇产物逐字节不变（前后 diff 验过）。
+
+**引擎侧（形态驱动，无页族特判字段名）：**
+
+- 新 shape `sections`（重复章节序列）：`loadCatalog`/`auditPositions`/`previewHtml` 按
+  shape 分支；`verifyByShape` 逐项逐字溯源 + 标题相似 + **段间重叠闸**（文章只有一个内容
+  字段，产品侧的跨字段 `findDuplicates` 闸收进字段内）。
+- `assemble` 拆族骨架：`assembleProduct`（行为不变）/ `assemblePost`（新）。族分支是骨架
+  装配层的边界（骨架形态=族级差异，同「新族=新套件+新装配」），值的栽种仍按 shape 驱动。
+- 判族契约直接用族目录名（`products`/`posts`），短名别名兜一层；已建族清单从 `scanKits`
+  现算进提示词。`writeDraft` 按 `page.type` 落 `content/posts/`（edit-server 调用零改动），
+  验证形态驱动（固定段验根树 / 重复章节验每项树）。
+- 图池 v1 **顺序配段**：第 i 图给第 i 段、余图挂末段，报告注明；缺图 known-leftover 不带假尺寸。
+
+**验收**：`accept-burn` 108/108（新增 T-post 块 10 钉）；旧 4 篇 build 产物 diff=0；
+INCLUDE_DRAFTS 草稿构建套件页出页正常（sec-N 锚点进 TOC）。
+
+**遗留（下轮）**：重复区内富文本的编辑器写回坐标真机验证；en 镜像路由的 template 派发
+（等 en 路由文件的未提交改动落地后同步）；烧制台下拉本身仍是写死 HTML（单族单套件时与
+扫描结果恒重合；某族出现第二套件时需接扫描渲染）。
