@@ -9,8 +9,8 @@ import { scanPages, buildGroups, siblingsOf, langSwitcher, isPublishable } from 
 
 const { j } = Astro.props
 const SITE = process.cwd() // Astro build 的 cwd = site 根
-const repoFrag = name => readFileSync(join(SITE, `../src/fragments/${name}.html`), 'utf8')
-const doc = readFileSync(join(SITE, '../src/layouts/document.html'), 'utf8')
+const repoFrag = name => readFileSync(join(SITE, `src/chrome/${name}.html`), 'utf8') // 站内 chrome（换站自带，不再依赖旧仓）
+const doc = readFileSync(join(SITE, 'src/chrome/document.html'), 'utf8')
 
 // 本页在族谱里的坐标（slug 全站唯一：zh=posts/xxx，镜像=en/posts/xxx）
 const pages = scanPages({ withJson: true })

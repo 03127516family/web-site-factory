@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const { j } = Astro.props
-const repoFrag = name => readFileSync(join(process.cwd(), `../src/fragments/${name}.html`), 'utf8')
+const repoFrag = name => readFileSync(join(process.cwd(), `src/chrome/${name}.html`), 'utf8') // 站内 chrome
 const IMG = '/assets/img/product/' // 烧制图池/编辑器上传共用产品图目录（上传端点落点，known 惯例）
 const WALK = { imgBase: IMG, headingOffset: 1 } // 章节标题占 h2，正文内标题 +1 起 h3（同 post@1）
 

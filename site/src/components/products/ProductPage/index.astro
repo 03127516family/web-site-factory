@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const { j } = Astro.props
-const repoFrag = name => readFileSync(join(process.cwd(), `../src/fragments/${name}.html`), 'utf8')
+const repoFrag = name => readFileSync(join(process.cwd(), `src/chrome/${name}.html`), 'utf8') // 站内 chrome
 const inquiryForm = repoFrag('inquiry-form')
 const photoswipe = repoFrag('photoswipe')
 const IMG = '/assets/img/product/'
