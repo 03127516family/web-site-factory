@@ -2,13 +2,14 @@
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
-import { rmSync, readFileSync, readdirSync, existsSync } from 'node:fs'
+import { rmSync, readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
+import { runPipeline, adoptMirror, approvePage, consoleData } from '../src/i18n-pipeline.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -459,7 +460,121 @@ test('引擎:瞬时错误→下轮成功→fail 清账', async () => {
   assert.equal(calls, 2)
   assert.equal(r.fail['a#0'], undefined) // 成功后清账
 })
+test('引擎:engine:错误不喂回提示词', async () => {
+  const seen = []
+  let calls = 0
+  const callAI = async messages => {
+    seen.push(messages[1].content)
+    if (++calls === 1) throw new Error('HTTP 500') // 可重试瞬时错
+    return { translations: { 'a#0': 'HD Overhead Crane.', 'a#1': 'Next.' } }
+  }
+  const r = await translateSegments(SEGS, TERMS, { callAI })
+  assert.equal(calls, 2)
+  assert.ok(!seen[1].includes('engine:') && !seen[1].includes('拒收')) // 引擎错误不得进重翻提示词
+  assert.equal(r.ok['a#0'], 'HD Overhead Crane.')
+})
 }
+
+// ---------- Task 8: 流水线 ----------
+const FIX = 'zz-i18n2-fixture'
+const FIX_FILE = () => join(process.cwd(), 'content', 'posts', `${FIX}.json`)
+const MIR_FILE = () => join(process.cwd(), 'content', 't9', 'posts', `${FIX}.json`)
+const fixture = () => writeFileSync(FIX_FILE(), JSON.stringify({
+  version: '1',
+  page: { slug: `posts/${FIX}`, type: 'post', lang: 'zh-CN', title: '夹具页标题', description: '夹具描述', status: 'published' },
+  title: '夹具标题',
+  breadcrumb: { current: '夹具', trail: [] },
+  overview: { title: '概述', body: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '第一句。第二句。' }] }] } },
+}, null, 2))
+const cleanup = () => {
+  for (const f of [FIX_FILE(), MIR_FILE()]) if (existsSync(f)) rmSync(f)
+  const t9dir = join(process.cwd(), 'content', 't9')
+  if (existsSync(t9dir)) rmSync(t9dir, { recursive: true })
+  const tmf = join(process.cwd(), 'src', 'i18n', 'tm.zh-CN.t9.json')
+  if (existsSync(tmf)) rmSync(tmf)
+}
+// 修正①：callAI 契约=解析后的对象（T7 实证），不包 OpenAI 外壳
+// 修正②：假译文必须纯 ASCII——第六道验收 cjk 残留会拒收任何带中文的译文
+// 修正③（实证）：假译文必须是「正常英文句」——句尾带 '. '+零 markdown 特殊字符。
+//   初版 `EN ${s.id}` 两处翻车：无句界 → 投影段重抽取并成一句（adoptMirror 防误审基线假阳性）；
+//   id 含 [ ] → sliceInlineMd 转义成 \[ \]（sameish 永不命中）。模块行为对真实译文是对的，夹具要像真实译文。
+const mockAI = async messages => {
+  const ss = JSON.parse(messages[1].content.match(/sentences：\n(.+?)\n\n返回/s)[1])
+  const translations = {}
+  let i = 0
+  for (const s of ss) translations[s.id] = `EN translation ${++i}.`
+  return { translations }
+}
+
+test('流水线:发布→草稿进 TM+镜像落盘 full', async () => {
+  cleanup(); fixture()
+  const r = await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  assert.ok(r.translated >= 5) // 标题/描述/当前/段标题/两句
+  const tm = loadTm('zh-CN', 't9')
+  assert.ok(Object.values(tm.sentences).every(e => e.status === 'draft'))
+  assert.ok(existsSync(MIR_FILE()))
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  assert.equal(mir.page.slug, `t9/posts/${FIX}`)
+  assert.equal(mir.page.status, 'draft') // required 语言不自动发布
+  cleanup()
+})
+test('流水线:幂等——重复跑不加新句', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  const n1 = Object.keys(loadTm('zh-CN', 't9').sentences).length
+  const r = await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  assert.equal(r.translated, 0)
+  assert.equal(Object.keys(loadTm('zh-CN', 't9').sentences).length, n1)
+  cleanup()
+})
+test('流水线:改源一句→只那句重新送翻', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  const j = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  j.overview.body.content[0].content[0].text = '第一句改了。第二句。'
+  writeFileSync(FIX_FILE(), JSON.stringify(j, null, 2))
+  const r = await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  assert.equal(r.translated, 1)
+  cleanup()
+})
+test('流水线:adoptMirror 人审写回', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  // 防误审基线：无人编辑直接 adopt，不得把自家投影 artifact 当人工审批
+  const srcJ0 = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  const mir0 = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  assert.equal(adoptMirror(mir0, srcJ0, loadTm('zh-CN', 't9'), 't9'), 0)
+  assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
+  // 人改第一句 → 写回 approved
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  mir.overview.body.content[0].content[0].text = 'Human fixed.'
+  const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  const n = adoptMirror(mir, srcJ, loadTm('zh-CN', 't9'), 't9')
+  assert.ok(n >= 1)
+  const tm = loadTm('zh-CN', 't9')
+  const ent = tm.sentences[Object.keys(tm.sentences).find(k => tm.sentences[k].text === '第一句。')]
+  assert.equal(ent?.status, 'approved')
+  cleanup()
+})
+test('流水线:approvePage 全 approved+status published', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  const tm = loadTm('zh-CN', 't9')
+  const readSrc = id => JSON.parse(readFileSync(join(process.cwd(), 'content', 'posts', `${id}.json`), 'utf8'))
+  approvePage(FIX, 't9', tm, readSrc)
+  assert.ok(Object.values(tm.sentences).every(e => e.status === 'approved'))
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  assert.equal(mir.page.status, 'published')
+  cleanup()
+})
+test('控制台:consoleData 汇总待审', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+  const d = consoleData()
+  const row = d.pages.find(p => p.pageId === FIX)
+  assert.ok(row && row.pending >= 5)
+  cleanup()
+})
 
 // ---------- 汇总（勿动） ----------
 let pass = 0

@@ -30,7 +30,7 @@ export async function translateSegments(segments, terms, { callAI, batchSize = 3
     const batch = segments.slice(off, off + batchSize)
     let pending = [...batch]
     for (let round = 0; round <= maxRetries && pending.length; round++) {
-      const lastFails = Object.fromEntries(pending.map(s => [s.id, fail[s.id]]).filter(([, v]) => v)) // 上轮原因（round=0 全空 → 提示词不追加）
+      const lastFails = Object.fromEntries(pending.map(s => [s.id, fail[s.id]]).filter(([, v]) => v && !v.startsWith('engine:'))) // 上轮机器验收原因（round=0 全空 → 提示词不追加）；engine: 是引擎侧错误（HTTP 500/超时），非机器验收拒收，喂回去=给 AI 喂假信息
       let translations = {}
       try {
         const res = await callAI(translateMessages(pending, terms, lastFails), 'i18n')
