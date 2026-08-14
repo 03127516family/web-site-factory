@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // DeepSeek 烧制台验收（无 key 全链 mock；真 key 验收为手动步骤，见计划 Task 9）。
 // 惯例同 accept-poc5/f3：ok() 累计，结尾非零退出。
-import { readFileSync, existsSync, rmSync, writeFileSync, unlinkSync } from 'node:fs'
+import { readFileSync, existsSync, rmSync, writeFileSync, unlinkSync, mkdtempSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { tmpdir } from 'node:os'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const RAW = join(SITE, '../src/content/raw/overhead-cranes-for-sale.txt')
@@ -54,6 +55,27 @@ const lib = await import('../src/burn-lib.mjs')
   let threw = false
   try { lib.findKit(join(SITE, 'src/components'), 'products', '不存在') } catch { threw = true }
   ok('findKit 找不到抛错', threw)
+}
+
+// ---------- T-incomplete 不整套件拒收 ----------
+{
+  const tmp = mkdtempSync(join(tmpdir(), 'kits-'))
+  try {
+    mkdirSync(join(tmp, 'products', 'PartialPage'), { recursive: true })
+    writeFileSync(join(tmp, 'products', 'PartialPage', 'index.astro'), '{}') // 只 astro，缺 meta+example
+    const kits = lib.scanKits(tmp)
+    const partial = kits.find(k => k.name === 'PartialPage')
+    ok('scanKits 收到不整套件（complete=false）', partial && partial.complete === false)
+    ok('不整套件正确标 hasAstro=true/hasMeta=false/hasExample=false',
+      partial && partial.hasAstro && !partial.hasMeta && !partial.hasExample)
+    let threw = false, msg = ''
+    try { lib.findKit(tmp, 'products', 'PartialPage') } catch (e) { threw = true; msg = e.message }
+    ok('findKit 不整套件抛错', threw)
+    ok('抛错信息点名缺的文件（meta.json + example.json）',
+      /套件不完整/.test(msg) && /meta\.json/.test(msg) && /example\.json/.test(msg))
+  } finally {
+    rmSync(tmp, { recursive: true, force: true })
+  }
 }
 
 // ---------- T2 字段目录 ----------
