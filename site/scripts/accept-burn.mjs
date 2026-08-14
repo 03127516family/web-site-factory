@@ -273,7 +273,7 @@ const lib = await import('../src/burn-lib.mjs')
     throw new Error('未覆盖 ' + tag)
   }
   const ra = await burner.burn({ text: raw, slug: 'tf-auto', productName: '欧式桥式起重机' }, { callAI: autoFake })
-  ok('auto 默认判族且判中 product 继续烧', classifyCalls === 1 && ra.report.family === 'product' && ra.json.overview?.body?.type === 'doc')
+  ok('auto 默认判族且判中 product 继续烧', classifyCalls === 1 && ra.report.family === 'products' && ra.json.overview?.body?.type === 'doc')
   ok('auto 判族理由进 notes', ra.report.notes.some(n => /自动判族/.test(n)))
 
   const postFake = async (m, tag) => {

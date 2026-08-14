@@ -106,12 +106,6 @@ export function findKit(componentsDir, family, name) {
   return k.dir
 }
 
-// ---------- 页族注册表（built=false 的族选了直接拒，不硬烧） ----------
-export const FAMILIES = {
-  product: { label: '产品页族', built: true },
-  post: { label: '文章页族', built: false },
-}
-
 // 双源核验：字段清单读 meta；组件字段看 .astro data-field（specs 特判 spec.text）；page.* 等 chrome 层看参照 JSON 实际键
 export function loadCatalog(metaPath, astroPath, refJsonPath) {
   const catalog = loadMeta(metaPath)

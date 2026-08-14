@@ -73,19 +73,23 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   callAI ??= createDeepseekCaller()
   const { rawText, images } = await lib.fetchSource({ text, url })
 
-  // 判族：人工显式指定跳过；auto 让 AI 判；未建族/无法识别干净拒绝（不硬烧）
+  // 判族：人工显式指定跳过；auto 让 AI 判；族能不能烧 = 有没有完整套件（scanKits 现算，注册表退役）
   let resolved = family
   const preNotes = []
+  const kits = lib.scanKits(COMPONENTS)
+  const familyKit = (fam) => kits.find(k => k.family === fam && k.complete)
   if (family === 'auto') {
     const verdict = await callAI(classifyMessages(rawText.slice(0, 3000)), 'classify')
-    resolved = verdict?.family
-    if (resolved !== 'product') {
-      const label = lib.FAMILIES[resolved]?.label ?? '无法识别'
-      throw new Error(`自动判族：这份原料像「${label}」——${verdict?.reason ?? '无理由'}。该族烧制未建；若确为产品页原料，请人工改选「产品页族」重试`)
+    resolved = verdict?.family === 'product' ? 'products' : null   // AI 返回 product；映射到族目录名 products
+    if (!resolved || !familyKit(resolved)) {
+      throw new Error(`自动判族：这份原料像「${verdict?.family ?? '无法识别'}」——${verdict?.reason ?? '无理由'}。该族烧制未建`)
     }
     preNotes.push(`自动判族：产品页族（${verdict.reason}）`)
-  } else if (!lib.FAMILIES[family]?.built) {
-    throw new Error(`页族「${lib.FAMILIES[family]?.label ?? family}」烧制未建`)
+  } else {
+    // 手动选族：family 入参用族目录名(products)或旧名(product)，统一映射
+    const fam = family === 'product' ? 'products' : family
+    if (!familyKit(fam)) throw new Error(`页族「${family}」烧制未建（无完整套件）`)
+    resolved = fam
   }
 
   const kitDir = lib.findKit(COMPONENTS, 'products', 'ProductPage')
