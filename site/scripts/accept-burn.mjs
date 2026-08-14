@@ -233,6 +233,7 @@ const lib = await import('../src/burn-lib.mjs')
   try {
     ok('writeDraft 撞名加序号', f1 === 'wd-test' && f2 === 'wd-test-2' && existsSync(p1) && existsSync(p2))
     ok('writeDraft 强制 draft', JSON.parse(readFileSync(p1, 'utf8')).page.status === 'draft')
+    ok('writeDraft 戳 page.template（路由 glob 依赖，缺则预览构建炸）', JSON.parse(readFileSync(p1, 'utf8')).page.template === 'ProductPage')
     let badSlug = false
     try { burner.writeDraft(jx, '坏 slug!') } catch { badSlug = true }
     ok('writeDraft 非法 slug 拒收', badSlug)

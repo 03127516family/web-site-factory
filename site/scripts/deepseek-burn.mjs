@@ -3,7 +3,7 @@
 // 纯逻辑全在 burn-lib；本文件只做「问 AI 要值」与「把值交给代码裁决」。
 // 用法: DEEPSEEK_API_KEY=xxx node scripts/deepseek-burn.mjs --text <文件> --slug xxx --name 产品名 [--save]
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
-import { join, dirname } from 'node:path'
+import { join, dirname, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as lib from '../src/burn-lib.mjs'
 
@@ -238,6 +238,7 @@ export function writeDraft(json, slug) {
   json.page.slug = `products/${final}`
   json.page.status = 'draft'
   const kitDir = lib.findKit(COMPONENTS, 'products', 'ProductPage')
+  json.page.template ??= basename(kitDir) // 草稿必须自带 template：路由按它 glob 套件（缺则预览构建炸）
   for (const c of lib.loadMeta(join(kitDir, 'meta.json')).filter(c => c.shape === 'section' && json[c.key]))
     lib.validateDoc(json[c.key].body, `${c.key}.body`)
   writeFileSync(join(SITE, 'content/products', `${final}.json`), JSON.stringify(json, null, 2) + '\n')
