@@ -5,10 +5,10 @@ import { join } from 'node:path'
 import { mdToDoc } from './mdast-tree.mjs'
 import { validateDoc } from './content-schema.mjs'
 import { renderDoc } from './render-doc.mjs'
-import { getIn } from './tree-utils.mjs'
+import { getIn, setIn } from './tree-utils.mjs'
 import { probe } from '../scripts/img-probe.mjs'
 
-export { mdToDoc, validateDoc, getIn }
+export { mdToDoc, validateDoc, getIn, setIn }
 
 // ---------- 原文分段编号（不给 AI；仅供代码侧反查漏段/位置审计） ----------
 export function numberBlocks(rawText) {
@@ -114,10 +114,11 @@ export function loadCatalog(metaPath, astroPath, refJsonPath) {
   return catalog.map(c => {
     let verified
     if (c.key === 'summary_intro') verified = fields.has('summary_intro.body') // 组件/旧模版均只渲 body（title 为存量死数据，烧 title 仅为与存量 JSON 同构）
-    else if (c.shape === 'section') verified = fields.has(`${c.key}.title`) && fields.has(`${c.key}.body`)
+    else if (c.shape === 'section') verified = fields.has(`${c.key}.body`)
+      && (c.titlePath === null || fields.has(c.titlePath ?? `${c.key}.title`)) // titlePath=标题落点；null=无标题槽（body-only）；缺省=<key>.title
     else if (c.shape === 'sections') verified = fields.has('section.heading') && fields.has('section.body') // 重复章节：单元槽是套件 map 里的相对名（section.*）
     else if (c.key === 'specs') verified = fields.has('spec.text')
-    else verified = fields.has(c.key) || getIn(ref, c.key) !== undefined
+    else verified = c.path ? fields.has(c.path) : (fields.has(c.key) || getIn(ref, c.key) !== undefined) // text 带 path=值落点（如标题位 body.h_x）
     if (!verified) throw new Error(`目录键 ${c.key} 双源核验失败（.astro 与参照 JSON 都没有）——先对齐组件或 meta`)
     return { ...c, verified }
   })
@@ -242,13 +243,28 @@ export function similarToAny(title, candidates, threshold = 0.9) {
   })
 }
 
-// ---------- 组装：结构归代码，AI 的值栽进骨架；骨架跟族（产品超集 / 标准文章），只返回 JSON 本体 ----------
+// ---------- 组装：结构归代码，AI 的值栽进骨架；骨架跟族（产品超集 / 文章），只返回 JSON 本体 ----------
 // 族分支是骨架装配层的边界（骨架形态=族级差异，同「新族=新套件+新装配」）；
-// 值的栽种仍全按 shape/目录驱动，无字段名特判。
+// 值的栽种仍全按 shape/目录/meta 路径声明驱动，无字段名特判。
 export async function assemble({ slug, productName, family = 'products', sectionResults, imagePool = [] }) {
   return family === 'posts'
     ? assemblePost({ slug, productName, sectionResults, imagePool })
     : assembleProduct({ slug, productName, sectionResults, imagePool })
+}
+
+// 通用栽种（meta 路径声明驱动，两族共用）：section 树落 <key>.body、标题按 titlePath
+// （null=无标题槽，title 落 <key>.title 当结构对齐死数据——summary_intro 旧例）；text 带 path 落 path。
+// 消化了返回 true，族装配器只处理自己认识的剩余键。
+function plantField(j, r) {
+  if (r.shape === 'section' && r.data) {
+    const tree = mdToDoc(r.data.body_md)
+    validateDoc(tree, `${r.key}.body`)
+    j[r.key] = { title: r.data.title, body: tree }
+    if (typeof r.titlePath === 'string') setIn(j, r.titlePath, r.data.title)
+    return true
+  }
+  if (r.shape === 'text' && r.path && r.data) { setIn(j, r.path, r.data.text); return true }
+  return false
 }
 
 async function assembleProduct({ slug, productName, sectionResults, imagePool = [] }) {
@@ -269,11 +285,8 @@ async function assembleProduct({ slug, productName, sectionResults, imagePool = 
   }
   for (const r of sectionResults) {
     if (!r.data) continue // 失败段缺席（超集裁剪天然支持）
-    if (r.shape === 'section') {
-      const tree = mdToDoc(r.data.body_md)
-      validateDoc(tree, `${r.key}.body`)
-      j[r.key] = { title: r.data.title, body: tree }
-    } else if (r.key === 'specs') {
+    if (plantField(j, r)) continue
+    else if (r.key === 'specs') {
       j.specs = r.data.items.map(text => ({ text }))
     } else if (r.key === 'summary.intro') {
       j.summary.intro = r.data.text
@@ -321,7 +334,8 @@ async function assemblePost({ slug, productName, sectionResults, imagePool = [] 
         validateDoc(tree, 'body.sections.body')
         return { heading: it.heading, body: tree }
       })
-    } else if (r.key === 'title') {
+    } else if (plantField(j, r)) continue
+    else if (r.key === 'title') {
       j.title = r.data.text
       j.page.title = `${r.data.text} | DGCRANE`
     } else if (r.key === 'page.description') {
@@ -343,7 +357,8 @@ export function previewHtml(j, catalog) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const escAttr = s => esc(s).replace(/"/g, '&quot;')
   const sections = catalog.filter(c => c.shape === 'section' && j[c.key])
-    .map(c => `<section><h3>${esc(j[c.key].title)}</h3>${renderDoc(j[c.key].body)}</section>`).join('\n')
+    .map(c => { const t = (typeof c.titlePath === 'string' ? getIn(j, c.titlePath) : undefined) ?? j[c.key].title
+      return `<section><h3>${esc(t)}</h3>${renderDoc(j[c.key].body)}</section>` }).join('\n')
   const chapters = catalog.filter(c => c.shape === 'sections').flatMap(c => getIn(j, c.key) ?? [])
     .map(s => `<section><h3>${esc(s.heading)}</h3>${renderDoc(s.body)}${s.image
       ? `<figure style="margin:6px 0"><img src="/assets/img/product/${escAttr(s.image)}" alt="${escAttr(s.alt ?? '')}" style="max-width:460px" width="${s.width ?? 880}" height="${s.height ?? 495}"></figure>` : ''}</section>`)

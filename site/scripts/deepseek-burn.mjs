@@ -84,10 +84,13 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const { rawText, images } = await lib.fetchSource({ text, url })
 
   // 判族：人工显式指定跳过；auto 让 AI 判；族能不能烧 = 有没有完整套件（scanKits 现算，注册表退役）
-  let resolved
+  // 套件选择：auto 判族后默认「通用件」（命名约定 <族名单数>Page，如 posts→PostPage）；
+  // 「族:套件名」可指定任一具体模版（一 astro 一模版，自己套自己，fit 由用户判断、缺席即裁）。
+  let resolved, kitName
   const preNotes = []
   const kits = lib.scanKits(COMPONENTS)
   const familyKit = (fam) => kits.find(k => k.family === fam && k.complete)
+  const canonicalKit = (fam) => kits.find(k => k.family === fam && k.complete && k.name === fam.replace(/s$/, '') + 'Page')?.name ?? familyKit(fam)?.name
   if (family === 'auto') {
     const built = [...new Set(kits.filter(k => k.complete).map(k => k.family))]
     const verdict = await callAI(classifyMessages(rawText.slice(0, 3000), built), 'classify')
@@ -96,19 +99,22 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
       const label = verdict?.family && verdict.family !== 'unknown' ? (FAMILY_LABEL[verdict.family] ?? verdict.family) : '无法识别'
       throw new Error(`自动判族：这份原料像「${label}」——${verdict?.reason ?? '无理由'}。已建页族：${built.map(f => FAMILY_LABEL[f] ?? f).join('/')}；请人工改选或换原料`)
     }
+    kitName = canonicalKit(resolved)
     preNotes.push(`自动判族：${FAMILY_LABEL[resolved] ?? resolved}（${verdict.reason}）`)
   } else {
-    // 手动选族：入参用族目录名(products/posts)或控制台短名(product/post)，统一映射
-    const fam = { product: 'products', post: 'posts' }[family] ?? family
+    // 手动选：族目录名(products/posts) / 控制台短名(product/post) / 「族:套件名」（指定具体模版）
+    const [rawFam, rawKit] = String(family).split(':')
+    const fam = { product: 'products', post: 'posts' }[rawFam] ?? rawFam
     if (!familyKit(fam)) throw new Error(`页族「${family}」烧制未建（无完整套件）`)
     resolved = fam
+    kitName = rawKit ?? canonicalKit(fam)
   }
 
-  const kitDir = familyKit(resolved).dir // 上面两路都验过 complete，此处必得完整套件
+  const kitDir = lib.findKit(COMPONENTS, resolved, kitName) // findKit 已返回套件目录（缺件明说：不存在/不完整带清单）
   const catalog = lib.loadCatalog(
     join(kitDir, 'meta.json'), join(kitDir, 'index.astro'), join(kitDir, 'example.json'))
   const paragraphs = lib.numberBlocks(rawText) // 仅供反查漏段/位置审计，不给 AI 编号
-  const report = { slug, productName, family: resolved, images: images.map(i => i.name), sections: [], unused: [], notes: [...preNotes] }
+  const report = { slug, productName, family: resolved, kit: kitName, images: images.map(i => i.name), sections: [], unused: [], notes: [...preNotes] }
   if (paragraphs.length > 200) report.notes.push(`剥壳后段数异常多（${paragraphs.length}），页面可能带噪，建议改贴裸文本`)
 
   // 一把梭：一次出整页；调用失败（含截断）→ 干净报错（自动逐格降级是 roadmap）
@@ -148,7 +154,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     }
     if (bad) { rec.status = 'failed'; data = null }
     report.sections.push(rec)
-    sectionResults.push({ key, shape: spec.shape, data })
+    sectionResults.push({ key, shape: spec.shape, titlePath: spec.titlePath, path: spec.path, data })
   }
 
   // 重叠硬闸：两格正文重叠 >50% → 带原因重烧一轮；终检仍犯 → failed 缺席
@@ -173,14 +179,14 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
         if (attempt === 2) data = null
       }
       if (!data) { rec.status = 'failed'; rec.issues.push(reason) } // 重烧全败=格子缺席，状态必须跟上，不留假 repaired
-      sectionResults[idx] = { key, shape: spec.shape, data }
+      sectionResults[idx] = { ...sectionResults[idx], data }
     }
     dups = lib.findDuplicates(sectionResults.filter(r => r.data))
     for (const d of dups) for (const key of [d.a, d.b]) {
       const rec = report.sections.find(s => s.key === key)
       rec.status = 'failed'; rec.issues.push(dupReason(d))
       const idx = sectionResults.findIndex(r => r.key === key)
-      sectionResults[idx] = { key, shape: sectionResults[idx].shape, data: null }
+      sectionResults[idx] = { ...sectionResults[idx], data: null }
     }
   }
 
@@ -199,13 +205,16 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   report.unused = paragraphs.filter(p => !jsonTextNorm.includes(lib.normalizeText(p.text))).map(p => ({ n: p.n, preview: p.text.slice(0, 40) }))
 
   const json = await lib.assemble({ slug, productName, family: resolved, sectionResults, imagePool: images })
+  json.page.template = kitName // 草稿自带套件名：路由按它派发（writeDraft 的 ??= 不覆盖）
   if (resolved === 'products') {
     if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
     report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
     report.notes.push('breadcrumb.trail 仅[首页]，二级分类人工确认')
   } else {
-    if (images.length) report.notes.push(`图池 ${images.length} 张按顺序配到第 i 段（余图挂末段），人工在编辑器确认`)
-    else report.notes.push('图池为空：章节无配图，待编辑器补传（known-leftover）')
+    if (images.length) {
+      if (catalog.some(c => c.shape === 'sections')) report.notes.push(`图池 ${images.length} 张按顺序配到第 i 段（余图挂末段），人工在编辑器确认`)
+      else report.notes.push('图池未自动落位（该套件无图槽语义），编辑器人工配图')
+    } else report.notes.push('图池为空：待编辑器补传（known-leftover）')
   }
   if (sectionResults.some(r => r.key === 'page.description' && r.data)) report.notes.push('page.description 为 AI 概括（溯源豁免），人工过目')
   if (report.sections.some(s => s.status === 'failed')) report.notes.push('有格烧败缺席（标红），可在编辑器人工补或重新烧')
@@ -279,7 +288,9 @@ export function writeDraft(json, slug) {
   while (existsSync(join(SITE, 'content', famDir, `${final}.json`))) final = `${slug}-${n++}`
   json.page.slug = `${famDir}/${final}`
   json.page.status = 'draft'
-  const kit = lib.scanKits(COMPONENTS).find(k => k.family === famDir && k.complete)
+  const kits = lib.scanKits(COMPONENTS)
+  const kit = kits.find(k => k.family === famDir && k.name === json.page.template) // 优先按草稿声明的套件（多套件族）
+    ?? kits.find(k => k.family === famDir && k.complete)
   if (!kit) throw new Error(`页族「${famDir}」无完整套件，无法落 draft`)
   json.page.template ??= basename(kit.dir) // 草稿必须自带 template：路由按它 glob 套件（缺则预览构建炸）
   const meta = lib.loadMeta(join(kit.dir, 'meta.json'))
