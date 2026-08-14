@@ -24,9 +24,19 @@ details{margin:12px 0}pre{white-space:pre-wrap;word-break:break-all;font-size:12
 <div class="row"><label>或旧站页面 URL</label><input type="text" id="url" placeholder="https://www.dgcrane.com/zh/…"></div>
 <div class="row"><label>模版/页族</label>
 <select id="family" style="width:100%;box-sizing:border-box;padding:8px;border:1px solid #ddd;border-radius:8px;font:inherit;background:#fff">
-  <option value="auto" selected>自动判断（AI 选族；判不了会明说）</option>
-  <option value="product">产品页族</option>
-  <option value="post">文章页族</option>
+  <!-- 选项清单暂为静态（edit-server 在并行改动中，接 scanKits 动态渲染待其落地——spec 已记触发条件）。
+       value 规范：auto / 族短名(product|post) / 「族目录:套件名」（指定具体模版，一 astro 一模版） -->
+  <option value="auto" selected>自动判断（AI 选族 → 通用版式；判不了会明说）</option>
+  <optgroup label="产品页族">
+    <option value="product">通用产品页（ProductPage·17 段超集）</option>
+  </optgroup>
+  <optgroup label="文章页族">
+    <option value="post">通用文章页（PostPage·顺序章节）</option>
+    <option value="posts:gantry-cranes-for-sale">龙门选购页版式（价格区间/成本拆解/5 卡片）</option>
+    <option value="posts:5-ton-overhead-crane">5 吨桥机页版式（类型/应用/价格/对比）</option>
+    <option value="posts:crane-lifting-safety-training">安全培训页版式（事故警示/规程/十不吊/手势）</option>
+    <option value="posts:32t-rail-mounted-container-gantry-crane-exported-to-russia">32t 出口案例版式（项目纪实/低温/本地化）</option>
+  </optgroup>
 </select></div>
 <div class="row" style="display:flex;gap:12px">
   <div style="flex:1"><label>slug（英文裸名，如 5t-eot-crane）</label><input type="text" id="slug"></div>
