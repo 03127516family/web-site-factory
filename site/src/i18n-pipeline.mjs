@@ -55,7 +55,11 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
     const terms = loadTerms(srcJ.page.lang, lang)
     const r = await translateSegments(missing, terms, { callAI })
     for (const u of missing) {
-      if (r.ok[u.id]) { upsert(tm, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' }); translated++ }
+      if (r.ok[u.id]) {
+        upsert(tm, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' })
+        delete tm.sentences[u.fp].error // 失败转正清旧 error 键（upsert 浅合并不清旧键，数据卫生）
+        translated++
+      }
       else { upsert(tm, u.fp, { text: u.text, translation: '', status: 'failed', origin: 'engine', error: r.fail[u.id] ?? 'unknown' }); failed++ }
     }
     saveTm(srcJ.page.lang, lang, tm)
@@ -89,7 +93,9 @@ export async function translateAll({ lang = 'en', callAI } = {}) {
 const sameish = (a, b) =>
   norm(a).replace(/[\s。！？）)」』.,;:!?]+$/g, '') === norm(b).replace(/[\s。！？）)」』.,;:!?]+$/g, '')
 
-// 镜像保存 = 人审写回（R44）：镜像句与 TM 不同 → approved；未译占位被改 → 新建 approved。返回写回句数。
+// 镜像保存 = 人审写回（R44）：镜像句与 TM 不同 → approved；未译占位被改 → 新建 approved。
+// 返回 { n, skipped }。代价明示：段内译文句数与源不一致时整段不 adopt——人就地改该段不会被采纳
+// （返回 skipped 供调用方提示：整段重写保持句数，或用通过按钮）；skipped>0 也留事件——编辑被吞不静默。
 export function adoptMirror(mirrorJ, srcJ, tm, lang) {
   const units = collectUnits(srcJ)
   const { aligned, skipped } = alignSentGroups(mirrorJ, units) // C-1：sent 句级必须先过段守卫
@@ -106,8 +112,8 @@ export function adoptMirror(mirrorJ, srcJ, tm, lang) {
       upsert(tm, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'human' }); n++
     }
   }
-  if (n) { saveTm(srcJ.page.lang, lang, tm); logEvent(srcJ.page.slug, 'review-edit', { lang, sentences: n, skipped }) }
-  return n
+  if (n || skipped) { if (n) saveTm(srcJ.page.lang, lang, tm); logEvent(srcJ.page.slug, 'review-edit', { lang, sentences: n, skipped }) }
+  return { n, skipped }
 }
 
 // sent 段级守卫（C-1）：按 (field,path) 分组——源段句数 = 该组单元数；镜像段重抽取句数 ≠ 源段句数
@@ -228,5 +234,5 @@ export function harvestMirror(pageId, lang) {
   const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: mirrorJ.page.status ?? 'published', existingTrail: mirrorJ.breadcrumb?.trail })
   writeJ(mirFile, mirror)
   logEvent(source.slug, 'harvest', { lang, sentences: n, skipped }) // 段不对齐跳过的句数留痕（宁可漏收养错）
-  return n
+  return { harvested: n, skipped } // T13 CLI 如实报「收 N 句、跳 M 句」
 }

@@ -2,14 +2,14 @@
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
 import { join } from 'node:path'
-import { rmSync, readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs'
+import { rmSync, readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
 import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
-import { runPipeline, adoptMirror, approvePage, consoleData, translateAll } from '../src/i18n-pipeline.mjs'
+import { runPipeline, adoptMirror, approvePage, consoleData, translateAll, harvestMirror } from '../src/i18n-pipeline.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -543,14 +543,13 @@ test('流水线:adoptMirror 人审写回', async () => {
   // 防误审基线：无人编辑直接 adopt，不得把自家投影 artifact 当人工审批
   const srcJ0 = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
   const mir0 = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
-  assert.equal(adoptMirror(mir0, srcJ0, loadTm('zh-CN', 't9'), 't9'), 0)
+  assert.deepEqual(adoptMirror(mir0, srcJ0, loadTm('zh-CN', 't9'), 't9'), { n: 0, skipped: 0 })
   assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
   // 人改第一句 → 写回 approved
   const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
   mir.overview.body.content[0].content[0].text = 'Human fixed.'
   const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
-  const n = adoptMirror(mir, srcJ, loadTm('zh-CN', 't9'), 't9')
-  assert.equal(n, 1) // 恰好一句人审写回（I-2 收紧：>= 会放过连带误审）
+  assert.deepEqual(adoptMirror(mir, srcJ, loadTm('zh-CN', 't9'), 't9'), { n: 1, skipped: 0 }) // 恰好一句人审写回（I-2 收紧：>= 会放过连带误审）
   const tm = loadTm('zh-CN', 't9')
   const ent = tm.sentences[Object.keys(tm.sentences).find(k => tm.sentences[k].text === '第一句。')]
   assert.equal(ent?.status, 'approved')
@@ -597,14 +596,14 @@ test('流水线:防误审——block 译文含句点空格（整段对称取，�
   j.overview.body.content.unshift({ type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: '产品特点' }] })
   writeFileSync(FIX_FILE(), JSON.stringify(j, null, 2))
   await runPipeline(FIX, { lang: 't9', callAI: aiWith({ 产品特点: 'Product Features. Details Inside' }) })
-  assert.equal(adoptUnedited(), 0) // join('') 吞空格会把自家投影当人工编辑（失效形态 A）
+  assert.deepEqual(adoptUnedited(), { n: 0, skipped: 0 }) // join('') 吞空格会把自家投影当人工编辑（失效形态 A）；整段对称取后守卫无需介入
   assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
   cleanup()
 })
 test('流水线:防误审——一源句拆两译（段守卫整段跳过不猜）', async () => {
   cleanup(); fixture()
   await runPipeline(FIX, { lang: 't9', callAI: aiWith({ '第一句。': 'First sentence. Extra clause.' }) })
-  assert.equal(adoptUnedited(), 0) // 镜像段 3 句 ≠ 源段 2 句 → 整段跳过（失效形态 B：si 漂移张冠李戴）
+  assert.deepEqual(adoptUnedited(), { n: 0, skipped: 2 }) // 镜像段 3 句 ≠ 源段 2 句 → 整段跳过（失效形态 B：si 漂移张冠李戴）
   const tm = loadTm('zh-CN', 't9')
   assert.ok(Object.values(tm.sentences).every(e => e.status === 'draft'))
   cleanup()
@@ -612,7 +611,7 @@ test('流水线:防误审——一源句拆两译（段守卫整段跳过不猜�
 test('流水线:防误审——译文无句尾标点（段守卫并句跳过）', async () => {
   cleanup(); fixture()
   await runPipeline(FIX, { lang: 't9', callAI: aiWith({ '第一句。': 'First sentence' }) })
-  assert.equal(adoptUnedited(), 0) // 镜像段并成 1 句 ≠ 源段 2 句 → 整段跳过（失效形态 C）
+  assert.deepEqual(adoptUnedited(), { n: 0, skipped: 2 }) // 镜像段并成 1 句 ≠ 源段 2 句 → 整段跳过（失效形态 C）
   assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
   cleanup()
 })
@@ -631,7 +630,9 @@ test('流水线:failed 句默认不重送、retryFailed 救济重送', async () 
   assert.equal(r2.translated, 0)
   const r3 = await runPipeline(FIX, { lang: 't9', callAI: mockAI, retryFailed: true }) // 人工救济通道
   assert.equal(r3.translated, 7)
-  assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft'))
+  const tm3 = loadTm('zh-CN', 't9')
+  assert.ok(Object.values(tm3.sentences).every(e => e.status === 'draft'))
+  assert.ok(Object.values(tm3.sentences).every(e => !('error' in e))) // 转正后旧 error 键清账（数据卫生）
   cleanup()
 })
 test('流水线:translateAll 跳过 draft 源页', async () => {
@@ -649,6 +650,59 @@ test('流水线:translateAll 跳过 draft 源页', async () => {
   const tm = loadTm('zh-CN', 't9')
   assert.ok(!Object.values(tm.sentences).some(e => e.text === '草稿页标题')) // 草稿页一句都没送
   assert.ok(!existsSync(MIR_FILE()))                                         // 也不建镜像
+  cleanup()
+})
+
+test('流水线:E 场景——段错位人就地改不被采纳但可见（skipped 反馈链）', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: aiWith({ '第一句。': 'First sentence. Extra clause.' }) }) // 一拆二 → 段错位
+  // 人就地改错位段里没拆的那句（改完段仍 3≠2 错位——真实场景：人没意识到要整段重写保持句数）
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  mir.overview.body.content[0].content[2].text = 'Better wording.'
+  const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  const r = adoptMirror(mir, srcJ, loadTm('zh-CN', 't9'), 't9')
+  assert.deepEqual(r, { n: 0, skipped: 2 }) // 编辑不被采纳（承认的代价）——但 skipped 把它摆上台面
+  assert.ok(Object.values(loadTm('zh-CN', 't9').sentences).every(e => e.status === 'draft')) // TM 未被污染
+  // 不静默：skipped>0 也留事件（沿用 accept-f3 惯例——读事件文件断言、接受追加不删行）
+  const last = JSON.parse(readFileSync(join(process.cwd(), '.i18n-events.jsonl'), 'utf8').trim().split('\n').at(-1))
+  assert.equal(last.action, 'review-edit')
+  assert.equal(last.detail.skipped, 2)
+  cleanup()
+})
+test('流水线:harvestMirror 存量收割——对齐段收、错位段跳', async () => {
+  cleanup()
+  // 夹具：A 段 1 源句、B 段 2 源句
+  writeFileSync(FIX_FILE(), JSON.stringify({
+    version: '1',
+    page: { slug: `posts/${FIX}`, type: 'post', lang: 'zh-CN', title: '收割页标题', description: '收割描述', status: 'published' },
+    title: '收割标题',
+    breadcrumb: { current: '收割', trail: [] },
+    overview: { title: '概述', body: { type: 'doc', content: [
+      { type: 'paragraph', content: [{ type: 'text', text: '第一段独句。' }] },
+      { type: 'paragraph', content: [{ type: 'text', text: '第二段首句。第二段次句。' }] },
+    ] } },
+  }, null, 2))
+  // 手工落存量镜像（模拟 F3 时代人工翻译页）：A 段对齐 1 英句；B 段 2 源句译成 1 句（错位）；字段留中文=不收
+  mkdirSync(join(process.cwd(), 'content', 't9', 'posts'), { recursive: true })
+  writeFileSync(MIR_FILE(), JSON.stringify({
+    version: '1',
+    page: { slug: `t9/posts/${FIX}`, type: 'post', lang: 't9', title: '收割页标题', description: '收割描述', status: 'published' },
+    title: '收割标题',
+    breadcrumb: { current: '收割', trail: [] },
+    overview: { title: '概述', body: { type: 'doc', content: [
+      { type: 'paragraph', content: [{ type: 'text', text: 'Aligned sentence.' }] },
+      { type: 'paragraph', content: [{ type: 'text', text: 'Merged into one.' }] },
+    ] } },
+  }, null, 2))
+  const r = harvestMirror(FIX, 't9')
+  assert.deepEqual(r, { harvested: 1, skipped: 2 })
+  const tm = loadTm('zh-CN', 't9')
+  const ent = Object.values(tm.sentences).find(e => e.text === '第一段独句。')
+  assert.equal(ent?.status, 'approved')
+  assert.equal(ent?.origin, 'harvest')
+  assert.equal(ent?.translation, 'Aligned sentence.')
+  assert.ok(!Object.values(tm.sentences).some(e => e.text === '第二段首句。')) // 错位句无记录（宁可漏收）
+  assert.ok(!Object.values(tm.sentences).some(e => e.text === '第二段次句。'))
   cleanup()
 })
 
