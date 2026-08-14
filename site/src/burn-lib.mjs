@@ -97,6 +97,13 @@ export function scanKits(componentsDir) {
   return kits.map(k => ({ ...k, complete: k.hasAstro && k.hasMeta && k.hasExample }))
 }
 
+// 通用件约定名（posts→PostPage / products→ProductPage，首字母大写）：auto 判族与无声明落盘的默认套件
+export function canonicalKitOf(kits, fam) {
+  const complete = kits.filter(k => k.family === fam && k.complete)
+  return complete.find(k => k.name === fam.replace(/s$/, '').replace(/^./, c => c.toUpperCase()) + 'Page')?.name
+    ?? complete[0]?.name
+}
+
 // 取指定族/名的完整套件；不存在或不完整→抛错（缺哪样明说）
 export function findKit(componentsDir, family, name) {
   const k = scanKits(componentsDir).find(x => x.family === family && x.name === name)

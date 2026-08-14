@@ -1,0 +1,102 @@
+[
+  {
+    "key": "title",
+    "shape": "text",
+    "level": "similar"
+  },
+  {
+    "key": "page.description",
+    "shape": "seo",
+    "level": "summary"
+  },
+  {
+    "key": "lead",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": null
+  },
+  {
+    "key": "overview_intro",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_overview"
+  },
+  {
+    "key": "overview_close",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": null
+  },
+  {
+    "key": "h_price",
+    "shape": "text",
+    "level": "similar",
+    "path": "body.h_price"
+  },
+  {
+    "key": "single",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_single"
+  },
+  {
+    "key": "double",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_double"
+  },
+  {
+    "key": "semi",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_semi"
+  },
+  {
+    "key": "portable",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_portable"
+  },
+  {
+    "key": "cost_intro",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_cost"
+  },
+  {
+    "key": "cost1",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_cost1"
+  },
+  {
+    "key": "cost2",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_cost2"
+  },
+  {
+    "key": "cost3",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_cost3"
+  },
+  {
+    "key": "cost4",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_cost4"
+  },
+  {
+    "key": "tips",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_tips"
+  },
+  {
+    "key": "conclusion",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_conclusion"
+  }
+]

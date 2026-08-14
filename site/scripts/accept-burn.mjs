@@ -499,6 +499,47 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
   rmSync(ppath)
 }
 
+// ---------- T-perkit 指定套件烧制钉（一 astro 一模版，spec B2） ----------
+{
+  const burner = await import('./deepseek-burn.mjs')
+
+  const kits = lib.scanKits(join(SITE, 'src/components'))
+  ok('scanKits 认出 6 套件（产品 1 + 文章 5）', kits.filter(k => k.complete).length === 6
+    && kits.filter(k => k.family === 'posts' && k.complete).length === 5)
+  ok('canonicalKitOf 通用件约定（PostPage/ProductPage）',
+    lib.canonicalKitOf(kits, 'posts') === 'PostPage' && lib.canonicalKitOf(kits, 'products') === 'ProductPage')
+  for (const n of ['gantry-cranes-for-sale', '5-ton-overhead-crane', 'crane-lifting-safety-training', '32t-rail-mounted-container-gantry-crane-exported-to-russia']) {
+    const cat = lib.loadCatalog(join(SITE, `src/components/posts/${n}/meta.json`), join(SITE, `src/components/posts/${n}/index.astro`), join(SITE, `src/components/posts/${n}/example.json`))
+    ok(`${n} 套件双源核验过`, cat.every(c => c.verified))
+  }
+
+  // 烧进 gantry 套件：titlePath 落位、发明格子拒收、chrome 自 gantry example、草稿带套件名
+  const raw2 = '龙门吊价格科普\n\n价格区间\n\n龙门起重机价格受跨度与吨位影响，小型设备数万元起。\n\n结论\n\n选型前应向多家供应商询价比较。'
+  const gEx = JSON.parse(readFileSync(join(SITE, 'src/components/posts/gantry-cranes-for-sale/example.json'), 'utf8'))
+  const { json: gj, report: gr } = await burner.burn(
+    { text: raw2, slug: 'zz-gantry', productName: '龙门吊价格科普', family: 'posts:gantry-cranes-for-sale' },
+    { callAI: async (m, tag) => {
+      if (tag === 'oneshot') return { fields: {
+        title: { text: '龙门吊价格科普' },
+        h_price: { text: '价格区间' },
+        price: { title: '价格区间', body_md: '龙门起重机价格受跨度与吨位影响，小型设备数万元起。' }, // gantry 无此槽→须拒
+        conclusion: { title: '结论', body_md: '选型前应向多家供应商询价比较。' } } }
+      throw new Error('未覆盖 ' + tag)
+    } })
+  ok('指定套件：报告带套件名', gr.kit === 'gantry-cranes-for-sale' && gr.family === 'posts')
+  ok('titlePath 落位（text→body.h_price、section 标题→body.h_conclusion）',
+    gj.body.h_price === '价格区间' && gj.body.h_conclusion === '结论' && gj.conclusion.body.type === 'doc')
+  ok('发明格子拒收（gantry 无 price 槽）', gr.sections.find(s => s.key === 'price')?.status === 'failed' && /白名单/.test(gr.sections.find(s => s.key === 'price')?.issues[0]))
+  ok('chrome 值自 gantry example（trail 同源、current 换新名）',
+    gj.breadcrumb.trail.length === gEx.breadcrumb.trail.length && gj.breadcrumb.current === '龙门吊价格科普')
+  ok('草稿自带套件名（template=gantry…）', gj.page.template === 'gantry-cranes-for-sale')
+
+  const gfinal = burner.writeDraft(gj, 'zz-gantry-accept')
+  const gpath = join(SITE, 'content/posts', `${gfinal}.json`)
+  ok('writeDraft 按声明的套件落 content/posts', JSON.parse(readFileSync(gpath, 'utf8')).page.template === 'gantry-cranes-for-sale')
+  rmSync(gpath)
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)

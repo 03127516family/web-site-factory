@@ -1,0 +1,96 @@
+[
+  {
+    "key": "title",
+    "shape": "text",
+    "level": "similar"
+  },
+  {
+    "key": "page.description",
+    "shape": "seo",
+    "level": "summary"
+  },
+  {
+    "key": "lead",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": null
+  },
+  {
+    "key": "h_accident",
+    "shape": "text",
+    "level": "similar",
+    "path": "body.h_accident"
+  },
+  {
+    "key": "accident_cases",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_case"
+  },
+  {
+    "key": "hazards",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_hazard"
+  },
+  {
+    "key": "h_gear",
+    "shape": "text",
+    "level": "similar",
+    "path": "body.h_gear"
+  },
+  {
+    "key": "hook",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_hook"
+  },
+  {
+    "key": "wirerope",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_wirerope"
+  },
+  {
+    "key": "h_operator",
+    "shape": "text",
+    "level": "similar",
+    "path": "body.h_operator"
+  },
+  {
+    "key": "operator_basic",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_basic"
+  },
+  {
+    "key": "operator_principles",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_principles"
+  },
+  {
+    "key": "emergency",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_emergency"
+  },
+  {
+    "key": "nolift",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_nolift"
+  },
+  {
+    "key": "signals",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_signals"
+  },
+  {
+    "key": "conclusion",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_conclusion"
+  }
+]

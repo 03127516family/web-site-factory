@@ -1,0 +1,66 @@
+[
+  {
+    "key": "title",
+    "shape": "text",
+    "level": "similar"
+  },
+  {
+    "key": "page.description",
+    "shape": "seo",
+    "level": "summary"
+  },
+  {
+    "key": "lead",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": null
+  },
+  {
+    "key": "types",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_types"
+  },
+  {
+    "key": "apps",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_apps"
+  },
+  {
+    "key": "price",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_price"
+  },
+  {
+    "key": "price_custom",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_price_custom"
+  },
+  {
+    "key": "factors",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_factors"
+  },
+  {
+    "key": "compare",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_compare"
+  },
+  {
+    "key": "cases",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_cases"
+  },
+  {
+    "key": "conclusion",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_conclusion"
+  }
+]

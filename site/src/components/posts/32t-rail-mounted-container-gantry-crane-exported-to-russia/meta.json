@@ -1,0 +1,72 @@
+[
+  {
+    "key": "title",
+    "shape": "text",
+    "level": "similar"
+  },
+  {
+    "key": "page.description",
+    "shape": "seo",
+    "level": "summary"
+  },
+  {
+    "key": "lead",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": null
+  },
+  {
+    "key": "req",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_req"
+  },
+  {
+    "key": "h_solution",
+    "shape": "text",
+    "level": "similar",
+    "path": "body.h_solution"
+  },
+  {
+    "key": "lowtemp",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_lowtemp"
+  },
+  {
+    "key": "localization",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_localization"
+  },
+  {
+    "key": "safety",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_safety"
+  },
+  {
+    "key": "transport",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_transport"
+  },
+  {
+    "key": "delivery",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_delivery"
+  },
+  {
+    "key": "summary",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_summary"
+  },
+  {
+    "key": "getquote",
+    "shape": "section",
+    "level": "verbatim",
+    "titlePath": "body.h_getquote"
+  }
+]

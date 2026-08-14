@@ -106,7 +106,7 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const preNotes = []
   const kits = lib.scanKits(COMPONENTS)
   const familyKit = (fam) => kits.find(k => k.family === fam && k.complete)
-  const canonicalKit = (fam) => kits.find(k => k.family === fam && k.complete && k.name === fam.replace(/s$/, '') + 'Page')?.name ?? familyKit(fam)?.name
+  const canonicalKit = (fam) => lib.canonicalKitOf(kits, fam)
   if (family === 'auto') {
     const built = [...new Set(kits.filter(k => k.complete).map(k => k.family))]
     const verdict = await callAI(classifyMessages(rawText.slice(0, 3000), built), 'classify')
@@ -307,7 +307,7 @@ export function writeDraft(json, slug) {
   json.page.status = 'draft'
   const kits = lib.scanKits(COMPONENTS)
   const kit = kits.find(k => k.family === famDir && k.name === json.page.template) // 优先按草稿声明的套件（多套件族）
-    ?? kits.find(k => k.family === famDir && k.complete)
+    ?? kits.find(k => k.family === famDir && k.complete && k.name === lib.canonicalKitOf(kits, famDir)) // 无声明回通用件约定
   if (!kit) throw new Error(`页族「${famDir}」无完整套件，无法落 draft`)
   json.page.template ??= basename(kit.dir) // 草稿必须自带 template：路由按它 glob 套件（缺则预览构建炸）
   const meta = lib.loadMeta(join(kit.dir, 'meta.json'))

@@ -1,0 +1,1002 @@
+{
+  "version": 1,
+  "page": {
+    "slug": "posts/32t-rail-mounted-container-gantry-crane-exported-to-russia",
+    "type": "post",
+    "lang": "zh-CN",
+    "title": "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境 | DGCRANE",
+    "description": "32吨轨道式集装箱龙门起重机出口俄罗斯案例：Q355E耐低温钢、-40℃稳定运行、俄语本地化、全面安全防护与运输保护，提供完整可靠的集装箱搬运解决方案。",
+    "template": "src/templates/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.html",
+    "family": "post@1",
+    "status": "published"
+  },
+  "title": "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境",
+  "breadcrumb": {
+    "current": "32吨轨道式集装箱龙门起重机出口俄罗斯：适用于低温环境",
+    "trail": [
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/"
+      },
+      {
+        "label": "案例",
+        "url": "https://www.dgcrane.com/zh/posts/"
+      }
+    ]
+  },
+  "author": {
+    "name": "赵卓拉",
+    "title": "桥式起重机/门式起重机/旋臂起重机/起重机零部件解决方案专家",
+    "bio": "拥有10多年起重机海外出口行业经验，帮助10,000+客户解决售前问题和疑虑，如果您有任何相关需求，请随时与我联系！",
+    "avatar": "/assets/img/post/Zora-Zhao.jpg"
+  },
+  "body": {
+    "h_req": "核心采购要求",
+    "h_solution": "定制化解决方案",
+    "h_lowtemp": "低温适应性设计",
+    "h_localization": "本地化设计",
+    "h_safety": "安全保护系统",
+    "h_transport": "运输保护设计",
+    "h_delivery": "交付结果",
+    "h_summary": "项目概要",
+    "h_getquote": "获取定制化起重机解决方案和报价",
+    "img_hero": "/assets/img/post/32T-Rail-Mounted-Container-Gantry-Crane-Exported-to-Russia.png",
+    "img_mainbeam": "/assets/img/post/main-beam.png",
+    "img_cabin": "/assets/img/post/cabin-1.png",
+    "img_travmotor": "/assets/img/post/traveling-motor.png",
+    "img_control": "/assets/img/post/control.png",
+    "img_travmech": "/assets/img/post/Traveling-Mechanism-Packaging.png",
+    "img_trolley": "/assets/img/post/Trolley-Packaging.png",
+    "img_spreader": "/assets/img/post/Container-Spreader-Packaging.png",
+    "img_result1": "/assets/img/post/32T-Rail-Mounted-Container-Gantry-Crane.png",
+    "img_result2": "/assets/img/post/32T-Rail-Mounted-Container-Gantry-Crane-for-Russia.png"
+  },
+  "inquiry_form": {
+    "title": "填写您的详细资料，我们将在24小时内给您答复!"
+  },
+  "i18n_rev": {
+    "breadcrumb.current": 1,
+    "title": 1,
+    "author.name": 1,
+    "lead": 1,
+    "body.h_req": 1,
+    "req": 1,
+    "body.h_solution": 1,
+    "body.h_lowtemp": 1,
+    "lowtemp": 1,
+    "body.h_localization": 1,
+    "localization": 1,
+    "body.h_safety": 1,
+    "safety": 1,
+    "body.h_transport": 1,
+    "transport": 1,
+    "body.h_delivery": 1,
+    "delivery": 1,
+    "body.h_summary": 1,
+    "summary": 1,
+    "body.h_getquote": 1,
+    "getquote": 1,
+    "author.title": 1,
+    "author.bio": 1,
+    "inquiry_form.title": 1,
+    "page.title": 1,
+    "page.description": 1
+  },
+  "lead": {
+    "title": "导言",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "该项目涉及一台32吨的发动机 轨道式集装箱龙门起重机，该设备出口俄罗斯，主要用于集装箱的装卸和转运作业。考虑到当地气候极其寒冷，主体结构采用Q355E耐低温钢材制造。电气系统经过特殊设计，具备抗寒性能，并配备了完善的安全保护系统，可在-40℃至+40℃的环境温度范围内稳定运行。"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "req": {
+    "title": "核心采购要求正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "俄罗斯客户的核心要求不仅仅是\"购买一台能够吊装集装箱的龙门起重机\"，而是要获得一个完整可靠的解决方案，该方案能够在极低温度环境下稳定运行，减少停机时间，并适应当地的操作系统。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "客户的需求和要求包括："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "人们担心设备在-40°C的低温下可能会冻结、变脆或无法启动。因此，需要一种能够在-40°C环境下可靠运行的轨道式集装箱龙门起重机，以便在俄罗斯寒冷地区长期户外使用。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "考虑到与当地操作习惯和电气标准不匹配可能会影响运行和维护，控制系统需要配备俄语标识并符合当地供电标准，以便更便捷高效地进行操作和管理。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "长期运行过程中存在安全风险和潜在故障，因此需要一套全面的安全保护系统。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "考虑到长途运输过程中关键部件可能受损，从而影响安装调试，因此需要可靠的包装解决方案来确保安全交付。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "基于这些考虑，我们开发了一种完全针对性的系统设计和封装解决方案。"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "lowtemp": {
+    "title": "低温适应性设计正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "为确保在俄罗斯-40°C的低温环境下可靠运行，采用了专门的低温设计："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Q355E 低温钢",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：主体结构采用 Q355E 钢板，在 -40°C 时仍保持优异的冲击韧性，有效防止脆性断裂，确保在寒冷环境下安全可靠运行。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "耐低温电缆",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：整台起重机采用耐低温电缆，在寒冷条件下仍能保持柔韧性和绝缘性能，防止电缆硬化、开裂和信号不稳定，从而提高电气可靠性。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "电机加热系统",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：起升电机和行走电机均配备加热带，可在低温环境下进行预热和保温。这可防止启动困难和机械卡滞，确保稳定运行。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "隔热驾驶室",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：驾驶室隔热性能良好，并配备空调。温度可根据环境条件自动调节，确保操作员舒适。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "localization": {
+    "title": "本地化设计正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "为确保操作简便和本地兼容性，该系统针对俄罗斯市场进行了优化："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "俄语标签",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：视频监控系统和驾驶室控制台配备了英语和俄语双语标签，使当地操作员能够轻松识别功能和设备状态，降低误操作风险，提高维护效率。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "本地电压兼容性",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：该设备设计用于 380V / 50Hz / 3相电源，完全符合俄罗斯工业标准，确保直接安装和稳定运行。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "safety": {
+    "title": "安全保护系统正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "配置了一套全面的安全保护系统，以确保安全稳定的运行："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "过载保护系统",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：实时负载监控，具有多级报警和运动限制功能，以防止结构过载。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "双重限位保护",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：起升和行进限位开关，防止过行程和机械损坏。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "紧急制动系统",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：四个支腿上均设有紧急停止按钮，并具有系统范围内的紧急停止功能，可在紧急情况下快速关闭。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "防风系统",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：风速传感器与轨道夹紧系统集成；当风速超过安全限值时，自动报警并锁定轨道，以防止滑移。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "电气保护系统",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：包括过电流、过温、缺相、相序错误、欠压和接地保护，以降低电气故障风险。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "transport": {
+    "title": "运输保护设计正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "考虑到运往俄罗斯的长途运输，关键部件都得到了特殊保护："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "台车完全用防水布包裹，以防止雨水和潮湿造成的损坏。起升电机和变速箱电机用防震泡沫固定，以减少振动造成的损坏。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "行走机构的齿轮箱电机首先经过加固，并用防震泡沫固定，以确保运输过程中的稳定性。然后，再覆盖一层防水篷布，以增强其防潮防雨性能。"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "绝缘操作室和电缆卷筒装在木箱中，以增强抗冲击性并防止运输过程中损坏。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "这样可以确保设备到达现场时的状态接近出厂交付状态。"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "delivery": {
+    "title": "交付结果正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "交付的32吨轨道式集装箱龙门起重机成功满足了客户的所有关键要求："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "在-40°C低温环境下稳定运行"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "完全符合俄罗斯当地电气和操作标准"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "综合户外安全防护系统"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "运输后关键部件状况良好，确保现场安装顺利进行。"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "该起重机根据项目要求进行了定制，具体规格如下："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "起重能力",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：32吨（吊具下方）"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "吊具",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：40英尺集装箱吊具（支持旋转、平移、起吊和集装箱搬运作业）"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "跨度",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：20m"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "提升高度",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：10米（吊具下方）"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "负载等级",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：ISO M6"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "工作温度",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：-40°C 至 +40°C"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "电源",
+                      "marks": [
+                        {
+                          "type": "bold"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "：380V / 50Hz / 3相"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "该项目在低温适应性、系统兼容性和运输可靠性方面均实现了统一的性能。客户最初关注的所有关键风险均在设计和制造阶段得到解决，设备调试后运行稳定。"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "summary": {
+    "title": "项目概要正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "该项目的核心不仅仅是交付一台龙门起重机，而是为极寒环境提供一套完整可靠的集装箱搬运解决方案。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "通过选择低温材料、加强电气系统、局部设计和运输保护，该设备不仅\"技术上符合要求\"，而且\"在实际条件下长期可靠运行\"。"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "getquote": {
+    "title": "获取报价正文",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "DGCRANE 在起重机出口方面拥有超过 15 年的经验，并根据不同的工作条件和项目要求提供完全定制的解决方案和报价支持。"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "我们的解决方案包括但不限于："
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "桥式起重机、龙门起重机和悬臂起重机系统"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "港口和堆场物料搬运解决方案"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "针对高温、低温、沿海和高腐蚀性环境的特殊设计"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "非标准跨距、提升高度和负载等级优化"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "自动化控制与远程操作系统集成"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "出口合规性和本地化适应设计"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "联系我们，获取量身定制的起重机解决方案和详细的项目报价。"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
