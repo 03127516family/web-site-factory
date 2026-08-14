@@ -1,7 +1,6 @@
 ---
 // 产品页路由：content/products/*.json 每份数据出一个页（数据驱动路由）。
-// POC 范围：ProductPage 组件目前只覆盖 product@1 页族段落（单梁），
-// overhead 的超集段落（spec_compare 等 6 段）待 POC-3 后续扩展，先只出单梁。
+// 模版由数据声明：page.template → components/products/<名>/index.astro（glob 派发）。
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '../../layouts/Chrome.astro'

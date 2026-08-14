@@ -1,6 +1,6 @@
-# ProductPage.meta.json — 字段语义注释
+# ProductPage 套件 meta.json — 字段语义注释
 
-> JSON 不能带注释，本文件是 `ProductPage.meta.json` 的知识存档。
+> JSON 不能带注释，本文件是套件 `meta.json`（components/products/ProductPage/）的知识存档。
 > 字段清单（key/shape/level）的唯一真相是旁边的 `.meta.json`；本文件只记**为什么**这么标注的语义依据，供后续维护参考。
 >
 > shape 取值：`section`=`{title,body_md}`（标题+正文树）｜ `list`=文本数组 ｜ `text`=单文本 ｜ `seo`=概括豁免
