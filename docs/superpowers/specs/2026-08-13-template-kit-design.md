@@ -212,3 +212,13 @@ titlePath 落位/chrome 自 example/草稿带套件名）；生产构建三阶�
   4 篇 JSON 声明 `template=自己`；en 路由已改套件派发（template 优先 → 同名套件回退），转发壳删除；
   en 路由提交基于已提交版打补丁，隔壁未提交的投影版留在工作区（其上已合入同一派发改动）；
 - `link-assets.mjs` 软链仓库根 `public/`（资产=内容层，换站自带 public；脚本本身通用）。
+
+### 7.6 真链实测（2026-08-14 深夜，HTTP 全链 + 真 key）与移交缺陷
+
+真链一遍（文档→选择→生成→落草稿→编辑页）：判族 posts ✓ / PostPage ✓ / 5 章节一次过 ✓ /
+unused=空 ✓ / 草稿落 content/posts ✓ / dist-edit 重建出页 ✓ / 编辑页 200 带编辑标记 ✓。
+顺带修掉引擎一处（`unused` 反查漏给 sections 形态加分支，`701cfe2`）。
+
+**移交给 edit-server（并行未提交文件，落地时改）**：① `/__burn-save` 重建失败清理分支写死
+`content/products`——posts 草稿失败时会清错目录；② `editUrl` 写死 `/products/<slug>/`——
+posts 草稿的「打开编辑器」链接 404（正确地址 `/posts/<slug>/`，实测 200）。
