@@ -28,10 +28,11 @@ for (const [label, p] of [['扁平布局组件', flatAstro], ['内容 JSON', con
 if (existsSync(kitDir)) { console.error(`❌ 套件目录已存在: ${kitDir}（要重建先删它）`); process.exit(1) }
 
 // ---------- ① index.astro：拷贝 + 两处机械改写 ----------
-// 相对 import 路径整体加一层 ../（套件目录比扁平件深一级）；旧仓 fragment 引用改指站内 chrome（S3）
+// src 根模块引用换成 @src 别名（components/posts/<名>.astro 的 '../../x.mjs' 恰指向 src/x.mjs；
+// 位置无关——拷进深一级的套件目录不用数层数）；旧仓 fragment 引用改指站内 chrome（S3）
 const astro = readFileSync(flatAstro, 'utf8')
 const fixedImports = astro
-  .replace(/(from\s+')((?:\.\.\/)+)/g, (m, pre, ups) => `${pre}../${ups}`) // 整段 ../ 前缀捕获后统一加一层
+  .replace(/(from\s+')\.\.\/\.\.\/([^']+\.mjs)'/g, "$1@src/$2'")
   .replace(/`\.\.\/src\/fragments\//g, '`src/chrome/')
 
 // ---------- ② meta.json：按 data-field 标记顺序自动配对 ----------

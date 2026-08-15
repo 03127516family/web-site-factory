@@ -2,8 +2,8 @@
 // 产品页组件（product@1 页族）：模版翻译自 src/templates/product.html——骨架逐标签照抄，
 // 固定字段挖洞填值，body 槽接 walker（render-doc.mjs），可选段按 JSON「在不在」裁剪（R16）。
 // data-* 坐标本期保留（geom 测量 + 后续编辑层挂载）；产物净化是构建开关，后议。
-import { renderDoc, renderSlot } from '../../../render-doc.mjs'
-import { splitByHeading } from '../../../tree-utils.mjs'
+import { renderDoc, renderSlot } from '@src/render-doc.mjs'
+import { splitByHeading } from '@src/tree-utils.mjs'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 

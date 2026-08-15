@@ -5,7 +5,7 @@
 // （T2 拍定，旧 4 篇继续走；旧 JSON 里残留的 src/templates/... 路径式 template 天然落空回退）。
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import Chrome from '../../layouts/Chrome.astro'
+import Chrome from '@layouts/Chrome.astro'
 
 const kitLayouts = import.meta.glob('../../components/posts/*/index.astro')
 const flatLayouts = import.meta.glob('../../components/posts/*.astro')

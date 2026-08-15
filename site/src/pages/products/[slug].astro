@@ -3,7 +3,7 @@
 // 模版由数据声明：page.template → components/products/<名>/index.astro（glob 派发）。
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import Chrome from '../../layouts/Chrome.astro'
+import Chrome from '@layouts/Chrome.astro'
 
 export function getStaticPaths() {
   const dir = join(process.cwd(), 'content/products')
