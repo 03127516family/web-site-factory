@@ -11,7 +11,9 @@ export function checkSentence(srcText, tgtMd, terms) {
     if (tgtMd.includes(zh)) fails.push(`map-residual:${zh}`)
   }
   const stripDates = s => s.replace(/\d{4}年\d{1,2}月(\d{1,2}日?)?/g, ' ') // 中文日期英译成月份名属正确译法，源侧豁免
-  const nums = s => (String(s).replace(/(\d),(\d{3})/g, '$1$2').match(/\d+(?:\.\d+)?/g) ?? [])
+  // 千分位归一须替换到不动点（评审 M3）：单遍 replace 处理不了 1,234,567——'1,234' 先并、',567' 残留第二轮才并
+  const stripThousands = s => { let t = String(s), p; while ((p = t.replace(/(\d),(\d{3})/g, '$1$2')) !== t) t = p; return t }
+  const nums = s => (stripThousands(s).match(/\d+(?:\.\d+)?/g) ?? [])
   const rest = nums(tgtMd)
   for (const n of nums(stripDates(srcText))) {
     const i = rest.indexOf(n)

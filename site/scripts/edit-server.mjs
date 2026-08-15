@@ -11,7 +11,7 @@ import { normalizeTree, setIn, splitByHeading, joinByHeading } from '../src/tree
 import { runPipeline, adoptMirror, approvePage, translateAll, consoleData } from '../src/i18n-pipeline.mjs'
 import { loadTm, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { loadTerms, saveTerms } from '../src/i18n-terms.mjs'
-import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
+import { projectPage, PENDING_CLASS, FAILED_CLASS } from '../src/i18n-project.mjs'
 import { logEvent } from '../src/i18n-events.mjs'
 import { scanPages } from '../src/i18n.mjs'
 import { createDeepseekCaller } from '../src/deepseek.mjs'
@@ -118,6 +118,7 @@ body.edl-on .edl-active > .ProseMirror{font:inherit!important;color:inherit!impo
 .edl-del{color:#dc2626;background:#fef2f2;text-decoration:line-through}
 .edl-note{color:#999;padding:6px 12px;font-size:12px}
 .${PENDING_CLASS}{background:#fef9c3;outline:1px dashed #eab308;border-radius:2px}
+.${FAILED_CLASS}{background:#fee2e2;outline:1px dashed #dc2626;border-radius:2px}
 </style>
 <script src="/__edit/edit-layer.js"></script>`
 
@@ -172,8 +173,12 @@ async function rebuild() {
   })
   await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build']) // 生产产物 dist（仅 published）
   await run([join(SITE, 'scripts/link-assets.mjs')])
-  await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' }) // 预览产物（含草稿）
-  await run([join(SITE, 'scripts/link-assets.mjs')], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' })
+  try {
+    await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' }) // 预览产物（含草稿）
+  } finally {
+    // 软链必须无条件补齐：astro 清理 outDir 会抹掉 assets，构建失败也不能让预览产物裸奔（两次「无 CSS」的根因）
+    await run([join(SITE, 'scripts/link-assets.mjs')], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' })
+  }
 }
 
 // 重建串行链：/__save、烧制落盘、后台翻译流水线共用一条链排队——防两个 astro build 并发写同一 outDir
@@ -183,6 +188,9 @@ let translateAllBusy = false // 全站送翻防重入闸（双击防护）
 
 const server = http.createServer(async (req, res) => {
   try {
+    // 评审 F3：Host 白名单——拦跨站 CSRF（恶意网页 no-cors 直打本地端口）与 DNS rebinding（改 Host 名读 GET）。
+    // 本地开发服只该被 localhost 访问；curl/浏览器/fetch 都天然满足。
+    if (!/^(127\.0\.0\.1|localhost):\d+$/.test(req.headers.host ?? '')) { res.writeHead(403); res.end(); return }
     if (req.method === 'POST' && req.url === '/__save') {
       let body = ''
       for await (const chunk of req) body += chunk
@@ -208,12 +216,15 @@ const server = http.createServer(async (req, res) => {
         const srcJ = JSON.parse(readFileSync(srcFile, 'utf8'))
         const tm = loadTm(srcJ.page.lang, lang)
         const { n, skipped } = adoptMirror(j, srcJ, tm, lang)
-        const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: j.page.status ?? 'draft', existingTrail: j.breadcrumb?.trail })
+        // 评审 P4：status 未显式传时【现读盘上最新值】——applyPatches 的 await 窗口里后台流水线可能已按 auto 置 published，拿 await 前的陈旧快照会把 published 拉回 draft
+        const existingStatus = status !== undefined ? status : JSON.parse(readFileSync(file, 'utf8')).page.status ?? 'draft'
+        const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus, existingTrail: j.breadcrumb?.trail })
         writeFileSync(file, JSON.stringify(mirror, null, 2) + '\n')
         if (n || skipped) console.log(`  [i18n] 镜像人审写回 ${n} 句${skipped ? `（${skipped} 句段错位被跳过：整段重写保持句数，或用审阅页通过按钮）` : ''}`)
-        await queueRebuild()
+        let rebuildError = null
+        try { await queueRebuild() } catch (e) { rebuildError = e.message } // 评审 M4：文件已落盘，重建失败≠保存被拒，如实分开报
         res.writeHead(200, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ ok: true, i18n: { adopted: n, skipped } })) // skipped 进响应体：被跳过不静默（edit-layer 可提示）
+        res.end(JSON.stringify({ ok: true, i18n: { adopted: n, skipped }, ...(rebuildError ? { rebuildError } : {}) })) // skipped 进响应体：被跳过不静默（edit-layer 可提示）
         return
       }
       writeFileSync(file, JSON.stringify(j, null, 2) + '\n')
@@ -236,9 +247,10 @@ const server = http.createServer(async (req, res) => {
           try { await queueRebuild() } catch (e) { console.error(`  [i18n] 流水线后重建失败 ${pageId}: ${e.message}`) }
         })()
       }
-      await queueRebuild()
+      let rebuildError = null
+      try { await queueRebuild() } catch (e) { rebuildError = e.message } // 评审 M4：同镜像分支——保存成功与重建失败分开报
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ ok: true }))
+      res.end(JSON.stringify({ ok: true, ...(rebuildError ? { rebuildError } : {}) }))
       return
     }
     if (req.method === 'POST' && req.url.startsWith('/__upload')) {
@@ -337,8 +349,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method !== 'GET') { res.writeHead(405); res.end(); return }
     if (req.url === '/__edit/edit-layer.js') {
+      const js = readFileSync(join(SITE, 'edit-layer/dist/edit-layer.js')) // 先取数再写头——写头后抛错 catch 再 writeHead 会崩进程（评审实证）
       res.writeHead(200, { 'Content-Type': 'text/javascript' })
-      res.end(readFileSync(join(SITE, 'edit-layer/dist/edit-layer.js')))
+      res.end(js)
       return
     }
     if (req.url === '/__burn') {
@@ -362,15 +375,17 @@ const server = http.createServer(async (req, res) => {
       return
     }
     if (req.url === '/__i18n/data') {
+      const data = JSON.stringify(consoleData()) // 先取数再写头（同 /__edit 分支注释）
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify(consoleData()))
+      res.end(data)
       return
     }
     if (req.url?.startsWith('/__i18n/terms')) {
       const u = new URL(req.url, 'http://x')
       const src = u.searchParams.get('src') || 'zh-CN', tgt = u.searchParams.get('tgt') || 'en'
+      const data = JSON.stringify(loadTerms(src, tgt)) // 语言码非法在此抛 → 统一 400（先取数再写头，防 headers 已发崩进程）
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify(loadTerms(src, tgt)))
+      res.end(data)
       return
     }
     if (req.url?.startsWith('/__i18n/review/')) {
@@ -379,6 +394,7 @@ const server = http.createServer(async (req, res) => {
       const pageId = decodeURIComponent(u.pathname.split('/').pop())
       const lang = u.searchParams.get('lang') || 'en'
       if (!/^[a-z][a-z0-9-]*$/i.test(lang)) throw new Error('lang 非法') // 内联进 iframe/script，白名单形态防注入
+      if (!/^[\w-]+$/.test(pageId)) throw new Error('pageId 非法') // 评审 M5：内联进标题/script，同款形态闸（存在性检查之外加一道）
       const srcPg = scanPages().find(p => p.pageId === pageId && !p.langDir)
       if (!srcPg) { res.writeHead(404); res.end('页面不存在'); return }
       const html = `<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>审校 ${pageId}</title>
@@ -386,8 +402,9 @@ const server = http.createServer(async (req, res) => {
 .bar{display:flex;gap:12px;align-items:center;padding:8px 14px;background:#1f2430;color:#fff}
 .bar button{border:0;border-radius:6px;padding:8px 18px;background:#16a34a;color:#fff;cursor:pointer}
 .bar .tip{font-size:12px;color:#94a3b8}.panes{flex:1;display:flex}.panes iframe{flex:1;border:0;border-right:1px solid #ddd}
-.tag{padding:2px 8px;border-radius:4px;background:#fef9c3;color:#854d0e;font-size:12px}</style></head>
-<body><div class="bar"><b>${pageId}</b><span class="tag">黄底=待审句</span>
+.tag{padding:2px 8px;border-radius:4px;background:#fef9c3;color:#854d0e;font-size:12px}
+.tag.red{background:#fee2e2;color:#991b1b}</style></head>
+<body><div class="bar"><b>${pageId}</b><span class="tag">黄底=待审句</span><span class="tag red">红底=拒收句（引擎验收没过，重点看）</span>
 <span class="tip">左中文现状 · 右英文草稿（在右页直接点字改=改完保存即审过）</span>
 <button id="ok">✓ 通过并发布</button><span id="msg" class="tip"></span></div>
 <div class="panes"><iframe src="/${srcPg.slug}/"></iframe><iframe src="/${lang}/${srcPg.slug}/"></iframe></div>
@@ -407,8 +424,14 @@ const server = http.createServer(async (req, res) => {
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' })
     res.end(ext === '.html' ? data.toString().replace('</body>', INJECT + '</body>') : data)
   } catch (e) {
-    res.writeHead(400, { 'Content-Type': 'application/json' })
-    res.end(JSON.stringify({ error: e.message }))
+    // 评审加固：headers 已发（流中途抛错）时再 writeHead 会 ERR_HTTP_HEADERS_SENT 直接崩进程——降级尽力收尾
+    if (!res.headersSent) {
+      res.writeHead(400, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: e.message }))
+    } else {
+      try { res.end() } catch {}
+      console.error(`  [edit] 中途失败 ${req.method} ${req.url}: ${e.message}`)
+    }
   }
 })
 server.requestTimeout = 600_000

@@ -45,7 +45,9 @@ export function scanPages({ withJson = false } = {}) {
       for (const f of readdirSync(join(abs, typeDir.name))) {
         if (!f.endsWith('.json')) continue // .bak 等杂物不登记
         const file = join(sub, typeDir.name, f)
-        const j = JSON.parse(readFileSync(join(dir, file), 'utf8'))
+        let j
+        try { j = JSON.parse(readFileSync(join(dir, file), 'utf8')) } // 评审 M6：损坏报错带文件路径（readJ/loadConfig 同款纪律）
+        catch (e) { throw new Error(`内容 JSON 损坏/不可读 ${join(dir, file)}: ${e.message}`) }
         const pg = {
           pageId: f.replace(/\.json$/, ''), // 跨语言配对键（R36 身份）
           type,
@@ -73,7 +75,10 @@ export function buildGroups(pages) {
     g.push(pg)
     groups.set(pg.pageId, g)
   }
-  for (const g of groups.values()) g.sort((a, b) => (a.langDir === null ? -1 : b.langDir === null ? 1 : 0))
+  for (const g of groups.values()) {
+    if (new Set(g.map(m => m.type)).size > 1) throw new Error(`pageId 跨类型撞名（posts 与 products 同名文件会并组、findSource 择源歧义）：${g[0].pageId}`) // 评审 M7
+    g.sort((a, b) => (a.langDir === null ? -1 : b.langDir === null ? 1 : 0))
+  }
   return groups
 }
 

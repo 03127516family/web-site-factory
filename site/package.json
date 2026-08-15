@@ -8,6 +8,7 @@
     "build": "astro build && node scripts/link-assets.mjs",
     "preview": "astro preview",
     "geom": "node scripts/geom-check.mjs",
+    "check": "node scripts/i18n-registry.mjs --check && node scripts/accept-i18n2.mjs",
     "i18n:registry": "node scripts/i18n-registry.mjs",
     "i18n:harvest": "node scripts/i18n-harvest.mjs",
     "accept:poc5": "node scripts/accept-poc5.mjs",

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 // accept-i18n2：翻译块重设计全链验收（引擎 mock，无 key 全绿）。
 import assert from 'node:assert/strict'
-import { join } from 'node:path'
+import { join, dirname } from 'node:path'
 import { rmSync, readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
-import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
+import { projectPage, PENDING_CLASS, FAILED_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
@@ -783,6 +783,87 @@ test('端点层:saveConfig 自动开关往返', () => {
     saveConfig({ auto: !c0.auto }) // 控制台①拨开关 → 落盘
     assert.equal(loadConfig().auto, !c0.auto)
   } finally { saveConfig({ auto: c0.auto }) } // 还原
+})
+
+// ---------- 评审修复合集（总评审+三路快查：C1/M3/D1/M6/M7/I2/M1 属性钉） ----------
+test('安全:语言码白名单单点闸（tm/terms 路径穿越拒收）', () => {
+  assert.throws(() => loadTm('x', '../../../evil'), /语言码非法/)
+  assert.throws(() => loadTm('a/b', 'en'), /语言码非法/)
+  assert.throws(() => saveTerms('zh-CN', '../../package', { lock: [], map: {} }), /语言码非法/)
+  assert.throws(() => loadTerms('..', 'en'), /语言码非法/)
+  assert.doesNotThrow(() => loadTm('zh-CN', 'en')) // 合法码照常
+})
+test('检查:千分位多逗号组归一到不动点（1,234,567）', () => {
+  const ok = checkSentence('共 1,234,567 台设备。', 'A total of 1234567 units.', { lock: [], map: {} })
+  assert.ok(ok.ok, ok.fails.join(','))
+  assert.ok(checkSentence('共 1,234,567 台。', 'many units.', { lock: [], map: {} }).fails.includes('number:1234567')) // 数字真缺了仍拦
+  assert.ok(checkSentence('共 1,234 台。', '1234 units.', { lock: [], map: {} }).ok) // 单逗号组回归不变
+})
+test('红标:failed 句 full 投影挂 i18n-failed（与未译黄标区分）+ 人审转正清 error', () => {
+  cleanup(); fixture()
+  const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  const failed = collectUnits(srcJ).find(u => u.text === '第一句。')
+  const tm = { pair: 'zh-CN>t9', sentences: {} }
+  upsert(tm, failed.fp, { text: failed.text, translation: '', status: 'failed', origin: 'engine', error: 'map-missing:测试→test' })
+  const mir = projectPage(srcJ, tm, 'full', { lang: 't9' })
+  const marks = mir.overview.body.content.flatMap(p => (p.content ?? [])).flatMap(n => n.marks ?? []).map(m => m.attrs?.class)
+  assert.ok(marks.includes(FAILED_CLASS)) // 拒收句=红标中文占位
+  assert.ok(marks.includes(PENDING_CLASS)) // 未译句=黄标，两类可区分（spec §7 红绿）
+  // 人审把红标句就地改掉 → adoptMirror 剥红标不炸 wrapMarks、转正且清 error 键（评审 D1）
+  const par = mir.overview.body.content.find(p => (p.content ?? []).some(n => (n.marks ?? []).some(m => m.attrs?.class === FAILED_CLASS)))
+  par.content = applyInlineUnit(par.content, 0, 'Human fixed it.')
+  const { n, skipped } = adoptMirror(mir, srcJ, tm, 't9')
+  assert.ok(n >= 1); assert.equal(skipped, 0)
+  assert.equal(tm.sentences[failed.fp].status, 'approved')
+  assert.equal('error' in tm.sentences[failed.fp], false)
+  cleanup()
+})
+test('转正:approvePage draft→approved 清 error 键（人审路补 2c5be01 漏的同款）', () => {
+  cleanup(); fixture()
+  const units = collectUnits(JSON.parse(readFileSync(FIX_FILE(), 'utf8')))
+  const tm = { pair: 'zh-CN>t9', sentences: {} }
+  for (const u of units) upsert(tm, u.fp, { text: u.text, translation: `Translation for ${units.indexOf(u)}.`, status: 'draft', origin: 'engine', error: 'stale-reason' })
+  approvePage(FIX, 't9', tm, id => JSON.parse(readFileSync(FIX_FILE().replace(FIX, id), 'utf8')))
+  const after = loadTm('zh-CN', 't9')
+  assert.ok(Object.values(after.sentences).every(e => e.status === 'approved' && !('error' in e)))
+  cleanup()
+})
+test('族谱:pageId 跨类型撞名抛错（防并组/择源歧义，改坏不静默）', () => {
+  const pages = [
+    { pageId: 'dup', type: 'post', langDir: null, lang: 'zh-CN', slug: 'posts/dup', file: 'posts/dup.json', status: 'published' },
+    { pageId: 'dup', type: 'product', langDir: null, lang: 'zh-CN', slug: 'products/dup', file: 'products/dup.json', status: 'published' },
+  ]
+  assert.throws(() => buildGroups(pages), /跨类型撞名/)
+  assert.doesNotThrow(() => buildGroups(pages.slice(0, 1)))
+})
+test('族谱:内容 JSON 损坏报错带文件名（不再裸 parse）', () => {
+  const bad = join(process.cwd(), 'content', 'posts', 'zz-corrupt-fixture.json')
+  writeFileSync(bad, '{broken')
+  try { assert.throws(() => scanPages(), /zz-corrupt-fixture\.json/) }
+  finally { rmSync(bad) }
+})
+test('收割:只补新句——盘上既有条目（draft/并发窗口形）原样保留不被覆盖', () => {
+  cleanup(); fixture()
+  const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  const units = collectUnits(srcJ)
+  const u1 = units.find(u => u.text === '第一句。'), u2 = units.find(u => u.text === '第二句。')
+  const tm = { pair: 'zh-CN>t9', sentences: {} }
+  const mir = projectPage(srcJ, tm, 'full', { lang: 't9' })
+  const par = mir.overview.body.content.find(p => p.type === 'paragraph')
+  par.content = applyInlineUnit(par.content, 1, 'Human two.') // 降序回植防 si 漂移；si0 补 trail 气口防并句
+  par.content = applyInlineUnit(par.content, 0, 'Human one.', { trail: ' ' })
+  mkdirSync(dirname(MIR_FILE()), { recursive: true })
+  writeFileSync(MIR_FILE(), JSON.stringify(mir, null, 2))
+  // 盘上已有：u1 人审终态 + u2 引擎 draft（模拟收割窗口里编辑服并发落的账）
+  upsert(tm, u1.fp, { text: u1.text, translation: 'Human one.', status: 'approved', origin: 'human' })
+  upsert(tm, u2.fp, { text: u2.text, translation: 'Engine draft two.', status: 'draft', origin: 'engine' })
+  saveTm('zh-CN', 't9', tm)
+  const { harvested } = harvestMirror(FIX, 't9')
+  const after = loadTm('zh-CN', 't9')
+  assert.equal(harvested, 0) // 两句盘上都已有 → 不收
+  assert.equal(after.sentences[u2.fp].translation, 'Engine draft two.') // draft 不被镜像人译覆盖（只补新句）
+  assert.equal(after.sentences[u2.fp].status, 'draft')
+  cleanup()
 })
 
 // ---------- 汇总（结构勿动；M-5 增补 finally 一行兜底清夹具） ----------

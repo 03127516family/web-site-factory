@@ -645,6 +645,11 @@ async function doSave(status) {
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) { alert('保存被拒：\n' + (data.error || res.status)); return } // V4：schema 拒收信息直达用户
+  // 评审 I1：镜像人审写回若跳过句（段句数与源不一致整段不采纳），如实弹窗——服务端落的是重投影产物，
+  // 不提示的话用户会以为自己改的句已生效，reload 后字变回去且零解释
+  if (data.i18n?.skipped) alert(`本次有 ${data.i18n.skipped} 句未采纳（所在段句数与源不一致，整段跳过防张冠李戴）。\n该段请整段重写并保持句数一致，或到翻译控制台用「通过并发布」。`)
+  // 评审 M4：文件已保存但重建失败——不是「保存被拒」，如实分开报
+  if (data.rebuildError) alert('已保存到内容文件，但页面重建失败（生产站可能仍显示旧版）：\n' + data.rebuildError)
   $('#edlModal').hidden = true
   state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.chunks.clear(); state.dirty.arrays.clear()
   if (status === 'published') { sessionStorage.setItem('edlReenter', '1'); alert('已发布，页面已重建'); location.reload() }

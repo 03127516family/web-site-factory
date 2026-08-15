@@ -2,7 +2,14 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 
-export const tmPath = (src, tgt) => join(process.cwd(), 'src', 'i18n', `tm.${src}.${tgt}.json`)
+// 语言码白名单（评审 C1：路径穿越防线）：src/tgt 只许 [\w-]，"../" 越狱当场拒——
+// 进文件路径的唯一闸口，terms 表同款复用；端点层无需各自再防。
+export const assertLangCode = x => {
+  if (!/^[\w-]+$/.test(String(x))) throw new Error(`语言码非法: ${JSON.stringify(String(x))}`)
+  return x
+}
+
+export const tmPath = (src, tgt) => join(process.cwd(), 'src', 'i18n', `tm.${assertLangCode(src)}.${assertLangCode(tgt)}.json`)
 
 export function loadTm(src, tgt) {
   const f = tmPath(src, tgt)

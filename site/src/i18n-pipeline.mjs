@@ -4,7 +4,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { scanPages, buildGroups } from './i18n.mjs'
 import { collectUnits } from './i18n-collect.mjs'
-import { projectPage, PENDING_CLASS } from './i18n-project.mjs'
+import { projectPage, PENDING_CLASS, ANNO_CLASSES } from './i18n-project.mjs'
 import { loadTm, saveTm, upsert, loadConfig } from './i18n-tm.mjs'
 import { loadTerms } from './i18n-terms.mjs'
 import { translateSegments } from './i18n-engine.mjs'
@@ -113,7 +113,9 @@ export function adoptMirror(mirrorJ, srcJ, tm, lang) {
     if (e) {
       if (sameish(cur, u.text)) continue // 仍是中文占位/未变
       if (sameish(cur, e.translation)) continue // 只是投影 artifact，非人工编辑
-      upsert(tm, u.fp, { translation: cur, status: 'approved', origin: 'human' }); n++
+      upsert(tm, u.fp, { translation: cur, status: 'approved', origin: 'human' })
+      delete tm.sentences[u.fp].error // 人审转正清旧 error 键（评审 D1：引擎路 2c5be01 清了，人审两条路漏同款）
+      n++
     } else if (!sameish(cur, u.text)) {
       upsert(tm, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'human' }); n++
     }
@@ -143,7 +145,7 @@ function alignSentGroups(mirrorJ, units) {
   return { aligned, skipped }
 }
 
-const stripPending = marks => (marks ?? []).filter(m => !(m.type === 'span' && m.attrs?.class === PENDING_CLASS)) // M-4：复用注册常量（不剥注解 wrapMarks 遇 span 抛错）
+const stripPending = marks => (marks ?? []).filter(m => !(m.type === 'span' && ANNO_CLASSES.includes(m.attrs?.class))) // M-4：注解类全集判（pending+failed，红标句也要剥——不剥 wrapMarks 遇 span 抛错）
 
 // 镜像段行内容（剥 pending 注解）；坐标取不到返 null
 function mirrorInline(mirrorJ, u) {
@@ -184,7 +186,7 @@ export function approvePage(pageId, lang, tm, readSrc) {
   let approved = 0
   for (const u of units) {
     const e = tm.sentences[u.fp]
-    if (e?.status === 'draft') { upsert(tm, u.fp, { status: 'approved', origin: 'human' }); approved++ }
+    if (e?.status === 'draft') { upsert(tm, u.fp, { status: 'approved', origin: 'human' }); delete tm.sentences[u.fp].error; approved++ } // 人审转正清旧 error 键（评审 D1）
   }
   saveTm(srcJ.page.lang, lang, tm)
   const source = findSource(pageId)
@@ -221,23 +223,26 @@ export function consoleData() {
   return { auto: cfg.auto, review: cfg.review, pages }
 }
 
-// 存量收割（Task 13 CLI 用）：把现有镜像里已翻好的句子收进 TM 当 approved
+// 存量收割（Task 13 CLI 用）：把现有镜像里已翻好的句子收进 TM 当 approved。
+// 评审 M1：本函数跑在 CLI 独立进程——与 edit-server 并发时整文件覆盖会丢窗口内 TM 更新，
+// 故写前重读盘现值、只补收割新句（收割只增不改，天然可合并）；镜像重投影仍是整文件覆盖，
+// 收割时最好停编辑服（跑法注明在 scripts/i18n-harvest.mjs 头部）。
 export function harvestMirror(pageId, lang) {
   const source = findSource(pageId)
   const srcJ = readJ(source.file)
   const mirFile = join(lang, source.file)
   if (!existsSync(join(CONTENT(), mirFile))) throw new Error(`${pageId} 无 ${lang} 镜像可收割`)
   const mirrorJ = readJ(mirFile)
-  const tm = loadTm(srcJ.page.lang, lang)
   const units = collectUnits(srcJ)
   const { aligned, skipped } = alignSentGroups(mirrorJ, units) // C-1：sent 只在段对齐成立时收
+  const fresh = loadTm(srcJ.page.lang, lang) // 现读盘上现值（收割对齐耗时几十 ms~秒，防跨进程丢更新）
   let n = 0
   for (const u of units) {
     const cur = u.kind === 'sent' ? aligned.get(`${u.field}|${u.path}`)?.[u.si] ?? null : mirrorSentence(mirrorJ, u)
-    if (cur && !sameish(cur, u.text) && !tm.sentences[u.fp]) { upsert(tm, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'harvest' }); n++ }
+    if (cur && !sameish(cur, u.text) && !fresh.sentences[u.fp]) { upsert(fresh, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'harvest' }); n++ }
   }
-  saveTm(srcJ.page.lang, lang, tm)
-  const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: mirrorJ.page.status ?? 'published', existingTrail: mirrorJ.breadcrumb?.trail })
+  saveTm(srcJ.page.lang, lang, fresh)
+  const mirror = projectPage(srcJ, fresh, 'full', { lang, existingStatus: mirrorJ.page.status ?? 'published', existingTrail: mirrorJ.breadcrumb?.trail })
   writeJ(mirFile, mirror)
   logEvent(source.slug, 'harvest', { lang, sentences: n, skipped }) // 段不对齐跳过的句数留痕（宁可漏收养错）
   return { harvested: n, skipped } // T13 CLI 如实报「收 N 句、跳 M 句」

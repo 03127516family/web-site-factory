@@ -32,6 +32,17 @@
         }
       }
     },
+    "aaaa": {
+      "type": "product",
+      "langs": {
+        "zh-CN": {
+          "slug": "products/aaaa",
+          "file": "content/products/aaaa.json",
+          "status": "draft",
+          "source": true
+        }
+      }
+    },
     "crane-lifting-safety-training": {
       "type": "post",
       "langs": {
@@ -40,6 +51,11 @@
           "file": "content/posts/crane-lifting-safety-training.json",
           "status": "published",
           "source": true
+        },
+        "en": {
+          "slug": "en/posts/crane-lifting-safety-training",
+          "file": "content/en/posts/crane-lifting-safety-training.json",
+          "status": "draft"
         }
       }
     },
@@ -49,8 +65,13 @@
         "zh-CN": {
           "slug": "products/free-standing-jib-cranes",
           "file": "content/products/free-standing-jib-cranes.json",
-          "status": "published",
+          "status": "draft",
           "source": true
+        },
+        "en": {
+          "slug": "en/products/free-standing-jib-cranes",
+          "file": "content/en/products/free-standing-jib-cranes.json",
+          "status": "published"
         }
       }
     },
@@ -62,6 +83,11 @@
           "file": "content/posts/gantry-cranes-for-sale.json",
           "status": "published",
           "source": true
+        },
+        "en": {
+          "slug": "en/posts/gantry-cranes-for-sale",
+          "file": "content/en/posts/gantry-cranes-for-sale.json",
+          "status": "draft"
         }
       }
     },
@@ -73,6 +99,11 @@
           "file": "content/products/multi-point-suspension-cranes.json",
           "status": "published",
           "source": true
+        },
+        "en": {
+          "slug": "en/products/multi-point-suspension-cranes",
+          "file": "content/en/products/multi-point-suspension-cranes.json",
+          "status": "draft"
         }
       }
     },
@@ -84,6 +115,11 @@
           "file": "content/products/overhead-cranes-for-sale.json",
           "status": "published",
           "source": true
+        },
+        "en": {
+          "slug": "en/products/overhead-cranes-for-sale",
+          "file": "content/en/products/overhead-cranes-for-sale.json",
+          "status": "draft"
         }
       }
     },
@@ -94,6 +130,33 @@
           "slug": "products/single-girder-eot-cranes",
           "file": "content/products/single-girder-eot-cranes.json",
           "status": "published",
+          "source": true
+        },
+        "en": {
+          "slug": "en/products/single-girder-eot-cranes",
+          "file": "content/en/products/single-girder-eot-cranes.json",
+          "status": "draft"
+        }
+      }
+    },
+    "wwww-xaxaa": {
+      "type": "post",
+      "langs": {
+        "zh-CN": {
+          "slug": "posts/wwww-xaxaa",
+          "file": "content/posts/wwww-xaxaa.json",
+          "status": "draft",
+          "source": true
+        }
+      }
+    },
+    "wwww-xaxaa-2": {
+      "type": "post",
+      "langs": {
+        "zh-CN": {
+          "slug": "posts/wwww-xaxaa-2",
+          "file": "content/posts/wwww-xaxaa-2.json",
+          "status": "draft",
           "source": true
         }
       }

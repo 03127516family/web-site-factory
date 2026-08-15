@@ -44,6 +44,8 @@
 <div id="toast"></div>
 <script>
 const $ = s => document.querySelector(s)
+// 评审 F2：所有插进 innerHTML 的动态值先过 esc（数据源是内容 JSON/术语表——可被投毒的存储位，同 burn-console 的 esc 纪律）
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
 const toast = m => { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2600) }
 let terms = { lock: [], map: {} }
 
@@ -54,15 +56,15 @@ async function loadData() {
   tb.innerHTML = d.pages.map(p => {
     const lamp = p.failed ? `<span class="lamp red">${p.failed}</span>` : `<span class="lamp green">0</span>`
     const pend = p.pending ? `<span class="lamp yellow">${p.pending}</span>` : `<span class="lamp green">0</span>`
-    const go = p.lang ? `<a href="/__i18n/review/${p.pageId}?lang=${p.lang}"><button class="ghost">去审</button></a>` : '（无镜像）'
-    return `<tr><td>${p.pageId}</td><td>${p.lang ?? '—'}</td><td>${pend}</td><td>${lamp}</td><td>${p.untranslated}</td><td>${p.status}</td><td>${go}</td></tr>`
+    const go = p.lang ? `<a href="/__i18n/review/${encodeURIComponent(p.pageId)}?lang=${encodeURIComponent(p.lang)}"><button class="ghost">去审</button></a>` : '（无镜像）'
+    return `<tr><td>${esc(p.pageId)}</td><td>${esc(p.lang ?? '—')}</td><td>${pend}</td><td>${lamp}</td><td>${p.untranslated}</td><td>${esc(p.status)}</td><td>${go}</td></tr>`
   }).join('')
 }
 async function loadTerms() {
   terms = await (await fetch('/__i18n/terms')).json()
-  $('#locks').innerHTML = terms.lock.map(w => `<span class="lamp yellow">${w} <a href="#" data-w="${w}" class="delLock">✕</a></span>`).join('')
+  $('#locks').innerHTML = terms.lock.map(w => `<span class="lamp yellow">${esc(w)} <a href="#" data-w="${esc(w)}" class="delLock">✕</a></span>`).join('')
   document.querySelector('#maps tbody').innerHTML = Object.entries(terms.map).map(([zh, en]) =>
-    `<tr><td>${zh}</td><td>${en}</td><td><a href="#" data-zh="${zh}" class="delMap">删</a></td></tr>`).join('')
+    `<tr><td>${esc(zh)}</td><td>${esc(en)}</td><td><a href="#" data-zh="${esc(zh)}" class="delMap">删</a></td></tr>`).join('')
 }
 async function saveTerms() {
   const r = await fetch('/__i18n/terms', { method: 'POST', body: JSON.stringify(terms) })
