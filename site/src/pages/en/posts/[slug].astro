@@ -11,8 +11,11 @@ import { scanPages, buildGroups, isPublishable } from '../../../i18n.mjs'
 export function getStaticPaths() {
   const dir = join(process.cwd(), 'content/en/posts')
   if (!existsSync(dir)) return [] // 该语言还没有此类型镜像
-  const haveLayout = new Set(Object.keys(import.meta.glob('../../../components/posts/*.astro'))
-    .map(p => p.split('/').pop().replace('.astro', '')))
+  // 有骨架才出页：套件目录（components/posts/<名>/）或扁平组件任一（glob 须函数体内现调，Astro 提 chunk 限制）
+  const haveLayout = new Set([
+    ...Object.keys(import.meta.glob('../../../components/posts/*/index.astro')).map(p => p.split('/').at(-2)),
+    ...Object.keys(import.meta.glob('../../../components/posts/*.astro')).map(p => p.split('/').pop().replace('.astro', '')),
+  ])
   const pages = scanPages({ withJson: true })
   const groups = buildGroups(pages)
   const bySlug = new Map(pages.map(p => [p.slug, p]))
@@ -29,8 +32,13 @@ export function getStaticPaths() {
 }
 
 const { j } = Astro.props
-const layouts = import.meta.glob('../../../components/posts/*.astro')
-const Comp = (await layouts[`../../../components/posts/${Astro.params.slug}.astro`]()).default
+const slug = Astro.params.slug
+// 派发同 zh：数据声明 template 的套件优先 → 同名套件（en JSON 的 template 仍是旧路径式）→ 扁平回退
+const kitLayouts = import.meta.glob('../../../components/posts/*/index.astro')
+const flatLayouts = import.meta.glob('../../../components/posts/*.astro')
+const kit = kitLayouts[`../../../components/posts/${j.page.template}/index.astro`]
+  ?? kitLayouts[`../../../components/posts/${slug}/index.astro`]
+const Comp = kit ? (await kit()).default : (await flatLayouts[`../../../components/posts/${slug}.astro`]()).default
 ---
 <Chrome j={j}>
 	<Comp j={j} />
