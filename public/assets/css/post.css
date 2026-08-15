@@ -108,3 +108,10 @@ body .is-layout-flex { display: flex; }
 #p_author .rightname p { font-size: 14px !important; color: #000000; font-weight: 700; margin: 20px 0 !important; padding: 0; }
 #p_author .rightname h5 { margin: 10px 0 !important; font-size: 14px !important; }
 #p_author .rightname h5 a { font-size: 14px !important; color: #003399; font-weight: 700 !important; padding: 0; text-decoration-line: underline !important; text-transform: lowercase; }
+
+/* ---------- 5. 询盘表单区（清浮动修复 2026-08-14） ----------
+   表单包装 #from-2 在 main.css 里是 float:left、宽 700（产品页家族的写法）。
+   文章页 .post-inquiry 直接接 footer，不清浮动 → footer 上滑垫到表单底下
+   （表单视觉上"嵌进"页脚，与真站文章页 #list-form 独立成块的样式不符）。
+   清浮动后 section 包住表单、footer 落在表单下方——对齐真站。 */
+.post-inquiry::after { content: ""; display: table; clear: both; }
