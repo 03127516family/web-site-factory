@@ -1,4 +1,4 @@
-// mdast → 语义树 映射（md-to-json 与 i18n-apply 共用）。
+// mdast → 语义树 映射（md-to-json / i18n-project / i18n-sent / burn-lib 共用）。
 // 烧树只此一份逻辑：未映射的节点一律抛错（先定语义再扩注册表，不静默降级）。
 import { fromMarkdown } from 'mdast-util-from-markdown'
 import { gfm } from 'micromark-extension-gfm'
@@ -84,7 +84,7 @@ export const mdToDoc = md => ({
   content: mapBlock(fromMarkdown(md, { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] }).children),
 })
 
-// 单行 inline markdown → inline 节点数组（i18n-apply 译文回解析用）。
+// 单行 inline markdown → inline 节点数组（i18n-sent 译文回植用：inlineMdToNodes）。
 // 入参必须恰好解析出一个段落——译文里冒出多段/表格/图片 = 翻译节点越界，抛错。
 export function inlineMdToNodes(md) {
   const ast = fromMarkdown(String(md), { extensions: [gfm()], mdastExtensions: [gfmFromMarkdown()] })

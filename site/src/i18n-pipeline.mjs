@@ -54,15 +54,21 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   if (translate && missing.length) {
     const terms = loadTerms(srcJ.page.lang, lang)
     const r = await translateSegments(missing, terms, { callAI })
+    // 竞态防护（T10 质量审 Major-1）：翻译窗口（秒~分钟）里其他演员（审阅页人审/approve/另一次发布）
+    // 可能已往盘上 TM 落了新条目——本副本已陈旧。写前重读盘上现值，只合并本次触碰的 fp；
+    // 不降级：盘上 approved 是人审终态，胜过引擎 draft/failed。
+    const fresh = loadTm(srcJ.page.lang, lang)
     for (const u of missing) {
       if (r.ok[u.id]) {
-        upsert(tm, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' })
-        delete tm.sentences[u.fp].error // 失败转正清旧 error 键（upsert 浅合并不清旧键，数据卫生）
+        if (fresh.sentences[u.fp]?.status === 'approved') continue // 窗口内已被人工审过，机器稿让位
+        upsert(fresh, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' })
+        delete fresh.sentences[u.fp].error // 失败转正清旧 error 键（upsert 浅合并不清旧键，数据卫生）
         translated++
       }
-      else { upsert(tm, u.fp, { text: u.text, translation: '', status: 'failed', origin: 'engine', error: r.fail[u.id] ?? 'unknown' }); failed++ }
+      else { upsert(fresh, u.fp, { text: u.text, translation: '', status: 'failed', origin: 'engine', error: r.fail[u.id] ?? 'unknown' }); failed++ }
     }
-    saveTm(srcJ.page.lang, lang, tm)
+    Object.assign(tm, fresh) // 后续投影/待审计数用合并后的账本
+    saveTm(srcJ.page.lang, lang, fresh)
     logEvent(source.slug, 'auto-translate', { lang, translated, failed })
   }
   // 重投影镜像（结构同步在此）：full 模式 + 保留现有 status；auto 语言直发

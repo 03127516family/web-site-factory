@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>翻译控制台</title>
+<style>
+  body{margin:0;font:14px/1.6 -apple-system,"PingFang SC",sans-serif;background:#f6f7f9;color:#1f2430}
+  header{background:#1f2430;color:#fff;padding:12px 20px;display:flex;gap:14px;align-items:center}
+  header a{color:#93c5fd;text-decoration:none}
+  main{max-width:960px;margin:20px auto;padding:0 16px;display:flex;flex-direction:column;gap:16px}
+  .card{background:#fff;border-radius:12px;padding:16px 20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .card h2{margin:0 0 10px;font-size:16px}
+  table{width:100%;border-collapse:collapse}
+  td,th{padding:6px 10px;border-bottom:1px solid #eee;text-align:left;font-size:13px}
+  .lamp{display:inline-block;min-width:34px;text-align:center;padding:2px 8px;border-radius:999px;font-size:12px}
+  .lamp.red{background:#fef2f2;color:#dc2626}.lamp.yellow{background:#fef9c3;color:#854d0e}.lamp.green{background:#f0fdf4;color:#16a34a}
+  button{border:0;border-radius:6px;padding:7px 16px;cursor:pointer;background:#2563eb;color:#fff}
+  button.ghost{background:#e5e7eb;color:#333}
+  button:disabled{opacity:.5;cursor:wait}
+  input[type=text]{padding:6px 8px;border:1px solid #ddd;border-radius:6px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1f2430;color:#fff;padding:8px 18px;border-radius:8px;display:none}
+</style>
+</head>
+<body>
+<header><b>翻译控制台</b><a href="/__burn">烧制台 →</a></header>
+<main>
+  <div class="card"><h2>① 自动翻译</h2>
+    <div class="row"><label><input type="checkbox" id="auto"> 中文发布时自动送翻（关=只检测+亮灯攒待办）</label></div>
+  </div>
+  <div class="card"><h2>② 待审</h2>
+    <div class="row" style="margin-bottom:10px"><button id="translateAll">③ 立即翻译全部待办</button><span id="taMsg" style="font-size:12px;color:#888"></span></div>
+    <table id="pending"><thead><tr><th>页面</th><th>语言</th><th>待审</th><th>失败</th><th>未翻</th><th>状态</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card"><h2>④ 术语表（中→英）</h2>
+    <h3 style="font-size:13px;margin:8px 0">锁词（原样不译）</h3>
+    <div id="locks" class="row"></div>
+    <div class="row" style="margin-top:8px"><input type="text" id="lockAdd" placeholder="加锁词，如 QD"><button class="ghost" id="lockAddBtn">添加</button></div>
+    <h3 style="font-size:13px;margin:14px 0 8px">固定译法</h3>
+    <table id="maps"><tbody></tbody></table>
+    <div class="row" style="margin-top:8px"><input type="text" id="mapZh" placeholder="中文"><input type="text" id="mapEn" placeholder="固定英文"><button class="ghost" id="mapAddBtn">添加</button></div>
+  </div>
+</main>
+<div id="toast"></div>
+<script>
+const $ = s => document.querySelector(s)
+const toast = m => { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 2600) }
+let terms = { lock: [], map: {} }
+
+async function loadData() {
+  const d = await (await fetch('/__i18n/data')).json()
+  $('#auto').checked = d.auto
+  const tb = document.querySelector('#pending tbody')
+  tb.innerHTML = d.pages.map(p => {
+    const lamp = p.failed ? `<span class="lamp red">${p.failed}</span>` : `<span class="lamp green">0</span>`
+    const pend = p.pending ? `<span class="lamp yellow">${p.pending}</span>` : `<span class="lamp green">0</span>`
+    const go = p.lang ? `<a href="/__i18n/review/${p.pageId}?lang=${p.lang}"><button class="ghost">去审</button></a>` : '（无镜像）'
+    return `<tr><td>${p.pageId}</td><td>${p.lang ?? '—'}</td><td>${pend}</td><td>${lamp}</td><td>${p.untranslated}</td><td>${p.status}</td><td>${go}</td></tr>`
+  }).join('')
+}
+async function loadTerms() {
+  terms = await (await fetch('/__i18n/terms')).json()
+  $('#locks').innerHTML = terms.lock.map(w => `<span class="lamp yellow">${w} <a href="#" data-w="${w}" class="delLock">✕</a></span>`).join('')
+  document.querySelector('#maps tbody').innerHTML = Object.entries(terms.map).map(([zh, en]) =>
+    `<tr><td>${zh}</td><td>${en}</td><td><a href="#" data-zh="${zh}" class="delMap">删</a></td></tr>`).join('')
+}
+async function saveTerms() {
+  const r = await fetch('/__i18n/terms', { method: 'POST', body: JSON.stringify(terms) })
+  const j = await r.json()
+  if (j.ok) { toast('术语已保存'); loadTerms() } else toast('拒收：' + j.error)
+}
+$('#auto').onchange = async e => { await fetch('/__i18n/config', { method: 'POST', body: JSON.stringify({ auto: e.target.checked }) }); toast(e.target.checked ? '自动翻译已开' : '自动翻译已关（只检测+亮灯）') }
+$('#translateAll').onclick = async e => {
+  e.target.disabled = true; $('#taMsg').textContent = '翻译中（全站批量，请稍候）…'
+  const r = await (await fetch('/__i18n/translate-all', { method: 'POST' })).json()
+  e.target.disabled = false
+  if (r.ok) { const t = r.results.reduce((a, x) => a + (x.translated ?? 0), 0); $('#taMsg').textContent = `完成：新翻 ${t} 句`; loadData() }
+  else $('#taMsg').textContent = '失败：' + (r.error ?? '')
+}
+$('#lockAddBtn').onclick = () => { const w = $('#lockAdd').value.trim(); if (!w) return; terms.lock.push(w); $('#lockAdd').value = ''; saveTerms() }
+$('#mapAddBtn').onclick = () => { const zh = $('#mapZh').value.trim(), en = $('#mapEn').value.trim(); if (!zh || !en) return; terms.map[zh] = en; $('#mapZh').value = ''; $('#mapEn').value = ''; saveTerms() }
+document.body.onclick = e => {
+  if (e.target.classList?.contains('delLock')) { e.preventDefault(); terms.lock = terms.lock.filter(w => w !== e.target.dataset.w); saveTerms() }
+  if (e.target.classList?.contains('delMap')) { e.preventDefault(); delete terms.map[e.target.dataset.zh]; saveTerms() }
+}
+loadData(); loadTerms()
+</script>
+</body>
+</html>

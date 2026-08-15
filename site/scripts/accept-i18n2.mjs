@@ -10,6 +10,7 @@ import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
 import { runPipeline, adoptMirror, approvePage, consoleData, translateAll, harvestMirror } from '../src/i18n-pipeline.mjs'
+import { isPublishable, scanPages, buildGroups } from '../src/i18n.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -28,9 +29,31 @@ test('切句:英文句点须跟空格/结尾+缩写不切', () => {
   const r = splitPlain('Made in U.S.A. standard. It works.')
   assert.deepEqual(r.map(s => s.text), ['Made in U.S.A. standard. ', 'It works.'])
 })
+test('切句:连续终结标点并入前句（！！！/？！/……）', () => {
+  const a = splitPlain('我们始终把安全放在心上！！！后面一句。')
+  assert.deepEqual(a.map(s => s.text), ['我们始终把安全放在心上！！！', '后面一句。'])
+  const b = splitPlain('真的？！确定吗？')
+  assert.deepEqual(b.map(s => s.text), ['真的？！', '确定吗？'])
+  const c = splitPlain('他走了……不再回来。')
+  assert.deepEqual(c.map(s => s.text), ['他走了……', '不再回来。'])
+})
+test('切句:逗号开头单元不并入（源文标点垃圾不遮蔽，修在源头）', () => {
+  const r = splitPlain('前句。, 后半句。')
+  assert.deepEqual(r.map(s => s.text), ['前句。', ', 后半句。'])
+})
 test('切句:空白段忽略+指纹归一', () => {
   assert.equal(splitPlain('  ').length, 0)
   assert.equal(fp('起重量为3吨。'), fp(' 起重量为3吨。\n'))
+})
+test('行内:md 特殊字符转义 round-trip 对称（遗留 #21 实测收案）', async () => {
+  const { inlineMdToNodes } = await import('../src/mdast-tree.mjs')
+  const rt = text => inlineMdToNodes(sliceInlineMd([{ type: 'text', text }], 0, text.length)).map(n => n.text).join('')
+  for (const t of ['宽度 5*3 米。', '下划线 _test_ 变量', '数组 arr[0] 取值。', '价格为 100_000 元', '含 `x` 与 `y` 的文本。'])
+    assert.equal(rt(t), t, `round-trip 破裂: ${t}`)
+  // marks 内特殊字符（bold 包星号）也不破
+  const back = inlineMdToNodes(sliceInlineMd([{ type: 'text', text: '加粗 *星号* 内容', marks: [{ type: 'bold' }] }], 0, 9))
+  assert.equal(back[0].text, '加粗 *星号* 内')
+  assert.equal(back[0].marks[0].type, 'bold')
 })
 test('行内:链接跨句合并', () => {
   const nodes = [
@@ -90,12 +113,17 @@ test('TM:saveTm/loadTm 真落盘往返', () => {
 })
 test('配置:saveConfig review 深合并不丢键', () => {
   const f = join(process.cwd(), 'src', 'i18n', 'config.json')
-  saveConfig({ review: { de: 'auto' } })
-  saveConfig({ review: { en: 'auto' } })
-  const c = loadConfig()
-  assert.equal(c.review.de, 'auto')  // de 不被顶掉
-  assert.equal(c.review.en, 'auto')
-  rmSync(f) // 还原「缺文件」初始态（前面用例依赖它）
+  const backup = existsSync(f) ? readFileSync(f, 'utf8') : null // T2 残留修复：备份还原——中途炸不再留脏配置
+  try {
+    saveConfig({ review: { de: 'auto' } })
+    saveConfig({ review: { en: 'auto' } })
+    const c = loadConfig()
+    assert.equal(c.review.de, 'auto')  // de 不被顶掉
+    assert.equal(c.review.en, 'auto')
+  } finally {
+    if (backup !== null) writeFileSync(f, backup)
+    else if (existsSync(f)) rmSync(f) // 还原原态（前面用例依赖「缺文件给默认」）
+  }
 })
 
 // ---------- Task 3: 可译采集 ----------
@@ -527,6 +555,26 @@ test('流水线:幂等——重复跑不加新句', async () => {
   assert.equal(Object.keys(loadTm('zh-CN', 't9').sentences).length, n1)
   cleanup()
 })
+test('流水线:翻译窗口并发人审不丢（TM 读改写竞态）', async () => {
+  cleanup(); fixture()
+  const firstFp = () => collectUnits(JSON.parse(readFileSync(FIX_FILE(), 'utf8'))).find(u => u.text === '第一句。').fp
+  // 竞态重放：callAI 期间（流水线持旧 TM 副本的秒~分钟窗口）另一演员（审阅页人审）把同句 approved 落盘
+  const racingAI = async messages => {
+    const tm = loadTm('zh-CN', 't9')
+    upsert(tm, firstFp(), { text: '第一句。', translation: 'Human approved sentence.', status: 'approved', origin: 'human' })
+    saveTm('zh-CN', 't9', tm)
+    return mockAI(messages) // 引擎照常返回全部译文（含对同句的 draft）
+  }
+  const r = await runPipeline(FIX, { lang: 't9', callAI: racingAI })
+  assert.ok(r.translated >= 5) // 其余句照常进账
+  const tm = loadTm('zh-CN', 't9')
+  const e = tm.sentences[firstFp()]
+  assert.equal(e.status, 'approved') // 人审终态不被引擎 draft 降级
+  assert.equal(e.translation, 'Human approved sentence.')
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8')) // 重投影用的也是合并后的账本
+  assert.ok(JSON.stringify(mir).includes('Human approved sentence.'))
+  cleanup()
+})
 test('流水线:改源一句→只那句重新送翻', async () => {
   cleanup(); fixture()
   await runPipeline(FIX, { lang: 't9', callAI: mockAI })
@@ -704,6 +752,37 @@ test('流水线:harvestMirror 存量收割——对齐段收、错位段跳', as
   assert.ok(!Object.values(tm.sentences).some(e => e.text === '第二段首句。')) // 错位句无记录（宁可漏收）
   assert.ok(!Object.values(tm.sentences).some(e => e.text === '第二段次句。'))
   cleanup()
+})
+
+// ---------- Task 9: 门禁（productionJson 单闸：approved 投影非空即可发） ----------
+test('门禁:有已审投影=可发；无=不可发（页级永不下线改句级）', async () => {
+  cleanup(); fixture()
+  await runPipeline(FIX, { lang: 't9', callAI: mockAI }) // 全 draft，无 approved
+  let pages = scanPages({ withJson: true })
+  let groups = buildGroups(pages)
+  let me = pages.find(p => p.slug === `t9/posts/${FIX}`)
+  assert.equal(isPublishable(me, groups, pages), false) // status=draft → 不可发（状态门）
+  // 手动把镜像翻成 published（模拟 auto 语言）——投影仍空（核心字段全 draft）→ 仍不可发
+  const mf = join(process.cwd(), 'content', 't9', 'posts', `${FIX}.json`)
+  const mj = JSON.parse(readFileSync(mf, 'utf8')); mj.page.status = 'published'; writeFileSync(mf, JSON.stringify(mj, null, 2))
+  pages = scanPages({ withJson: true }); groups = buildGroups(pages)
+  me = pages.find(p => p.slug === `t9/posts/${FIX}`)
+  assert.equal(isPublishable(me, groups, pages), false) // approved 投影为空 → 不可发（投影闸本体，非状态门）
+  const tm = loadTm('zh-CN', 't9')
+  approvePage(FIX, 't9', tm, id => JSON.parse(readFileSync(join(process.cwd(), 'content', 'posts', `${id}.json`), 'utf8')))
+  pages = scanPages({ withJson: true }); groups = buildGroups(pages)
+  me = pages.find(p => p.slug === `t9/posts/${FIX}`)
+  assert.equal(isPublishable(me, groups, pages), true) // approved 投影非空 → 可发
+  cleanup()
+})
+
+// ---------- Task 10: edit-server 接线（数据层；HTTP 面冒烟走真服务，T12 收口） ----------
+test('端点层:saveConfig 自动开关往返', () => {
+  const c0 = loadConfig()
+  try {
+    saveConfig({ auto: !c0.auto }) // 控制台①拨开关 → 落盘
+    assert.equal(loadConfig().auto, !c0.auto)
+  } finally { saveConfig({ auto: c0.auto }) } // 还原
 })
 
 // ---------- 汇总（结构勿动；M-5 增补 finally 一行兜底清夹具） ----------

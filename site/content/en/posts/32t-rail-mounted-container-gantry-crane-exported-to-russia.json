@@ -54,65 +54,6 @@
   "inquiry_form": {
     "title": "Fill in your details and we will reply to you within 24 hours!"
   },
-  "i18n_rev": {
-    "breadcrumb.current": 1,
-    "title": 1,
-    "author.name": 1,
-    "lead": 1,
-    "body.h_req": 1,
-    "req": 1,
-    "body.h_solution": 1,
-    "body.h_lowtemp": 1,
-    "lowtemp": 1,
-    "body.h_localization": 1,
-    "localization": 1,
-    "body.h_safety": 1,
-    "safety": 1,
-    "body.h_transport": 1,
-    "transport": 1,
-    "body.h_delivery": 1,
-    "delivery": 1,
-    "body.h_summary": 1,
-    "summary": 1,
-    "body.h_getquote": 1,
-    "getquote": 1,
-    "author.title": 1,
-    "author.bio": 1,
-    "inquiry_form.title": 1,
-    "page.title": 1,
-    "page.description": 1
-  },
-  "i18n": {
-    "source": "zh-CN",
-    "translated_rev": {
-      "breadcrumb.current": 1,
-      "title": 1,
-      "author.name": 1,
-      "lead": 1,
-      "body.h_req": 1,
-      "req": 1,
-      "body.h_solution": 1,
-      "body.h_lowtemp": 1,
-      "lowtemp": 1,
-      "body.h_localization": 1,
-      "localization": 1,
-      "body.h_safety": 1,
-      "safety": 1,
-      "body.h_transport": 1,
-      "transport": 1,
-      "body.h_delivery": 1,
-      "delivery": 1,
-      "body.h_summary": 1,
-      "summary": 1,
-      "body.h_getquote": 1,
-      "getquote": 1,
-      "author.title": 1,
-      "author.bio": 1,
-      "inquiry_form.title": 1,
-      "page.title": 1,
-      "page.description": 1
-    }
-  },
   "lead": {
     "title": "导言",
     "body": {
@@ -123,7 +64,23 @@
           "content": [
             {
               "type": "text",
-              "text": "This project involved a 32-ton Rail-Mounted Container Gantry Crane exported to Russia, used primarily for loading, unloading, and transferring containers. Given the extremely cold local climate, the main structure is fabricated from Q355E low-temperature-resistant steel. The electrical system was specially engineered for cold resistance and equipped with a comprehensive safety protection system, enabling stable operation across an ambient temperature range of -40℃ to +40℃."
+              "text": "This project involved a 32-ton Rail-Mounted Container Gantry Crane exported to Russia, used primarily for loading, unloading, and transferring containers."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Given the extremely cold local climate, the main structure is fabricated from Q355E low-temperature-resistant steel."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The electrical system was specially engineered for cold resistance and equipped with a comprehensive safety protection system, enabling stable operation across an ambient temperature range of -40℃ to +40℃."
             }
           ]
         }
@@ -164,7 +121,15 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "There were concerns that the equipment might freeze, become brittle, or fail to start at -40°C. A Rail-Mounted Container Gantry Crane capable of reliable operation at -40°C was therefore required, for long-term outdoor use in Russia's cold regions."
+                      "text": "There were concerns that the equipment might freeze, become brittle, or fail to start at -40°C."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "A Rail-Mounted Container Gantry Crane capable of reliable operation at -40°C was therefore required, for long-term outdoor use in Russia's cold regions."
                     }
                   ]
                 }
@@ -306,7 +271,15 @@
                     },
                     {
                       "type": "text",
-                      "text": ": Both the hoisting and travel motors are fitted with heating tapes for preheating and heat retention in low-temperature environments. This prevents hard starting and mechanical seizure, ensuring stable operation."
+                      "text": ": Both the hoisting and travel motors are fitted with heating tapes for preheating and heat retention in low-temperature environments."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "This prevents hard starting and mechanical seizure, ensuring stable operation."
                     }
                   ]
                 }
@@ -329,7 +302,15 @@
                     },
                     {
                       "type": "text",
-                      "text": ": The operator cabin offers good thermal insulation and is equipped with air conditioning. The temperature adjusts automatically to ambient conditions, ensuring operator comfort."
+                      "text": ": The operator cabin offers good thermal insulation and is equipped with air conditioning."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The temperature adjusts automatically to ambient conditions, ensuring operator comfort."
                     }
                   ]
                 }
@@ -570,7 +551,15 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "The trolley is fully wrapped in tarpaulin to prevent damage from rain and moisture. The hoisting motor and gearbox motor are secured with shock-absorbing foam to reduce vibration damage."
+                      "text": "The trolley is fully wrapped in tarpaulin to prevent damage from rain and moisture."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The hoisting motor and gearbox motor are secured with shock-absorbing foam to reduce vibration damage."
                     }
                   ]
                 }
@@ -584,7 +573,15 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "The travel mechanism's gearbox motor was first reinforced and secured with shock-absorbing foam to ensure stability during transport. It was then covered with a layer of waterproof tarpaulin to enhance moisture and rain resistance."
+                      "text": "The travel mechanism's gearbox motor was first reinforced and secured with shock-absorbing foam to ensure stability during transport."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "It was then covered with a layer of waterproof tarpaulin to enhance moisture and rain resistance."
                     }
                   ]
                 }
@@ -873,7 +870,15 @@
           "content": [
             {
               "type": "text",
-              "text": "The project achieved unified performance in low-temperature adaptability, system compatibility, and transport reliability. All of the key risks the customer was initially concerned about were addressed during the design and manufacturing stages, and the equipment operated stably after commissioning."
+              "text": "The project achieved unified performance in low-temperature adaptability, system compatibility, and transport reliability."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "All of the key risks the customer was initially concerned about were addressed during the design and manufacturing stages, and the equipment operated stably after commissioning."
             }
           ]
         }
@@ -1029,5 +1034,8 @@
         }
       ]
     }
+  },
+  "i18n": {
+    "source": "zh-CN"
   }
 }

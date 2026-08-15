@@ -1,7 +1,7 @@
 // 句级切分（D5）：翻译单元 = 句。指纹 = 源句归一文本 sha1 前 12，位置无关（重排/跨页免疫）。
-// 本文件 fp = 句级归一指纹；src/i18n-fields.mjs 的 fp 是旧 F3 字段级指纹，Task 12 退役旧文件时归并（escMd/wrapMarks 亦与旧文件重复，同期归并）。
+// 旧 F3 字段级指纹（i18n-fields.mjs）已随 Task 12 退役，本文件是唯一指纹/escMd/wrapMarks 实现。
 // 护栏：小数点不切（3.5）；字母缩写不切（U.S.A.）；英文句点须跟空格/换行/结尾；
-// hardBreak 强制成界；链接跨句不硬切（合并为一单元，保 marks 不烂）。
+// 连续终结标点（！！！/？！/……）并入前句不出纯标点单元；hardBreak 强制成界；链接跨句不硬切（合并为一单元，保 marks 不烂）。
 import { createHash } from 'node:crypto'
 import { inlineMdToNodes } from './mdast-tree.mjs'
 
@@ -27,7 +27,13 @@ export function splitPlain(text) {
   const out = []
   for (let i = 0; i + 1 < cuts.length; i++) {
     const t = s.slice(cuts[i], cuts[i + 1])
-    if (t.trim()) out.push({ start: cuts[i], end: cuts[i + 1], text: t })
+    if (!t.trim()) continue
+    if (out.length && /^[。！？…!?]/.test(t.trim())) { // 连续终结标点（！！！/？！/……）并入前句，不出纯标点单元
+      out[out.length - 1].end = cuts[i + 1]
+      out[out.length - 1].text = s.slice(out[out.length - 1].start, cuts[i + 1])
+      continue
+    }
+    out.push({ start: cuts[i], end: cuts[i + 1], text: t })
   }
   return out
 }

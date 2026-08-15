@@ -7,6 +7,8 @@
 // 物化快照（scripts/i18n-registry.mjs --write），供外部/检查用——可全量重建，不是第二真相。
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
+import { loadTm } from './i18n-tm.mjs'
+import { projectPage } from './i18n-project.mjs'
 
 // ---------- 站点层 i18n 配置（终态迁 site.config，同旧系统决策） ----------
 export const SITE_ROOT = 'https://www.dgcrane.com/'
@@ -110,18 +112,20 @@ export function langSwitcher(pg, siblings) {
 </div>`
 }
 
-// ---------- 发布门禁（U-3/R43） ----------
-// 源语言页恒可发；镜像页仅当【无任何「从未翻译」字段】才可发（已译但过期=照显上次译文，可发）。
-// 孤儿镜像（无源）不发。渲染不参与——只路由/build 用它决定出不出。
-export function neverTranslated(sourceRev, translatedRev) {
-  return Object.keys(sourceRev).filter(f => !(translatedRev[f] > 0))
+// ---------- 发布门禁（新语义：approved 投影非空即可发；页面永不下线，缺句照发） ----------
+// 生产内容源（单闸）：镜像页的生产 JSON = approved 投影；null = 不可发（核心字段未审/孤儿/状态）。
+// 路由（取 j）与 isPublishable（判可发）与 Chrome（切换器）同调这一处，口径永不分叉。
+export function productionJson(pg, groups, pagesWithJson) {
+  if (!pg.langDir) return pg.j ?? null // 源页不投影（调用方不应拿源页来问；给个直白兜底）
+  if (pg.status !== 'published') return null
+  const source = (groups.get(pg.pageId) || []).find(m => !m.langDir)
+  if (!source) return null // 孤儿镜像不发
+  const srcJ = (pagesWithJson || []).find(m => m.pageId === source.pageId && !m.langDir)?.j
+    ?? JSON.parse(readFileSync(join(CONTENT(), source.file), 'utf8'))
+  const tm = loadTm(srcJ.page.lang, pg.lang)
+  return projectPage(srcJ, tm, 'approved', { lang: pg.lang, existingStatus: 'published' })
 }
 export function isPublishable(pg, groups, pagesWithJson) {
   if (!pg.langDir) return true
-  const source = (groups.get(pg.pageId) || []).find(m => !m.langDir)
-  if (!source) return false
-  const srcJ = (pagesWithJson || []).find(m => m.pageId === source.pageId && !m.langDir)?.j
-    ?? JSON.parse(readFileSync(join(CONTENT(), source.file), 'utf8'))
-  const tgtJ = pg.j ?? JSON.parse(readFileSync(join(CONTENT(), pg.file), 'utf8'))
-  return neverTranslated(srcJ.i18n_rev || {}, tgtJ.i18n?.translated_rev || {}).length === 0
+  return productionJson(pg, groups, pagesWithJson) !== null
 }

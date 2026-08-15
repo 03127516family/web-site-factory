@@ -6,7 +6,7 @@
     "lang": "en",
     "title": "5 Ton Overhead Crane: The Ultimate Guide to Types, Prices & Applications | DGCRANE",
     "description": "The ultimate guide to 5 ton overhead cranes: single girder / double girder / low headroom / underhung / FEM European-standard types, standard and customized price ranges, key cost factors, side-by-side parameter comparison and real project cases — everything you need to choose the right mid-capacity lifting equipment.",
-    "template": "src/templates/posts/5-ton-overhead-crane.html",
+    "template": "5-ton-overhead-crane",
     "family": "post@1",
     "status": "published"
   },
@@ -43,34 +43,7 @@
     "img_case4": "/assets/img/post/5t-case-philippines.jpg"
   },
   "inquiry_form": {
-    "title": "Fill in your details and we will reply within 24 hours!"
-  },
-  "i18n": {
-    "source": "zh-CN",
-    "translated_rev": {
-      "title": 1,
-      "page.title": 1,
-      "page.description": 1,
-      "breadcrumb.current": 1,
-      "body.h_types": 1,
-      "body.h_apps": 1,
-      "body.h_price": 1,
-      "body.h_price_custom": 1,
-      "body.h_factors": 1,
-      "body.h_compare": 1,
-      "body.h_cases": 1,
-      "body.h_conclusion": 1,
-      "inquiry_form.title": 1,
-      "lead": 3,
-      "types": 1,
-      "apps": 1,
-      "price": 1,
-      "price_custom": 1,
-      "factors": 1,
-      "compare": 1,
-      "cases": 1,
-      "conclusion": 1
-    }
+    "title": "Fill in your details and we will reply to you within 24 hours!"
   },
   "lead": {
     "title": "Introduction",
@@ -95,7 +68,15 @@
             },
             {
               "type": "text",
-              "text": " is one of the most widely used mid-capacity lifting machines, serving machinery manufacturing, warehousing and logistics, metal processing, mining, papermaking and many other industries. Combining "
+              "text": " is one of the most widely used mid-capacity lifting machines, serving machinery manufacturing, warehousing and logistics, metal processing, mining, papermaking and many other industries."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Combining "
             },
             {
               "type": "text",
@@ -126,7 +107,15 @@
           "content": [
             {
               "type": "text",
-              "text": "This article takes a deep dive into the various types of 5 ton overhead cranes, from single girder to double girder designs, analyzes the factors that drive their prices, and uses parameter comparisons and real project cases to show how to choose the best-fitting equipment. Whether you are an engineer, a purchasing manager or a facility manager, this guide will give you comprehensive decision support."
+              "text": "This article takes a deep dive into the various types of 5 ton overhead cranes, from single girder to double girder designs, analyzes the factors that drive their prices, and uses parameter comparisons and real project cases to show how to choose the best-fitting equipment."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Whether you are an engineer, a purchasing manager or a facility manager, this guide will give you comprehensive decision support."
             }
           ]
         }
@@ -161,7 +150,15 @@
             },
             {
               "type": "text",
-              "text": " — an economical single girder crane equipped with an electric hoist, suitable for light and medium material handling. Features: simple structure, low cost, easy installation; ideal for standard workshops."
+              "text": " — an economical single girder crane equipped with an electric hoist, suitable for light and medium material handling."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: simple structure, low cost, easy installation; ideal for standard workshops."
             }
           ]
         },
@@ -179,7 +176,15 @@
             },
             {
               "type": "text",
-              "text": " — purpose-built for workshops with limited headroom; the hoist runs beside the girder to gain extra lifting height. Features: saves vertical space and lowers the required building height; ideal for space-constrained environments."
+              "text": " — purpose-built for workshops with limited headroom; the hoist runs beside the girder to gain extra lifting height."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: saves vertical space and lowers the required building height; ideal for space-constrained environments."
             }
           ]
         },
@@ -197,7 +202,15 @@
             },
             {
               "type": "text",
-              "text": " — suspended from runway tracks fixed to the workshop roof, suitable for buildings without load-bearing columns but with a roof that can carry the load. Features: saves floor space; ideal for small plants or warehouses."
+              "text": " — suspended from runway tracks fixed to the workshop roof, suitable for buildings without load-bearing columns but with a roof that can carry the load."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: saves floor space; ideal for small plants or warehouses."
             }
           ]
         },
@@ -215,7 +228,15 @@
             },
             {
               "type": "text",
-              "text": " — designed to the European FEM standard and fitted with a low-headroom electric hoist for high-precision tasks. Features: lightweight, high rigidity, energy-saving; ideal for demanding workshops."
+              "text": " — designed to the European FEM standard and fitted with a low-headroom electric hoist for high-precision tasks."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: lightweight, high rigidity, energy-saving; ideal for demanding workshops."
             }
           ]
         },
@@ -233,7 +254,15 @@
             },
             {
               "type": "text",
-              "text": " — the hoist trolley is offset to one side of the main girder, optimizing lifting height and space utilization. Features: suits low-headroom and special-layout workshops; smooth travelling."
+              "text": " — the hoist trolley is offset to one side of the main girder, optimizing lifting height and space utilization."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: suits low-headroom and special-layout workshops; smooth travelling."
             }
           ]
         },
@@ -251,7 +280,15 @@
             },
             {
               "type": "text",
-              "text": " — runs along a single rail for straight-line or curved material handling. Features: compact structure; ideal for narrow spaces or dedicated production lines."
+              "text": " — runs along a single rail for straight-line or curved material handling."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: compact structure; ideal for narrow spaces or dedicated production lines."
             }
           ]
         },
@@ -269,7 +306,15 @@
             },
             {
               "type": "text",
-              "text": " — European-standard double girder design carrying a hoist trolley or winch trolley. Features: compact structure, high efficiency, variable frequency speed control; ideal for high-end industrial applications."
+              "text": " — European-standard double girder design carrying a hoist trolley or winch trolley."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: compact structure, high efficiency, variable frequency speed control; ideal for high-end industrial applications."
             }
           ]
         },
@@ -287,7 +332,15 @@
             },
             {
               "type": "text",
-              "text": " — double girder design with a hoist trolley, suitable for medium-duty load handling. Features: light structure and low profile; used in factories, mines and similar sites."
+              "text": " — double girder design with a hoist trolley, suitable for medium-duty load handling."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: light structure and low profile; used in factories, mines and similar sites."
             }
           ]
         },
@@ -305,7 +358,15 @@
             },
             {
               "type": "text",
-              "text": " — equipped with a winch trolley for heavy-duty, high-frequency operation. Features: high load capacity and strong stability; ideal for steel mills, mines and other heavy industries."
+              "text": " — equipped with a winch trolley for heavy-duty, high-frequency operation."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Features: high load capacity and strong stability; ideal for steel mills, mines and other heavy industries."
             }
           ]
         }
@@ -322,7 +383,15 @@
           "content": [
             {
               "type": "text",
-              "text": "Thanks to its flexible structure, moderate capacity and easy operation, the 5 ton overhead crane plays a key role across many industries, handling daily transfer, precision assembly and high-frequency lifting alike. Typical application industries include:"
+              "text": "Thanks to its flexible structure, moderate capacity and easy operation, the 5 ton overhead crane plays a key role across many industries, handling daily transfer, precision assembly and high-frequency lifting alike."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Typical application industries include:"
             }
           ]
         },
@@ -505,7 +574,23 @@
           "content": [
             {
               "type": "text",
-              "text": "Understanding 5 ton overhead crane prices is key to choosing the right equipment. Prices vary with crane type, span, lifting height, working environment and custom features. The table below lists common standardized products to help you budget and pick the best solution."
+              "text": "Understanding 5 ton overhead crane prices is key to choosing the right equipment."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Prices vary with crane type, span, lifting height, working environment and custom features."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The table below lists common standardized products to help you budget and pick the best solution."
             }
           ]
         },
@@ -612,7 +697,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "7.5-37.5"
+                          "text": "7.5-37.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -626,7 +719,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-30"
+                          "text": "6-30",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -640,7 +741,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3-A5"
+                          "text": "A3-A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -654,7 +763,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$2,439-16,214"
+                          "text": "$2,439-16,214",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -687,7 +804,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "7.5-21.5"
+                          "text": "7.5-21.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -701,7 +826,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-30"
+                          "text": "6-30",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -715,7 +848,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3"
+                          "text": "A3",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -729,7 +870,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$2,561-17,025"
+                          "text": "$2,561-17,025",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -762,7 +911,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "3-16"
+                          "text": "3-16",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -776,7 +933,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-18"
+                          "text": "6-18",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -790,7 +955,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3-A5"
+                          "text": "A3-A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -804,7 +977,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$2,439-16,214"
+                          "text": "$2,439-16,214",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -837,7 +1018,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "9.5-24"
+                          "text": "9.5-24",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -851,7 +1040,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-18"
+                          "text": "6-18",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -865,7 +1062,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A5"
+                          "text": "A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -879,7 +1084,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$5,900-11,000"
+                          "text": "$5,900-11,000",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -912,7 +1125,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "7.5-22.5"
+                          "text": "7.5-22.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -926,7 +1147,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-12"
+                          "text": "6-12",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -940,7 +1169,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3"
+                          "text": "A3",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -954,7 +1191,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$3,903-29,185"
+                          "text": "$3,903-29,185",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1001,7 +1246,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-30"
+                          "text": "6-30",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1015,7 +1268,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "M3"
+                          "text": "M3",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1029,7 +1290,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$600-1,720"
+                          "text": "$600-1,720",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1062,7 +1331,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "10.5-31.5"
+                          "text": "10.5-31.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1076,7 +1353,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-18"
+                          "text": "6-18",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1090,7 +1375,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3-A4"
+                          "text": "A3-A4",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1104,7 +1397,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$12,195-81,070"
+                          "text": "$12,195-81,070",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1137,7 +1438,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "10.5-31.5"
+                          "text": "10.5-31.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1151,7 +1460,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "16"
+                          "text": "16",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1165,7 +1482,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A5-A6"
+                          "text": "A5-A6",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1179,7 +1504,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$12,195-81,070"
+                          "text": "$12,195-81,070",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1212,7 +1545,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "10.5-31.5"
+                          "text": "10.5-31.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1226,7 +1567,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "22"
+                          "text": "22",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1240,7 +1589,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A5"
+                          "text": "A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1254,7 +1611,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "$29,268-70,845"
+                          "text": "$29,268-70,845",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1318,7 +1683,15 @@
             },
             {
               "type": "text",
-              "text": " — Type: European top running double girder overhead crane with wire rope hoist; Capacity: 5 tons; Span: 16.5 m; Lifting height: 13 m; Lifting speed: 0.5-5 m/min; Travelling speed: crane 4-40 m/min, trolley 2-20 m/min; Duty class: A5; Control: remote control. Price: $19,143."
+              "text": " — Type: European top running double girder overhead crane with wire rope hoist; Capacity: 5 tons; Span: 16.5 m; Lifting height: 13 m; Lifting speed: 0.5-5 m/min; Travelling speed: crane 4-40 m/min, trolley 2-20 m/min; Duty class: A5; Control: remote control."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Price: $19,143."
             }
           ]
         },
@@ -1336,7 +1709,15 @@
             },
             {
               "type": "text",
-              "text": " — Type: European heavy duty double girder overhead crane with open winch hoist; Capacity: 5 tons; Span: 25.5 m; Lifting height: 9 m; Lifting speed: 0.88-8.8 m/min; Travelling speed: crane 5.8-58 m/min, trolley 2.6-26 m/min; Duty class: A5; Control: cabin control. Price: $23,800."
+              "text": " — Type: European heavy duty double girder overhead crane with open winch hoist; Capacity: 5 tons; Span: 25.5 m; Lifting height: 9 m; Lifting speed: 0.88-8.8 m/min; Travelling speed: crane 5.8-58 m/min, trolley 2.6-26 m/min; Duty class: A5; Control: cabin control."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Price: $23,800."
             }
           ]
         }
@@ -1481,7 +1862,15 @@
           "content": [
             {
               "type": "text",
-              "text": "Depending on building structure, headroom, duty cycle and budget, 5 ton overhead cranes can be broken down into several typical configurations. Here is a comparison of the main ones:"
+              "text": "Depending on building structure, headroom, duty cycle and budget, 5 ton overhead cranes can be broken down into several typical configurations."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Here is a comparison of the main ones:"
             }
           ]
         },
@@ -1562,7 +1951,7 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "Type"
+                          "text": "Types"
                         }
                       ]
                     }
@@ -1665,7 +2054,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "7.5-37.5"
+                          "text": "7.5-37.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1679,7 +2076,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-30"
+                          "text": "6-30",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1693,7 +2098,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3-A5"
+                          "text": "A3-A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1754,7 +2167,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "7.5-21.5"
+                          "text": "7.5-21.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1768,7 +2189,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-30"
+                          "text": "6-30",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1782,7 +2211,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3"
+                          "text": "A3",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1843,7 +2280,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "3-16"
+                          "text": "3-16",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1857,7 +2302,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "3-16"
+                          "text": "3-16",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1871,7 +2324,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3-A5"
+                          "text": "A3-A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1932,7 +2393,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "9.5-24"
+                          "text": "9.5-24",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1946,7 +2415,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-18"
+                          "text": "6-18",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -1960,7 +2437,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A5"
+                          "text": "A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2021,7 +2506,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "7.5-22.5"
+                          "text": "7.5-22.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2035,7 +2528,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-12"
+                          "text": "6-12",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2049,7 +2550,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3"
+                          "text": "A3",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2124,7 +2633,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-30"
+                          "text": "6-30",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2138,7 +2655,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "M3"
+                          "text": "M3",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2199,7 +2724,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "10.5-31.5"
+                          "text": "10.5-31.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2213,7 +2746,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "6-18"
+                          "text": "6-18",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2227,7 +2768,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A3-A4"
+                          "text": "A3-A4",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2288,7 +2837,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "10.5-31.5"
+                          "text": "10.5-31.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2302,7 +2859,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "16"
+                          "text": "16",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2316,7 +2881,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A5-A6"
+                          "text": "A5-A6",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2377,7 +2950,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "10.5-31.5"
+                          "text": "10.5-31.5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2391,7 +2972,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "22"
+                          "text": "22",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2405,7 +2994,15 @@
                       "content": [
                         {
                           "type": "text",
-                          "text": "A5"
+                          "text": "A5",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
                         }
                       ]
                     }
@@ -2465,7 +3062,31 @@
             },
             {
               "type": "text",
-              "text": ": the customer initially planned to fabricate the main girder themselves while we supplied the remaining components. After receiving our quotation, the customer's engineers came back with many questions, which we answered patiently. After a month of communication, the customer was satisfied with our price and product and purchased two complete cranes in one order. Specifications: capacity 3T & 5T; model HD; span 9.15 m; lifting height 6 m; duty class A5; power supply 380V/50Hz/3Ph; control: pendant + remote control."
+              "text": ": the customer initially planned to fabricate the main girder themselves while we supplied the remaining components."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "After receiving our quotation, the customer's engineers came back with many questions, which we answered patiently."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "After a month of communication, the customer was satisfied with our price and product and purchased two complete cranes in one order."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Specifications: capacity 3T & 5T; model HD; span 9.15 m; lifting height 6 m; duty class A5; power supply 380V/50Hz/3Ph; control: pendant + remote control."
             }
           ]
         },
@@ -2483,7 +3104,39 @@
             },
             {
               "type": "text",
-              "text": ": a long-trusted Ethiopian customer referred a new client, and we successfully delivered an HD type European single girder overhead crane with a capacity of 5 tons. During the early discussions the customer was concerned about transporting the 27.76 m extra-long main girder. Our engineering team designed a segmented solution: the girder was split into three sections (11.8 m each) for transport and joined on site with high-strength bolts and flange plates. To guarantee the strength of the joints, multiple mechanical tests and on-site connection inspections were carried out, ensuring the load behavior matches a one-piece girder. Specifications: capacity 5 tons; span 27.76 m; lifting height 10.5 m; lifting speed 0.8/5 m/min; main electrical components Schneider; duty class FEM 2m; control: pendant control; power supply 380V 50Hz 3Ph."
+              "text": ": a long-trusted Ethiopian customer referred a new client, and we successfully delivered an HD type European single girder overhead crane with a capacity of 5 tons."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "During the early discussions the customer was concerned about transporting the 27.76 m extra-long main girder."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Our engineering team designed a segmented solution: the girder was split into three sections (11.8 m each) for transport and joined on site with high-strength bolts and flange plates."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "To guarantee the strength of the joints, multiple mechanical tests and on-site connection inspections were carried out, ensuring the load behavior matches a one-piece girder."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Specifications: capacity 5 tons; span 27.76 m; lifting height 10.5 m; lifting speed 0.8/5 m/min; main electrical components Schneider; duty class FEM 2m; control: pendant control; power supply 380V 50Hz 3Ph."
             }
           ]
         },
@@ -2492,16 +3145,62 @@
           "content": [
             {
               "type": "text",
-              "text": "5 ton double girder overhead crane exported to Saudi Arabia",
+              "text": "5吨双梁桥式起重机出口沙特阿拉伯",
               "marks": [
                 {
                   "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
                 }
               ]
             },
             {
               "type": "text",
-              "text": ": a long-term customer in Saudi Arabia, satisfied with our products and service, placed a repeat order for a double girder overhead crane, a pillar jib crane and electric hoists, praising the equipment quality and the team's service. Specifications: capacity 5 tons; span 16.98 m; lifting height 7 m; motors ABM/SEW."
+              "text": "：沙特一位长期客户对我们的产品和服务表示满意，再次采购了双梁桥式起重机、立柱式悬臂起重机和电动葫芦。",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "客户对设备的卓越品质和团队服务表示赞赏。",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "规格：起重量 5 吨；跨度 16.98 m；起升高度 7 m；电机 ABM/SEW。",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
             }
           ]
         },
@@ -2519,7 +3218,23 @@
             },
             {
               "type": "text",
-              "text": ": the customer planned steel plate handling inside a steel-structure workshop. They had a clear lifting-height requirement but the building height was limited, so we configured a low headroom single girder overhead crane with a matching low-headroom electric hoist, effectively increasing the lifting height within the available space. The customer ordered three 5 ton low headroom single girder overhead cranes at once."
+              "text": ": the customer planned steel plate handling inside a steel-structure workshop."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "They had a clear lifting-height requirement but the building height was limited, so we configured a low headroom single girder overhead crane with a matching low-headroom electric hoist, effectively increasing the lifting height within the available space."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The customer ordered three 5 ton low headroom single girder overhead cranes at once."
             }
           ]
         }
@@ -2536,7 +3251,15 @@
           "content": [
             {
               "type": "text",
-              "text": "As a core piece of equipment in modern industrial production, the 5 ton overhead crane — with its moderate capacity, flexible configuration and mature, reliable structure — is a mainstay of machinery manufacturing, warehousing and logistics, metal processing, mining and papermaking. From the economical LD single girder crane to high-performance FEM European-style cranes and heavy-duty QD double girder cranes, the range of types covers different building structures and working conditions."
+              "text": "As a core piece of equipment in modern industrial production, the 5 ton overhead crane — with its moderate capacity, flexible configuration and mature, reliable structure — is a mainstay of machinery manufacturing, warehousing and logistics, metal processing, mining and papermaking."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "From the economical LD single girder crane to high-performance FEM European-style cranes and heavy-duty QD double girder cranes, the range of types covers different building structures and working conditions."
             }
           ]
         },
@@ -2545,7 +3268,15 @@
           "content": [
             {
               "type": "text",
-              "text": "Through detailed type introductions, price analysis, parameter comparison and real project cases, this article has shown how to choose the right crane based on span, lifting height, working environment and control requirements. Whether it is a low-headroom design that maximizes workshop space or an explosion-proof double girder crane for harsh environments, these machines give businesses an efficient and safe material handling solution."
+              "text": "Through detailed type introductions, price analysis, parameter comparison and real project cases, this article has shown how to choose the right crane based on span, lifting height, working environment and control requirements."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Whether it is a low-headroom design that maximizes workshop space or an explosion-proof double girder crane for harsh environments, these machines give businesses an efficient and safe material handling solution."
             }
           ]
         },
@@ -2560,5 +3291,8 @@
         }
       ]
     }
+  },
+  "i18n": {
+    "source": "zh-CN"
   }
 }

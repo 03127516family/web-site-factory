@@ -8,14 +8,21 @@ import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
 import { validateDoc } from '../src/content-schema.mjs'
 import { normalizeTree, setIn, splitByHeading, joinByHeading } from '../src/tree-utils.mjs'
-import { stampAfterSave } from './i18n-touch.mjs'
+import { runPipeline, adoptMirror, approvePage, translateAll, consoleData } from '../src/i18n-pipeline.mjs'
+import { loadTm, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
+import { loadTerms, saveTerms } from '../src/i18n-terms.mjs'
+import { projectPage, PENDING_CLASS } from '../src/i18n-project.mjs'
+import { logEvent } from '../src/i18n-events.mjs'
+import { scanPages } from '../src/i18n.mjs'
+import { createDeepseekCaller } from '../src/deepseek.mjs'
 import { probe, IMG_DIR } from './img-probe.mjs'
 import { burn, writeDraft } from './deepseek-burn.mjs'
 import sharp from 'sharp'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
+if (process.cwd() !== SITE) process.chdir(SITE) // TM/术语/流水线按 process.cwd() 寻址——从仓库根启动会读错位/写幽灵文件，锚回 site/
 const DIST = join(SITE, 'dist-edit') // 编辑/预览服「含草稿」产物（R33）；生产站另服 dist
-const PORT = 8092
+const PORT = Number(process.env.PORT) || 8092 // 可 PORT=8093 并存冒烟（默认不变）
 const PREVIEWS = new Map() // 烧制预览暂存（内存，重启即清；上限 20 份 FIFO）
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.json': 'application/json', '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.mp4': 'video/mp4' }
 
@@ -110,6 +117,7 @@ body.edl-on .edl-active > .ProseMirror{font:inherit!important;color:inherit!impo
 .edl-add{color:#16a34a;background:#f0fdf4}
 .edl-del{color:#dc2626;background:#fef2f2;text-decoration:line-through}
 .edl-note{color:#999;padding:6px 12px;font-size:12px}
+.${PENDING_CLASS}{background:#fef9c3;outline:1px dashed #eab308;border-radius:2px}
 </style>
 <script src="/__edit/edit-layer.js"></script>`
 
@@ -168,6 +176,11 @@ async function rebuild() {
   await run([join(SITE, 'scripts/link-assets.mjs')], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' })
 }
 
+// 重建串行链：/__save、烧制落盘、后台翻译流水线共用一条链排队——防两个 astro build 并发写同一 outDir
+let rebuildChain = Promise.resolve()
+const queueRebuild = () => { rebuildChain = rebuildChain.catch(() => {}).then(rebuild); return rebuildChain }
+let translateAllBusy = false // 全站送翻防重入闸（双击防护）
+
 const server = http.createServer(async (req, res) => {
   try {
     if (req.method === 'POST' && req.url === '/__save') {
@@ -185,11 +198,45 @@ const server = http.createServer(async (req, res) => {
         if (!['draft', 'published'].includes(status)) throw new Error('status 非法: ' + status)
         j.page.status = status
       }
+      // i18n 新链（spec §4）：镜像保存 = 人审写回（adoptMirror→TM 置 approved→只落重投影产物，
+      // 投影抛错=本次保存整体失败，不落半成品）；zh 源「发布」= 后台流水线（结构同步+按开关送翻）。草稿保存不触发。
+      const segments = rel.split('/')
+      if (segments.length === 3) {
+        // 镜像（en/posts/xxx.json）：人审直改 → TM approved → 重投影（骨架恒 ≡ 源树）
+        const [lang, , pageId] = [segments[0], segments[1], segments[2].replace(/\.json$/, '')]
+        const srcFile = join(SITE, 'content', segments[1], `${pageId}.json`)
+        const srcJ = JSON.parse(readFileSync(srcFile, 'utf8'))
+        const tm = loadTm(srcJ.page.lang, lang)
+        const { n, skipped } = adoptMirror(j, srcJ, tm, lang)
+        const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: j.page.status ?? 'draft', existingTrail: j.breadcrumb?.trail })
+        writeFileSync(file, JSON.stringify(mirror, null, 2) + '\n')
+        if (n || skipped) console.log(`  [i18n] 镜像人审写回 ${n} 句${skipped ? `（${skipped} 句段错位被跳过：整段重写保持句数，或用审阅页通过按钮）` : ''}`)
+        await queueRebuild()
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ ok: true, i18n: { adopted: n, skipped } })) // skipped 进响应体：被跳过不静默（edit-layer 可提示）
+        return
+      }
       writeFileSync(file, JSON.stringify(j, null, 2) + '\n')
-      // i18n 保存抬戳（R43/R44）：zh 源 → 名册字段 i18n_rev+1 刷指纹；镜像 → translated_rev 抬到源戳
-      const stamped = stampAfterSave(rel, patches.map(p => p.path).filter(Boolean))
-      if (stamped) console.log(`  [i18n] ${stamped.kind === 'source' ? '源戳 +1' : '镜像抬戳'}: ${stamped.fields.join(', ')}`)
-      await rebuild()
+      if (status === 'published') {
+        // zh 源发布：后台流水线——整页送翻可达分钟级，同步等会卡死编辑器保存响应（问题 #6）。
+        // 完成后自己排队重建；失败留事件+console（下次发布/手动送翻会再跑）。
+        const pageId = segments[segments.length - 1].replace(/\.json$/, '')
+        const cfg = loadConfig()
+        const callAI = process.env.DEEPSEEK_API_KEY ? createDeepseekCaller() : null
+        ;(async () => {
+          for (const lang of Object.keys(cfg.review)) {
+            try {
+              const r = await runPipeline(pageId, { lang, translate: cfg.auto && !!callAI, callAI })
+              console.log(`  [i18n] 流水线 ${pageId}→${lang}: 新翻 ${r.translated} 失败 ${r.failed} 待审 ${r.pending}`)
+            } catch (e) {
+              console.error(`  [i18n] 流水线失败 ${pageId}→${lang}: ${e.message}`)
+              logEvent(pageId, 'pipeline-error', { lang, error: e.message }) // 硬失败留痕——控制台/事件侧可见
+            }
+          }
+          try { await queueRebuild() } catch (e) { console.error(`  [i18n] 流水线后重建失败 ${pageId}: ${e.message}`) }
+        })()
+      }
+      await queueRebuild()
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true }))
       return
@@ -212,6 +259,46 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true, src: '/assets/img/product/' + out }))
       return
+    }
+    if (req.method === 'POST' && req.url === '/__i18n/config') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      const { auto } = JSON.parse(body)
+      if (typeof auto !== 'boolean') throw new Error('auto 须为布尔')
+      saveConfig({ auto })
+      res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true })); return
+    }
+    if (req.method === 'POST' && req.url === '/__i18n/terms') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      const { src = 'zh-CN', tgt = 'en', lock, map } = JSON.parse(body)
+      saveTerms(src, tgt, { lock, map }) // 校验不过会抛，走统一 400
+      res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true })); return
+    }
+    if (req.method === 'POST' && req.url === '/__i18n/translate-all') {
+      if (!process.env.DEEPSEEK_API_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: '未配置 DEEPSEEK_API_KEY' })); return }
+      if (translateAllBusy) { res.writeHead(409, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: '全站翻译已在跑，等它完成再点' })); return }
+      translateAllBusy = true // 防重入：双击=两个并发循环（TM 已有合并防护，这里再省一份钱）
+      try {
+        const results = []
+        for (const lang of Object.keys(loadConfig().review)) results.push(...await translateAll({ lang, callAI: createDeepseekCaller() })) // 语言跟 cfg.review 走，与发布钩子同口径
+        await queueRebuild()
+        res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ ok: true, results }))
+      } finally { translateAllBusy = false }
+      return
+    }
+    if (req.method === 'POST' && req.url === '/__i18n/approve') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      const { pageId, lang = 'en' } = JSON.parse(body)
+      const srcPg = scanPages().find(p => p.pageId === pageId && !p.langDir)
+      if (!srcPg) throw new Error('页面不存在: ' + pageId)
+      const srcJ = JSON.parse(readFileSync(join(SITE, 'content', srcPg.file), 'utf8'))
+      const tm = loadTm(srcJ.page.lang, lang)
+      const r = approvePage(pageId, lang, tm, () => srcJ)
+      await queueRebuild()
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ ok: true, approved: r.approved, remainingFailed: r.remainingFailed, remainingUntranslated: r.remainingUntranslated })); return
     }
     if (req.method === 'POST' && req.url === '/__burn') {
       if (!process.env.DEEPSEEK_API_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: '未配置 DEEPSEEK_API_KEY（服务端环境变量）' })); return }
@@ -239,7 +326,7 @@ const server = http.createServer(async (req, res) => {
       const final = writeDraft(json, slug) // 撞名加序号 + 全树 schema + 强制 draft
       console.log(`  [burn] 落 draft: content/products/${final}.json`)
       try {
-        await rebuild()
+        await queueRebuild()
       } catch (e) {
         rmSync(join(SITE, 'content/products', `${final}.json`)) // 毒草稿不留在盘上祸害后续 rebuild
         throw new Error(`落盘成功但重建失败，已自动删除该草稿：${e.message}`)
@@ -265,6 +352,47 @@ const server = http.createServer(async (req, res) => {
       const pid = req.url.split('/').pop()
       const html = PREVIEWS.get(pid)
       if (!html) { res.writeHead(404); res.end('预览不存在或已过期（服务重启即清），请重新烧制'); return }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+      res.end(html)
+      return
+    }
+    if (req.url === '/__i18n') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
+      res.end(readFileSync(join(SITE, 'edit-layer/i18n-console.html'), 'utf8'))
+      return
+    }
+    if (req.url === '/__i18n/data') {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify(consoleData()))
+      return
+    }
+    if (req.url?.startsWith('/__i18n/terms')) {
+      const u = new URL(req.url, 'http://x')
+      const src = u.searchParams.get('src') || 'zh-CN', tgt = u.searchParams.get('tgt') || 'en'
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify(loadTerms(src, tgt)))
+      return
+    }
+    if (req.url?.startsWith('/__i18n/review/')) {
+      // 双页审阅（spec §5）：左=中文现状，右=英文草稿（黄底待审句；就地改+保存=人审写回）
+      const u = new URL(req.url, 'http://x')
+      const pageId = decodeURIComponent(u.pathname.split('/').pop())
+      const lang = u.searchParams.get('lang') || 'en'
+      if (!/^[a-z][a-z0-9-]*$/i.test(lang)) throw new Error('lang 非法') // 内联进 iframe/script，白名单形态防注入
+      const srcPg = scanPages().find(p => p.pageId === pageId && !p.langDir)
+      if (!srcPg) { res.writeHead(404); res.end('页面不存在'); return }
+      const html = `<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>审校 ${pageId}</title>
+<style>body{margin:0;font:14px -apple-system,"PingFang SC",sans-serif;display:flex;flex-direction:column;height:100vh}
+.bar{display:flex;gap:12px;align-items:center;padding:8px 14px;background:#1f2430;color:#fff}
+.bar button{border:0;border-radius:6px;padding:8px 18px;background:#16a34a;color:#fff;cursor:pointer}
+.bar .tip{font-size:12px;color:#94a3b8}.panes{flex:1;display:flex}.panes iframe{flex:1;border:0;border-right:1px solid #ddd}
+.tag{padding:2px 8px;border-radius:4px;background:#fef9c3;color:#854d0e;font-size:12px}</style></head>
+<body><div class="bar"><b>${pageId}</b><span class="tag">黄底=待审句</span>
+<span class="tip">左中文现状 · 右英文草稿（在右页直接点字改=改完保存即审过）</span>
+<button id="ok">✓ 通过并发布</button><span id="msg" class="tip"></span></div>
+<div class="panes"><iframe src="/${srcPg.slug}/"></iframe><iframe src="/${lang}/${srcPg.slug}/"></iframe></div>
+<script>document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/approve',{method:'POST',body:JSON.stringify({pageId:'${pageId}',lang:'${lang}'})});const j=await r.json();document.getElementById('msg').textContent=j.ok?('已通过 '+j.approved+' 句并发布'+(j.remainingFailed?('；仍有 '+j.remainingFailed+' 句失败'):'')+(j.remainingUntranslated?('；'+j.remainingUntranslated+' 句未翻'):'')):('失败：'+j.error)}</script>
+</body></html>`
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(html)
       return

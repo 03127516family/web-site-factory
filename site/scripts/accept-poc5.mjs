@@ -9,7 +9,8 @@ import { fileURLToPath } from 'node:url'
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const JSON_FILE = join(SITE, 'content/products/single-girder-eot-cranes.json')
 const DIST_PAGE = join(SITE, 'dist/products/single-girder-eot-cranes/index.html')
-const EDIT = 'http://localhost:8092/products/single-girder-eot-cranes/'
+const EDIT_PORT = process.env.EDIT_PORT || 8092 // 可让开被占的 8092 并行跑验收
+const EDIT = `http://localhost:${EDIT_PORT}/products/single-girder-eot-cranes/`
 const PUB = 'http://localhost:8091/products/single-girder-eot-cranes/'
 const results = []
 const ok = (name, cond, extra = '') => { results.push({ name, pass: !!cond }); console.log(`${cond ? '✅' : '❌'} ${name}${extra ? ' — ' + extra : ''}`) }
@@ -68,7 +69,7 @@ const headingLevels = JSON.stringify(j.overview.body).match(/"level":\d/g)
 ok('V2b heading 层级回退正确（无 level:4 落盘）', !headingLevels?.includes('"level":4'), headingLevels?.join(','))
 
 // ---- V4：坏树直投端点 → schema 拒收，JSON 不被污染 ----
-const bad = await page.request.post('http://localhost:8092/__save', {
+const bad = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, {
   data: { slug: 'products/single-girder-eot-cranes', status: 'published', patches: [{ path: 'overview.body', kind: 'tree', value: { type: 'doc', content: [{ type: 'video', content: [] }] } }] },
 })
 ok('V4 坏树被拒（400）', bad.status() === 400)
@@ -77,13 +78,13 @@ ok('V4 报错点名未知节点', /未知节点|不允许/.test(badMsg), badMsg.
 ok('V4 JSON 未被污染', JSON.stringify(readJ().overview.body).includes('验收追加段POC5'))
 
 // ---- V3：状态门 ----
-const r1 = await page.request.post('http://localhost:8092/__save', { data: { slug: 'products/single-girder-eot-cranes', status: 'draft', patches: [] } })
+const r1 = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, { data: { slug: 'products/single-girder-eot-cranes', status: 'draft', patches: [] } })
 ok('V3 存草稿端点 200', r1.status() === 200)
 await page.waitForTimeout(2000)
 ok('V3 draft 后 dist 页面消失', !existsSync(DIST_PAGE))
 ok('V3 草稿预览仍在（8092 可见, R33）', existsSync(DIST_PAGE.replace('dist/', 'dist-edit/')))
 ok('V3 JSON 状态 = draft', readJ().page.status === 'draft')
-const r2 = await page.request.post('http://localhost:8092/__save', { data: { slug: 'products/single-girder-eot-cranes', status: 'published', patches: [] } })
+const r2 = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, { data: { slug: 'products/single-girder-eot-cranes', status: 'published', patches: [] } })
 ok('V3 发布端点 200', r2.status() === 200)
 await page.waitForTimeout(2000)
 ok('V3 published 后 dist 页面回来', existsSync(DIST_PAGE))
@@ -92,7 +93,7 @@ ok('V3 published 后 dist 页面回来', existsSync(DIST_PAGE))
 {
   const sharp = (await import('sharp')).default
   const big = await sharp({ create: { width: 4000, height: 2000, channels: 3, background: { r: 200, g: 30, b: 30 } } }).png().toBuffer()
-  const up = await page.request.post('http://localhost:8092/__upload?name=poc5-upload-test.png', { data: big, headers: { 'Content-Type': 'application/octet-stream' } })
+  const up = await page.request.post(`http://localhost:${EDIT_PORT}/__upload?name=poc5-upload-test.png`, { data: big, headers: { 'Content-Type': 'application/octet-stream' } })
   const upData = await up.json()
   ok('V5 上传端点 200', up.status() === 200 && upData.ok)
   const upFile = join(SITE, '../public/assets/img/product', (upData.src || '').split('/').pop())
@@ -106,7 +107,7 @@ await browser.close()
 
 // ---- 还原 ----
 copyFileSync(JSON_FILE + '.bak', JSON_FILE)
-await fetch('http://localhost:8092/__save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: 'products/single-girder-eot-cranes', status: 'published', patches: [] }) })
+await fetch(`http://localhost:${EDIT_PORT}/__save`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: 'products/single-girder-eot-cranes', status: 'published', patches: [] }) })
 await new Promise(r => setTimeout(r, 2000))
 console.log('\n（JSON 已还原，页面已重建）')
 
