@@ -1,0 +1,121 @@
+{
+  "version": 1,
+  "page": {
+    "slug": "posts/demo-shi-bu-diao",
+    "type": "post",
+    "lang": "zh-CN",
+    "title": "起重机械十不吊原则详解 | DGCRANE",
+    "description": "起重机械十不吊原则详解：十不吊的由来，以及指挥信号不清、捆绑不牢、安全装置失效、光线阴暗看不清等不吊情形。",
+    "family": "post@1",
+    "status": "draft",
+    "template": "PostPage"
+  },
+  "title": "起重机械十不吊原则详解",
+  "breadcrumb": {
+    "current": "起重机械十不吊原则详解",
+    "trail": [
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/"
+      },
+      {
+        "label": "案例",
+        "url": "https://www.dgcrane.com/zh/posts/"
+      }
+    ]
+  },
+  "inquiry_form": {
+    "type": "inquiry-form",
+    "form_id": 713,
+    "title": "填写您的详细资料，我们将在24小时内给您答复!"
+  },
+  "body": {
+    "sections": [
+      {
+        "heading": "十不吊的由来",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "十不吊是起重行业多年事故教训的总结，指十种严禁起吊的危险工况。坚持十不吊能有效防止超载、斜拉、吊物失衡等典型事故。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "heading": "指挥信号不清不吊",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "指挥信号不明确时起吊，司机与指挥之间容易产生理解偏差。遇到信号不清，应当立即停止动作，与指挥人员确认后再作业。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "heading": "捆绑不牢不吊",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "捆绑不牢固时吊物可能在空中松脱坠落。起吊前应检查捆绑点、索具受力与棱角衬垫，确认无误方可试吊。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "heading": "安全装置失效不吊",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "超载限制器、力矩限制器等安全装置失灵时，起重机失去最后一道保护。发现安全装置异常应停机报修，严禁带病作业。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "heading": "光线阴暗看不清不吊",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "视线不良时无法观察吊物运行路径与人员站位。夜间或昏暗环境作业应保证照明，否则不得起吊。"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
