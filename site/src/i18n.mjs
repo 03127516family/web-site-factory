@@ -18,7 +18,16 @@ export const LANG_LABEL = { 'zh-CN': '简体中文', en: 'English' }
 export const langLabel = lang => LANG_LABEL[lang] || lang
 
 const CONTENT = () => join(process.cwd(), 'content')
+const TYPE_DIRS = ['products', 'posts'] // content 根下的类型目录（其余一级子目录=语言镜像位）
 const escAttr = (s = '') => String(s).replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;')
+
+// 语言目录枚举：content/ 一级子目录且非类型目录。scanPages 与 [lang] 路由共用同一条规则——
+// 新增一种语言 = content/<lang>/ 建目录放镜像，路由/族谱/切换器自动认得，零登记。
+export function langDirs() {
+  return readdirSync(CONTENT(), { withFileTypes: true })
+    .filter(d => d.isDirectory() && !TYPE_DIRS.includes(d.name))
+    .map(d => d.name)
+}
 
 // ---------- 族谱派生 ----------
 // 扫 content 树 → 页面登记列表。每项：{ pageId, type, lang, langDir(null=源), slug, status, file, j? }
@@ -52,10 +61,7 @@ export function scanPages({ withJson = false } = {}) {
     }
   }
   walk('', null) // zh 源：content/<type>/*.json
-  for (const sub of readdirSync(dir, { withFileTypes: true })) {
-    // 语言镜像：content/<lang>/<type>/*.json（一级子目录且非已知类型目录即语言目录）
-    if (sub.isDirectory() && !['products', 'posts'].includes(sub.name)) walk(sub.name, sub.name)
-  }
+  for (const sub of langDirs()) walk(sub, sub) // 语言镜像：content/<lang>/<type>/*.json
   return out.sort((a, b) => (a.slug < b.slug ? -1 : 1))
 }
 

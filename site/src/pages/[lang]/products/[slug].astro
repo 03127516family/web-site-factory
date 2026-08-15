@@ -1,0 +1,41 @@
+---
+// 语言镜像产品路由（[lang] 泛化，R35→任意语言）：content/<lang>/products/*.json。
+// lang 由 getStaticPaths 从 langDirs() 枚举（与 scanPages 同一条规则）——新增语言零登记。
+// 生产内容源 = productionJson（approved 投影，同 posts 路由）；组件按 page.template 动态派发
+// （components/products/<template>/index.astro，meta-per-template 结构）。
+// 编辑预览（INCLUDE_DRAFTS=1）读镜像文件全文（含草稿/占位/pending 注解，供审阅高亮）。
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
+import { join } from 'node:path'
+import Chrome from '../../../layouts/Chrome.astro'
+import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n.mjs'
+
+export function getStaticPaths() {
+  const pages = scanPages({ withJson: true })
+  const groups = buildGroups(pages)
+  const bySlug = new Map(pages.map(p => [p.slug, p]))
+  const out = []
+  for (const lang of langDirs()) {
+    const dir = join(process.cwd(), 'content', lang, 'products')
+    if (!existsSync(dir)) continue // 该语言还没有产品镜像
+    for (const f of readdirSync(dir)) {
+      if (!f.endsWith('.json')) continue
+      const j = JSON.parse(readFileSync(join(dir, f), 'utf8'))
+      const params = { lang, slug: f.replace('.json', '') }
+      if (process.env.INCLUDE_DRAFTS === '1') { out.push({ params, props: { j } }); continue } // 预览=镜像全文
+      const me = bySlug.get(j.page.slug)
+      const pj = me && productionJson(me, groups, pages) // 生产=approved 投影（null=不出页）
+      if (pj) out.push({ params, props: { j: pj } })
+    }
+  }
+  return out
+}
+
+const { j } = Astro.props
+// glob 键后缀化（zh 路由同款）：查表用 products/<名>/index.astro，不数 ../../../
+const bySuffix = o => Object.fromEntries(Object.entries(o).map(([k, v]) => [k.slice(k.indexOf('/products/') + 1), v]))
+const layouts = bySuffix(import.meta.glob('@components/products/*/index.astro'))
+const Comp = (await layouts[`products/${j.page.template}/index.astro`]()).default
+---
+<Chrome j={j}>
+	<Comp j={j} />
+</Chrome>
