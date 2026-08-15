@@ -46,7 +46,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_case && j.accident_cases && (
 			<div data-field="accident_cases.body" data-edit="rich" set:html={renderDoc(j.accident_cases.body, WALK)} />
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_accident" data-edit="image" src={j.body.img_accident} alt="起重事故案例警示" width="880" height="731" /></figure>
+			{j.body?.img_accident && (<figure class="wp-block-image size-full"><img data-field="body.img_accident" data-edit="image" src={j.body.img_accident} alt="起重事故案例警示" width="880" height="731" /></figure>)}
 
 			{j.body?.h_hazard && j.hazards && (
 			<h3 id="main-hazards" class="wp-block-heading" data-field="body.h_hazard" data-edit="text">{j.body.h_hazard}</h3>
@@ -54,7 +54,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_hazard && j.hazards && (
 			<div data-field="hazards.body" data-edit="rich" set:html={renderDoc(j.hazards.body, WALK)} />
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_hazard" data-edit="image" src={j.body.img_hazard} alt="起重机械伤害发生率统计" width="880" height="729" /></figure>
+			{j.body?.img_hazard && (<figure class="wp-block-image size-full"><img data-field="body.img_hazard" data-edit="image" src={j.body.img_hazard} alt="起重机械伤害发生率统计" width="880" height="729" /></figure>)}
 
 			<!-- H2 核心吊具安全使用与报废标准 -->
 			{j.body?.h_gear && (
@@ -74,7 +74,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_wirerope && j.wirerope && (
 			<div data-field="wirerope.body" data-edit="rich" set:html={renderDoc(j.wirerope.body, WALK)} />
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_wirerope" data-edit="image" src={j.body.img_wirerope} alt="钢丝绳畸形报废状态示意" width="880" height="577" /></figure>
+			{j.body?.img_wirerope && (<figure class="wp-block-image size-full"><img data-field="body.img_wirerope" data-edit="image" src={j.body.img_wirerope} alt="钢丝绳畸形报废状态示意" width="880" height="577" /></figure>)}
 
 			<!-- H2 操作员标准化安全操作规程 -->
 			{j.body?.h_operator && (
@@ -109,7 +109,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_nolift && j.nolift && (
 			<div data-field="nolift.body" data-edit="rich" set:html={renderDoc(j.nolift.body, WALK)} />
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_nolift" data-edit="image" src={j.body.img_nolift} alt="十不吊安全禁令示意" width="880" height="731" /></figure>
+			{j.body?.img_nolift && (<figure class="wp-block-image size-full"><img data-field="body.img_nolift" data-edit="image" src={j.body.img_nolift} alt="十不吊安全禁令示意" width="880" height="731" /></figure>)}
 
 			<!-- H2 标准指挥手势 -->
 			{j.body?.h_signals && j.signals && (
@@ -118,10 +118,10 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_signals && j.signals && (
 			<div data-field="signals.body" data-edit="rich" set:html={renderDoc(j.signals.body, WALK)} />
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.signal1_img" data-edit="image" src={j.body.signal1_img} alt="标准指挥手势：预备、要主钩、要副钩、吊钩上升" width="880" height="473" /></figure>
-			<figure class="wp-block-image size-full"><img data-field="body.signal2_img" data-edit="image" src={j.body.signal2_img} alt="标准指挥手势：吊钩水平移动、吊钩微微上升、吊钩下降" width="880" height="430" /></figure>
-			<figure class="wp-block-image size-full"><img data-field="body.signal3_img" data-edit="image" src={j.body.signal3_img} alt="标准指挥手势：吊钩微微下落、微动范围、吊钩水平微微移动" width="880" height="448" /></figure>
-			<figure class="wp-block-image size-full"><img data-field="body.signal4_img" data-edit="image" src={j.body.signal4_img} alt="标准指挥手势：指示降落方位、停止、紧急停止、工作结束" width="880" height="426" /></figure>
+			{j.body?.signal1_img && (<figure class="wp-block-image size-full"><img data-field="body.signal1_img" data-edit="image" src={j.body.signal1_img} alt="标准指挥手势：预备、要主钩、要副钩、吊钩上升" width="880" height="473" /></figure>)}
+			{j.body?.signal2_img && (<figure class="wp-block-image size-full"><img data-field="body.signal2_img" data-edit="image" src={j.body.signal2_img} alt="标准指挥手势：吊钩水平移动、吊钩微微上升、吊钩下降" width="880" height="430" /></figure>)}
+			{j.body?.signal3_img && (<figure class="wp-block-image size-full"><img data-field="body.signal3_img" data-edit="image" src={j.body.signal3_img} alt="标准指挥手势：吊钩微微下落、微动范围、吊钩水平微微移动" width="880" height="448" /></figure>)}
+			{j.body?.signal4_img && (<figure class="wp-block-image size-full"><img data-field="body.signal4_img" data-edit="image" src={j.body.signal4_img} alt="标准指挥手势：指示降落方位、停止、紧急停止、工作结束" width="880" height="426" /></figure>)}
 
 			<!-- H2 结语 -->
 			{j.body?.h_conclusion && j.conclusion && (

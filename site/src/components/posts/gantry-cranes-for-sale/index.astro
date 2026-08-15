@@ -45,13 +45,13 @@ const WALK = { headingOffset: 1 }
 
 			<!-- 产品类型卡片网格（5 卡：3 列 + 2 列） -->
 			<div class="card-grid wp-block-columns is-layout-flex wp-container-core-columns-is-layout-1 wp-block-columns-is-layout-flex">
-				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.card1_img" data-edit="image" src={j.body.card1_img} alt="单梁龙门起重机" width="280" height="190" /></figure>{j.body?.card1_name && (<p class="card-name" data-field="body.card1_name" data-edit="text">{j.body.card1_name}</p>)}</div>
-				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.card2_img" data-edit="image" src={j.body.card2_img} alt="双梁龙门起重机" width="280" height="190" /></figure>{j.body?.card2_name && (<p class="card-name" data-field="body.card2_name" data-edit="text">{j.body.card2_name}</p>)}</div>
-				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.card3_img" data-edit="image" src={j.body.card3_img} alt="半龙门起重机" width="280" height="190" /></figure>{j.body?.card3_name && (<p class="card-name" data-field="body.card3_name" data-edit="text">{j.body.card3_name}</p>)}</div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">{j.body?.card1_img && (<figure class="wp-block-image size-full"><img data-field="body.card1_img" data-edit="image" src={j.body.card1_img} alt="单梁龙门起重机" width="280" height="190" /></figure>)}{j.body?.card1_name && (<p class="card-name" data-field="body.card1_name" data-edit="text">{j.body.card1_name}</p>)}</div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">{j.body?.card2_img && (<figure class="wp-block-image size-full"><img data-field="body.card2_img" data-edit="image" src={j.body.card2_img} alt="双梁龙门起重机" width="280" height="190" /></figure>)}{j.body?.card2_name && (<p class="card-name" data-field="body.card2_name" data-edit="text">{j.body.card2_name}</p>)}</div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">{j.body?.card3_img && (<figure class="wp-block-image size-full"><img data-field="body.card3_img" data-edit="image" src={j.body.card3_img} alt="半龙门起重机" width="280" height="190" /></figure>)}{j.body?.card3_name && (<p class="card-name" data-field="body.card3_name" data-edit="text">{j.body.card3_name}</p>)}</div>
 			</div>
 			<div class="card-grid wp-block-columns is-layout-flex wp-container-core-columns-is-layout-2 wp-block-columns-is-layout-flex">
-				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.card4_img" data-edit="image" src={j.body.card4_img} alt="便携式龙门起重机" width="280" height="190" /></figure>{j.body?.card4_name && (<p class="card-name" data-field="body.card4_name" data-edit="text">{j.body.card4_name}</p>)}</div>
-				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow"><figure class="wp-block-image size-full"><img data-field="body.card5_img" data-edit="image" src={j.body.card5_img} alt="定制龙门起重机" width="280" height="190" /></figure>{j.body?.card5_name && (<p class="card-name" data-field="body.card5_name" data-edit="text">{j.body.card5_name}</p>)}</div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">{j.body?.card4_img && (<figure class="wp-block-image size-full"><img data-field="body.card4_img" data-edit="image" src={j.body.card4_img} alt="便携式龙门起重机" width="280" height="190" /></figure>)}{j.body?.card4_name && (<p class="card-name" data-field="body.card4_name" data-edit="text">{j.body.card4_name}</p>)}</div>
+				<div class="wp-block-column is-layout-flow wp-block-column-is-layout-flow">{j.body?.card5_img && (<figure class="wp-block-image size-full"><img data-field="body.card5_img" data-edit="image" src={j.body.card5_img} alt="定制龙门起重机" width="280" height="190" /></figure>)}{j.body?.card5_name && (<p class="card-name" data-field="body.card5_name" data-edit="text">{j.body.card5_name}</p>)}</div>
 			</div>
 
 			{j.overview_close && (
@@ -66,7 +66,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_single && j.single && (
 			<h3 id="single-girder-price" class="wp-block-heading" data-field="body.h_single" data-edit="text">{j.body.h_single}</h3>
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_single" data-edit="image" src={j.body.img_single} alt="单梁龙门起重机" width="880" height="495" /></figure>
+			{j.body?.img_single && (<figure class="wp-block-image size-full"><img data-field="body.img_single" data-edit="image" src={j.body.img_single} alt="单梁龙门起重机" width="880" height="495" /></figure>)}
 			{j.body?.h_single && j.single && (
 			<div data-field="single.body" data-edit="rich" set:html={renderDoc(j.single.body, WALK)} />
 			)}
@@ -74,7 +74,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_double && j.double && (
 			<h3 id="double-girder-price" class="wp-block-heading" data-field="body.h_double" data-edit="text">{j.body.h_double}</h3>
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_double" data-edit="image" src={j.body.img_double} alt="双梁龙门起重机" width="880" height="495" /></figure>
+			{j.body?.img_double && (<figure class="wp-block-image size-full"><img data-field="body.img_double" data-edit="image" src={j.body.img_double} alt="双梁龙门起重机" width="880" height="495" /></figure>)}
 			{j.body?.h_double && j.double && (
 			<div data-field="double.body" data-edit="rich" set:html={renderDoc(j.double.body, WALK)} />
 			)}
@@ -82,7 +82,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_semi && j.semi && (
 			<h3 id="semi-gantry-price" class="wp-block-heading" data-field="body.h_semi" data-edit="text">{j.body.h_semi}</h3>
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_semi" data-edit="image" src={j.body.img_semi} alt="半龙门起重机" width="880" height="495" /></figure>
+			{j.body?.img_semi && (<figure class="wp-block-image size-full"><img data-field="body.img_semi" data-edit="image" src={j.body.img_semi} alt="半龙门起重机" width="880" height="495" /></figure>)}
 			{j.body?.h_semi && j.semi && (
 			<div data-field="semi.body" data-edit="rich" set:html={renderDoc(j.semi.body, WALK)} />
 			)}
@@ -90,7 +90,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_portable && j.portable && (
 			<h3 id="portable-price" class="wp-block-heading" data-field="body.h_portable" data-edit="text">{j.body.h_portable}</h3>
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_portable" data-edit="image" src={j.body.img_portable} alt="便携式龙门起重机" width="880" height="495" /></figure>
+			{j.body?.img_portable && (<figure class="wp-block-image size-full"><img data-field="body.img_portable" data-edit="image" src={j.body.img_portable} alt="便携式龙门起重机" width="880" height="495" /></figure>)}
 			{j.body?.h_portable && j.portable && (
 			<div data-field="portable.body" data-edit="rich" set:html={renderDoc(j.portable.body, WALK)} />
 			)}
@@ -102,7 +102,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_cost && j.cost_intro && (
 			<div data-field="cost_intro.body" data-edit="rich" set:html={renderDoc(j.cost_intro.body, WALK)} />
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_cost" data-edit="image" src={j.body.img_cost} alt="龙门起重机成本因素" width="880" height="495" /></figure>
+			{j.body?.img_cost && (<figure class="wp-block-image size-full"><img data-field="body.img_cost" data-edit="image" src={j.body.img_cost} alt="龙门起重机成本因素" width="880" height="495" /></figure>)}
 
 			{j.body?.h_cost1 && j.cost1 && (
 			<h3 id="cost-equipment" class="wp-block-heading" data-field="body.h_cost1" data-edit="text">{j.body.h_cost1}</h3>

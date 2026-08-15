@@ -42,7 +42,7 @@ const WALK = { headingOffset: 1 }
 			{j.body?.h_types && j.types && (
 			<h2 id="types" class="wp-block-heading" data-field="body.h_types" data-edit="text">{j.body.h_types}</h2>
 			)}
-			<figure class="wp-block-image size-full"><img data-field="body.img_types" data-edit="image" src={j.body.img_types} alt="5吨桥式起重机类型总览" width="880" height="495" /></figure>
+			{j.body?.img_types && (<figure class="wp-block-image size-full"><img data-field="body.img_types" data-edit="image" src={j.body.img_types} alt="5吨桥式起重机类型总览" width="880" height="495" /></figure>)}
 			{j.body?.h_types && j.types && (
 			<div data-field="types.body" data-edit="rich" set:html={renderDoc(j.types.body, WALK)} />
 			)}

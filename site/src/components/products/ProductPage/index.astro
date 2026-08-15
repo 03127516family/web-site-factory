@@ -30,7 +30,7 @@ const craneTypes = (j.crane_types_images ?? []).map((t, i) => ({ ...t, body: typ
 ---
 
 <section data-template="hero@1" data-block-id="hero" data-kind="shared" class="banner">
-	<p><img fetchpriority="high" decoding="async" data-field="hero.image" src={IMG + j.hero.image} alt={j.title} width={j.hero.width} height={j.hero.height} /></p>
+	{j.hero?.image && (<p><img fetchpriority="high" decoding="async" data-field="hero.image" src={IMG + j.hero.image} alt={j.title} width={j.hero.width} height={j.hero.height} /></p>)}
 	<div class="con">
 		<h2 data-field="hero.headline">{j.hero.headline}</h2>
 		<ul data-field="hero.highlights">
