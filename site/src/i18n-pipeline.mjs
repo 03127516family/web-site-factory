@@ -44,7 +44,11 @@ function withContext(units) {
 
 // 主入口：中文「发布」事件（或手动送翻）。translate=false = 开关关：只检测+重投影；
 // retryFailed=true = 人工救济通道（I-1）：failed 句重送——发布钩子默认 false 不反复烧钱。
+// 在译去重（评审 P2 裁定）：同页同语言已在译（translate-all 跑着时又发布了该页/连发两次发布）→
+// 本回合降级只检测+重投影，不重复送翻——TM 收敛无损，省的是真钱；下轮 translate-all/发布自然补上。
+const inflight = new Set()
 export async function runPipeline(pageId, { lang = 'en', translate = true, retryFailed = false, callAI = null } = {}) {
+  if (translate && inflight.has(`${pageId}|${lang}`)) translate = false
   const source = findSource(pageId)
   const srcJ = readJ(source.file)
   const tm = loadTm(srcJ.page.lang, lang)
@@ -52,24 +56,27 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   const missing = withContext(units).filter(u => !tm.sentences[u.fp] || (retryFailed && tm.sentences[u.fp]?.status === 'failed'))
   let translated = 0, failed = 0
   if (translate && missing.length) {
-    const terms = loadTerms(srcJ.page.lang, lang)
-    const r = await translateSegments(missing, terms, { callAI })
-    // 竞态防护（T10 质量审 Major-1）：翻译窗口（秒~分钟）里其他演员（审阅页人审/approve/另一次发布）
-    // 可能已往盘上 TM 落了新条目——本副本已陈旧。写前重读盘上现值，只合并本次触碰的 fp；
-    // 不降级：盘上 approved 是人审终态，胜过引擎 draft/failed。
-    const fresh = loadTm(srcJ.page.lang, lang)
-    for (const u of missing) {
-      if (r.ok[u.id]) {
-        if (fresh.sentences[u.fp]?.status === 'approved') continue // 窗口内已被人工审过，机器稿让位
-        upsert(fresh, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' })
-        delete fresh.sentences[u.fp].error // 失败转正清旧 error 键（upsert 浅合并不清旧键，数据卫生）
-        translated++
+    inflight.add(`${pageId}|${lang}`)
+    try {
+      const terms = loadTerms(srcJ.page.lang, lang)
+      const r = await translateSegments(missing, terms, { callAI })
+      // 竞态防护（T10 质量审 Major-1）：翻译窗口（秒~分钟）里其他演员（审阅页人审/approve/另一次发布）
+      // 可能已往盘上 TM 落了新条目——本副本已陈旧。写前重读盘上现值，只合并本次触碰的 fp；
+      // 不降级：盘上 approved 是人审终态，胜过引擎 draft/failed。
+      const fresh = loadTm(srcJ.page.lang, lang)
+      for (const u of missing) {
+        if (r.ok[u.id]) {
+          if (fresh.sentences[u.fp]?.status === 'approved') continue // 窗口内已被人工审过，机器稿让位
+          upsert(fresh, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' })
+          delete fresh.sentences[u.fp].error // 失败转正清旧 error 键（upsert 浅合并不清旧键，数据卫生）
+          translated++
+        }
+        else { upsert(fresh, u.fp, { text: u.text, translation: '', status: 'failed', origin: 'engine', error: r.fail[u.id] ?? 'unknown' }); failed++ }
       }
-      else { upsert(fresh, u.fp, { text: u.text, translation: '', status: 'failed', origin: 'engine', error: r.fail[u.id] ?? 'unknown' }); failed++ }
-    }
-    Object.assign(tm, fresh) // 后续投影/待审计数用合并后的账本
-    saveTm(srcJ.page.lang, lang, fresh)
-    logEvent(source.slug, 'auto-translate', { lang, translated, failed })
+      Object.assign(tm, fresh) // 后续投影/待审计数用合并后的账本
+      saveTm(srcJ.page.lang, lang, fresh)
+      logEvent(source.slug, 'auto-translate', { lang, translated, failed })
+    } finally { inflight.delete(`${pageId}|${lang}`) } // 翻译抛错也要放行——否则该页永久降级只检测
   }
   // 重投影镜像（结构同步在此）：full 模式 + 保留现有 status；auto 语言直发
   const mirFile = join(lang, source.file)

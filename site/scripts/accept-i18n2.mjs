@@ -828,6 +828,20 @@ test('转正:approvePage draft→approved 清 error 键（人审路补 2c5be01 �
   assert.ok(Object.values(after.sentences).every(e => e.status === 'approved' && !('error' in e)))
   cleanup()
 })
+test('流水线:同页在译去重——并发第二回合只检测不重复送翻（防双份账单）', async () => {
+  cleanup(); fixture()
+  let release; const gate = new Promise(r => release = r)
+  let calls = 0
+  const slowAI = async messages => { calls++; await gate; return mockAI(messages) }
+  const p1 = runPipeline(FIX, { lang: 't9', callAI: slowAI }) // 同步前缀里 inflight 已挂（runPipeline 至首个 await 前无让出）
+  const p2 = runPipeline(FIX, { lang: 't9', callAI: slowAI }) // 窗口内的第二回合（如 translate-all 期间又发布）
+  release()
+  const [r1, r2] = await Promise.all([p1, p2])
+  assert.equal(calls, 1) // 只有一次真正送翻
+  assert.ok(r1.translated >= 5)
+  assert.equal(r2.translated, 0) // 第二回合降级只检测+重投影
+  cleanup()
+})
 test('族谱:pageId 跨类型撞名抛错（防并组/择源歧义，改坏不静默）', () => {
   const pages = [
     { pageId: 'dup', type: 'post', langDir: null, lang: 'zh-CN', slug: 'posts/dup', file: 'posts/dup.json', status: 'published' },
