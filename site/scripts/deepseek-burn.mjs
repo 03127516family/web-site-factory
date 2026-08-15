@@ -211,10 +211,11 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   const audit = lib.auditPositions(sectionResults.filter(r => r.data), rawText, paragraphs)
   for (const w of audit.warnings) report.notes.push(w)
   report.fieldMap = audit.fieldMap // 人审辅助：每格命中的原文段号
-  const acceptedTexts = [] // 所有已收格子的文字（段=标题+树块，list=条目，text/seo=text）
+  const acceptedTexts = [] // 所有已收格子的文字（段=标题+树块，章节=逐项标题+树块，list=条目，text/seo=text）
   for (const r of sectionResults) {
     if (!r.data) continue
     if (r.shape === 'section') acceptedTexts.push(r.data.title, ...lib.treeBlocks(lib.mdToDoc(r.data.body_md)))
+    else if (r.shape === 'sections') acceptedTexts.push(...r.data.items.flatMap(it => [it.heading, ...lib.treeBlocks(lib.mdToDoc(it.body_md))]))
     else if (r.shape === 'list') acceptedTexts.push(...r.data.items)
     else if (r.data.text) acceptedTexts.push(r.data.text)
   }

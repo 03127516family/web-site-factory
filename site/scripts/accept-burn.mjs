@@ -527,6 +527,12 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
       throw new Error('未覆盖 ' + tag)
     } })
   ok('指定套件：报告带套件名', gr.kit === 'gantry-cranes-for-sale' && gr.family === 'posts')
+  const rp2 = await burner.burn({ text: '甲文\n\n安全要求\n\n操作人员必须持证上岗。\n\n十不吊\n\n超载不吊，斜拉不吊。', slug: 'zz-un-used', productName: '甲文', family: 'posts' }, { callAI: async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { title: { text: '甲文' }, 'body.sections': { items: [
+      { heading: '安全要求', body_md: '操作人员必须持证上岗。' }, { heading: '十不吊', body_md: '超载不吊，斜拉不吊。' }] } } }
+    throw new Error('未覆盖 ' + tag)
+  } })
+  ok('sections 内容计入已用文本（unused 不再误报）', rp2.report.unused.length === 0, JSON.stringify(rp2.report.unused))
   ok('titlePath 落位（text→body.h_price、section 标题→body.h_conclusion）',
     gj.body.h_price === '价格区间' && gj.body.h_conclusion === '结论' && gj.conclusion.body.type === 'doc')
   ok('发明格子拒收（gantry 无 price 槽）', gr.sections.find(s => s.key === 'price')?.status === 'failed' && /白名单/.test(gr.sections.find(s => s.key === 'price')?.issues[0]))
