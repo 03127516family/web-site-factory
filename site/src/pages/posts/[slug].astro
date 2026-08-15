@@ -7,8 +7,11 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '@layouts/Chrome.astro'
 
-const kitLayouts = import.meta.glob('../../components/posts/*/index.astro')
-const flatLayouts = import.meta.glob('../../components/posts/*.astro')
+// glob 返回键被 Vite 规范化成「相对本文件」的路径——统一转成后缀键（posts/<名>/index.astro），
+// 查表不再数 ../../../（模式可用 @components 别名；键形后缀化后与文件位置无关）
+const bySuffix = o => Object.fromEntries(Object.entries(o).map(([k, v]) => [k.slice(k.indexOf('/posts/') + 1), v]))
+const kitLayouts = bySuffix(import.meta.glob('@components/posts/*/index.astro'))
+const flatLayouts = bySuffix(import.meta.glob('@components/posts/*.astro'))
 
 export function getStaticPaths() {
   const dir = join(process.cwd(), 'content/posts')
@@ -25,10 +28,10 @@ export function getStaticPaths() {
 
 const { j } = Astro.props
 const slug = Astro.params.slug
-const kit = kitLayouts[`../../components/posts/${j.page.template}/index.astro`]
+const kit = kitLayouts[`posts/${j.page.template}/index.astro`]
 const Comp = kit
   ? (await kit()).default // 套件骨架（烧制新页）
-  : (await flatLayouts[`../../components/posts/${slug}.astro`]()).default // 每篇一模版（旧 4 篇）
+  : (await flatLayouts[`posts/${slug}.astro`]()).default // 每篇一模版（兜底）
 ---
 <Chrome j={j}>
 	<Comp j={j} />

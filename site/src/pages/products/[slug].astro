@@ -15,8 +15,10 @@ export function getStaticPaths() {
 }
 
 const { j } = Astro.props
-const layouts = import.meta.glob('../../components/products/*/index.astro')
-const Comp = (await layouts[`../../components/products/${j.page.template}/index.astro`]()).default
+// glob 键后缀化（posts 路由同款）：查表用 products/<名>/index.astro，不数 ../../../
+const bySuffix = o => Object.fromEntries(Object.entries(o).map(([k, v]) => [k.slice(k.indexOf('/products/') + 1), v]))
+const layouts = bySuffix(import.meta.glob('@components/products/*/index.astro'))
+const Comp = (await layouts[`products/${j.page.template}/index.astro`]()).default
 ---
 <Chrome j={j}>
   <Comp j={j} />

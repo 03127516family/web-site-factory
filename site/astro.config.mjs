@@ -8,7 +8,8 @@ export default defineConfig({
   // 双产物：默认 dist（生产，仅 published）；BUILD_OUT=dist-edit + INCLUDE_DRAFTS=1 = 编辑预览（含草稿，R33）
   outDir: process.env.BUILD_OUT || 'dist',
   // 路径别名（位置无关引用）：import 语句全认；import.meta.glob 的「模式」认别名，
-  // 但返回的「键」会被 Vite 规范化回相对导入者的路径——glob 查表字面量须保持相对写法。
+  // 但返回的「键」会被 Vite 规范化回相对导入者的路径——查表别写相对字面量，
+  // 用「后缀键」惯例（路由里 bySuffix() 把键转成 posts/<名>/… 再查），彻底不数 ../../../。
   // 挪文件/拷组件进套件目录不再数 ../ 层数（kit-init 深度改写那类 bug 的根治）。
   vite: {
     resolve: {
