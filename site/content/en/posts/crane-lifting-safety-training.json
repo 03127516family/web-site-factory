@@ -1,0 +1,1441 @@
+{
+  "version": 1,
+  "page": {
+    "slug": "en/posts/crane-lifting-safety-training",
+    "type": "post",
+    "lang": "en",
+    "title": "Crane Operation Safety Management: Core Standards, Hazards, and Risk Prevention | DGCRANE",
+    "description": "Core safety standards for lifting operations: warnings from typical accident cases, scrapping standards for hooks and wire ropes, standardized safety operating procedures for operators, the \"Ten No-Lift\" safety prohibitions, and standard command gestures, to comprehensively prevent safety risks in lifting operations.",
+    "template": "crane-lifting-safety-training",
+    "family": "post@1",
+    "status": "draft"
+  },
+  "title": "Crane Operation Safety Management: Core Standards, Hazards, and Risk Prevention",
+  "breadcrumb": {
+    "current": "Crane Operation Safety Management: Core Standards, Hazards, and Risk Prevention",
+    "trail": [
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/"
+      },
+      {
+        "label": "案例",
+        "url": "https://www.dgcrane.com/zh/posts/"
+      }
+    ]
+  },
+  "body": {
+    "h_accident": "Warnings from Lifting Accidents and Analysis of Safety Risks",
+    "h_case": "Warnings from Typical Accident Cases",
+    "h_hazard": "Main Hazards and Accident Causes",
+    "h_gear": "Core Lifting Gear Safety Use and Scrapping Standards",
+    "h_hook": "1. Hook Use and Scrapping Requirements",
+    "h_wirerope": "2. Wire Rope Use and Scrapping Requirements",
+    "h_operator": "Standardized Safety Operating Procedures for Crane Operators",
+    "h_basic": "1. Basic Employment Conditions",
+    "h_principles": "2. Core Operating Requirements",
+    "h_emergency": "3. Emergency Response Standards",
+    "h_nolift": "\"Ten No-Lift\" Safety Prohibitions",
+    "h_signals": "Standard Command Gestures",
+    "h_conclusion": "Conclusion",
+    "img_accident": "/assets/img/post/crane-safety-accident-case.png",
+    "img_hazard": "/assets/img/post/crane-safety-hazard-stats.png",
+    "img_wirerope": "/assets/img/post/crane-safety-wire-rope.png",
+    "img_nolift": "/assets/img/post/crane-safety-no-lift.png",
+    "signal1_img": "/assets/img/post/crane-safety-hand-signal-1.png",
+    "signal2_img": "/assets/img/post/crane-safety-hand-signal-2.png",
+    "signal3_img": "/assets/img/post/crane-safety-hand-signal-3.png",
+    "signal4_img": "/assets/img/post/crane-safety-hand-signal-4.png"
+  },
+  "inquiry_form": {
+    "title": "Fill in your details and we will reply to you within 24 hours!"
+  },
+  "lead": {
+    "title": "Introduction",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "As a critical link in industrial production and engineering construction, lifting operations involve complex processes and prominent safety risks. Any operational violations, equipment hazards, or management oversights can easily lead to accidents such as falling loads, crushing collisions, and casualties, seriously threatening production safety and the lives and health of personnel.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "To comprehensively strengthen safety management of lifting operations, standardize full-process operations, and prevent and mitigate various safety risks, the core safety standards, operational requirements, and key risk prevention points for lifting operations are summarized below, providing a solid guide for safe production.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "accident_cases": {
+    "title": "Warnings from Typical Accident Cases - Main Text",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Over the years, frequent lifting accidents caused by violations, equipment hazards, and management deficiencies have occurred, with profound lessons:",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In 2003, at a steel company in Dalian, due to failure to inspect the wire rope and operators illegally staying in the danger zone, the wire rope broke during lifting, and hot slag overturned, causing the death of an operator;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In 2011, at an aluminum processing enterprise, a crane driver's reckless operation caused a collision between cranes, and an operator narrowly escaped a fall from height; in the same year, in another workshop, a crane operator failed to raise the sling and illegally drove, overturning the work platform, fortunately without casualties;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "In 2007, at an enterprise in Wenzhou, an unlicensed person illegally operated a crane without upper limit protection, causing the wire rope to break and the load to fall, resulting in a fatality.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "hazards": {
+    "title": "Main Hazards and Accident Causes - Main Text",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "According to accident statistics, ",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "falling loads (34%) and crushing collisions (30%)",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " are the two most frequent types of safety accidents in lifting operations, along with multiple risks such as overturning, object strikes, and electric shock.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Management-related causes of lifting injury accidents:",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Personnel work without proper certification, engaging in lifting operations without being qualified crane operators or riggers.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Work permits required for overload and tandem lifting are not issued.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Operations are carried out without safety briefing.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Safety measures are not fully implemented.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lifting equipment is put into operation without testing or after failing tests.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Direct causes of crane injury accidents:",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When the crane is lifting objects, if there is no dedicated person or the signal is unfamiliar, and the object descends too fast, it can cause the hook to disengage.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Wire ropes are not inspected regularly, and excessive force on the lifted object can cause breakage and injury.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Improper hooking or rigging causes the object to be unstable and sway, hitting stacked materials or striking nearby personnel.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Insufficient awareness of hazards in the work environment leads to crushing or collision during the inertial movement of the lifted load.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Incorrect lifting methods and insecure fastening cause the load to fall, injuring personnel on the ground.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Inaccurate estimation of load weight and overloading cause the crane brake to fail.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Operators lack lifting knowledge, have low skills, and violate operating procedures.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "On multi-trade collaborative work surfaces, lack of unified command and poor coordination among operators cause injuries during lifting operations.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Crane tools and equipment are used without maintenance, operating while defective, leading to crane failures and accidents.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Improper selection of wire ropes, chains, shackles, and other rigging by lifting personnel, with insufficient or no safety factors, causes falling loads to injure people and damage equipment.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "hook": {
+    "title": "Hook Usage and Scrapping Requirements",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The hook is the core load-bearing component in lifting operations; its integrity directly determines operational safety, and strict compliance with usage and scrapping specifications is mandatory.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Usage Specifications",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Do not use cast hooks; hooks must be securely fixed, rotate flexibly, have no cracks or defects on the surface, and defects must not be repaired by welding; safety devices to prevent accidental unhooking must be provided, ensuring locking nuts, fixing bolts, and other accessories are intact.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Scrapping Standards",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Immediately scrap if cracks appear (cracks cannot be welded), wear on the dangerous section exceeds 10%, opening increase exceeds 15%, hook body torsional deformation exceeds 10°, or plastic deformation occurs; replace laminated hook bushings and pins if wear exceeds limits.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "wirerope": {
+    "title": "Wire Rope Usage and Scrapping Requirements",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Wire rope is one of the core load-bearing components in lifting operations, with strong load capacity, smooth operation, and high reliability, but it is relatively rigid and susceptible to wear, high temperature, and corrosion; improper use can cause breakage and accidents.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Scrapping Conditions",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Immediately scrap if wavy shape, wire/strand extrusion, cage-like deformation, abnormal rope diameter, bending, kinking, local flattening, or other deformed states occur.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "operator_basic": {
+    "title": "Basic Employment Requirements",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "As core lifting operators, one must hold a valid certificate, operate according to regulations, and strictly follow all safety procedures throughout the process.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Crane operators must pass professional training and assessment and hold a valid operation certificate before operating the crane; those without special training and examination are not allowed to operate independently.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Crane operators must be at least 18 years old, in good health, and free from diseases or physical defects that hinder their work (such as color blindness, hearing impairment, epilepsy, hypertension, heart disease, vertigo, mental illness, and sudden fainting disorders).",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "They should have knowledge of the performance and uses of all crane mechanisms and devices, electrical knowledge, and fire prevention knowledge.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "During operation, crane operators are not allowed to smoke, eat, read books or newspapers, use mobile phones, etc., and must strictly observe labor discipline.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Be familiar with various command signals.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "operator_principles": {
+    "title": "Core Operational Requirements",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Operation must follow the five principles of ",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": "stability, accuracy, speed, safety, and rationality",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ", with smooth start and braking, precise load positioning, efficient operation, accident prevention, and reasonable equipment control.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Before Operation",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Wear protective equipment properly, wear insulated shoes and a 'three-tight' work suit; enter and exit the cab via the dedicated ladder, conduct shift handover inspections and no-load trial runs, and confirm no abnormalities before starting work.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "During operation",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Sound the horn as a warning when starting, approaching equipment, lifting/lowering loads, or passing through personnel areas; adjust speed step by step, and strictly prohibit direct reversal, gear skipping, or skewed lifting; the load must be kept 0.5 meters above any equipment in the path, and only release the hook after confirming the load is securely landed; do not leave loads suspended for extended periods, and strictly prohibit maintenance or getting on/off the equipment during operation.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "After operation",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Park the equipment at the designated position, raise the hook, return the pendant control to zero, cut off the power supply, and complete equipment cleaning and lubrication maintenance.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "emergency": {
+    "title": "Emergency Response Procedures",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Brake failure",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Stay calm, repeatedly raise and lower the load slowly, sound the horn as a warning, move the load to an open area and land it safely, and strictly prevent equipment power loss.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Electrical fire",
+              "marks": [
+                {
+                  "type": "bold"
+                },
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": ": Immediately cut off the power supply, use dry powder or carbon dioxide fire extinguishers to put out the fire, and strictly prohibit using water to extinguish while energized.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "nolift": {
+    "title": "Ten No-Lift Safety Prohibitions",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Lifting operations must strictly comply with the rigid requirements of the \"Ten No-Lift\" rules, and no lifting is allowed under any circumstances in violation of these rules:",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if overweight or overloaded;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if the command signal is unclear or if the command violates regulations;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if the load is not securely fastened or does not meet safety requirements;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if the lighting is dim or visibility is poor;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if the load is pulled at an angle or hung obliquely;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if there are people standing on the load or floating objects placed on it;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if safety devices are incomplete, malfunctioning, or not sensitive;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if objects with sharp edges or notches lack anti-cutting measures;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift if the tonnage of the load is unclear;",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Do not lift buried objects or objects hooked to buildings/equipment.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "signals": {
+    "title": "Standard Command Gestures",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Standardized and unified command gestures are an important guarantee for the safety of lifting operations. Operators and signal persons must jointly memorize the following core command gestures to ensure accurate signal transmission.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "conclusion": {
+    "title": "Conclusion",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Safety is the bottom line of production, and standardization is the guarantee of safety.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Lifting operations concern the safety of personnel and the stability of enterprise production. All work positions must firmly establish safety awareness, strictly comply with all regulations on lifting tools, operating procedures, and safety prohibitions, strengthen equipment maintenance, refine on-site management, eliminate violations, comprehensively build a solid safety defense line for lifting operations, and safeguard the entire production process with standardized operations.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "i18n": {
+    "source": "zh-CN"
+  }
+}

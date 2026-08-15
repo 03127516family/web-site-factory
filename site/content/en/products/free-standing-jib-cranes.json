@@ -1,0 +1,734 @@
+{
+  "version": 1,
+  "page": {
+    "slug": "en/products/free-standing-jib-cranes",
+    "type": "product",
+    "lang": "en",
+    "title": "Free-standing Jib Crane - DGCRANE",
+    "description": "Free-standing (self-standing) jib crane manufacturer and exporter, with lifting capacity up to 16 tons, boom length up to 16 meters, rotation 120-360°, compact structure, small footprint, easy installation, suitable for short-distance intensive work cells.",
+    "template": "ProductPage",
+    "family": "product-superset@1",
+    "status": "published"
+  },
+  "title": "Freestanding Jib Crane",
+  "breadcrumb": {
+    "current": "Freestanding Jib Crane",
+    "trail": [
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/"
+      },
+      {
+        "label": "旋臂起重机",
+        "url": "https://www.dgcrane.com/zh/jib-cranes/"
+      }
+    ]
+  },
+  "hero": {
+    "headline": "Crane Manufacturer and Exporter",
+    "highlights": [
+      "Over 10 years of crane export experience",
+      "Cranes sold to more than 120 countries",
+      "A technical team of over 50 people",
+      "Over 3,000 cases across different industries"
+    ]
+  },
+  "summary": {
+    "cta": "Request a Quote"
+  },
+  "specs": [
+    {
+      "text": "Lifting Capacity: up to 16 tons"
+    },
+    {
+      "text": "Boom Length: Up to 16m"
+    },
+    {
+      "text": "Lifting Height: up to 12 (floor to boom bottom)"
+    },
+    {
+      "text": "Duty Class: M3-M5"
+    },
+    {
+      "text": "Rotation Angle: 120-360°"
+    },
+    {
+      "text": "Power Supply: 220V~690V, 50-60Hz, 3ph AC"
+    },
+    {
+      "text": "Request New Parameters"
+    },
+    {
+      "text": "New Parameters Complete"
+    }
+  ],
+  "inquiry_form": {
+    "type": "inquiry-form",
+    "form_id": 713,
+    "title": "Fill in your details and we will reply to you within 24 hours!"
+  },
+  "related_products": {
+    "type": "related-products",
+    "title": "Related Products",
+    "category": "jib-cranes",
+    "limit": 4,
+    "seed": [
+      {
+        "title": "FEM Standard Jib Crane",
+        "image": "European_Jib_Crane.jpg",
+        "url": "https://www.dgcrane.com/zh/fem-standard-jib-cranes/",
+        "summary": "The European-style jib crane has a unique structure, safe and reliable, with high efficiency, energy saving, time saving, and flexibility. It is especially suitable for short-distance, high-intensity lifting places. European-style jib cranes are widely used in workshops, warehouses, docks, and other fixed places. The duty class is generally A4 or A5."
+      },
+      {
+        "title": "FEM Standard Wire Rope Electric Hoist",
+        "image": "European_Wire_Rope_Electric_Hoist.jpg",
+        "url": "https://www.dgcrane.com/zh/products/wire-rope-hoist-suppliers/",
+        "summary": "The lifting mechanism of the European wire rope electric hoist uses a planetary gear drive - compact, lightweight, and mounted inside the drum, it effectively reduces the overall size of the hoist. The European wire rope electric hoist is designed for maximum modularity, with a high degree of part commonality."
+      },
+      {
+        "title": "FEM Standard Electric Chain Hoist",
+        "image": "European_Electric_Chain_Hoist.jpg",
+        "url": "https://www.dgcrane.com/zh/fem-standard-electric-chain-hoists/",
+        "summary": "The European electric chain hoist is compact and reliable. Its modular design lets our products flexibly form systems with different lifting capacities, lifting speeds, and duty classifications."
+      },
+      {
+        "title": "FEM Standard Gantry Crane",
+        "image": "European_Gantry_Crane.jpg",
+        "url": "https://www.dgcrane.com/zh/fem-standard-gantry-cranes/",
+        "summary": "The European-style gantry crane adopts European design standards and manufacturing technology, reaching the advanced level of similar international products, such as low height, light weight, low wheel pressure, flexible direct drive, variable frequency speed control, and maintenance-free."
+      }
+    ]
+  },
+  "summary_intro": {
+    "title": "Introduction",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Free-standing jib cranes are typically used in smaller work cell areas for repetitive and unique lifting tasks."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Jib cranes are very versatile and can also be paired with overhead cranes to maximize production efficiency."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The working range is a circular area, making it highly suitable for workplaces with short distances and dense material flow."
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "It offers a substantial lifting capacity and can be used across various industries."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Its lightweight structure occupies minimal space and is easy to install."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "overview": {
+    "title": "Overview",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "A freestanding jib crane consists of a column, a slewing arm, and an electric hoist."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "It proves highly effective in workshops with limited space."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "It occupies a very small footprint while covering the entire working area."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Depending on requirements, it can be mounted on the floor or wall, and the lifting mechanism can be electric or manual."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Widely used in various locations such as loading docks, ports, and shipyards, it can be used in conjunction with other jib cranes or as supporting equipment on factory production lines."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The installation and dismantling of the fixed column jib crane are extremely simple, requiring no disassembly."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "introduction": {
+    "title": "Introduction",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The freestanding jib crane is designed to stand on its own without any other support."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "It consists of a rotatable vertical column and a horizontal load-supporting arm."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "We rely not on low jib crane prices but on the high quality of our freestanding jib cranes to achieve our company's growth."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Freestanding Jib Crane"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Compared to wall-mounted and wall-traveling jib cranes, the freestanding jib crane can achieve higher capacities, longer spans, and a larger rotation range."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Due to its structural advantages, this jib crane can be customized to meet your specific application requirements."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The only installation constraint is that the soil pressure where the freestanding jib crane is placed must reach 2,500 pounds per square foot."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "advantages": {
+    "title": "Advantages",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Maximizes Space Utilization"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Easy Installation"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lightweight Structure"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Robust and Durable"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Safety and Reliability"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Low Noise"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "basic_params": {
+    "title": "Basic Parameters",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "It is a recently developed medium and small lifting equipment, highly suitable for short-distance movement and lifting/transporting personnel in workplaces."
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Crane Rotation:"
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "360 degrees"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Boom Length: Up to 16m"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Rotation Speed: 0.5 r/min"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Safe Working Load: up to 16 tons"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lifting Height: up to 12 m (from floor to bottom of jib)"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Working Temperature: -20~+40℃"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Travel Speed: 20 or 30 m/min"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Control Mode: Pendant Control, Remote Control, and Cabin"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Application: Widely used in various industries"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Power Supply."
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "AC 380V, 50HZ, 3P"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Note: Users can also choose dual-speed, single-speed chain hoists and wire-rope hoists."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "main_features": {
+    "title": "Key features",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Maximum Versatility"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "It is one of the most versatile cranes."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The free-standing jib crane can be installed almost anywhere, indoors or outdoors, such as loading docks, ports, shipyards, etc."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "It can also work with other jib cranes or serve as a supplement to factory assembly lines."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Installation and relocation of the free-standing jib crane are very simple, without disassembly."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Easy Operation"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The cranes produced by our factory allow operators to control movements precisely, effectively, and quickly."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "With advanced technology, we can make the movements of the jib crane very simple and accurate."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Therefore, unintentional movements will be minimized."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "In turn, damage to your plant, equipment, and even personnel will be greatly reduced."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The working life of the crane can be better guaranteed and extended."
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Safety"
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "We always put safety in mind!!!"
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "We have adopted an emergency stop system to enhance safety."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "We adopt an emergency braking system to enhance safety."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "When operators encounter some emergency situations, the emergency braking system will be activated to protect the relevant assets."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Every product from our factory is well tested before being delivered to your workplace."
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "If you cannot complete the installation independently, our experienced workers will not leave your workplace until the crane is inspected and guaranteed 100%."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "i18n": {
+    "source": "zh-CN"
+  }
+}

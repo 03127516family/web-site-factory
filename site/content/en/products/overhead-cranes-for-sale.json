@@ -1,0 +1,3448 @@
+{
+  "version": 1,
+  "page": {
+    "slug": "en/products/overhead-cranes-for-sale",
+    "type": "product",
+    "lang": "en",
+    "title": "FEM Standard Overhead Crane (European-style Overhead Crane) - DGCRANE",
+    "description": "European-style (FEM standard) Overhead Crane manufacturer and exporter, widely used in machinery manufacturing, petrochemical, port, electric power and other industries, with advanced technology, light deadweight, and high energy efficiency.",
+    "template": "ProductPage",
+    "family": "product-superset@1",
+    "status": "draft"
+  },
+  "title": "FEM Standard Overhead Crane",
+  "breadcrumb": {
+    "current": "FEM Standard Overhead Crane",
+    "trail": [
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/"
+      },
+      {
+        "label": "桥式起重机",
+        "url": "https://www.dgcrane.com/zh/overhead-cranes/"
+      }
+    ]
+  },
+  "hero": {
+    "image": "European-Overhead-Crane-scaled.jpg",
+    "headline": "Crane Manufacturer and Exporter",
+    "highlights": [
+      "Over 10 years of crane export experience",
+      "Cranes sold to more than 120 countries",
+      "A technical team of over 50 people",
+      "Over 3,000 cases across different industries"
+    ],
+    "width": 2560,
+    "height": 533
+  },
+  "summary": {
+    "cta": "Request a Quote"
+  },
+  "specs": [
+    {
+      "text": "Lifting Capacity: 3.2-80t"
+    },
+    {
+      "text": "Span: 4-31.5m"
+    },
+    {
+      "text": "Lifting Height: Customized according to customer's site conditions"
+    },
+    {
+      "text": "Duty Class: A5"
+    },
+    {
+      "text": "Power Supply: 220V~690V, 50-60Hz, 3ph AC"
+    },
+    {
+      "text": "Protection Class: IP54 IP55"
+    },
+    {
+      "text": "Control Method: Pendant Control / Remote Control / Cabin Control"
+    }
+  ],
+  "gallery": [
+    {
+      "image": "5Ton-European-type-single-girder-overhead-crane-3.jpg",
+      "alt": "5t European-style Single Girder Overhead Crane 3"
+    },
+    {
+      "image": "5Ton-European-type-single-girder-overhead-crane-1.jpg",
+      "alt": "5t European-style Single Girder Overhead Crane 1"
+    },
+    {
+      "image": "15Ton-European-type-single-girder-overhead-crane.jpg",
+      "alt": "15t European-style Single Girder Overhead Crane"
+    },
+    {
+      "image": "5Ton-NLH-European-Type-double-girder-overhead-crane-2.jpg",
+      "alt": "5t NLH European-style Double Girder Overhead Crane 2"
+    },
+    {
+      "image": "5Ton-NLH-European-Type-double-girder-overhead-crane-1.jpg",
+      "alt": "5t NLH European-style Double Girder Overhead Crane 1"
+    },
+    {
+      "image": "5Ton-NLH-European-Type-double-girder-overhead-crane-3.jpg",
+      "alt": "5t NLH European-style Double Girder Overhead Crane 3"
+    },
+    {
+      "image": "NLH-European-type-double-girder-overhead-crane-1.jpg",
+      "alt": "NLH European-style Double Girder Overhead Crane 1"
+    },
+    {
+      "image": "NLH-European-type-double-girder-overhead-crane-2.jpg",
+      "alt": "NLH European-style Double Girder Overhead Crane 2"
+    },
+    {
+      "image": "NLH-European-type-double-girder-overhead-crane-3.jpg",
+      "alt": "NLH European-style Double Girder Overhead Crane 3"
+    },
+    {
+      "image": "12.5ton-European-type-double-girder-overhead-crane.jpg",
+      "alt": "12.5t European-style Double Girder Overhead Crane"
+    },
+    {
+      "image": "European-type-hoist.jpg",
+      "alt": "European-style Electric Hoist"
+    },
+    {
+      "image": "Euro-type-overhead-crane-2.jpg",
+      "alt": "European-style Overhead Crane 2"
+    },
+    {
+      "image": "Euro-type-overhead-crane-3.jpg",
+      "alt": "European-style Overhead Crane 3"
+    },
+    {
+      "image": "Euro-type-overhead-crane-5.jpg",
+      "alt": "European-style Overhead Crane 5"
+    },
+    {
+      "image": "Euro-type-overhead-crane-4-1.jpg",
+      "alt": "European-style Overhead Crane 4 1"
+    },
+    {
+      "image": "Euro-type-overhead-crane-6.jpg",
+      "alt": "European-style Overhead Crane 6"
+    },
+    {
+      "image": "Euro-type-overhead-crane-7.jpg",
+      "alt": "European-style Overhead Crane 7"
+    },
+    {
+      "image": "Euro-type-overhead-crane-8.jpg",
+      "alt": "European-style Overhead Crane 8"
+    },
+    {
+      "image": "Euro-type-overhead-crane-9.jpg",
+      "alt": "European-style Overhead Crane 9"
+    }
+  ],
+  "components_images": [
+    {
+      "name": "Main Girder",
+      "image": "Main-girder.jpg",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "name": "End Carriage",
+      "image": "End-carriages.jpg",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "name": "Hoisting Mechanism",
+      "image": "European-type-wire-rope-hoist.jpg",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "name": "Crane Travel Gear Motor",
+      "image": "SEW-gear-motor-for-crane-traveling.jpg",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "name": "Electrical Control System",
+      "image": "Crane-electric-control-bo.jpg"
+    },
+    {
+      "name": "Control Mode",
+      "image": "Pendant-controller.jpg",
+      "width": 1200,
+      "height": 800
+    },
+    {
+      "name": "Protection devices for European-style Overhead Crane"
+    }
+  ],
+  "production_flow": {
+    "title": "A European-type Overhead Crane Will Be Produced Within 45 Days",
+    "tips": "Delivery time for cranes with different voltages may be extended by 10-15 days, as electrical components need to be customized by our suppliers.",
+    "steps": [
+      {
+        "label": "Incoming Material Inspection",
+        "image": "1-Incoming-material-sample-test-1.jpg",
+        "dataSize": "2400x1600"
+      },
+      {
+        "label": "Steel Plate Uncoiling and Cracking",
+        "image": "2-Steel-plate-uncoiling-and-falttening.jpg",
+        "dataSize": "2400x1600"
+      },
+      {
+        "label": "Steel Plate Cutting",
+        "image": "3-Steel-sheeting-cuttig.jpg",
+        "dataSize": "2400x1600"
+      },
+      {
+        "label": "Rolling Groove",
+        "image": "4-Rolling-groove.jpg",
+        "dataSize": "2400x1600"
+      },
+      {
+        "label": "Welding Main Girder",
+        "image": "5_Welding-the-main-girder.jpg",
+        "dataSize": "2100x1400"
+      },
+      {
+        "label": "Crane Pre-assembly",
+        "image": "7-Crane-pre-assembling.jpg",
+        "dataSize": "2400x1600"
+      },
+      {
+        "label": "Assembly of European-type Wire-rope Hoist",
+        "image": "8_Assembly-of-the-European-type-wire-rope-hoists.jpg",
+        "dataSize": "2100x1400"
+      },
+      {
+        "label": "Crane Packaging and Delivery",
+        "image": "9-Crane-packing-and-delivery.jpg",
+        "dataSize": "2400x1600"
+      }
+    ],
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Incoming Material Inspection → Steel Plate Uncoiling and Cracking → Steel Plate Cutting → Rolling Groove → Welding Main Girder → Crane Pre-assembly → Assembly of European-type Wire-rope Hoist → Crane Packaging and Delivery",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "blockquote",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Note.",
+                  "marks": [
+                    {
+                      "type": "span",
+                      "attrs": {
+                        "class": "i18n-pending"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "text": " "
+                },
+                {
+                  "type": "text",
+                  "text": "Delivery time for cranes with different voltages may be extended by 10-15 days, as electrical components need to be customized by our suppliers.",
+                  "marks": [
+                    {
+                      "type": "span",
+                      "attrs": {
+                        "class": "i18n-pending"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "crane_types_images": [
+    {
+      "name": "HD European-style Single Girder Overhead Crane",
+      "image": "HD-European-type-single-girder-overhead-crane.jpg"
+    },
+    {
+      "name": "NLH European-style Double Girder Overhead Crane",
+      "image": "NLH-European-type-double-girder-overhead-crane.jpg"
+    },
+    {
+      "name": "QD European-style Double Girder Overhead Crane",
+      "image": "QD-European-type-double-girder-overhead-crane.jpg"
+    }
+  ],
+  "installation": {
+    "title": "On-site Installation or Remote Guidance Available",
+    "cases": [
+      {
+        "title": "5-ton European-style Single Girder Overhead Cranes Sold to Zimbabwe",
+        "image": "2.After-painting-the-main-beam.jpg",
+        "url": "https://www.dgcrane.com/zh/posts/5ton-european-single-girder-overhead-cranes-for-sale-to-zimbabwe/"
+      },
+      {
+        "title": "3-ton Fully Electric Small Gantry Crane with 5-ton European Electric Hoist Sold to Australia",
+        "image": "Main-beam-and-ground-beams-of-3t-fully-electric-mini-gantry-crane.jpg",
+        "url": "https://www.dgcrane.com/zh/posts/3t-fully-electric-mini-gantry-crane-with-5t-european-electric-hoist-for-sale-to-australia/"
+      },
+      {
+        "title": "5-ton HD European-style Single Girder Overhead Crane Sold to Qatar",
+        "image": "Rainproof-cloth-packaging.jpg",
+        "url": "https://www.dgcrane.com/zh/posts/5ton-hd-european-type-single-girder-overhead-crane-exported-to-qatar/"
+      },
+      {
+        "title": "4 Sets of Double Girder Gantry Cranes and 5 Sets of Double Girder Overhead Cranes Sold to Philippines",
+        "image": "Installation-Photo.png",
+        "url": "https://www.dgcrane.com/zh/posts/4-sets-of-mg-16t-s16-6m-a5-double-girder-gantry-cranes-5-sets-of-lh10t-15t-s21-135m-a3-a5-double-girder-overhead-cranes-exported-to-philippines/"
+      }
+    ],
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Building trust is indeed difficult, but with our 10+ years of sales experience and over 3000 projects completed, both end users and agents have benefited from our cooperation.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "By the way, recruitment of independent sales representatives.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Generous commission / No risk.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "inquiry_form": {
+    "type": "inquiry-form",
+    "form_id": 713,
+    "title": "Fill in your details and we will reply to you within 24 hours!"
+  },
+  "related_products": {
+    "type": "related-products",
+    "title": "Related Products",
+    "category": "overhead-cranes",
+    "limit": 4,
+    "seed": [
+      {
+        "title": "FEM Standard Wire Rope Electric Hoist",
+        "image": "European_Wire_Rope_Electric_Hoist.jpg",
+        "url": "https://www.dgcrane.com/zh/products/wire-rope-hoist-suppliers/",
+        "summary": "The lifting mechanism of the European wire rope electric hoist uses a planetary gear drive - compact, lightweight, and mounted inside the drum, it effectively reduces the overall size of the hoist. The European wire rope electric hoist is designed for maximum modularity, with a high degree of part commonality."
+      },
+      {
+        "title": "FEM Standard Electric Chain Hoist",
+        "image": "European_Electric_Chain_Hoist.jpg",
+        "url": "https://www.dgcrane.com/zh/fem-standard-electric-chain-hoists/",
+        "summary": "The European electric chain hoist is compact and reliable. Its modular design lets our products flexibly form systems with different lifting capacities, lifting speeds, and duty classifications. The outstanding performance meets the demands of fast cargo transfer and precision assembly, and it can also be widely used in workplaces with complex requirements to meet customers individualized needs."
+      },
+      {
+        "title": "FEM Standard Gantry Crane",
+        "image": "European_Gantry_Crane.jpg",
+        "url": "https://www.dgcrane.com/zh/fem-standard-gantry-cranes/",
+        "summary": "The European-style gantry crane adopts European design standards and manufacturing technology, reaching the advanced level of similar international products, such as low height, light weight, low wheel pressure, flexible direct drive, variable frequency speed control, and maintenance-free."
+      },
+      {
+        "title": "FEM Standard Jib Crane",
+        "image": "European_Jib_Crane.jpg",
+        "url": "https://www.dgcrane.com/zh/fem-standard-jib-cranes/",
+        "summary": "The European-style jib crane has a unique structure, safe and reliable, with high efficiency, energy saving, time saving, and flexibility. It is especially suitable for short-distance, high-intensity lifting places. European-style jib cranes are widely used in workshops, warehouses, docks, and other fixed places. The duty class is generally A4 or A5."
+      }
+    ]
+  },
+  "summary_intro": {
+    "title": "Introduction",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The European-style Overhead Crane is independently developed and designed based on advanced European design and manufacturing technology, combined with the latest domestic standards.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "With an attractive appearance, the transmission mechanism adopts a three-in-one reducer (hardened gear reducer, variable frequency braking motor), fully comparable to similar European products in appearance and technical performance.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "overview": {
+    "title": "Overview",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "European-style Overhead Cranes are widely used for material handling in workshops and warehouses in industries such as machinery manufacturing, petroleum, petrochemical, ports, railways, civil aviation, power, food, papermaking, building materials, and electronics.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "They are particularly suitable for material handling requiring precise positioning and precision assembly of large components.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Its superior performance is reflected in the mature application of advanced technologies such as modular design, variable frequency speed control, and automatic detection.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Comprehensive protection functions such as overload protection, overcurrent protection, and undervoltage protection further enhance the application and working performance of the crane.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "advantages": {
+    "title": "Advantages",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Compact structure",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Good rigidity",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Easy Operation"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Low Noise"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Saves workshop space and investment costs",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Safety and Reliability"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Beautiful appearance",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "protection": {
+    "title": "Protection devices for European-style Overhead Crane",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Variable Frequency Drive: The protection functions of the VFD can provide short-circuit, overcurrent, motor overheating, undervoltage, overvoltage, grounding, short-circuit, anti-stall, heatsink overheating, and braking unit overheating protection for each drive mechanism.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Power distribution protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The main circuit of the crane's power distribution is equipped with protective components, such as an automatic air switch for the main power supply and a main contactor.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Short-circuit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The main Power Supply circuit is equipped with an automatic switch for short-circuit protection of the crane; the control circuit is equipped with a small-capacity automatic air switch for short-circuit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Overload protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Each motor of the crane's mechanisms is equipped with an individual overcurrent protection device as overload protection; the main Power Supply automatic air switch serves as the crane's overload protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Phase sequence protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The equipment adopts a phase sequence protector to monitor Power Supply quality in real time.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "When the power supply experiences overvoltage, undervoltage, phase loss, or phase sequence changes due to external reasons, the control system will cut off the main circuit, effectively protecting the safety of equipment and personnel.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hoist limit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The hoisting mechanism is equipped with a positioning limit switch and a limit switch.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The positioning limit switch ensures that the hoisting mechanism automatically stops when in position.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The limit switch ensures that the hoisting mechanism automatically cuts off when the hook rises to the extreme position.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Travel limit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The crane travel and trolley traverse mechanisms are generally equipped with positioning limit switches and limit switches at both ends.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Emergency power-off protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "An emergency switch is installed on the control circuit of the crane.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "In case of an accident, the Power Supply to the control circuit can be cut off at any time, and then the main circuit is disconnected to ensure the safe operation of the crane.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Anti-corrosion, dust-proof, and sealing measures.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "introduction": {
+    "title": "Introduction",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Overhead Cranes are widely used in warehouses and factories, serving as important material handling equipment.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "However, different countries and regions have their own characteristics.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "In China, the initial Overhead Cranes and manufacturing technology originated from the former Soviet Union.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "After decades of development, Overhead Cranes have been applied in almost all fields in China as they are now, which has proven their excellent characteristics.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Therefore, if you come from Russia, this will be very familiar to you.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "On the other hand, if you come from Europe and the United States, the situation is different.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Next, let's talk about the sales of European-style Overhead Cranes.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "To be honest, the Overhead Cranes sold are widely used worldwide, except in China, of course.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "There are many differences in appearance and technical standards between them.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "With the development and exchange of technology, the differences are getting smaller, especially for Double Girder Overhead Cranes.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Now, the main difference lies in the Single Girder Overhead Crane and the installed Wire-rope Electric Hoist.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "As shown in the following pictures.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "cross-girder3.jpg",
+            "alt": "Cross beam",
+            "width": 813,
+            "height": 291
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Cross beam - The European-style Single Girder Overhead Crane for sale uses H-beam steel structure, while traditional Single Girder Overhead Cranes use welded box-type.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The European type is lighter in weight.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "End carriage - There is no significant difference in end carriages.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "image",
+          "attrs": {
+            "src": "hoist-compare-1.jpg",
+            "alt": "Hoisting comparison",
+            "width": 813,
+            "height": 277
+          }
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Hoist - Another major difference is the hoist; the European-type hoist is more advanced with a higher lifting height.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "spec_compare": {
+    "title": "Brief Technical Parameter Comparison",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "table",
+          "content": [
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableHeader",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Technical Data",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Traditional Type",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "European Type",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Load",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Up to 16 metric tons",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Up to 12.5 metric tons",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Span",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 90 ft",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 98 ft.",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Bridge travel speed",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 98 fpm",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 160 fpm",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Trolley travel speed",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 65 fpm",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 100 fpm",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Crane speed",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 26 fpm",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "to 41 fpm",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "spec_detail": {
+    "title": "Detailed Specifications Available on Request",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "table",
+          "content": [
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableHeader",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Item",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Traditional-style Overhead Crane",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableHeader",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "European-style Overhead Crane",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Structure and Function",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Simple",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Complex and Multi-functional",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Prices"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Much more cost-effective",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Expensive",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Crane Net Weight",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Heavier energy costs and higher construction costs.",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Lighter steel structure and more efficient energy costs, more efficient construction costs",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "tableRow",
+              "content": [
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Adaptability",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "More robust in harsh working conditions and improper operation",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "tableCell",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "Stable and comfortable, but requires proper working conditions and proper operation.",
+                          "marks": [
+                            {
+                              "type": "span",
+                              "attrs": {
+                                "class": "i18n-pending"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "which_better": {
+    "title": "Which is Better",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Generally speaking, European-style Overhead Crane is more advanced and better.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "However, in terms of working conditions, operating conditions, and price, I know that the right one is the best.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "At DGCRANE, we are honored to provide you with the right crane. We have different types of Overhead Cranes and flexible sales plans.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "components": {
+    "title": "Components",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Main Girder",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The main girder is a welded box structure with the lower flange plate serving as the runway for the hoist.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The main girder is manufactured strictly in accordance with the process flow.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Welding adopts a fully automatic CO2 shielded welding production line, resulting in minimal welding deformation, high weld strength, and low residual stress.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Welds are inspected according to national standard GB3323.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "It possesses good strength, rigidity, and stability.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "End Carriage",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The crane end carriage adopts a rectangular tube integral end beam structure to avoid deformation caused by welding.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "It is machined in one pass using a large floor-type boring machine, ensuring that the two deflection values of the wheels are within tolerance.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The improved design of the crane end carriage reduces vertical rigidity and increases horizontal rigidity, which can overcome the phenomenon of three wheels contacting the ground, greatly extending wheel life.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The end carriage structure for mounting wheels integrates international advanced technology and adopts an integral boring structure for higher installation accuracy.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Hoisting Mechanism",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The hoisting mechanism adopts a European-style hoist or European-style trolley.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The hoist lifting mechanism uses planetary gears, which are compact and lightweight, installed inside the drum, effectively reducing the size of the electric hoist.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Its design maximizes the use of modular design, with strong part interchangeability.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The design standard adopts the European FEM standard, and the selection of parameters such as lifting speed and travel speed is more user-friendly.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Low design speed ensures accurate positioning, suitable for installation and maintenance; high design speed makes the hoisting mechanism more efficient and convenient.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Crane Travel Gear Motor",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The crane travel mechanism adopts a \"three-in-one\" drive gearbox, driving the end carriages on both sides separately; the motor is a dedicated brake motor for the crane, connected by bolts.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "This drive type offers advantages such as high transmission accuracy, light weight, good sealing, low noise, long life, and maintenance-free operation.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Electrical Control System",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The voltage of the European-style crane is determined by the local industrial voltage of the customer, and the electrical system is manufactured accordingly.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Equipped with a rotation limit switch for the cross fork, which cuts off the Power Supply to the cross travel motor and long travel motor before the crane buffer collides with the rail end stop.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Equipped with an overload limiter.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "When the wire rope tension exceeds 90% of the rated value, the overload protection device alarms.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "When the wire rope tension exceeds 110% of the rated value, the overload protection device automatically cuts off the lifting circuit.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The trolley power supply uses a special-shaped steel suspension with flat cable.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Control Mode",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Operation panel, remote control, and cab operation. The crane can also be equipped with two sets of operation devices, namely: ground + remote control or cab + remote control.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The crane can also be equipped with two sets of operating devices: ground + remote control or cab + remote control.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "However, for safety reasons, the two operating modes can only be switched, not used simultaneously.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Protection devices for European-style Overhead Crane",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Variable Frequency Drive: The protection functions of the VFD can provide short-circuit, overcurrent, motor overheating, undervoltage, overvoltage, grounding, short-circuit, anti-stall, heatsink overheating, and braking unit overheating protection for each drive mechanism.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Power distribution protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The main circuit of the crane's power distribution is equipped with protective components, such as an automatic air switch for the main power supply and a main contactor.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Short-circuit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The main Power Supply circuit is equipped with an automatic switch for short-circuit protection of the crane; the control circuit is equipped with a small-capacity automatic air switch for short-circuit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Overload protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Each motor of the crane's mechanisms is equipped with an individual overcurrent protection device as overload protection; the main Power Supply automatic air switch serves as the crane's overload protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Phase sequence protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The equipment adopts a phase sequence protector to monitor Power Supply quality in real time.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "When the power supply experiences overvoltage, undervoltage, phase loss, or phase sequence changes due to external reasons, the control system will cut off the main circuit, effectively protecting the safety of equipment and personnel.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hoist limit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The hoisting mechanism is equipped with a positioning limit switch and a limit switch.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The positioning limit switch ensures that the hoisting mechanism automatically stops when in position.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The limit switch ensures that the hoisting mechanism automatically cuts off when the hook rises to the extreme position.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Travel limit protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "The crane travel and trolley traverse mechanisms are generally equipped with positioning limit switches and limit switches at both ends.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Emergency power-off protection.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "An emergency switch is installed on the control circuit of the crane.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "In case of an accident, the Power Supply to the control circuit can be cut off at any time, and then the main circuit is disconnected to ensure the safe operation of the crane.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Anti-corrosion, dust-proof, and sealing measures",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "crane_types": {
+    "title": "Crane Types for Different Working Conditions",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "HD European-style Single Girder Overhead Crane",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Reliability, high efficiency, easy operation, and safety",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Low procurement and maintenance costs",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Typically, the maximum Lifting Capacity of the HD European-style Single Girder Overhead Crane is 12.5 tons.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "NLH European-style Double Girder Overhead Crane",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Reliability, high efficiency, easy operation, and safety",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Low procurement and maintenance costs",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When the lifting capacity exceeds 12.5 tons, customers are advised to choose the NLH European-style Double Girder Overhead Crane.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "QD European-style Double Girder Overhead Crane",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Attractive appearance and lightweight structure",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Environmentally friendly and quiet operation",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Technical advantages: dual-speed intelligent variable frequency",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Stable lifting",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "i18n": {
+    "source": "zh-CN"
+  }
+}

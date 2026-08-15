@@ -1,0 +1,897 @@
+{
+  "version": 1,
+  "page": {
+    "slug": "en/products/multi-point-suspension-cranes",
+    "type": "product",
+    "lang": "en",
+    "title": "Multi-point Suspension Crane: For Large-span Industrial Workshops - DGCRANE",
+    "description": "The multi-point suspension crane is specifically designed for large-span industrial workshops and warehouses (such as aircraft manufacturing and maintenance plants). It distributes the load through multiple suspension points, with a lifting capacity of 3-40 tons and a maximum span of up to 80 meters.",
+    "template": "ProductPage",
+    "family": "product-superset@1",
+    "status": "draft"
+  },
+  "title": "Multi-Point Suspension Crane",
+  "breadcrumb": {
+    "current": "Multi-Point Suspension Crane",
+    "trail": [
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/"
+      },
+      {
+        "label": "Eot Cranes",
+        "url": "https://www.dgcrane.com/zh/eot-cranes/"
+      }
+    ]
+  },
+  "hero": {
+    "image": "Multi-point-Suspension-Crane-scaled.jpg",
+    "headline": "Crane Manufacturer and Exporter",
+    "highlights": [
+      "Over 10 years of crane export experience",
+      "Cranes sold to more than 120 countries",
+      "A technical team of over 50 people",
+      "Over 3,000 cases across different industries"
+    ],
+    "width": 900,
+    "height": 188
+  },
+  "summary": {
+    "cta": "Request a Quote"
+  },
+  "specs": [
+    {
+      "text": "Lifting Capacity: 3-40 tons"
+    },
+    {
+      "text": "Number of Suspension Points: 3, 4, 5, 6, 7, 8"
+    },
+    {
+      "text": "Total Span: Up to 80 meters"
+    },
+    {
+      "text": "Lifting Height: 3-30 meters"
+    },
+    {
+      "text": "Duty Class: A3–A5"
+    }
+  ],
+  "inquiry_form": {
+    "type": "inquiry-form",
+    "form_id": 713,
+    "title": "Fill in your details and we will reply to you within 24 hours!"
+  },
+  "related_products": {
+    "type": "related-products",
+    "title": "Related Products",
+    "category": "eot-cranes",
+    "limit": 4,
+    "seed": [
+      {
+        "title": "Workstation Overhead Crane",
+        "image": "Workstation-Overhead-Crane-1.jpg",
+        "url": "https://www.dgcrane.com/zh/workstation-overhead-cranes/",
+        "summary": "The workstation Overhead Crane has a lifting capacity of 0.125t-2t and a wide range of applications. The biggest advantage of our company's workstation Overhead Crane is that it can be easily expanded to adapt to new requirements at any time, and can grow together with your business."
+      },
+      {
+        "title": "Aviation Industry Overhead Crane: Streamlining Aircraft Assembly, Maintenance, and Repair",
+        "image": "Overhead-Cranes-for-the-Aviation-Industry.jpg",
+        "url": "https://www.dgcrane.com/zh/overhead-cranes-for-the-aviation-industry/",
+        "summary": ""
+      },
+      {
+        "title": "Single Girder Overhead Crane",
+        "image": "Single-Girder-Overhead-Crane-1.jpg",
+        "url": "https://www.dgcrane.com/zh/products/single-girder-eot-cranes/",
+        "summary": "Whether you are making a procurement plan or determining a customized solution for plant lifting equipment, if the lifting capacity requirement is 20 tons or less, the Single Girder Overhead Crane, with its simple structure, flexible solutions, and convenient disassembly, assembly, and transportation, can be your second choice."
+      },
+      {
+        "title": "Monorail Overhead Crane",
+        "image": "mb-Monorail-Overhead-Crane.jpg",
+        "url": "https://www.dgcrane.com/zh/monorail-overhead-cranes/",
+        "summary": "A monorail crane is a type of crane that serves as an alternative to traditional cranes and conveyors. These cranes are mostly used to relocate materials or products within a limited area. Such a place can be a factory or an entire workstation. The design of the monorail crane is simple and can be compatible with the building structure without major modifications."
+      }
+    ]
+  },
+  "summary_intro": {
+    "title": "Introduction",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The multi-point suspension crane is a specialized suspended crane designed to meet the needs of large-span industrial workshops and warehouses (such as aircraft manufacturing plants and aircraft maintenance plants).",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "By distributing the load through multiple suspension points, this crane reduces the impact of the crane's weight on the building's roof structure, thereby lowering the building height and helping to significantly reduce factory construction costs.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "overview": {
+    "title": "Features and Highlights",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The multi-point suspension design makes this crane suitable for large-span workshops, providing a wide working range while effectively reducing structural dimensions, minimizing headroom occupation, and increasing the effective lifting height.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The lightweight crane structure significantly reduces the load requirements on the building roof and steel structure frame.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The articulated connections between multiple spans effectively prevent wheel unloading and excessive load concentration on individual suspension points.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The crane wheel assembly can be adapted to H-beam or I-beam rails, flexibly meeting different building structures and customer needs.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The compact cable festoon system for trolley power supply reduces the limit switches on the left and right ends, thereby improving the overall utilization of workshop space.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Equipped with a three-in-one drive unit and variable frequency drive (VFD) control, it operates smoothly and reliably, with a wide speed adjustment range and high positioning accuracy.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Synchronous control technology ensures coordinated operation of multiple drive units, effectively preventing rail skewing.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The PLC control system enables collaborative operation of multiple cranes, expanding the working range.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The traveling wheels made of wear-resistant engineering plastic help prevent wear on the wheels and crane rails.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "High-strength, oil-free wire ropes and T-grade high-strength hooks improve overall safety and reliability.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The rope guide made of high-performance polymer composite material has the advantages of low wear, high strength, and good toughness.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The electronic anti-sway function improves lifting stability and operational efficiency.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "main_features": {
+    "title": "Comparison of Multi-Point Suspension Crane and Suspended Crane",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Multi-Point Suspension Crane",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Support arrangement: Multiple suspension points are arranged along the runway beam to evenly distribute the load.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Enhanced stability: Multi-point suspension ensures smooth operation; equipped with Variable Frequency Drive (VFD) control and anti-sway system for high-precision positioning.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Span capability: Large spans can be achieved by increasing the number of suspension points, with a maximum span of up to 80 meters.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Applications: Large-span, high-demand facilities such as aircraft maintenance hangars and aircraft manufacturing plants.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Jib Crane",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "bulletList",
+          "content": [
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Support structure: Two suspension points, directly suspended below the runway track, requiring no columns.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Lifting stability: Suitable for general material handling needs in standard workshops.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Span range: Commonly used in small to medium-span buildings, with typical spans of approximately 3–22.5 meters.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "listItem",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Applications: General material handling in machine shops, machine assembly areas, equipment maintenance facilities, and warehouses.",
+                      "marks": [
+                        {
+                          "type": "span",
+                          "attrs": {
+                            "class": "i18n-pending"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "which_better": {
+    "title": "Multi-Point Suspension Crane Case Studies",
+    "body": {
+      "type": "doc",
+      "content": [
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Multi-Point Suspension Crane for Aircraft Maintenance Workshop",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "In an aircraft maintenance workshop, a multi-point suspension crane is used for lifting, transporting, and positioning large aircraft components such as fuselage sections, wings, tail assemblies, engines, and landing gear.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "Due to the large size, complex shapes, and extremely high requirements for balance, synchronization, and precise positioning during lifting, this crane uses multiple support points to distribute the load and achieve synchronized lifting/moving.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "This enables it to smoothly and precisely move large, irregularly shaped components from one workstation to another, and lift engines, wings, and other parts onto maintenance platforms while minimizing component sway.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "For aircraft hangars with large spans and spacious interiors, overhead cranes can fully utilize the upper space without occupying floor area, thereby improving space utilization and maintenance efficiency.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "heading",
+          "attrs": {
+            "level": 3
+          },
+          "content": [
+            {
+              "type": "text",
+              "text": "Multi-Point Suspension Crane for a Large Rubber Manufacturing Plant",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "This project was implemented in a large-span rubber production workshop.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "The building was an existing structure with complex structural conditions, and some steel components had deformation.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "In addition, the production process required lifting and transporting extra-long materials, imposing high demands on load balance and operational stability of the lifting equipment.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Given this, the project adopted a multi-point suspension crane solution to accommodate the large-span structure and enhance overall operational safety.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "The project is equipped with two multi-point suspension cranes, each featuring a 60-meter Main Girder and a seven-point suspension design to effectively distribute the load.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Additionally, specialized lifting devices for handling extra-long materials were provided to meet specific material handling needs during production.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "paragraph",
+          "content": [
+            {
+              "type": "text",
+              "text": "To address adverse installation conditions such as deformation of existing steel structures, a comprehensive on-site assessment was conducted before installation.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "text": " "
+            },
+            {
+              "type": "text",
+              "text": "Subsequently, corrective measures were taken on the supporting steel structure to ensure reliable installation and long-term stable operation of the crane.",
+              "marks": [
+                {
+                  "type": "span",
+                  "attrs": {
+                    "class": "i18n-pending"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "i18n": {
+    "source": "zh-CN"
+  }
+}

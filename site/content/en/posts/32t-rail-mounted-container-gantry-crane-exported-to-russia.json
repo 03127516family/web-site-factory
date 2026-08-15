@@ -6,7 +6,7 @@
     "lang": "en",
     "title": "32-Ton Rail-Mounted Container Gantry Crane Exported to Russia: Built for Low-Temperature Environments | DGCRANE",
     "description": "Case study: a 32-ton Rail-Mounted Container Gantry Crane exported to Russia—Q355E low-temperature steel, stable operation at -40°C, Russian localization, comprehensive safety and transport protection, delivering a complete and reliable container-handling solution.",
-    "template": "src/templates/posts/32t-rail-mounted-container-gantry-crane-exported-to-russia.html",
+    "template": "32t-rail-mounted-container-gantry-crane-exported-to-russia",
     "family": "post@1",
     "status": "published"
   },
@@ -55,7 +55,7 @@
     "title": "Fill in your details and we will reply to you within 24 hours!"
   },
   "lead": {
-    "title": "导言",
+    "title": "Introduction",
     "body": {
       "type": "doc",
       "content": [
@@ -88,7 +88,7 @@
     }
   },
   "req": {
-    "title": "核心采购要求正文",
+    "title": "Core Procurement Requirements",
     "body": {
       "type": "doc",
       "content": [
@@ -192,7 +192,7 @@
     }
   },
   "lowtemp": {
-    "title": "低温适应性设计正文",
+    "title": "Low-Temperature Adaptability Design",
     "body": {
       "type": "doc",
       "content": [
@@ -322,7 +322,7 @@
     }
   },
   "localization": {
-    "title": "本地化设计正文",
+    "title": "Localization Design",
     "body": {
       "type": "doc",
       "content": [
@@ -390,7 +390,7 @@
     }
   },
   "safety": {
-    "title": "安全保护系统正文",
+    "title": "Safety Protection System",
     "body": {
       "type": "doc",
       "content": [
@@ -527,7 +527,7 @@
     }
   },
   "transport": {
-    "title": "运输保护设计正文",
+    "title": "Transport Protection Design",
     "body": {
       "type": "doc",
       "content": [
@@ -616,7 +616,7 @@
     }
   },
   "delivery": {
-    "title": "交付结果正文",
+    "title": "Delivery Results",
     "body": {
       "type": "doc",
       "content": [
@@ -886,7 +886,7 @@
     }
   },
   "summary": {
-    "title": "项目概要正文",
+    "title": "Project Summary",
     "body": {
       "type": "doc",
       "content": [
@@ -912,7 +912,7 @@
     }
   },
   "getquote": {
-    "title": "获取报价正文",
+    "title": "Get a Quote",
     "body": {
       "type": "doc",
       "content": [
