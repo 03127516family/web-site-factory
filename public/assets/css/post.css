@@ -115,3 +115,8 @@ body .is-layout-flex { display: flex; }
    （表单视觉上"嵌进"页脚，与真站文章页 #list-form 独立成块的样式不符）。
    清浮动后 section 包住表单、footer 落在表单下方——对齐真站。 */
 .post-inquiry::after { content: ""; display: table; clear: both; }
+/* 文章页表单位置对齐真站（live main.css #list-form）：右侧 660 宽；
+   产品页家族的 #from-2 是 float:left 700——文章页覆盖之（真站左侧的联系卡块未迁移，左侧暂空）。 */
+.post-inquiry #from-2 { float: right; width: 660px; }
+.post-inquiry #from-2 .wpforms-field-name-first,
+.post-inquiry #from-2 .wpforms-field-name-last { width: 320px; }
