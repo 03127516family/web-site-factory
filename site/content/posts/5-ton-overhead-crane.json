@@ -6,7 +6,7 @@
     "lang": "zh-CN",
     "title": "5吨桥式起重机终极指南：类型、价格与应用 | DGCRANE",
     "description": "5吨桥式起重机（5 Ton Overhead Crane）终极指南：单梁/双梁/低净空/下悬/FEM 欧标等类型介绍、标准与定制价格区间、影响成本的关键因素、各类型参数对比与真实案例，助你选对中型吊装设备。",
-    "template": "src/templates/posts/5-ton-overhead-crane.html",
+    "template": "5-ton-overhead-crane",
     "family": "post@1",
     "status": "published"
   },

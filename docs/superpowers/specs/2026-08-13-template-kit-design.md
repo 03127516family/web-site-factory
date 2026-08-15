@@ -208,5 +208,7 @@ titlePath 落位/chrome 自 example/草稿带套件名）；生产构建三阶�
 - `src/i18n.mjs` 站点配置簇（SITE_ROOT/DEPLOY_LANGS/LANG_LABEL 等）——文件在并行未提交改动中，
   落地后随 site.config 外置；
 - 控制台选项仍为静态 HTML（edit-server 在并行改动中；落地后接 scanKits 动态渲染）；
-- 旧 4 篇扁平件与套件拷贝并存（隔壁落地后删扁平收单源）；
+- ~~旧 4 篇扁平件与套件拷贝并存~~ **已收单源（2026-08-14 追加）**：扁平件改为 5 行转发壳
+  （en 路由的 T2 扁平派发约定需要文件存在；正文唯一真相同名套件目录），4 篇 JSON 声明
+  `template=自己`，zh 直达套件。en 路由改 template 派发后壳可删；
 - `link-assets.mjs` 软链仓库根 `public/`（资产=内容层，换站自带 public；脚本本身通用）。
