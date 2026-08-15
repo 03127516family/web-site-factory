@@ -546,6 +546,26 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
   rmSync(gpath)
 }
 
+// ---------- T-guard 守卫完备性钉（可选内容必须「有值才渲染」，漏挂当场红） ----------
+{
+  // 受检范围：图槽（body.* 图 / hero 横幅 / 重复章节配图）——正文段与标题的守卫由 T9 纪律人工守，
+  // 图槽最易漏（2026-08-14 烧无图文章暴露 29 处裸奔）。gallery/case 等数组项除外（外层 map 已含守卫语义）。
+  const kits = lib.scanKits(join(SITE, 'src/components')).filter(k => k.complete)
+  let checked = 0, missing = []
+  for (const k of kits) {
+    const src = readFileSync(join(k.dir, 'index.astro'), 'utf8')
+    const lines = src.split('\n')
+    lines.forEach((line, i) => {
+      const guarded = /&&\s*\(/.test(line) || (i > 0 && /&&\s*\(\s*$/.test(lines[i - 1]))
+      for (const m of line.matchAll(/<img[^>]*data-field="(body\.\w+|hero\.image|section\.image)"/g)) {
+        checked++
+        if (!guarded) missing.push(`${k.family}/${k.name}: ${m[1]}`)
+      }
+    })
+  }
+  ok(`图槽守卫完备（${checked} 个受检，0 裸奔）`, missing.length === 0, missing.slice(0, 5).join('；'))
+}
+
 // ---------- 汇总 ----------
 const fails = results.filter(r => !r.pass)
 console.log(`\n${results.length - fails.length}/${results.length} 通过`)
