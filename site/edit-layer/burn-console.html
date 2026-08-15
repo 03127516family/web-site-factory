@@ -90,7 +90,9 @@ $('save').onclick = async () => {
     const r = await fetch('/__burn-save', { method: 'POST', body: JSON.stringify(current) })
     const d = await r.json()
     if (!r.ok) { $('saved').textContent = '❌ ' + (d.error || r.status); return }
-    $('saved').innerHTML = `✅ 已落 draft：<b>${esc(d.slug)}.json</b>，已重建。<a href="${esc(d.editUrl)}" target="_blank">打开编辑器精修 →</a>`
+    // 链接按烧制结果的 page.type 自拼（edit-server 的 editUrl 写死 /products/，对文章草稿指错族——移交缺陷，客户端先兜住）
+    const famDir = current.json?.page?.type === 'post' ? 'posts' : 'products'
+    $('saved').innerHTML = `✅ 已落 draft：<b>${famDir}/${esc(d.slug)}.json</b>，已重建。<a href="/${famDir}/${esc(d.slug)}/" target="_blank">打开编辑器精修 →</a>`
   } catch (e) { $('saved').textContent = '❌ ' + e.message } finally { $('save').disabled = false }
 }
 $('redo').onclick = () => { $('out').hidden = true; $('status').textContent = '调整输入后再点「开始烧制」' }
