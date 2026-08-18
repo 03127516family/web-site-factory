@@ -8,7 +8,7 @@
     "description": "Single Girder Overhead Crane manufacturer and exporter, suitable for high-speed production lines, with over 10 years of export experience, sold to more than 120 countries.",
     "template": "ProductPage",
     "family": "product@1",
-    "status": "draft"
+    "status": "published"
   },
   "title": "Single Girder Overhead Crane",
   "breadcrumb": {
@@ -1149,15 +1149,7 @@
           "content": [
             {
               "type": "text",
-              "text": "Advantages",
-              "marks": [
-                {
-                  "type": "span",
-                  "attrs": {
-                    "class": "i18n-pending"
-                  }
-                }
-              ]
+              "text": "Advantages"
             }
           ]
         },
@@ -1216,15 +1208,7 @@
                   "content": [
                     {
                       "type": "text",
-                      "text": "Low Noise",
-                      "marks": [
-                        {
-                          "type": "span",
-                          "attrs": {
-                            "class": "i18n-pending"
-                          }
-                        }
-                      ]
+                      "text": "Low Noise"
                     }
                   ]
                 }

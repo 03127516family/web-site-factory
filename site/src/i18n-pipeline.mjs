@@ -52,6 +52,8 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   const source = findSource(pageId)
   const srcJ = readJ(source.file)
   const tm = loadTm(srcJ.page.lang, lang)
+  const cfg = loadConfig()
+  const autoReview = cfg.review[lang] === 'auto' // 免审语言（2026-08-18 拍定拆人审闸）：机翻直写 approved 即时上线；翻错靠镜像就地改 → TM 人审条永远压过机翻
   const units = collectUnits(srcJ)
   const missing = withContext(units).filter(u => !tm.sentences[u.fp] || (retryFailed && tm.sentences[u.fp]?.status === 'failed'))
   let translated = 0, failed = 0
@@ -67,7 +69,7 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
       for (const u of missing) {
         if (r.ok[u.id]) {
           if (fresh.sentences[u.fp]?.status === 'approved') continue // 窗口内已被人工审过，机器稿让位
-          upsert(fresh, u.fp, { text: u.text, translation: r.ok[u.id], status: 'draft', origin: 'engine' })
+          upsert(fresh, u.fp, { text: u.text, translation: r.ok[u.id], status: autoReview ? 'approved' : 'draft', origin: 'engine' })
           delete fresh.sentences[u.fp].error // 失败转正清旧 error 键（upsert 浅合并不清旧键，数据卫生）
           translated++
         }
@@ -81,7 +83,6 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   // 重投影镜像（结构同步在此）：full 模式 + 保留现有 status；auto 语言直发
   const mirFile = join(lang, source.file)
   const existing = existsSync(join(CONTENT(), mirFile)) ? readJ(mirFile) : null
-  const cfg = loadConfig()
   // M-6：auto 直发还要求源本身 published——草稿源页的新镜像永 draft
   const status = existing?.page?.status ?? (cfg.review[lang] === 'auto' && srcJ.page.status === 'published' ? 'published' : 'draft')
   const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus: status, existingTrail: existing?.breadcrumb?.trail })

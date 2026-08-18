@@ -6,10 +6,12 @@ import { validateDoc } from './content-schema.mjs'
 import { SKIP_KEYS, skipPath, VALUE_SKIP } from './i18n-collect.mjs' // 同一套排除：键+路径前缀+值形态（值形态命中的串直通保留——它们永远不进 TM，删了就是生产镜像丢图）
 
 export const PENDING_CLASS = 'i18n-pending'
-export const FAILED_CLASS = 'i18n-failed' // 红标（spec §7 红绿）：引擎拒收句≠未译句——审阅时重点看
-export const ANNO_CLASSES = [PENDING_CLASS, FAILED_CLASS] // 注解类全集：adoptMirror/harvest 剥注解按此判（span 不进句 md）
+export const FAILED_CLASS = 'i18n-failed' // 引擎拒收句（红深）——审阅时重点看
+export const UNTRANSLATED_CLASS = 'i18n-untranslated' // 从未翻译句=中文占位（红浅）——与待审黄标区分，审阅一眼可找
+export const ANNO_CLASSES = [PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS] // 注解类全集：adoptMirror/harvest 剥注解按此判（span 不进句 md）
 const PENDING_MARK = { type: 'span', attrs: { class: PENDING_CLASS } }
 const FAILED_MARK = { type: 'span', attrs: { class: FAILED_CLASS } }
+const UNTRANSLATED_MARK = { type: 'span', attrs: { class: UNTRANSLATED_CLASS } }
 const CORE_FIELDS = ['title', 'page.title', 'page.description', 'breadcrumb.current']
 
 const anno = nodes => nodes.map(n => n.type === 'text'
@@ -18,6 +20,9 @@ const anno = nodes => nodes.map(n => n.type === 'text'
 const annoFailed = nodes => nodes.map(n => n.type === 'text'
   ? { ...n, marks: [...(n.marks ?? []), { type: 'span', attrs: { class: FAILED_CLASS } }] }
   : n)
+const annoUntranslated = nodes => nodes.map(n => n.type === 'text'
+  ? { ...n, marks: [...(n.marks ?? []), { type: 'span', attrs: { class: UNTRANSLATED_CLASS } }] }
+  : n)
 
 // 一句的投影：返回节点数组 | null（不出）
 function sentNodes(text, sentenceFp, tm, mode) {
@@ -25,8 +30,8 @@ function sentNodes(text, sentenceFp, tm, mode) {
   if (e?.status === 'approved') return inlineMdToNodes(e.translation)
   if (mode === 'approved') return null
   if (e?.status === 'draft') return anno(inlineMdToNodes(e.translation))
-  if (e?.status === 'failed') return annoFailed(inlineMdToNodes(text)) // 拒收句=红标中文占位（与未译黄标区分）
-  return anno(inlineMdToNodes(text)) // 未译 → 中文占位（full 模式）
+  if (e?.status === 'failed') return annoFailed(inlineMdToNodes(text)) // 拒收句=红深中文占位
+  return annoUntranslated(inlineMdToNodes(text)) // 未译 → 中文占位（full 模式，红浅标）
 }
 
 // 树投影：逐节点重建。返回值 null = 该节点整体不出。lang = 目标语言（句间空格合成判 CJK 用）
@@ -42,7 +47,7 @@ function projNode(node, tm, mode, lang) {
       const e = tm.sentences[fp(units[si].md)]
       if (mode === 'approved' && e?.status !== 'approved') { nodes = applyInlineUnit(nodes, si, ''); continue } // 未审句删除
       const replacement = e?.status === 'approved' ? e.translation : e?.status === 'draft' ? e.translation : units[si].md
-      const anno = e?.status === 'approved' ? [] : e?.status === 'failed' ? [FAILED_MARK] : [PENDING_MARK]
+      const anno = e?.status === 'approved' ? [] : e?.status === 'failed' ? [FAILED_MARK] : e?.status === 'draft' ? [PENDING_MARK] : [UNTRANSLATED_MARK]
       const trail = keptAfter && sepless(spans[si]) && !cjk ? ' ' : '' // 合成句间空格（保留句之后还有保留句才补）
       nodes = applyInlineUnit(nodes, si, replacement, { annoMarks: anno, trail })
       keptAfter = true

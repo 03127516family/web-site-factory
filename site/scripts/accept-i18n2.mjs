@@ -5,7 +5,7 @@ import { join, dirname } from 'node:path'
 import { rmSync, readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 'node:fs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
-import { projectPage, PENDING_CLASS, FAILED_CLASS } from '../src/i18n-project.mjs'
+import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n-project.mjs'
 import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
@@ -98,10 +98,10 @@ test('TM:upsert 写读往返+状态机', () => {
   assert.equal(tm.sentences['abc123'].status, 'approved')
   assert.ok(tm.sentences['abc123'].updatedAt)
 })
-test('配置:缺文件给默认', () => {
+test('配置:加载现值（en 已拍定 auto 免审直发）', () => {
   const c = loadConfig()
   assert.equal(typeof c.auto, 'boolean')
-  assert.equal(c.review.en, 'required')
+  assert.equal(c.review.en, 'auto')
 })
 test('TM:saveTm/loadTm 真落盘往返', () => {
   const f = join(process.cwd(), 'src', 'i18n', 'tm.t-x.t-y.json')
@@ -239,13 +239,14 @@ test('投影:approved 全齐 → 骨架≡源+译文+无注解 span', () => {
   assert.equal(JSON.stringify(j).includes(PENDING_CLASS), false)        // 生产无注解
   assert.equal(j.page.slug, 't1/posts/x')                               // 镜像 slug 前缀
 })
-test('投影:full 草稿/未译都出+带 pending 注解', () => {
+test('投影:full 草稿/未译都出+三态注解区分', () => {
   const tm = tmWith([{ text: '第一句。', translation: 'First draft.', status: 'draft', origin: 'engine' }])
   const j = projectPage(SRC(), tm, 'full', { lang: 't1' })
   const para = j.overview.body.content[0]
   assert.equal(para.content.map(n => n.text).join(''), 'First draft. 第二句。') // 草稿+中文占位（句间空格 = C1 合成半：预览与生产同形）
-  const spans = para.content.flatMap(n => (n.marks ?? []).filter(m => m.type === 'span' && m.attrs?.class === PENDING_CLASS))
-  assert.ok(spans.length >= 2)                                          // 草稿句与未译句都标 pending
+  const classes = para.content.flatMap(n => (n.marks ?? []).filter(m => m.type === 'span').map(m => m.attrs?.class))
+  assert.ok(classes.includes(PENDING_CLASS))       // 草稿句=待审黄标
+  assert.ok(classes.includes(UNTRANSLATED_CLASS))  // 未译句=红浅标（三态：黄/红浅/红深）
 })
 test('投影:full 保 mirror 现有 status', () => {
   const tm = tmWith([])
@@ -546,6 +547,25 @@ test('流水线:发布→草稿进 TM+镜像落盘 full', async () => {
   assert.equal(mir.page.status, 'draft') // required 语言不自动发布
   cleanup()
 })
+test('流水线:auto 语言引擎译文直写 approved（免审直发）', async () => {
+  cleanup(); fixture()
+  const cfgFile = join(process.cwd(), 'src', 'i18n', 'config.json')
+  const backup = readFileSync(cfgFile, 'utf8') // 备份还原——中途炸不留脏配置（T2 同款纪律）
+  try {
+    saveConfig({ review: { t9: 'auto' } })
+    const r = await runPipeline(FIX, { lang: 't9', callAI: mockAI })
+    assert.ok(r.translated >= 5)
+    const tm = loadTm('zh-CN', 't9')
+    assert.ok(Object.values(tm.sentences).length > 0)
+    assert.ok(Object.values(tm.sentences).every(e => e.status === 'approved')) // 免审：机翻直写终态，不挂待人点
+    assert.ok(Object.values(tm.sentences).every(e => e.origin === 'engine')) // 仍可辨认——与人审 approved 区分（人改永远压过机翻）
+    const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+    assert.equal(mir.page.status, 'published') // auto + 源 published → 镜像直发（M-6 不放宽：草稿源仍不出）
+  } finally {
+    writeFileSync(cfgFile, backup)
+    cleanup()
+  }
+})
 test('流水线:幂等——重复跑不加新句', async () => {
   cleanup(); fixture()
   await runPipeline(FIX, { lang: 't9', callAI: mockAI })
@@ -799,7 +819,7 @@ test('检查:千分位多逗号组归一到不动点（1,234,567）', () => {
   assert.ok(checkSentence('共 1,234,567 台。', 'many units.', { lock: [], map: {} }).fails.includes('number:1234567')) // 数字真缺了仍拦
   assert.ok(checkSentence('共 1,234 台。', '1234 units.', { lock: [], map: {} }).ok) // 单逗号组回归不变
 })
-test('红标:failed 句 full 投影挂 i18n-failed（与未译黄标区分）+ 人审转正清 error', () => {
+test('红标:failed 句 full 投影挂 i18n-failed（红深，与未译红浅区分）+ 人审转正清 error', () => {
   cleanup(); fixture()
   const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
   const failed = collectUnits(srcJ).find(u => u.text === '第一句。')
@@ -807,8 +827,8 @@ test('红标:failed 句 full 投影挂 i18n-failed（与未译黄标区分）+ �
   upsert(tm, failed.fp, { text: failed.text, translation: '', status: 'failed', origin: 'engine', error: 'map-missing:测试→test' })
   const mir = projectPage(srcJ, tm, 'full', { lang: 't9' })
   const marks = mir.overview.body.content.flatMap(p => (p.content ?? [])).flatMap(n => n.marks ?? []).map(m => m.attrs?.class)
-  assert.ok(marks.includes(FAILED_CLASS)) // 拒收句=红标中文占位
-  assert.ok(marks.includes(PENDING_CLASS)) // 未译句=黄标，两类可区分（spec §7 红绿）
+  assert.ok(marks.includes(FAILED_CLASS)) // 拒收句=红深标中文占位
+  assert.ok(marks.includes(UNTRANSLATED_CLASS)) // 未译句=红浅标，与红深/待审黄三态可区分（spec §7 红绿）
   // 人审把红标句就地改掉 → adoptMirror 剥红标不炸 wrapMarks、转正且清 error 键（评审 D1）
   const par = mir.overview.body.content.find(p => (p.content ?? []).some(n => (n.marks ?? []).some(m => m.attrs?.class === FAILED_CLASS)))
   par.content = applyInlineUnit(par.content, 0, 'Human fixed it.')
