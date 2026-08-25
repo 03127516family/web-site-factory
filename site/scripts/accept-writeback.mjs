@@ -297,11 +297,11 @@ test('prepares a revision-checked contract writeback request', () => {
     const input = { ...data(), page: { type: 'product', template: 'ProductPage', status: 'published' } }
     const bytes = Buffer.from(JSON.stringify(input))
     const result = prepareWriteback({
-      site, bytes, expectedRevision: revisionOf(bytes), status: 'draft',
+      site, bytes, expectedRevision: revisionOf(bytes),
       changes: [{ targetId: 'title', value: 'Request title' }],
     })
     assert.equal(result.data.title, 'Request title')
-    assert.equal(result.data.page.status, 'draft')
+    assert.equal(result.data.page.status, 'published')
   } finally {
     rmSync(site, { recursive: true, force: true })
   }
@@ -347,17 +347,21 @@ test('rejects client-submitted internal restore operations', () => {
   }
 })
 
-test('converts only contract-allowlisted legacy patches', () => {
-  const site = mkdtempSync(join(tmpdir(), 'legacy-'))
+test('requires revision and changes and rejects legacy patches', () => {
+  const site = mkdtempSync(join(tmpdir(), 'request-shape-'))
   try {
     const dir = join(site, 'src/components/products/ProductPage')
     mkdirSync(dir, { recursive: true })
     writeFileSync(join(dir, 'edit-contract.json'), JSON.stringify(contract))
     const input = { ...data(), page: { type: 'product', template: 'ProductPage', status: 'published' } }
     const bytes = Buffer.from(JSON.stringify(input))
-    const result = prepareWriteback({ site, bytes, patches: [{ path: 'title', kind: 'html', value: 'Legacy title' }] })
-    assert.equal(result.data.title, 'Legacy title')
-    assert.equal(errorCode(() => prepareWriteback({ site, bytes, patches: [{ path: 'secret.value', kind: 'html', value: 'x' }] })), 'TARGET_NOT_FOUND')
+    const revision = revisionOf(bytes)
+    assert.equal(errorCode(() => prepareWriteback({ site, bytes, changes: [] })), 'REVISION_REQUIRED')
+    assert.equal(errorCode(() => prepareWriteback({ site, bytes, expectedRevision: revision })), 'CHANGES_REQUIRED')
+    assert.equal(errorCode(() => prepareWriteback({
+      site, bytes, expectedRevision: revision, changes: [],
+      patches: [{ path: 'title', kind: 'html', value: 'Legacy title' }],
+    })), 'LEGACY_PATCH_UNSUPPORTED')
   } finally {
     rmSync(site, { recursive: true, force: true })
   }

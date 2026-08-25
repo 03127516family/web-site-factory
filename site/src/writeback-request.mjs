@@ -38,50 +38,15 @@ function normalizeAssetChanges(contract, changes) {
   })
 }
 
-function patchValue(patch) {
-  if (patch.kind === 'html') return patch.value
-  if (patch.kind === 'tree') return patch.value
-  if (patch.kind === 'image') return { src: patch.src, alt: patch.alt ?? '' }
-  if (patch.kind === 'link') return patch.href
-  fail('LEGACY_PATCH_UNSUPPORTED', `旧 patch 类型不再支持: ${patch.kind}`)
-}
-
-export function legacyPatchesToChanges(data, contract, patches) {
-  if (!Array.isArray(patches)) fail('INVALID_OPERATION', 'patches 必须是数组')
-  const fixedByPath = new Map(Object.entries(contract.fields).map(([targetId, field]) => [field.path, targetId]))
-  const changes = []
-  for (const patch of patches) {
-    const fixed = fixedByPath.get(patch?.path)
-    if (fixed) {
-      changes.push({ targetId: fixed, value: patchValue(patch) })
-      continue
-    }
-    let matched = false
-    for (const [regionId, region] of Object.entries(contract.repeats)) {
-      const escaped = region.path.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const match = String(patch?.path || '').match(new RegExp(`^${escaped}\\[(\\d+)\\]\\.(.+)$`))
-      if (!match) continue
-      const fieldEntry = Object.entries(region.fields).find(([, field]) => field.path === match[2])
-      if (!fieldEntry) break
-      const items = region.path.split('.').reduce((value, key) => value?.[key], data)
-      const item = items?.[Number(match[1])]
-      const itemId = item?.[region.itemIdField]
-      if (!itemId) fail('ITEM_NOT_FOUND', `旧 patch 对应项缺少稳定 ID: ${patch.path}`)
-      changes.push({ targetId: `${regionId}/${itemId}/${fieldEntry[0]}`, value: patchValue(patch) })
-      matched = true
-      break
-    }
-    if (!matched) fail('TARGET_NOT_FOUND', `模板未授权旧 patch 路径: ${patch?.path || ''}`, { path: patch?.path })
-  }
-  return changes
-}
-
-export function prepareWriteback({ site, bytes, expectedRevision, changes, patches, status }) {
+export function prepareWriteback(request) {
+  if ('patches' in request) fail('LEGACY_PATCH_UNSUPPORTED', 'patches 协议已移除，请提交 changes')
+  const { site, bytes, expectedRevision, changes } = request
   const currentRevision = revisionOf(bytes)
-  if (expectedRevision !== undefined && expectedRevision !== currentRevision) {
+  if (expectedRevision === undefined) fail('REVISION_REQUIRED', '保存必须携带 revision')
+  if (expectedRevision !== currentRevision) {
     fail('REVISION_CONFLICT', '页面内容已被其他保存更新，请刷新后重试', { expectedRevision, currentRevision })
   }
-  if (changes !== undefined && expectedRevision === undefined) fail('REVISION_REQUIRED', 'Changes 保存必须携带 revision')
+  if (!Array.isArray(changes)) fail('CHANGES_REQUIRED', '保存必须携带 changes 数组')
 
   let current
   try { current = JSON.parse(Buffer.from(bytes).toString('utf8')) }
@@ -89,17 +54,12 @@ export function prepareWriteback({ site, bytes, expectedRevision, changes, patch
   if (!current.page) fail('CONTENT_INVALID', '内容 JSON 缺少 page')
 
   const contract = loadEditContract(site, current.page)
-  const normalizedChanges = normalizeAssetChanges(contract, changes ?? legacyPatchesToChanges(current, contract, patches ?? []))
+  const normalizedChanges = normalizeAssetChanges(contract, changes)
   for (const change of normalizedChanges) {
     if (change?.op && !CLIENT_OPERATIONS.has(change.op)) {
       fail('INVALID_OPERATION', `客户端不允许提交 repeat 操作: ${change.op}`)
     }
   }
   const result = applyChanges({ data: current, contract, changes: normalizedChanges })
-
-  if (status !== undefined) {
-    if (!['draft', 'published'].includes(status)) fail('INVALID_STATUS', `status 非法: ${status}`)
-    result.data.page.status = status
-  }
   return { ...result, contract, currentRevision }
 }
