@@ -163,6 +163,12 @@ test('采集:产品页配置键不进翻译（family/template）', () => {
   const ids = collectUnits(j).map(u => u.id)
   assert.deepEqual(ids.sort(), ['page.title', 'title'].sort())
 })
+
+test('采集:writeback 稳定 id 是结构字段不进翻译', () => {
+  const j = { rows: [{ id: 'row_a83f', label: '产品名称' }] }
+  const ids = collectUnits(j).map(u => u.id)
+  assert.deepEqual(ids, ['rows[0].label'])
+})
 test('采集:值形态排除各分支钉死', () => {
   const j = {
     avatar: '/assets/img/product/x.jpg',   // /assets/ 前缀

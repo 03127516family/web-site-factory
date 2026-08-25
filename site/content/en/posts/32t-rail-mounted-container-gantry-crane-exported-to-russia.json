@@ -16,11 +16,13 @@
     "trail": [
       {
         "label": "Home",
-        "url": "https://www.dgcrane.com/en/"
+        "url": "https://www.dgcrane.com/en/",
+        "id": "crumb_1476e23bf1"
       },
       {
         "label": "Cases",
-        "url": "https://www.dgcrane.com/en/posts/"
+        "url": "https://www.dgcrane.com/en/posts/",
+        "id": "crumb_d26afd3048"
       }
     ]
   },

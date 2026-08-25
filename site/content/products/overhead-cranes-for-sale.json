@@ -16,11 +16,13 @@
     "trail": [
       {
         "label": "首页",
-        "url": "https://www.dgcrane.com/zh/"
+        "url": "https://www.dgcrane.com/zh/",
+        "id": "crumb_a2e6095740"
       },
       {
         "label": "桥式起重机",
-        "url": "https://www.dgcrane.com/zh/overhead-cranes/"
+        "url": "https://www.dgcrane.com/zh/overhead-cranes/",
+        "id": "crumb_820719e79f"
       }
     ]
   },
@@ -41,143 +43,129 @@
   },
   "specs": [
     {
-      "text": "容量：3.2-80吨"
+      "text": "容量：3.2-80吨",
+      "id": "spec_0b288bcda4"
     },
     {
-      "text": "跨度长度：4-31.5米"
+      "text": "跨度长度：4-31.5米",
+      "id": "spec_61c8634ff1"
     },
     {
-      "text": "提升高度：根据客户的现场条件定制"
+      "text": "提升高度：根据客户的现场条件定制",
+      "id": "spec_52715e7ae7"
     },
     {
-      "text": "工作职责。A5"
+      "text": "工作职责。A5",
+      "id": "spec_11ebf14cd0"
     },
     {
-      "text": "工作电压：220V~690V，50-60Hz，3ph AC"
+      "text": "工作电压：220V~690V，50-60Hz，3ph AC",
+      "id": "spec_03f91f6332"
     },
     {
-      "text": "保护等级。IP54 IP55"
+      "text": "保护等级。IP54 IP55",
+      "id": "spec_07f90475aa"
     },
     {
-      "text": "起重机控制模式。悬挂式控制/远程控制/机舱控制"
+      "text": "起重机控制模式。悬挂式控制/远程控制/机舱控制",
+      "id": "spec_99e822798e"
     }
   ],
   "gallery": [
     {
       "image": "5Ton-European-type-single-girder-overhead-crane-3.jpg",
-      "alt": "5吨欧式单梁桥式起重机 3"
+      "alt": "5吨欧式单梁桥式起重机 3",
+      "id": "gallery_69052f5f0f"
     },
     {
       "image": "5Ton-European-type-single-girder-overhead-crane-1.jpg",
-      "alt": "5吨欧式单梁桥式起重机1台"
+      "alt": "5吨欧式单梁桥式起重机1台",
+      "id": "gallery_faa1ac8576"
     },
     {
       "image": "15Ton-European-type-single-girder-overhead-crane.jpg",
-      "alt": "15吨欧式单梁桥式起重机"
+      "alt": "15吨欧式单梁桥式起重机",
+      "id": "gallery_46f3d60aaf"
     },
     {
       "image": "5Ton-NLH-European-Type-double-girder-overhead-crane-2.jpg",
-      "alt": "5吨NLH欧式双梁桥式起重机 2"
+      "alt": "5吨NLH欧式双梁桥式起重机 2",
+      "id": "gallery_cb4b2136c4"
     },
     {
       "image": "5Ton-NLH-European-Type-double-girder-overhead-crane-1.jpg",
-      "alt": "5吨NLH欧式双梁桥式起重机 1"
+      "alt": "5吨NLH欧式双梁桥式起重机 1",
+      "id": "gallery_df1e0a8450"
     },
     {
       "image": "5Ton-NLH-European-Type-double-girder-overhead-crane-3.jpg",
-      "alt": "5吨NLH欧式双梁桥式起重机 3"
+      "alt": "5吨NLH欧式双梁桥式起重机 3",
+      "id": "gallery_88a38e72fb"
     },
     {
       "image": "NLH-European-type-double-girder-overhead-crane-1.jpg",
-      "alt": "NLH欧式双梁桥式起重机 1"
+      "alt": "NLH欧式双梁桥式起重机 1",
+      "id": "gallery_628704a760"
     },
     {
       "image": "NLH-European-type-double-girder-overhead-crane-2.jpg",
-      "alt": "NLH欧式双梁桥式起重机 2"
+      "alt": "NLH欧式双梁桥式起重机 2",
+      "id": "gallery_b5d5ff2402"
     },
     {
       "image": "NLH-European-type-double-girder-overhead-crane-3.jpg",
-      "alt": "NLH欧式双梁桥式起重机 3"
+      "alt": "NLH欧式双梁桥式起重机 3",
+      "id": "gallery_4c291351d0"
     },
     {
       "image": "12.5ton-European-type-double-girder-overhead-crane.jpg",
-      "alt": "12.5吨欧式双梁桥式起重机"
+      "alt": "12.5吨欧式双梁桥式起重机",
+      "id": "gallery_11c890fbab"
     },
     {
       "image": "European-type-hoist.jpg",
-      "alt": "欧式提升机"
+      "alt": "欧式提升机",
+      "id": "gallery_0d7fb6a615"
     },
     {
       "image": "Euro-type-overhead-crane-2.jpg",
-      "alt": "欧式桥式起重机 2"
+      "alt": "欧式桥式起重机 2",
+      "id": "gallery_006b6b1ce2"
     },
     {
       "image": "Euro-type-overhead-crane-3.jpg",
-      "alt": "欧式桥式起重机 3"
+      "alt": "欧式桥式起重机 3",
+      "id": "gallery_8751b0f927"
     },
     {
       "image": "Euro-type-overhead-crane-5.jpg",
-      "alt": "欧式桥式起重机 5"
+      "alt": "欧式桥式起重机 5",
+      "id": "gallery_87bc77ef80"
     },
     {
       "image": "Euro-type-overhead-crane-4-1.jpg",
-      "alt": "欧式桥式起重机 4 1"
+      "alt": "欧式桥式起重机 4 1",
+      "id": "gallery_ab42447ebc"
     },
     {
       "image": "Euro-type-overhead-crane-6.jpg",
-      "alt": "欧式桥式起重机 6"
+      "alt": "欧式桥式起重机 6",
+      "id": "gallery_b7d4ce4666"
     },
     {
       "image": "Euro-type-overhead-crane-7.jpg",
-      "alt": "欧式桥式起重机 7"
+      "alt": "欧式桥式起重机 7",
+      "id": "gallery_148c153fc3"
     },
     {
       "image": "Euro-type-overhead-crane-8.jpg",
-      "alt": "欧式桥式起重机 8"
+      "alt": "欧式桥式起重机 8",
+      "id": "gallery_850ecaa24f"
     },
     {
       "image": "Euro-type-overhead-crane-9.jpg",
-      "alt": "欧式桥式起重机 9"
-    }
-  ],
-  "components_images": [
-    {
-      "name": "主梁",
-      "image": "Main-girder.jpg",
-      "width": 1200,
-      "height": 800
-    },
-    {
-      "name": "末端车架",
-      "image": "End-carriages.jpg",
-      "width": 1200,
-      "height": 800
-    },
-    {
-      "name": "升降机构",
-      "image": "European-type-wire-rope-hoist.jpg",
-      "width": 1200,
-      "height": 800
-    },
-    {
-      "name": "起重机行走齿轮马达",
-      "image": "SEW-gear-motor-for-crane-traveling.jpg",
-      "width": 1200,
-      "height": 800
-    },
-    {
-      "name": "电控系统",
-      "image": "Crane-electric-control-bo.jpg"
-    },
-    {
-      "name": "控制模式",
-      "image": "Pendant-controller.jpg",
-      "width": 1200,
-      "height": 800
-    },
-    {
-      "name": "欧洲型桥式起重机的保护装置",
-      "image": null
+      "alt": "欧式桥式起重机 9",
+      "id": "gallery_9a3efb755c"
     }
   ],
   "production_flow": {
@@ -187,42 +175,50 @@
       {
         "label": "来料检验",
         "image": "1-Incoming-material-sample-test-1.jpg",
-        "dataSize": "2400x1600"
+        "dataSize": "2400x1600",
+        "id": "flow_d6ab75c9f2"
       },
       {
         "label": "钢板开卷和开裂",
         "image": "2-Steel-plate-uncoiling-and-falttening.jpg",
-        "dataSize": "2400x1600"
+        "dataSize": "2400x1600",
+        "id": "flow_9f8876010d"
       },
       {
         "label": "钢板切割",
         "image": "3-Steel-sheeting-cuttig.jpg",
-        "dataSize": "2400x1600"
+        "dataSize": "2400x1600",
+        "id": "flow_0ac6bab675"
       },
       {
         "label": "滚动槽",
         "image": "4-Rolling-groove.jpg",
-        "dataSize": "2400x1600"
+        "dataSize": "2400x1600",
+        "id": "flow_795faaeea5"
       },
       {
         "label": "焊接主大梁",
         "image": "5_Welding-the-main-girder.jpg",
-        "dataSize": "2100x1400"
+        "dataSize": "2100x1400",
+        "id": "flow_296407bdc6"
       },
       {
         "label": "起重机预装",
         "image": "7-Crane-pre-assembling.jpg",
-        "dataSize": "2400x1600"
+        "dataSize": "2400x1600",
+        "id": "flow_1e3f469fc9"
       },
       {
         "label": "欧洲型钢丝绳吊杆的组装",
         "image": "8_Assembly-of-the-European-type-wire-rope-hoists.jpg",
-        "dataSize": "2100x1400"
+        "dataSize": "2100x1400",
+        "id": "flow_0741458588"
       },
       {
         "label": "起重机包装和交付",
         "image": "9-Crane-packing-and-delivery.jpg",
-        "dataSize": "2400x1600"
+        "dataSize": "2400x1600",
+        "id": "flow_d6569c948b"
       }
     ],
     "body": {
@@ -254,42 +250,32 @@
       ]
     }
   },
-  "crane_types_images": [
-    {
-      "name": "高清欧式单梁桥式起重机",
-      "image": "HD-European-type-single-girder-overhead-crane.jpg"
-    },
-    {
-      "name": "NLH欧洲型双梁桥式起重机",
-      "image": "NLH-European-type-double-girder-overhead-crane.jpg"
-    },
-    {
-      "name": "QD型欧式双梁桥式起重机",
-      "image": "QD-European-type-double-girder-overhead-crane.jpg"
-    }
-  ],
   "installation": {
     "title": "可进行现场安装或远程指导",
     "cases": [
       {
         "title": "5吨欧式单梁Overhead Cranes销往津巴布韦",
         "image": "2.After-painting-the-main-beam.jpg",
-        "url": "https://www.dgcrane.com/zh/posts/5ton-european-single-girder-overhead-cranes-for-sale-to-zimbabwe/"
+        "url": "https://www.dgcrane.com/zh/posts/5ton-european-single-girder-overhead-cranes-for-sale-to-zimbabwe/",
+        "id": "case_037d7f4b3a"
       },
       {
         "title": "3吨全电动小型龙门吊配5吨欧洲电动葫芦销往澳大利亚",
         "image": "Main-beam-and-ground-beams-of-3t-fully-electric-mini-gantry-crane.jpg",
-        "url": "https://www.dgcrane.com/zh/posts/3t-fully-electric-mini-gantry-crane-with-5t-european-electric-hoist-for-sale-to-australia/"
+        "url": "https://www.dgcrane.com/zh/posts/3t-fully-electric-mini-gantry-crane-with-5t-european-electric-hoist-for-sale-to-australia/",
+        "id": "case_b76524fead"
       },
       {
         "title": "5吨高清欧式单梁桥式起重机出售到卡塔尔",
         "image": "Rainproof-cloth-packaging.jpg",
-        "url": "https://www.dgcrane.com/zh/posts/5ton-hd-european-type-single-girder-overhead-crane-exported-to-qatar/"
+        "url": "https://www.dgcrane.com/zh/posts/5ton-hd-european-type-single-girder-overhead-crane-exported-to-qatar/",
+        "id": "case_3a1fa168d3"
       },
       {
         "title": "4套双梁龙门起重机和5套双梁桥式起重机出售给菲律宾",
         "image": "Installation-Photo.png",
-        "url": "https://www.dgcrane.com/zh/posts/4-sets-of-mg-16t-s16-6m-a5-double-girder-gantry-cranes-5-sets-of-lh10t-15t-s21-135m-a3-a5-double-girder-overhead-cranes-exported-to-philippines/"
+        "url": "https://www.dgcrane.com/zh/posts/4-sets-of-mg-16t-s16-6m-a5-double-girder-gantry-cranes-5-sets-of-lh10t-15t-s21-135m-a3-a5-double-girder-overhead-cranes-exported-to-philippines/",
+        "id": "case_b258246f43"
       }
     ],
     "body": {
@@ -322,25 +308,29 @@
         "title": "FEM标准钢丝绳电动葫芦",
         "image": "European_Wire_Rope_Electric_Hoist.jpg",
         "url": "https://www.dgcrane.com/zh/products/wire-rope-hoist-suppliers/",
-        "summary": "欧式钢丝绳电动葫芦的起升机构采用行星齿轮，结构紧凑，重量轻，安装在卷筒内，有效地缩小了葫芦的整体尺寸。欧式钢丝绳电动葫芦的设计最大程度地采用了模块化设计，各部件的通用程度高。"
+        "summary": "欧式钢丝绳电动葫芦的起升机构采用行星齿轮，结构紧凑，重量轻，安装在卷筒内，有效地缩小了葫芦的整体尺寸。欧式钢丝绳电动葫芦的设计最大程度地采用了模块化设计，各部件的通用程度高。",
+        "id": "related_86d0ea190d"
       },
       {
         "title": "FEM标准电动环链升降机",
         "image": "European_Electric_Chain_Hoist.jpg",
         "url": "https://www.dgcrane.com/zh/fem-standard-electric-chain-hoists/",
-        "summary": "欧式环链电动葫芦结构紧凑，性能可靠。模块化设计使我们的产品可以灵活地组成不同的起重吨位、起重速度和工作等级系统。优异的性能满足了货物快速转移和精密装配的要求，也可广泛应用于使用要求复杂的场所，满足客户的个性化需求。"
+        "summary": "欧式环链电动葫芦结构紧凑，性能可靠。模块化设计使我们的产品可以灵活地组成不同的起重吨位、起重速度和工作等级系统。优异的性能满足了货物快速转移和精密装配的要求，也可广泛应用于使用要求复杂的场所，满足客户的个性化需求。",
+        "id": "related_be4725381b"
       },
       {
         "title": "FEM标准门式起重机",
         "image": "European_Gantry_Crane.jpg",
         "url": "https://www.dgcrane.com/zh/fem-standard-gantry-cranes/",
-        "summary": "欧式龙门吊采用欧洲设计标准和制造技术，达到了国际同类产品的先进水平，如高度低、重量轻、轮压小、直接驱动灵活、无级变速、免维护等。"
+        "summary": "欧式龙门吊采用欧洲设计标准和制造技术，达到了国际同类产品的先进水平，如高度低、重量轻、轮压小、直接驱动灵活、无级变速、免维护等。",
+        "id": "related_b1eed141c7"
       },
       {
         "title": "FEM标准旋臂式起重机",
         "image": "European_Jib_Crane.jpg",
         "url": "https://www.dgcrane.com/zh/fem-standard-jib-cranes/",
-        "summary": "欧式旋臂吊结构独特，安全可靠，具有高效、节能、省时、灵活等特点。它特别适用于短距离、高强度的吊装场所。欧式旋臂吊广泛用于车间、仓库、码头等固定场所。工作等级一般为A4或A5。"
+        "summary": "欧式旋臂吊结构独特，安全可靠，具有高效、节能、省时、灵活等特点。它特别适用于短距离、高强度的吊装场所。欧式旋臂吊广泛用于车间、仓库、码头等固定场所。工作等级一般为A4或A5。",
+        "id": "related_3f1406460f"
       }
     ]
   },
@@ -1297,338 +1287,325 @@
   },
   "components": {
     "title": "组成部分",
-    "body": {
-      "type": "doc",
-      "content": [
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
+    "items": [
+      {
+        "name": "主梁",
+        "image": "Main-girder.jpg",
+        "width": 1200,
+        "height": 800,
+        "body": {
+          "type": "doc",
           "content": [
             {
-              "type": "text",
-              "text": "主梁"
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "主梁为焊接的箱形结构，下翼缘板为提升机运行轨道。主梁严格按照工艺流程进行生产。焊接采用全自动CO2保护焊生产线，焊接变形小，焊缝强度高，残余应力低。焊缝按国家标准GB3323进行检验。它具有较好的强度、刚度和稳定性"
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "末端车架"
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "起重机端头车采用矩形管整体端头梁结构，避免焊接造成的变形。采用大型落地镗床一次加工成型，保证车轮的两个挠度值在公差范围内。起重机端梁的改进设计，降低了垂直刚度，增加了水平刚度，可以克服起重机车轮三个轮子接触地面的现象，大大提高了车轮的寿命。安装车轮的端梁结构融合了国际先进技术，采用整体镗孔结构，安装精度更高。"
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "升降机构"
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "提升机构采用欧式葫芦或欧式小车。葫芦提升机构采用行星齿轮，结构紧凑，重量轻，安装在卷筒内，有效地缩小了电动葫芦的体积。其设计最大程度地采用了模块化设计，零部件通用性强。设计标准采用欧洲FEM标准，提升速度、运行速度等参数的选择更加人性化。设计速度慢，定位准确，适合安装和维修；设计速度快，使提升机构的效率更高，更方便。"
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "起重机行走齿轮马达"
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "大车运行机构采用“三合一”驱动齿轮箱，分别驱动两侧端梁；电动机采用大车专用制动电动机，采用螺栓连接。此驱动型式具有传动精度高、重量轻、密封性好、噪音低、寿命长、免维护等优点。"
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "电控系统"
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "欧式起重机电压按客户当地工业电压确定，电气系统按电压制造。装有横叉旋转限位开关，在起重机缓冲器与轨道端块相撞前，切断横移电机及长行走电机电源。装有超载限制器。当钢丝绳张力大于额定值90%时，超载保护装置报警。当钢丝绳张力大于额定值110%时，超载保护装置自动切断起升电路。小车电源采用异型钢悬挂配扁平电缆。"
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "控制模式"
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "content": [
-            {
-              "type": "text",
-              "text": "操作面板、遥控、驾驶室操控。起重机也可配备两套操作装置，即：地面+遥控或驾驶室+遥控。但出于安全问题，两种操作方式只能切换，不能同时使用。"
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "欧洲型桥式起重机的保护装置"
-            }
-          ]
-        },
-        {
-          "type": "bulletList",
-          "content": [
-            {
-              "type": "listItem",
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "变频器：变频器的保护功能可以对各驱动机构进行短路、过流、电机过热、欠压、过压、接地、短路、防失速、散热器过热、制动单元过热保护。"
-                    }
-                  ]
+                  "type": "text",
+                  "text": "主梁为焊接的箱形结构，下翼缘板为提升机运行轨道。主梁严格按照工艺流程进行生产。焊接采用全自动CO2保护焊生产线，焊接变形小，焊缝强度高，残余应力低。焊缝按国家标准GB3323进行检验。它具有较好的强度、刚度和稳定性"
                 }
               ]
-            },
+            }
+          ]
+        },
+        "id": "component_fb7e62c67a"
+      },
+      {
+        "name": "末端车架",
+        "image": "End-carriages.jpg",
+        "width": 1200,
+        "height": 800,
+        "body": {
+          "type": "doc",
+          "content": [
             {
-              "type": "listItem",
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "配电保护。起重机配电的主回路装有保护部件，如主电源的自动空气开关和主接触器。"
-                    }
-                  ]
+                  "type": "text",
+                  "text": "起重机端头车采用矩形管整体端头梁结构，避免焊接造成的变形。采用大型落地镗床一次加工成型，保证车轮的两个挠度值在公差范围内。起重机端梁的改进设计，降低了垂直刚度，增加了水平刚度，可以克服起重机车轮三个轮子接触地面的现象，大大提高了车轮的寿命。安装车轮的端梁结构融合了国际先进技术，采用整体镗孔结构，安装精度更高。"
                 }
               ]
-            },
+            }
+          ]
+        },
+        "id": "component_6bf40f9c23"
+      },
+      {
+        "name": "升降机构",
+        "image": "European-type-wire-rope-hoist.jpg",
+        "width": 1200,
+        "height": 800,
+        "body": {
+          "type": "doc",
+          "content": [
             {
-              "type": "listItem",
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "短路保护。主电源电路装有自动开关作为起重机的短路保护；控制电路装有小容量自动空气开关作为短路保护。"
-                    }
-                  ]
+                  "type": "text",
+                  "text": "提升机构采用欧式葫芦或欧式小车。葫芦提升机构采用行星齿轮，结构紧凑，重量轻，安装在卷筒内，有效地缩小了电动葫芦的体积。其设计最大程度地采用了模块化设计，零部件通用性强。设计标准采用欧洲FEM标准，提升速度、运行速度等参数的选择更加人性化。设计速度慢，定位准确，适合安装和维修；设计速度快，使提升机构的效率更高，更方便。"
                 }
               ]
-            },
+            }
+          ]
+        },
+        "id": "component_317fff53d3"
+      },
+      {
+        "name": "起重机行走齿轮马达",
+        "image": "SEW-gear-motor-for-crane-traveling.jpg",
+        "width": 1200,
+        "height": 800,
+        "body": {
+          "type": "doc",
+          "content": [
             {
-              "type": "listItem",
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "过载保护。起重机各机构的电机均装有单独的过流保护装置作为过载保护；主电源的自动空气开关作为起重机的过载保护。"
-                    }
-                  ]
+                  "type": "text",
+                  "text": "大车运行机构采用“三合一”驱动齿轮箱，分别驱动两侧端梁；电动机采用大车专用制动电动机，采用螺栓连接。此驱动型式具有传动精度高、重量轻、密封性好、噪音低、寿命长、免维护等优点。"
                 }
               ]
-            },
+            }
+          ]
+        },
+        "id": "component_4a4ef9acd3"
+      },
+      {
+        "name": "电控系统",
+        "image": "Crane-electric-control-bo.jpg",
+        "body": {
+          "type": "doc",
+          "content": [
             {
-              "type": "listItem",
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "相序保护。设备采用相序保护器，实时监控电源质量。当电源因外界原因产生过压、欠压、缺相或相序变化时，控制系统将切断主回路，有效保护设备和人员的安全。"
-                    }
-                  ]
+                  "type": "text",
+                  "text": "欧式起重机电压按客户当地工业电压确定，电气系统按电压制造。装有横叉旋转限位开关，在起重机缓冲器与轨道端块相撞前，切断横移电机及长行走电机电源。装有超载限制器。当钢丝绳张力大于额定值90%时，超载保护装置报警。当钢丝绳张力大于额定值110%时，超载保护装置自动切断起升电路。小车电源采用异型钢悬挂配扁平电缆。"
                 }
               ]
-            },
+            }
+          ]
+        },
+        "id": "component_7090752f7e"
+      },
+      {
+        "name": "控制模式",
+        "image": "Pendant-controller.jpg",
+        "width": 1200,
+        "height": 800,
+        "body": {
+          "type": "doc",
+          "content": [
             {
-              "type": "listItem",
+              "type": "paragraph",
               "content": [
                 {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "升降机限位保护。升降机构配备了就位限位开关和限位开关。就位限位开关可确保升降机构在就位时自动停止。限位开关可以确保升降机构在吊钩上升到极限位置时自动切断。"
-                    }
-                  ]
+                  "type": "text",
+                  "text": "操作面板、遥控、驾驶室操控。起重机也可配备两套操作装置，即：地面+遥控或驾驶室+遥控。但出于安全问题，两种操作方式只能切换，不能同时使用。"
                 }
               ]
-            },
+            }
+          ]
+        },
+        "id": "component_c44a98f7d7"
+      },
+      {
+        "name": "欧洲型桥式起重机的保护装置",
+        "image": null,
+        "body": {
+          "type": "doc",
+          "content": [
             {
-              "type": "listItem",
+              "type": "bulletList",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "行走限位保护。起重机行走和小车横移机构一般在两端装有在位限位开关和限位开关"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "变频器：变频器的保护功能可以对各驱动机构进行短路、过流、电机过热、欠压、过压、接地、短路、防失速、散热器过热、制动单元过热保护。"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "紧急断电保护。起重机的控制电路上装有紧急开关。当事故发生时，可随时切断控制电路的电源，然后切断主电路，保证起重机的安全运行。"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "配电保护。起重机配电的主回路装有保护部件，如主电源的自动空气开关和主接触器。"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "防腐、防尘和密封措施"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "短路保护。主电源电路装有自动开关作为起重机的短路保护；控制电路装有小容量自动空气开关作为短路保护。"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "过载保护。起重机各机构的电机均装有单独的过流保护装置作为过载保护；主电源的自动空气开关作为起重机的过载保护。"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "相序保护。设备采用相序保护器，实时监控电源质量。当电源因外界原因产生过压、欠压、缺相或相序变化时，控制系统将切断主回路，有效保护设备和人员的安全。"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "升降机限位保护。升降机构配备了就位限位开关和限位开关。就位限位开关可确保升降机构在就位时自动停止。限位开关可以确保升降机构在吊钩上升到极限位置时自动切断。"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "行走限位保护。起重机行走和小车横移机构一般在两端装有在位限位开关和限位开关"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "紧急断电保护。起重机的控制电路上装有紧急开关。当事故发生时，可随时切断控制电路的电源，然后切断主电路，保证起重机的安全运行。"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "防腐、防尘和密封措施"
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           ]
-        }
-      ]
-    }
+        },
+        "id": "component_3a139f3065"
+      }
+    ]
   },
   "crane_types": {
     "title": "适用于不同工作条件的起重机类型",
-    "body": {
-      "type": "doc",
-      "content": [
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
+    "items": [
+      {
+        "name": "高清欧式单梁桥式起重机",
+        "image": "HD-European-type-single-girder-overhead-crane.jpg",
+        "body": {
+          "type": "doc",
           "content": [
             {
-              "type": "text",
-              "text": "高清欧式单梁桥式起重机"
-            }
-          ]
-        },
-        {
-          "type": "bulletList",
-          "content": [
-            {
-              "type": "listItem",
+              "type": "bulletList",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "可靠性、高效、操作简便、安全"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "可靠性、高效、操作简便、安全"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "采购和维护成本低"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "采购和维护成本低"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "通常，HD欧式单梁桥式起重机的最大起重能力为12.5吨。"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "通常，HD欧式单梁桥式起重机的最大起重能力为12.5吨。"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -1636,139 +1613,136 @@
             }
           ]
         },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
+        "id": "crane_type_cf539a1871"
+      },
+      {
+        "name": "NLH欧洲型双梁桥式起重机",
+        "image": "NLH-European-type-double-girder-overhead-crane.jpg",
+        "body": {
+          "type": "doc",
           "content": [
             {
-              "type": "text",
-              "text": "NLH欧洲型双梁桥式起重机"
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "可靠性、高效、操作简便、安全"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "采购和维护成本低"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "当容量大于12.5吨时，建议客户选择NLH欧式双梁桥式起重机。"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
-        {
-          "type": "bulletList",
+        "id": "crane_type_943550b3da"
+      },
+      {
+        "name": "QD型欧式双梁桥式起重机",
+        "image": "QD-European-type-double-girder-overhead-crane.jpg",
+        "body": {
+          "type": "doc",
           "content": [
             {
-              "type": "listItem",
+              "type": "bulletList",
               "content": [
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "可靠性、高效、操作简便、安全"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "外观漂亮，结构轻巧"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "采购和维护成本低"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "环境友好，无声无息"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "当容量大于12.5吨时，建议客户选择NLH欧式双梁桥式起重机。"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "技术优势：双速智能变频"
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "heading",
-          "attrs": {
-            "level": 3
-          },
-          "content": [
-            {
-              "type": "text",
-              "text": "QD型欧式双梁桥式起重机"
-            }
-          ]
-        },
-        {
-          "type": "bulletList",
-          "content": [
-            {
-              "type": "listItem",
-              "content": [
+                },
                 {
-                  "type": "paragraph",
+                  "type": "listItem",
                   "content": [
                     {
-                      "type": "text",
-                      "text": "外观漂亮，结构轻巧"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "环境友好，无声无息"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "技术优势：双速智能变频"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "content": [
-                {
-                  "type": "paragraph",
-                  "content": [
-                    {
-                      "type": "text",
-                      "text": "稳定的提升"
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "稳定的提升"
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
           ]
-        }
-      ]
-    }
+        },
+        "id": "crane_type_473262d480"
+      }
+    ]
   }
 }

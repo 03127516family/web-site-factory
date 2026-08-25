@@ -16,11 +16,13 @@
     "trail": [
       {
         "label": "首页",
-        "url": "https://www.dgcrane.com/zh/"
+        "url": "https://www.dgcrane.com/zh/",
+        "id": "crumb_c6291d1b89"
       },
       {
         "label": "旋臂起重机",
-        "url": "https://www.dgcrane.com/zh/jib-cranes/"
+        "url": "https://www.dgcrane.com/zh/jib-cranes/",
+        "id": "crumb_13079cea46"
       }
     ]
   },
@@ -38,28 +40,36 @@
   },
   "specs": [
     {
-      "text": "Lifting Capacity: up to 16 tons"
+      "text": "Lifting Capacity: up to 16 tons",
+      "id": "spec_7b99a2fcf6"
     },
     {
-      "text": "Boom Length: Up to 16m"
+      "text": "Boom Length: Up to 16m",
+      "id": "spec_d46bdb36db"
     },
     {
-      "text": "Lifting Height: up to 12 (floor to boom bottom)"
+      "text": "Lifting Height: up to 12 (floor to boom bottom)",
+      "id": "spec_d273d74a00"
     },
     {
-      "text": "Duty Class: M3-M5"
+      "text": "Duty Class: M3-M5",
+      "id": "spec_b32dc6da88"
     },
     {
-      "text": "Rotation Angle: 120-360°"
+      "text": "Rotation Angle: 120-360°",
+      "id": "spec_9f15439332"
     },
     {
-      "text": "Power Supply: 220V~690V, 50-60Hz, 3ph AC"
+      "text": "Power Supply: 220V~690V, 50-60Hz, 3ph AC",
+      "id": "spec_4605ed1a0e"
     },
     {
-      "text": "Request New Parameters"
+      "text": "Request New Parameters",
+      "id": "spec_affa09c541"
     },
     {
-      "text": "New Parameters Complete"
+      "text": "New Parameters Complete",
+      "id": "spec_73c3d73497"
     }
   ],
   "inquiry_form": {
@@ -77,25 +87,29 @@
         "title": "FEM Standard Jib Crane",
         "image": "European_Jib_Crane.jpg",
         "url": "https://www.dgcrane.com/zh/fem-standard-jib-cranes/",
-        "summary": "The European-style jib crane has a unique structure, safe and reliable, with high efficiency, energy saving, time saving, and flexibility. It is especially suitable for short-distance, high-intensity lifting places. European-style jib cranes are widely used in workshops, warehouses, docks, and other fixed places. The duty class is generally A4 or A5."
+        "summary": "The European-style jib crane has a unique structure, safe and reliable, with high efficiency, energy saving, time saving, and flexibility. It is especially suitable for short-distance, high-intensity lifting places. European-style jib cranes are widely used in workshops, warehouses, docks, and other fixed places. The duty class is generally A4 or A5.",
+        "id": "related_9ee06a4d24"
       },
       {
         "title": "FEM Standard Wire Rope Electric Hoist",
         "image": "European_Wire_Rope_Electric_Hoist.jpg",
         "url": "https://www.dgcrane.com/zh/products/wire-rope-hoist-suppliers/",
-        "summary": "The lifting mechanism of the European wire rope electric hoist uses a planetary gear drive - compact, lightweight, and mounted inside the drum, it effectively reduces the overall size of the hoist. The European wire rope electric hoist is designed for maximum modularity, with a high degree of part commonality."
+        "summary": "The lifting mechanism of the European wire rope electric hoist uses a planetary gear drive - compact, lightweight, and mounted inside the drum, it effectively reduces the overall size of the hoist. The European wire rope electric hoist is designed for maximum modularity, with a high degree of part commonality.",
+        "id": "related_8af66756f1"
       },
       {
         "title": "FEM Standard Electric Chain Hoist",
         "image": "European_Electric_Chain_Hoist.jpg",
         "url": "https://www.dgcrane.com/zh/fem-standard-electric-chain-hoists/",
-        "summary": "The European electric chain hoist is compact and reliable. Its modular design lets our products flexibly form systems with different lifting capacities, lifting speeds, and duty classifications."
+        "summary": "The European electric chain hoist is compact and reliable. Its modular design lets our products flexibly form systems with different lifting capacities, lifting speeds, and duty classifications.",
+        "id": "related_986a378b2f"
       },
       {
         "title": "FEM Standard Gantry Crane",
         "image": "European_Gantry_Crane.jpg",
         "url": "https://www.dgcrane.com/zh/fem-standard-gantry-cranes/",
-        "summary": "The European-style gantry crane adopts European design standards and manufacturing technology, reaching the advanced level of similar international products, such as low height, light weight, low wheel pressure, flexible direct drive, variable frequency speed control, and maintenance-free."
+        "summary": "The European-style gantry crane adopts European design standards and manufacturing technology, reaching the advanced level of similar international products, such as low height, light weight, low wheel pressure, flexible direct drive, variable frequency speed control, and maintenance-free.",
+        "id": "related_9a30ea6420"
       }
     ]
   },

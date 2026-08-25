@@ -14,11 +14,23 @@
   "breadcrumb": {
     "current": "龙门起重机选购指南",
     "trail": [
-      { "label": "首页", "url": "https://www.dgcrane.com/zh/" },
-      { "label": "案例", "url": "https://www.dgcrane.com/zh/posts/" }
+      {
+        "label": "首页",
+        "url": "https://www.dgcrane.com/zh/",
+        "id": "crumb_dd9f507beb"
+      },
+      {
+        "label": "案例",
+        "url": "https://www.dgcrane.com/zh/posts/",
+        "id": "crumb_d7a6de21dd"
+      }
     ]
   },
-  "inquiry_form": { "type": "inquiry-form", "form_id": 713, "title": "填写您的详细资料，我们将在24小时内给您答复!" },
+  "inquiry_form": {
+    "type": "inquiry-form",
+    "form_id": 713,
+    "title": "填写您的详细资料，我们将在24小时内给您答复!"
+  },
   "body": {
     "sections": [
       {
@@ -26,27 +38,82 @@
         "body": {
           "type": "doc",
           "content": [
-            { "type": "paragraph", "content": [{ "type": "text", "text": "龙门起重机按主梁结构分为单梁与双梁两种形式。" }] },
-            { "type": "paragraph", "content": [{ "type": "text", "text": "单梁结构自重轻、造价低，适用于中小吨位；双梁结构刚度大、工作级别高，适用于大吨位与高频作业。" }] },
-            { "type": "bulletList", "content": [
-              { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "单梁：起重量一般不超过 20 吨" }] }] },
-              { "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "双梁：起重量可达数百吨，适合重载" }] }] }
-            ] }
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "龙门起重机按主梁结构分为单梁与双梁两种形式。"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "单梁结构自重轻、造价低，适用于中小吨位；双梁结构刚度大、工作级别高，适用于大吨位与高频作业。"
+                }
+              ]
+            },
+            {
+              "type": "bulletList",
+              "content": [
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "单梁：起重量一般不超过 20 吨"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "listItem",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
+                        {
+                          "type": "text",
+                          "text": "双梁：起重量可达数百吨，适合重载"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
           ]
-        }
+        },
+        "id": "section_2dcd63d620"
       },
       {
         "heading": "场地条件与预算",
         "body": {
           "type": "doc",
           "content": [
-            { "type": "paragraph", "content": [{ "type": "text", "text": "选购前应测量场地跨度、两侧净空与轨道基础条件，结合预算确定配置。" }] }
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "选购前应测量场地跨度、两侧净空与轨道基础条件，结合预算确定配置。"
+                }
+              ]
+            }
           ]
         },
         "image": "gantry-crane-site.jpg",
         "alt": "龙门起重机安装现场",
         "width": 880,
-        "height": 495
+        "height": 495,
+        "id": "section_8c3400d512"
       }
     ]
   }

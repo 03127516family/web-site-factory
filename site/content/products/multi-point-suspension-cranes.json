@@ -16,11 +16,13 @@
     "trail": [
       {
         "label": "首页",
-        "url": "https://www.dgcrane.com/zh/"
+        "url": "https://www.dgcrane.com/zh/",
+        "id": "crumb_1473013b57"
       },
       {
         "label": "Eot Cranes",
-        "url": "https://www.dgcrane.com/zh/eot-cranes/"
+        "url": "https://www.dgcrane.com/zh/eot-cranes/",
+        "id": "crumb_fdf9aff210"
       }
     ]
   },
@@ -41,19 +43,24 @@
   },
   "specs": [
     {
-      "text": "起重能力：3-40吨"
+      "text": "起重能力：3-40吨",
+      "id": "spec_7b2bf7155e"
     },
     {
-      "text": "悬挂点数：3、4、5、6、7、8"
+      "text": "悬挂点数：3、4、5、6、7、8",
+      "id": "spec_1386d34499"
     },
     {
-      "text": "总跨度：最大可达 80 米"
+      "text": "总跨度：最大可达 80 米",
+      "id": "spec_e7e1586fc2"
     },
     {
-      "text": "提升高度：3-30米"
+      "text": "提升高度：3-30米",
+      "id": "spec_a4b105d445"
     },
     {
-      "text": "工作等级：A3–A5"
+      "text": "工作等级：A3–A5",
+      "id": "spec_de0046795f"
     }
   ],
   "inquiry_form": {
@@ -71,25 +78,29 @@
         "title": "工作站桥式起重机",
         "image": "Workstation-Overhead-Crane-1.jpg",
         "url": "https://www.dgcrane.com/zh/workstation-overhead-cranes/",
-        "summary": "工作站桥式起重机的起重量为0.125t-2t，应用范围很广。我们公司的工作站桥式起重机最大的优点是可以很容易地进行扩展，随时适应新的要求，可以与您的企业共同发展。"
+        "summary": "工作站桥式起重机的起重量为0.125t-2t，应用范围很广。我们公司的工作站桥式起重机最大的优点是可以很容易地进行扩展，随时适应新的要求，可以与您的企业共同发展。",
+        "id": "related_5693db3bd6"
       },
       {
         "title": "航空业桥式起重机：简化飞机组装、维护和维修",
         "image": "Overhead-Cranes-for-the-Aviation-Industry.jpg",
         "url": "https://www.dgcrane.com/zh/overhead-cranes-for-the-aviation-industry/",
-        "summary": ""
+        "summary": "",
+        "id": "related_b7639e4759"
       },
       {
         "title": "单梁桥式起重机",
         "image": "Single-Girder-Overhead-Crane-1.jpg",
         "url": "https://www.dgcrane.com/zh/products/single-girder-eot-cranes/",
-        "summary": "无论您是在进行采购计划，还是正在确定厂房起重设备的定制方案，如果起重能力要求在20吨及以下，单梁桥式起重机具有结构简单、方案灵活、拆装运输方便等优点可以是您的第二选择。"
+        "summary": "无论您是在进行采购计划，还是正在确定厂房起重设备的定制方案，如果起重能力要求在20吨及以下，单梁桥式起重机具有结构简单、方案灵活、拆装运输方便等优点可以是您的第二选择。",
+        "id": "related_9294e4877f"
       },
       {
         "title": "单轨桥式起重机",
         "image": "mb-Monorail-Overhead-Crane.jpg",
         "url": "https://www.dgcrane.com/zh/monorail-overhead-cranes/",
-        "summary": "单轨吊是一种替代传统起重机和传送带的起重机。这些起重机大多用于在有限的区域内重新安置材料或产品。这种场所可以是工厂或整个工作站。单轨吊的设计很简单，可以与建筑物的结构兼容，不需要做大的改动。"
+        "summary": "单轨吊是一种替代传统起重机和传送带的起重机。这些起重机大多用于在有限的区域内重新安置材料或产品。这种场所可以是工厂或整个工作站。单轨吊的设计很简单，可以与建筑物的结构兼容，不需要做大的改动。",
+        "id": "related_f18944ea4c"
       }
     ]
   },

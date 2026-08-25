@@ -2,7 +2,7 @@
 // 判形不判名：doc 树→树单元；字符串→文本单元；结构性键与 URL/文件形态值排除（U-1 沿用）。
 import { fp, extractInlineUnits, sliceInlineMd, inlineSpans } from './i18n-sent.mjs'
 
-export const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'family', 'category', 'dataSize', 'image', 'src', 'href', 'url', 'video', 'pdf'])
+export const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'family', 'category', 'id', 'dataSize', 'image', 'src', 'href', 'url', 'video', 'pdf'])
 const SKIP_TOP = new Set(['i18n', 'i18n_rev', 'i18n_fp'])
 const SKIP_PATHS = new Set(['breadcrumb.trail']) // 分语言手写结构（旧 STRUCTURAL_EXCLUDE）
 const SKIP_PATH_LIST = [...SKIP_PATHS]

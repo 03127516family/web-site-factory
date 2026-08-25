@@ -7,11 +7,16 @@ import { validateDoc } from './content-schema.mjs'
 import { renderDoc } from './render-doc.mjs'
 import { getIn, setIn } from './tree-utils.mjs'
 import { probe } from '../scripts/img-probe.mjs'
+import { loadSiteAssetConfig, publicAssetPolicy } from './asset-config.mjs'
 
 export { mdToDoc, validateDoc, getIn, setIn }
 
 // ---------- 站点资产约定（换站唯一要改的一处；模版/chrome/内容全是数据自带） ----------
-export const SITE_ASSETS = { dir: 'public/assets/img/product', url: '/assets/img/product/' }
+const ASSET_CONFIG = loadSiteAssetConfig()
+export const SITE_ASSETS = {
+  dir: join(ASSET_CONFIG.diskRoot, 'product'),
+  url: publicAssetPolicy({ namespace: 'product', valueFormat: 'filename' }, ASSET_CONFIG).publicPrefix.replace(/\/$/, ''),
+}
 
 // ---------- 原文分段编号（不给 AI；仅供代码侧反查漏段/位置审计） ----------
 export function numberBlocks(rawText) {

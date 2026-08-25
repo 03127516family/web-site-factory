@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "assets": { "namespace": "post", "valueFormat": "publicPath" },
+  "fields": {
+    "breadcrumb.current": { "path": "breadcrumb.current", "type": "text", "required": true },
+    "title": { "path": "title", "type": "text", "required": true },
+    "author.name": { "path": "author.name", "type": "text" },
+    "author.avatar": { "path": "author.avatar", "type": "image" },
+    "author.title": { "path": "author.title", "type": "text" },
+    "author.bio": { "path": "author.bio", "type": "text" },
+    "lead.body": { "path": "lead.body", "type": "richText" },
+    "body.img_hero": { "path": "body.img_hero", "type": "image" },
+    "body.h_req": { "path": "body.h_req", "type": "text" },
+    "req.body": { "path": "req.body", "type": "richText" },
+    "body.h_solution": { "path": "body.h_solution", "type": "text" },
+    "body.h_lowtemp": { "path": "body.h_lowtemp", "type": "text" },
+    "lowtemp.body": { "path": "lowtemp.body", "type": "richText" },
+    "body.img_mainbeam": { "path": "body.img_mainbeam", "type": "image" },
+    "body.img_cabin": { "path": "body.img_cabin", "type": "image" },
+    "body.img_travmotor": { "path": "body.img_travmotor", "type": "image" },
+    "body.h_localization": { "path": "body.h_localization", "type": "text" },
+    "localization.body": { "path": "localization.body", "type": "richText" },
+    "body.img_control": { "path": "body.img_control", "type": "image" },
+    "body.h_safety": { "path": "body.h_safety", "type": "text" },
+    "safety.body": { "path": "safety.body", "type": "richText" },
+    "body.h_transport": { "path": "body.h_transport", "type": "text" },
+    "transport.body": { "path": "transport.body", "type": "richText" },
+    "body.img_travmech": { "path": "body.img_travmech", "type": "image" },
+    "body.img_trolley": { "path": "body.img_trolley", "type": "image" },
+    "body.img_spreader": { "path": "body.img_spreader", "type": "image" },
+    "body.h_delivery": { "path": "body.h_delivery", "type": "text" },
+    "delivery.body": { "path": "delivery.body", "type": "richText" },
+    "body.img_result1": { "path": "body.img_result1", "type": "image" },
+    "body.img_result2": { "path": "body.img_result2", "type": "image" },
+    "body.h_summary": { "path": "body.h_summary", "type": "text" },
+    "summary.body": { "path": "summary.body", "type": "richText" },
+    "body.h_getquote": { "path": "body.h_getquote", "type": "text" },
+    "getquote.body": { "path": "getquote.body", "type": "richText" },
+    "inquiry_form.title": { "path": "inquiry_form.title", "type": "text" }
+  },
+  "repeats": {
+    "breadcrumb-trail": {
+      "path": "breadcrumb.trail", "itemIdField": "id", "minItems": 1, "maxItems": 10,
+      "prototype": { "id": null, "label": "", "url": "" },
+      "fields": { "label": { "path": "label", "type": "text" }, "url": { "path": "url", "type": "link" } }
+    }
+  }
+}

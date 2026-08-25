@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
 import { mdToDoc } from '../src/mdast-tree.mjs'
 import { validateDoc } from '../src/content-schema.mjs'
+import { migratePageWritebackV1 } from '../src/writeback-migrate.mjs'
 import { probe } from './img-probe.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -39,16 +40,17 @@ for (let i = 0; i < heads.length; i++) {
   console.log(`  ✓ ${key}.body — ${tree.content.length} 个顶层块`)
 }
 
+const out = migratePageWritebackV1({ version: 1, ...fm })
+
 // 图片尺寸落数据：hero（横幅固有尺寸）、components（部件图按固有尺寸展示）、flow（PhotoSwipe data-size）
-if (fm.hero?.image) Object.assign(fm.hero, await probe(fm.hero.image))
-for (const c of fm.components_images ?? []) if (c.image) Object.assign(c, await probe(c.image))
-for (const s of fm.production_flow?.steps ?? []) {
+if (out.hero?.image) Object.assign(out.hero, await probe(out.hero.image))
+for (const c of out.components?.items ?? []) if (c.image) Object.assign(c, await probe(c.image))
+for (const s of out.production_flow?.steps ?? []) {
   if (!s.image) continue
   const { width, height } = await probe(s.image)
   if (width) s.dataSize = `${width}x${height}`
 }
 
-const out = { version: 1, ...fm }
 out.page.status ??= 'published' // 状态门（R29）：存量页默认已发布；新页由 AI 烧时显式给 draft
 const slug = fm.page?.slug
 if (!slug) throw new Error('frontmatter 缺 page.slug')

@@ -16,11 +16,13 @@
     "trail": [
       {
         "label": "首页",
-        "url": "https://www.dgcrane.com/zh/"
+        "url": "https://www.dgcrane.com/zh/",
+        "id": "crumb_448b0ef7c0"
       },
       {
         "label": "案例",
-        "url": "https://www.dgcrane.com/zh/posts/"
+        "url": "https://www.dgcrane.com/zh/posts/",
+        "id": "crumb_390f42ecb8"
       }
     ]
   },

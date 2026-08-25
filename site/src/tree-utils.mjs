@@ -20,7 +20,7 @@ export function joinByHeading(parts) {
 // 编辑器 getJSON() 的树 → 落盘形态：heading 层级回退（walker 渲染 +1 的逆操作）、
 // 图片剥掉路径前缀、清 null/PM 噪音属性。纯树变换，零 HTML。
 export function normalizeTree(node, opts = {}) {
-  const { headingShift = -1, imgBase = '/assets/img/product/' } = opts
+  const { headingShift = -1, imgBase = null } = opts
   if (Array.isArray(node)) return node.map(n => normalizeTree(n, opts))
   if (node === null || typeof node !== 'object') return node
   const n = {}
@@ -33,7 +33,7 @@ export function normalizeTree(node, opts = {}) {
       a[k] = v
     }
     if (n.type === 'image') {
-      if (typeof a.src === 'string' && a.src.startsWith(imgBase)) a.src = a.src.slice(imgBase.length)
+      if (imgBase && typeof a.src === 'string' && a.src.startsWith(imgBase)) a.src = a.src.slice(imgBase.length)
       delete a.class; delete a.title; delete a.loading; delete a.decoding
     }
     if (n.type === 'heading' && typeof a.level === 'number') a.level += headingShift

@@ -35,8 +35,8 @@
 - `related_products`
 - `case`
 - `production_flow`
-- `components_images`
-- `crane_types_images`
+- `components.items`
+- `crane_types.items`
 - `breadcrumb.trail`
 - `inquiry_form`
 

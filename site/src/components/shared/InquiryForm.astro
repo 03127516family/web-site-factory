@@ -1,0 +1,12 @@
+---
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+const { title, class: className = 'post-inquiry wrap' } = Astro.props
+const form = readFileSync(join(process.cwd(), 'src/chrome/inquiry-form.html'), 'utf8')
+---
+
+<section data-template="inquiry-form@1" data-dynamic="inquiry-form" data-form-id="713" data-block-id="inquiry-form" class={className} id="from-single">
+	<h3 data-field="inquiry_form.title">{title}</h3>
+	<Fragment set:html={form} />
+</section>

@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "assets": { "namespace": "post", "valueFormat": "publicPath" },
+  "fields": {
+    "breadcrumb.current": { "path": "breadcrumb.current", "type": "text", "required": true },
+    "title": { "path": "title", "type": "text", "required": true },
+    "lead.body": { "path": "lead.body", "type": "richText" },
+    "body.h_accident": { "path": "body.h_accident", "type": "text" },
+    "body.h_case": { "path": "body.h_case", "type": "text" },
+    "accident_cases.body": { "path": "accident_cases.body", "type": "richText" },
+    "body.img_accident": { "path": "body.img_accident", "type": "image" },
+    "body.h_hazard": { "path": "body.h_hazard", "type": "text" },
+    "hazards.body": { "path": "hazards.body", "type": "richText" },
+    "body.img_hazard": { "path": "body.img_hazard", "type": "image" },
+    "body.h_gear": { "path": "body.h_gear", "type": "text" },
+    "body.h_hook": { "path": "body.h_hook", "type": "text" },
+    "hook.body": { "path": "hook.body", "type": "richText" },
+    "body.h_wirerope": { "path": "body.h_wirerope", "type": "text" },
+    "wirerope.body": { "path": "wirerope.body", "type": "richText" },
+    "body.img_wirerope": { "path": "body.img_wirerope", "type": "image" },
+    "body.h_operator": { "path": "body.h_operator", "type": "text" },
+    "body.h_basic": { "path": "body.h_basic", "type": "text" },
+    "operator_basic.body": { "path": "operator_basic.body", "type": "richText" },
+    "body.h_principles": { "path": "body.h_principles", "type": "text" },
+    "operator_principles.body": { "path": "operator_principles.body", "type": "richText" },
+    "body.h_emergency": { "path": "body.h_emergency", "type": "text" },
+    "emergency.body": { "path": "emergency.body", "type": "richText" },
+    "body.h_nolift": { "path": "body.h_nolift", "type": "text" },
+    "nolift.body": { "path": "nolift.body", "type": "richText" },
+    "body.img_nolift": { "path": "body.img_nolift", "type": "image" },
+    "body.h_signals": { "path": "body.h_signals", "type": "text" },
+    "signals.body": { "path": "signals.body", "type": "richText" },
+    "body.signal1_img": { "path": "body.signal1_img", "type": "image" },
+    "body.signal2_img": { "path": "body.signal2_img", "type": "image" },
+    "body.signal3_img": { "path": "body.signal3_img", "type": "image" },
+    "body.signal4_img": { "path": "body.signal4_img", "type": "image" },
+    "body.h_conclusion": { "path": "body.h_conclusion", "type": "text" },
+    "conclusion.body": { "path": "conclusion.body", "type": "richText" },
+    "inquiry_form.title": { "path": "inquiry_form.title", "type": "text" }
+  },
+  "repeats": {
+    "breadcrumb-trail": {
+      "path": "breadcrumb.trail", "itemIdField": "id", "minItems": 1, "maxItems": 10,
+      "prototype": { "id": null, "label": "", "url": "" },
+      "fields": { "label": { "path": "label", "type": "text" }, "url": { "path": "url", "type": "link" } }
+    }
+  }
+}

@@ -16,11 +16,13 @@
     "trail": [
       {
         "label": "首页",
-        "url": "https://www.dgcrane.com/zh/"
+        "url": "https://www.dgcrane.com/zh/",
+        "id": "crumb_1473013b57"
       },
       {
         "label": "Eot Cranes",
-        "url": "https://www.dgcrane.com/zh/eot-cranes/"
+        "url": "https://www.dgcrane.com/zh/eot-cranes/",
+        "id": "crumb_fdf9aff210"
       }
     ]
   },
@@ -41,19 +43,24 @@
   },
   "specs": [
     {
-      "text": "Lifting Capacity: 3-40 tons"
+      "text": "Lifting Capacity: 3-40 tons",
+      "id": "spec_7b2bf7155e"
     },
     {
-      "text": "Number of Suspension Points: 3, 4, 5, 6, 7, 8"
+      "text": "Number of Suspension Points: 3, 4, 5, 6, 7, 8",
+      "id": "spec_1386d34499"
     },
     {
-      "text": "Total Span: Up to 80 meters"
+      "text": "Total Span: Up to 80 meters",
+      "id": "spec_e7e1586fc2"
     },
     {
-      "text": "Lifting Height: 3-30 meters"
+      "text": "Lifting Height: 3-30 meters",
+      "id": "spec_a4b105d445"
     },
     {
-      "text": "Duty Class: A3–A5"
+      "text": "Duty Class: A3–A5",
+      "id": "spec_de0046795f"
     }
   ],
   "inquiry_form": {
@@ -71,25 +78,29 @@
         "title": "Workstation Overhead Crane",
         "image": "Workstation-Overhead-Crane-1.jpg",
         "url": "https://www.dgcrane.com/zh/workstation-overhead-cranes/",
-        "summary": "The workstation Overhead Crane has a lifting capacity of 0.125t-2t and a wide range of applications. The biggest advantage of our company's workstation Overhead Crane is that it can be easily expanded to adapt to new requirements at any time, and can grow together with your business."
+        "summary": "The workstation Overhead Crane has a lifting capacity of 0.125t-2t and a wide range of applications. The biggest advantage of our company's workstation Overhead Crane is that it can be easily expanded to adapt to new requirements at any time, and can grow together with your business.",
+        "id": "related_5693db3bd6"
       },
       {
         "title": "Aviation Industry Overhead Crane: Streamlining Aircraft Assembly, Maintenance, and Repair",
         "image": "Overhead-Cranes-for-the-Aviation-Industry.jpg",
         "url": "https://www.dgcrane.com/zh/overhead-cranes-for-the-aviation-industry/",
-        "summary": ""
+        "summary": "",
+        "id": "related_b7639e4759"
       },
       {
         "title": "Single Girder Overhead Crane",
         "image": "Single-Girder-Overhead-Crane-1.jpg",
         "url": "https://www.dgcrane.com/zh/products/single-girder-eot-cranes/",
-        "summary": "Whether you are making a procurement plan or determining a customized solution for plant lifting equipment, if the lifting capacity requirement is 20 tons or less, the Single Girder Overhead Crane, with its simple structure, flexible solutions, and convenient disassembly, assembly, and transportation, can be your second choice."
+        "summary": "Whether you are making a procurement plan or determining a customized solution for plant lifting equipment, if the lifting capacity requirement is 20 tons or less, the Single Girder Overhead Crane, with its simple structure, flexible solutions, and convenient disassembly, assembly, and transportation, can be your second choice.",
+        "id": "related_9294e4877f"
       },
       {
         "title": "Monorail Overhead Crane",
         "image": "mb-Monorail-Overhead-Crane.jpg",
         "url": "https://www.dgcrane.com/zh/monorail-overhead-cranes/",
-        "summary": "A monorail crane is a type of crane that serves as an alternative to traditional cranes and conveyors. These cranes are mostly used to relocate materials or products within a limited area. Such a place can be a factory or an entire workstation. The design of the monorail crane is simple and can be compatible with the building structure without major modifications."
+        "summary": "A monorail crane is a type of crane that serves as an alternative to traditional cranes and conveyors. These cranes are mostly used to relocate materials or products within a limited area. Such a place can be a factory or an entire workstation. The design of the monorail crane is simple and can be compatible with the building structure without major modifications.",
+        "id": "related_f18944ea4c"
       }
     ]
   },

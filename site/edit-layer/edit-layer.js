@@ -14,14 +14,40 @@ import Image from '@tiptap/extension-image'
 
 const state = {
   on: false, toolbar: true,
-  editor: null, el: null, kind: null,
+  editor: null, el: null, kind: null, listItem: null,
   hadTableWrap: false,
-  dirty: { fields: new Map(), trees: new Map(), chunks: new Map(), arrays: new Set() },
+  context: window.__EDIT_CONTEXT__ ?? null,
+  dirty: { fields: new Map(), trees: new Map(), operations: [] },
 }
 const $ = (s) => document.querySelector(s)
 
-// ---------- 形态推断 ----------
+function targetOf(el) {
+  const holder = el.closest('[data-repeat-key]')
+  if (!holder) {
+    const marker = el.closest('[data-edit-key], [data-field]')
+    return marker?.getAttribute('data-edit-key') || marker?.getAttribute('data-field') || null
+  }
+  const item = el.closest('[data-item-id]')
+  const field = el.getAttribute('data-item-field') || (el.getAttribute('data-field') || '').split('.').pop()
+  if (!item?.dataset.itemId || !field) return null
+  return `${holder.dataset.repeatKey}/${item.dataset.itemId}/${field}`
+}
+
+function fieldSpec(targetId) {
+  if (!targetId || !state.context?.contract) return null
+  const parts = targetId.split('/')
+  return parts.length === 1
+    ? state.context.contract.fields?.[targetId]
+    : state.context.contract.repeats?.[parts[0]]?.fields?.[parts[2]]
+}
+
+// ---------- 契约决定编辑能力；无上下文页面才使用旧外观兜底 ----------
 function inferKind(el) {
+  const type = fieldSpec(targetOf(el))?.type
+  if (type === 'richText') return 'rich'
+  if (type === 'stringList') return 'list'
+  if (type === 'image' || type === 'link') return type
+  if (type === 'text' || type === 'number') return 'text'
   const declared = el.getAttribute('data-edit') // 有显式声明先听声明(文章族模版自带), 没有再推断
   if (declared === 'image' || declared === 'link' || declared === 'rich' || declared === 'text') return declared
   if (el.tagName === 'IMG') return 'image'
@@ -145,7 +171,8 @@ function mountEditor(el, kind, at) {
   state.el = el
   el.classList.add('edl-active')
   if (kind === 'rich') { wireTableChips(); showToolbar(); editor.on('selectionUpdate', updateImageChip) }
-  // 显式聚焦: 落在点击坐标处, 定位不到才落文末
+  // 先同步拿到焦点，避免新空行在下一帧前收到的首批键盘输入丢失；下一帧再按点击坐标精确定位。
+  editor.commands.focus('end')
   requestAnimationFrame(() => {
     if (state.editor !== editor) return
     try {
@@ -156,7 +183,31 @@ function mountEditor(el, kind, at) {
   })
 }
 
+function mountListEditor(el, target) {
+  const item = target.closest('li') || el.querySelector(':scope > li')
+  if (!item || !el.contains(item)) return
+  state.kind = 'list'
+  state.el = el
+  state.listItem = item
+  el.classList.add('edl-active')
+  item.setAttribute('contenteditable', 'plaintext-only')
+  item.classList.add('edl-list-active')
+  item.focus()
+}
+
 function commitActive() {
+  if (state.listItem) {
+    const el = state.el
+    state.listItem.removeAttribute('contenteditable')
+    state.listItem.classList.remove('edl-list-active')
+    el.classList.remove('edl-active')
+    state.dirty.fields.set(targetOf(el), el)
+    state.listItem = null
+    state.el = null
+    state.kind = null
+    updateDirtyBadge()
+    return
+  }
   if (!state.editor) return
   let el = state.el
   const kind = state.kind
@@ -164,7 +215,7 @@ function commitActive() {
     const html = state.editor.getHTML() // 内联文档: 产出无 <p>, 但 <span>/<b>/<a> 等行内元素原样往返
     state.editor.destroy()
     el.innerHTML = html
-    state.dirty.fields.set(pathOf(el).path, el) // 保存时读 innerHTML（与 JSON 字符串语义同源）
+    state.dirty.fields.set(targetOf(el), el)
     updateDirtyBadge()
   } else {
     const tree = state.editor.getJSON() // 树在此刻捕获——DOM 反解那条路已随 htmlToMd 退役
@@ -278,7 +329,9 @@ function placePopover(pop, r) {
   pop.style.top = top + 'px'
   pop.style.left = left + 'px'
 }
-function openImagePopover(img) { // 替换模式: 改已有图的 src/alt
+function openImagePopover(field) { // 图片字段可标在 img 或包裹 img 的容器上
+  const img = field.matches('img') ? field : field.querySelector('img')
+  if (!img) return
   const pop = $('#edlImgPop')
   pop.hidden = false
   pop._insert = false
@@ -381,12 +434,31 @@ function syncSwiper(node) {
 }
 
 // ---------- 行级迷你组: 悬停任一单元 → ＋上/＋下/−(定位增删, 不再只能末尾追加) ----------
-let itemMenu = null, itemTarget = null
+let itemMenu = null, itemTarget = null, itemHideTimer = null
+const newItemId = region => `${region.replace(/[^A-Za-z0-9]+/g, '_')}_${crypto.randomUUID().replace(/-/g, '').slice(0, 12)}`
+function clearRepeatClone(clone, regionId) {
+  clone.querySelectorAll('.ProseMirror').forEach(el => el.replaceWith(...el.childNodes))
+  clone.classList.remove('edl-active')
+  clone.classList.add('edl-new-item')
+  clone.removeAttribute('contenteditable')
+  for (const field of [clone, ...clone.querySelectorAll('[data-item-field]')]) {
+    const key = field.getAttribute('data-item-field')
+    if (!key) continue
+    const type = state.context?.contract?.repeats?.[regionId]?.fields?.[key]?.type
+    if (type === 'image') { field.setAttribute('src', ''); field.setAttribute('alt', '') }
+    else if (type === 'link') field.setAttribute('href', '')
+    else if (type === 'richText') field.innerHTML = '<p></p>'
+    else if (type === 'stringList') field.innerHTML = '<li></li>'
+    else field.textContent = ''
+  }
+}
 function ensureItemMenu() {
   if (itemMenu) return
   itemMenu = document.createElement('div')
   itemMenu.className = 'edl-ui edl-itemmenu'
   itemMenu.innerHTML = '<button data-op="above" title="在此行上方加一行">＋上</button><button data-op="below" title="在此行下方加一行">＋下</button><button data-op="del" title="删这一行">−</button>'
+  itemMenu.addEventListener('pointerenter', cancelItemMenuHide)
+  itemMenu.addEventListener('pointerleave', scheduleItemMenuHide)
   itemMenu.addEventListener('click', e => {
     const op = e.target.dataset?.op
     if (!op || !itemTarget) return
@@ -394,50 +466,75 @@ function ensureItemMenu() {
     commitActive()
     if (!itemTarget.isConnected) { hideItemMenu(); return }
     const box = itemTarget.parentElement
-    const arrPath = box?.getAttribute('data-array')
-    if (arrPath) state.dirty.arrays.add(arrPath) // 数组变了：保存时整列重建
-    updateDirtyBadge()
+    const regionId = box?.getAttribute('data-repeat-key')
+    const itemId = itemTarget.getAttribute('data-item-id')
+    if (!regionId || !itemId) { hideItemMenu(); return }
     if (op === 'del') {
-      itemTarget.remove()
-    } else { // 克隆本行插到正上/正下方——"行"的内容模子就是本行自己
+      state.dirty.operations.push({ op: 'deleteItem', regionId, itemId })
+      document.querySelectorAll(`[data-repeat-key="${CSS.escape(regionId)}"] [data-item-id="${CSS.escape(itemId)}"]`).forEach(item => item.remove())
+    } else {
+      const id = newItemId(regionId)
+      const siblings = [...box.children].filter(el => el.hasAttribute('data-item-id'))
+      const index = siblings.indexOf(itemTarget)
+      const afterItemId = op === 'above' ? (siblings[index - 1]?.getAttribute('data-item-id') ?? null) : itemId
+      state.dirty.operations.push({ op: 'insertItem', regionId, itemId: id, afterItemId })
       const clone = itemTarget.cloneNode(true)
+      clone.setAttribute('data-item-id', id)
+      clearRepeatClone(clone, regionId)
       const bid = itemTarget.getAttribute('data-block-id')
       if (bid) clone.setAttribute('data-block-id', bid + '-new') // 有坐标才带坐标
       op === 'above' ? itemTarget.before(clone) : itemTarget.after(clone)
     }
+    updateDirtyBadge()
     syncSwiper(box)
     hideItemMenu()
   })
   document.body.appendChild(itemMenu)
 }
-function repeatItemOf(t) { // data-repeat 的直接子元素就是行; data-block-id 只是可选的精确坐标, 不强制
-  let n = t
-  while (n && n !== document.body) {
-    if (n.parentElement?.hasAttribute?.('data-repeat')) return n
-    n = n.parentElement
-  }
-  return null
+function repeatItemOf(t) {
+  const item = t.closest?.('[data-item-id]')
+  if (!item) return null
+  const holder = item.parentElement
+  return holder?.hasAttribute('data-repeat-key') && !holder.hasAttribute('data-repeat-mirror') ? item : null
 }
 function onMove(e) {
   if (!state.on) return
-  if (itemMenu && itemMenu.contains(e.target)) return
+  if (itemMenu && itemMenu.contains(e.target)) { cancelItemMenuHide(); return }
   const it = repeatItemOf(e.target)
-  if (!it) { hideItemMenu(); return }
+  if (!it) { scheduleItemMenuHide(); return }
+  cancelItemMenuHide()
   ensureItemMenu()
   itemTarget = it
   // 防呆: 只剩一行时不给 −(删空就没有任何入口能加回来)
-  const rows = it.parentElement.childElementCount
-  itemMenu.querySelector('[data-op="del"]').style.display = rows > 1 ? '' : 'none'
+  const rows = [...it.parentElement.children].filter(el => el.hasAttribute('data-item-id')).length
+  const region = state.context?.contract?.repeats?.[it.parentElement.dataset.repeatKey]
+  itemMenu.querySelector('[data-op="del"]').style.display = rows > (region?.minItems ?? 1) ? '' : 'none'
+  const canAdd = rows < (region?.maxItems ?? Number.MAX_SAFE_INTEGER)
+  itemMenu.querySelector('[data-op="above"]').style.display = canAdd ? '' : 'none'
+  itemMenu.querySelector('[data-op="below"]').style.display = canAdd ? '' : 'none'
   const r = it.getBoundingClientRect()
   itemMenu.style.display = 'flex'
-  itemMenu.style.top = (r.top + 2) + 'px'
+  const menuHeight = itemMenu.offsetHeight || 20
+  itemMenu.style.top = Math.min(Math.max(8, r.top + 2), Math.max(8, innerHeight - menuHeight - 8)) + 'px'
   // 窄行防自挡: 优先放行尾外侧, 贴不下(近视口右缘)才收回行内
-  const mw = 120
+  const mw = itemMenu.offsetWidth || 120
   let left = r.right + 4
   if (left + mw > innerWidth - 8) left = Math.max(8, r.right - mw - 4)
-  itemMenu.style.left = left + 'px'
+  itemMenu.style.left = Math.min(left, Math.max(8, innerWidth - mw - 8)) + 'px'
 }
-function hideItemMenu() { if (itemMenu) itemMenu.style.display = 'none'; itemTarget = null }
+function cancelItemMenuHide() {
+  if (itemHideTimer) clearTimeout(itemHideTimer)
+  itemHideTimer = null
+}
+function scheduleItemMenuHide() {
+  cancelItemMenuHide()
+  itemHideTimer = setTimeout(hideItemMenu, 220)
+}
+function hideItemMenu() {
+  cancelItemMenuHide()
+  if (itemMenu) itemMenu.style.display = 'none'
+  itemTarget = null
+}
 
 // ---------- 重复区: 入场时区域轮廓闪 1.5s(教学), 平时零常驻 UI; 增删全在行级迷你组 ----------
 function flashZones() {
@@ -473,22 +570,16 @@ function rowLabel(item) { // 行标签：优先标题字段，其次图名，兜
 }
 function snapshotOriginals() {
   document.querySelectorAll('[data-field]').forEach(el => {
-    const holder = el.closest('[data-repeat]')
-    const arrayBody = holder?.getAttribute('data-array-body')
-    let key
-    if (arrayBody && (el.getAttribute('data-field') || '').endsWith('.body')) { // 与 markRichDirty 同钥匙
-      let item = el
-      while (item.parentElement && item.parentElement !== holder) item = item.parentElement
-      key = `${arrayBody}#${[...holder.children].indexOf(item)}`
-    } else key = pathOf(el).path
+    const key = targetOf(el)
+    if (!key) return
     if (!origSnap.has(key)) origSnap.set(key, {
       text: normTxt(stripTags(el.innerHTML)),
       blocks: snapBlocks(el),
       src: el.getAttribute('src'), href: el.getAttribute('href'),
     })
   })
-  document.querySelectorAll('[data-array]').forEach(holder => {
-    origSnap.set('rows:' + holder.getAttribute('data-array'), [...holder.children].map(rowLabel))
+  document.querySelectorAll('[data-repeat-key]:not([data-repeat-mirror])').forEach(holder => {
+    origSnap.set('rows:' + holder.getAttribute('data-repeat-key'), [...holder.children].filter(el => el.hasAttribute('data-item-id')).map(rowLabel))
   })
 }
 function diffLines(a, b) { // 段级 LCS → del/add 操作流（same 不渲染）
@@ -540,7 +631,7 @@ function preview(p) { // 单个补丁的人话预览
     return renderDiff([oldT], [newT])
   }
   if (p.kind === 'image') {
-    const old = stripBase(origSnap.get(p.path)?.src || '') // 两边同去路径前缀，显示对称
+    const old = origSnap.get(p.path)?.src || ''
     return `<div class="edl-diff"><div class="edl-del">－ ${old || '（原图未知）'}</div><div class="edl-add">＋ ${p.src}${p.alt ? '（' + p.alt + '）' : ''}</div></div>`
   }
   if (p.kind === 'link') {
@@ -555,106 +646,74 @@ function preview(p) { // 单个补丁的人话预览
   }
   return '<div class="edl-note">（结构改动）</div>'
 }
-// ---------- 写回（POC-5）：收集改动 → 预览 → 存草稿/发布 ----------
-const IMG_BASE = '/assets/img/product/'
-const stripBase = s => ((s || '').startsWith(IMG_BASE) ? s.slice(IMG_BASE.length) : s)
-function pathOf(el) { // data-field + 最近 data-repeat 祖先（data-array 自声明）→ JSON 点路径，零注册表
-  const field = el.getAttribute('data-field')
-  const holder = el.closest('[data-repeat]')
-  if (!holder) return { path: field }
-  const arr = holder.getAttribute('data-array') || holder.getAttribute('data-repeat')
-  let item = el
-  while (item.parentElement && item.parentElement !== holder) item = item.parentElement
-  const idx = [...holder.children].indexOf(item)
-  const sub = field.includes('.') ? field.split('.').pop() : field
-  return { path: `${arr}[${idx}].${sub}` }
+function previewChange(change) {
+  if (change.op) return `<div class="edl-note">${change.op}：${change.itemId || ''}</div>`
+  const type = fieldSpec(change.targetId)?.type
+  if (type === 'richText') return preview({ path: change.targetId, kind: 'tree', value: change.value })
+  if (type === 'image') return preview({ path: change.targetId, kind: 'image', src: change.value.src, alt: change.value.alt })
+  if (type === 'link') return preview({ path: change.targetId, kind: 'link', href: change.value })
+  if (type === 'stringList') return renderDiff(origSnap.get(change.targetId)?.blocks ?? [], change.value)
+  return preview({ path: change.targetId, kind: 'html', value: String(change.value ?? '') })
 }
-function dirtyCount() { return state.dirty.fields.size + state.dirty.trees.size + state.dirty.chunks.size + state.dirty.arrays.size }
+// ---------- 写回（POC-5）：收集改动 → 预览 → 存草稿/发布 ----------
+function dirtyCount() { return state.dirty.fields.size + state.dirty.trees.size + state.dirty.operations.length }
 function updateDirtyBadge() {
   const b = $('#edlDirty')
   if (b) { const n = dirtyCount(); b.textContent = n ? `● ${n} 处未保存` : ''; b.style.color = '#fbbf24' }
   updateChromePill()
 }
 function markRichDirty(el, tree) {
-  const field = el.getAttribute('data-field')
-  const holder = el.closest('[data-repeat]')
-  const arrayBody = holder?.getAttribute('data-array-body')
-  if (arrayBody) { // 重复区内的 body 槽：写回目标是整棵树的第 i 段（chunk）
-    let item = el
-    while (item.parentElement && item.parentElement !== holder) item = item.parentElement
-    state.dirty.chunks.set(`${arrayBody}#${[...holder.children].indexOf(item)}`, {
-      path: arrayBody, index: [...holder.children].indexOf(item), tree,
-    })
-  } else {
-    state.dirty.trees.set(field, tree)
-  }
+  const target = targetOf(el)
+  if (target) state.dirty.trees.set(target, tree)
   updateDirtyBadge()
 }
-function readArray(arrPath) { // 整列重建：从 DOM 行读回对象数组（行内 body 槽不走此路，走 chunk）
-  const holder = document.querySelector(`[data-array="${arrPath}"]`)
-  if (!holder) return null
-  return [...holder.children].map(item => {
-    const o = {}
-    const fields = [...item.querySelectorAll('[data-field]')]
-    if (item.hasAttribute('data-field')) fields.unshift(item) // 行自身即字段（如 specs 的 <li data-field="spec.text">）
-    fields.forEach(f => {
-      const sub = f.getAttribute('data-field').split('.').pop()
-      const kind = inferKind(f)
-      if (kind === 'image') { o[sub] = stripBase(f.getAttribute('src')); o.alt = f.getAttribute('alt') ?? '' }
-      else if (kind === 'link') o[sub] = f.getAttribute('href') || ''
-      else if (kind === 'text') o[sub] = f.innerHTML.trim()
-    })
-    return o
-  })
-}
-function collectPatches() {
-  const patches = []
-  const covered = p => [...state.dirty.arrays].some(a => p.startsWith(a + '[')) // 数组重建优先，其下单点补丁跳过
-  for (const [path, el] of state.dirty.fields) {
-    if (covered(path) || !el.isConnected) continue
-    const kind = inferKind(el)
-    if (kind === 'image') patches.push({ path, kind: 'image', src: stripBase(el.getAttribute('src')), alt: el.getAttribute('alt') ?? '' })
-    else if (kind === 'link') patches.push({ path, kind: 'link', href: el.getAttribute('href') || '' })
-    else patches.push({ path, kind: 'html', value: el.innerHTML.trim() })
+function collectChanges() {
+  const changes = [...state.dirty.operations]
+  for (const [targetId, el] of state.dirty.fields) {
+    if (!el.isConnected) continue
+    const type = fieldSpec(targetId)?.type
+    if (type === 'image') changes.push({ targetId, value: { src: el.getAttribute('src') || '', alt: el.getAttribute('alt') ?? '' } })
+    else if (type === 'link') changes.push({ targetId, value: el.getAttribute('href') || '' })
+    else if (type === 'stringList') changes.push({ targetId, value: [...el.querySelectorAll('li')].map(li => li.textContent.trim()).filter(Boolean) })
+    else if (type === 'number') changes.push({ targetId, value: Number(el.textContent.trim()) })
+    else changes.push({ targetId, value: el.textContent.trim() })
   }
-  for (const [path, tree] of state.dirty.trees) patches.push({ path, kind: 'tree', value: tree })
-  for (const { path, index, tree } of state.dirty.chunks.values()) patches.push({ path, kind: 'chunk', index, value: tree })
-  for (const arr of state.dirty.arrays) {
-    const items = readArray(arr)
-    if (items) patches.push({ path: arr, kind: 'array', value: items })
-  }
-  return patches
+  for (const [targetId, tree] of state.dirty.trees) changes.push({ targetId, value: tree })
+  return changes
 }
 function showSave() { // R23：保存前改动可见
   commitActive()
-  const patches = collectPatches()
-  $('#edlModalContent').innerHTML = patches.length
-    ? patches.map(p =>
-        `<div class="edl-pv"><div class="edl-pv-head"><code>${p.path}</code><span>${p.kind}</span></div>${preview(p)}</div>`
+  const changes = collectChanges()
+  $('#edlModalContent').innerHTML = changes.length
+    ? changes.map(change =>
+        `<div class="edl-pv"><div class="edl-pv-head"><code>${change.targetId || change.regionId}</code><span>${change.op || fieldSpec(change.targetId)?.type || 'value'}</span></div>${previewChange(change)}</div>`
       ).join('')
     : '<p style="padding:12px;color:#777">没有改动</p>'
-  $('#edlModal').dataset.patches = JSON.stringify(patches)
+  $('#edlModal').dataset.changes = JSON.stringify(changes)
   $('#edlModal').hidden = false
 }
 async function doSave(status) {
-  const patches = JSON.parse($('#edlModal').dataset.patches || '[]')
-  // slug = 内容相对路径（/en/posts/xxx/ → en/posts/xxx）——服务端据此定位 content/<slug>.json，zh/镜像无歧义
-  const slug = location.pathname.replace(/\/+$/, '').replace(/^\/+/, '')
+  const changes = JSON.parse($('#edlModal').dataset.changes || '[]')
+  const slug = state.context?.slug || location.pathname.replace(/\/+$/, '').replace(/^\/+/, '')
   const res = await fetch('/__save', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slug, status, patches }),
+    body: JSON.stringify({ slug, status, revision: state.context?.revision, changes }),
   })
   const data = await res.json().catch(() => ({}))
-  if (!res.ok) { alert('保存被拒：\n' + (data.error || res.status)); return } // V4：schema 拒收信息直达用户
+  if (!res.ok) {
+    const lead = res.status === 409 ? '页面已被其他保存更新，请刷新后重试：\n' : '保存被拒：\n'
+    alert(lead + (data.error || res.status)); return
+  }
   // 评审 I1：镜像人审写回若跳过句（段句数与源不一致整段不采纳），如实弹窗——服务端落的是重投影产物，
   // 不提示的话用户会以为自己改的句已生效，reload 后字变回去且零解释
   if (data.i18n?.skipped) alert(`本次有 ${data.i18n.skipped} 句未采纳（所在段句数与源不一致，整段跳过防张冠李戴）。\n该段请整段重写并保持句数一致，或到翻译控制台用「通过并发布」。`)
   // 评审 M4：文件已保存但重建失败——不是「保存被拒」，如实分开报
   if (data.rebuildError) alert('已保存到内容文件，但页面重建失败（生产站可能仍显示旧版）：\n' + data.rebuildError)
   $('#edlModal').hidden = true
+  if (state.context && data.revision) state.context.revision = data.revision
   lastSaveAt = new Date()
   updateChromeAutosave()
-  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.chunks.clear(); state.dirty.arrays.clear()
+  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0
   if (status === 'published') { sessionStorage.setItem('edlReenter', '1'); alert('已发布，页面已重建'); location.reload() }
   else alert('草稿已保存。当前就是草稿预览（生产站不显示此页）')
 }
@@ -662,8 +721,9 @@ async function doSave(status) {
 // ---------- 事件路由(pointerdown 捕获即挂载——Swiper 等组件会吞掉兼容性 mousedown, pointerdown 吞不掉) ----------
 function onDown(e) {
   if (e.target.closest('.edl-ui')) return
-  if (state.el && state.el.contains(e.target)) return
-  const fieldEl = e.target.closest('[data-field]')
+  if (state.listItem?.contains(e.target)) return
+  if (state.el && state.kind !== 'list' && state.el.contains(e.target)) return
+  const fieldEl = e.target.closest('[data-edit-key], [data-field]')
   if (!fieldEl) { commitActive(); closeImagePopover(); closeLinkPopover(); return }
   const kind = inferKind(fieldEl)
   if (kind === 'image') {
@@ -679,9 +739,10 @@ function onDown(e) {
     return
   }
   commitActive(); closeImagePopover(); closeLinkPopover()
-  mountEditor(fieldEl, kind, { x: e.clientX, y: e.clientY })
+  if (kind === 'list') mountListEditor(fieldEl, e.target)
+  else mountEditor(fieldEl, kind, { x: e.clientX, y: e.clientY })
   // 字段嵌在链接里(如面包屑 label 套在 a[crumb.url] 里): 文字就地改, 地址框一并弹出
-  const ownerLink = fieldEl.closest('a[data-field]')
+  const ownerLink = fieldEl.closest('a[data-edit-key], a[data-field]')
   if (kind === 'text' && ownerLink) openLinkPopover(ownerLink)
 }
 function onClickGuard(e) { // 编辑模式下内容区不导航(只 preventDefault, 不影响 ProseMirror)
@@ -690,9 +751,27 @@ function onClickGuard(e) { // 编辑模式下内容区不导航(只 preventDefau
 }
 
 // ---------- 总开关 ----------
+function exposeEditTargets() {
+  const touched = new Set()
+  document.querySelectorAll('[data-field], [data-edit-key]').forEach(field => {
+    for (let el = field; el && el !== document.body; el = el.parentElement) {
+      const style = getComputedStyle(el)
+      if (Number.parseFloat(style.zIndex) < 0) { el.classList.add('edl-edit-lift'); touched.add(el) }
+      if (style.pointerEvents === 'none') { el.classList.add('edl-edit-pointer'); touched.add(el) }
+    }
+  })
+  state.exposed = touched
+}
+
+function restoreEditTargets() {
+  for (const el of state.exposed || []) el.classList.remove('edl-edit-lift', 'edl-edit-pointer')
+  state.exposed = null
+}
+
 function enterEdit() {
   state.on = true
   document.body.classList.add('edl-on')
+  exposeEditTargets()
   flashZones()
   $('#edlToggle').textContent = '✓ 退出编辑'
   $('#edlMode').hidden = false
@@ -705,6 +784,7 @@ function exitEdit() {
   commitActive()
   state.on = false
   document.body.classList.remove('edl-on')
+  restoreEditTargets()
   unflashZones()
   hideItemMenu()
   closeImagePopover()
@@ -745,6 +825,20 @@ const CHROME_CSS = `
 #edl-chrome-bottom .edl-chrome-spacer{flex:1}
 #edlChromeRevert{background:transparent;border:0;color:#5C5752;font-size:12px;padding:0;cursor:pointer;text-decoration:underline}
 body{padding-top:56px!important;padding-bottom:38px!important}
+@media(max-width:640px){
+  #edl-chrome-top{padding:0 8px;gap:6px}
+  #edl-chrome-top .edl-chrome-left{flex:1;gap:5px;overflow:hidden}
+  #edl-chrome-top .edl-chrome-right{flex:none;gap:5px}
+  #edlChromeWorkbench,.edl-chrome-divider,#edlChromePill{display:none}
+  #edlChromeTitle{max-width:96px;flex:1}
+  .edl-chrome-lang{flex:none}
+  .edl-chrome-lang button{padding:4px 5px}
+  .edl-chrome-btn{height:32px;padding:0 8px;font-size:12px}
+  #edl-chrome-bottom{padding:0 8px;gap:8px;white-space:nowrap}
+  #edlChromeAutosave{display:none}
+  .edl-pill{left:8px;right:8px;bottom:46px;justify-content:space-between}
+  .edl-pill button{padding:8px 12px}
+}
 `
 function pageTitleText() { // 页面标题 = document.title 去掉站点后缀（- DGCRANE / | DGCRANE）
   let t = String(document.title || '').replace(/\s*[|｜\-–—]\s*DGCRANE\s*$/i, '').trim()
@@ -865,7 +959,7 @@ export function boot() {
     } else {
       const img = pop._img
       if (!img) return
-      state.dirty.fields.set(pathOf(img).path, img)
+      state.dirty.fields.set(targetOf(img), img)
       updateDirtyBadge()
       const oldSrc = img.getAttribute('src')
       if (src) {
@@ -882,20 +976,21 @@ export function boot() {
     const f = e.target.files?.[0]
     if (!f) return
     $('#edlImgSrc').value = '上传中…'
-    const res = await fetch('/__upload?name=' + encodeURIComponent(f.name), { method: 'POST', body: f })
+    const slug = state.context?.slug || location.pathname.replace(/\/+$/, '').replace(/^\/+/, '')
+    const res = await fetch('/__upload?slug=' + encodeURIComponent(slug) + '&name=' + encodeURIComponent(f.name), { method: 'POST', body: f })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) { $('#edlImgSrc').value = ''; alert('上传失败：' + (data.error || res.status)); return }
-    $('#edlImgSrc').value = data.src // 真实路径（已过压缩闸门），保存写回的就是它
+    $('#edlImgSrc').value = data.publicUrl
     const pop = $('#edlImgPop')
     pop._objectUrl = null
-    if (pop._img) pop._img.src = data.src
+    if (pop._img) pop._img.src = data.publicUrl
   })
   $('#edlImgClose').addEventListener('click', closeImagePopover)
   $('#edlLinkPop').addEventListener('mousedown', e => e.stopPropagation())
   $('#edlLinkApply').addEventListener('click', () => {
     const a = $('#edlLinkPop')._a
     if (!a) return
-    state.dirty.fields.set(pathOf(a).path, a)
+    state.dirty.fields.set(targetOf(a), a)
     updateDirtyBadge()
     const href = $('#edlLinkHref').value.trim()
     if (href) a.setAttribute('href', href)

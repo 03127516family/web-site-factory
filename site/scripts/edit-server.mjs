@@ -1,13 +1,11 @@
 #!/usr/bin/env node
-// POC-5 编辑服务（8092）：静态(dist) + 编辑层注入 + /__save 写回端点。
-// 写回链：应用补丁 → schema 校验（V4 拒收在此）→ 落盘 → astro build 重建 → 响应。
+// 编辑服务（8092）：静态预览 + 编辑层注入 + 契约写回端点。
+// 写回链：revision/契约校验 → 原子落盘 → 原子替换构建产物 → 响应。
 import http from 'node:http'
-import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync, renameSync } from 'node:fs'
 import { join, dirname, extname, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
-import { validateDoc } from '../src/content-schema.mjs'
-import { normalizeTree, setIn, splitByHeading, joinByHeading } from '../src/tree-utils.mjs'
 import { runPipeline, adoptMirror, approvePage, translateAll, consoleData } from '../src/i18n-pipeline.mjs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { loadTerms, saveTerms } from '../src/i18n-terms.mjs'
@@ -17,10 +15,15 @@ import { logEvent } from '../src/i18n-events.mjs'
 import { scanPages } from '../src/i18n.mjs'
 import { collectUnits } from '../src/i18n-collect.mjs'
 import { createDeepseekCaller } from '../src/deepseek.mjs'
-import { probe, IMG_DIR } from './img-probe.mjs'
 import { burn, writeDraft } from './deepseek-burn.mjs'
 import { scanKits } from '../src/burn-lib.mjs'
 import { bindHost, accessUrls, lanHostAllowed } from './lan.mjs'
+import { prepareWriteback } from '../src/writeback-request.mjs'
+import { writeJsonAtomic } from '../src/content-revision.mjs'
+import { createEditContext, editContextScript } from '../src/edit-context.mjs'
+import { WritebackError } from '../src/writeback-core.mjs'
+import { loadEditContract } from '../src/edit-contract.mjs'
+import { assetUploadTarget } from '../src/asset-config.mjs'
 import sharp from 'sharp'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -77,8 +80,15 @@ const INJECT = `
 #edlSave{background:#16a34a}
 body.edl-on [data-field]:hover{outline:2px dashed rgba(37,99,235,.55);outline-offset:2px;cursor:text}
 body.edl-on img[data-field]:hover{cursor:pointer}
-body.edl-on .breadcrumb .current{pointer-events:none}
+body.edl-on .edl-edit-lift{z-index:1!important}
+body.edl-on .edl-edit-pointer{pointer-events:auto!important}
+body.edl-on [data-edit-reveal]{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;max-height:none!important;overflow:visible!important}
+body.edl-on [data-edit-overlay]{pointer-events:none!important}
+body.edl-on [data-edit-overlay] [data-field],body.edl-on [data-edit-overlay] [data-edit-key]{pointer-events:auto!important}
 body.edl-on [data-field].edl-active{outline:2px solid rgba(37,99,235,.9);outline-offset:2px}
+body.edl-on .edl-list-active{outline:2px solid rgba(37,99,235,.9);outline-offset:2px}
+body.edl-on .edl-new-item{min-height:1.5em}
+body.edl-on .edl-new-item [data-item-field]:empty{display:inline-block;min-width:4rem;min-height:1.5em;outline:1px dashed rgba(37,99,235,.45);outline-offset:2px}
 .ProseMirror{outline:none}.ProseMirror:focus{outline:none}
 body.edl-on .edl-active > .ProseMirror{font:inherit!important;color:inherit!important;line-height:inherit!important;letter-spacing:inherit!important;text-align:inherit!important;text-transform:inherit!important;text-indent:inherit!important;background:none!important;padding:0!important;margin:0!important}
 .ProseMirror p{margin:0 0 .5em}.ProseMirror table{border-collapse:collapse}
@@ -129,68 +139,53 @@ body.edl-on .edl-active > .ProseMirror{font:inherit!important;color:inherit!impo
 </style>
 <script src="/__edit/edit-layer.js"></script>`
 
-async function applyPatches(j, patches) {
-  for (const p of patches) {
-    if (p.kind === 'html') setIn(j, p.path, p.value)
-    else if (p.kind === 'link') setIn(j, p.path, p.href)
-    else if (p.kind === 'image') {
-      setIn(j, p.path, p.src)
-      // alt 兄弟字段存在才写（hero 这类模板派生 alt 的字段不无中生有）
-      const keys = p.path.replace(/\.image$/, '.alt').replace(/\[(\d+)\]/g, '.$1').split('.')
-      let cur = j
-      for (let i = 0; i < keys.length - 1 && cur; i++) cur = cur[keys[i]]
-      if (cur && typeof cur === 'object' && 'alt' in cur) setIn(j, keys.join('.').replace(/\.(\d+)\./g, '[$1].'), p.alt)
-    }
-    else if (p.kind === 'tree') {
-      const tree = normalizeTree(p.value)
-      validateDoc(tree, p.path) // V4：写坏当场拒收
-      setIn(j, p.path, tree)
-    }
-    else if (p.kind === 'chunk') {
-      const cur = p.path.split('.').reduce((o, k) => o?.[k], j)
-      const parts = splitByHeading(cur)
-      if (!parts[p.index]) throw new Error(`chunk 索引越界: ${p.path}#${p.index}`)
-      const tree = normalizeTree(p.value)
-      parts[p.index].nodes = tree.content
-      const joined = joinByHeading(parts)
-      validateDoc(joined, p.path)
-      setIn(j, p.path, joined)
-    }
-    else if (p.kind === 'array') {
-      if (!Array.isArray(p.value)) throw new Error(`array 补丁须为数组: ${p.path}`)
-      setIn(j, p.path, p.value)
-      // 尺寸类字段重探测（增删后索引漂移，直接全列重算，幂等）
-      if (p.path === 'components_images') for (const c of j.components_images) if (c.image) Object.assign(c, await probe(c.image))
-      if (p.path === 'production_flow.steps') {
-        for (const s of j.production_flow.steps) {
-          if (!s.image) continue
-          const { width, height } = await probe(s.image)
-          if (width) s.dataSize = `${width}x${height}`
-        }
-      }
-    }
-    else throw new Error(`未知补丁类型: ${p.kind}`)
-  }
-}
-
 async function rebuild() {
   const run = (args, env = {}) => new Promise((res, rej) => {
     const c = spawn(process.execPath, args, { cwd: SITE, stdio: 'inherit', env: { ...process.env, ...env } })
     c.on('exit', code => (code === 0 ? res() : rej(new Error(args[args.length - 1] + ' 退出码 ' + code))))
   })
-  await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build']) // 生产产物 dist（仅 published）
-  await run([join(SITE, 'scripts/link-assets.mjs')])
-  try {
-    await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' }) // 预览产物（含草稿）
-  } finally {
-    // 软链必须无条件补齐：astro 清理 outDir 会抹掉 assets，构建失败也不能让预览产物裸奔（两次「无 CSS」的根因）
-    await run([join(SITE, 'scripts/link-assets.mjs')], { INCLUDE_DRAFTS: '1', BUILD_OUT: 'dist-edit' })
+
+  const buildOutput = async (out, env = {}) => {
+    const staging = `${out}-next-${process.pid}`
+    const previous = `${out}-previous-${process.pid}`
+    rmSync(join(SITE, staging), { recursive: true, force: true })
+    rmSync(join(SITE, previous), { recursive: true, force: true })
+    try {
+      await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'], { ...env, BUILD_OUT: staging })
+      await run([join(SITE, 'scripts/link-assets.mjs')], { ...env, BUILD_OUT: staging })
+
+      const finalDir = join(SITE, out)
+      const stagingDir = join(SITE, staging)
+      const previousDir = join(SITE, previous)
+      if (existsSync(finalDir)) renameSync(finalDir, previousDir)
+      try {
+        renameSync(stagingDir, finalDir)
+      } catch (error) {
+        if (existsSync(previousDir)) renameSync(previousDir, finalDir)
+        throw error
+      }
+      rmSync(previousDir, { recursive: true, force: true })
+    } finally {
+      rmSync(join(SITE, staging), { recursive: true, force: true })
+      rmSync(join(SITE, previous), { recursive: true, force: true })
+    }
   }
+
+  // 始终在旁路目录完成构建，再同步换入；后台翻译重建期间编辑页不会短暂 404。
+  await buildOutput('dist')
+  await buildOutput('dist-edit', { INCLUDE_DRAFTS: '1' })
 }
 
 // 重建串行链：/__save、烧制落盘、后台翻译流水线共用一条链排队——防两个 astro build 并发写同一 outDir
 let rebuildChain = Promise.resolve()
 const queueRebuild = () => { rebuildChain = rebuildChain.catch(() => {}).then(rebuild); return rebuildChain }
+const contentChains = new Map()
+function queueContentWrite(file, operation) {
+  const previous = contentChains.get(file) ?? Promise.resolve()
+  const current = previous.catch(() => {}).then(operation)
+  contentChains.set(file, current)
+  return current.finally(() => { if (contentChains.get(file) === current) contentChains.delete(file) })
+}
 let translateAllBusy = false // 全站送翻防重入闸（双击防护）
 const pageBusy = new Set() // 单页送翻防重入闸（pageId|lang）
 
@@ -203,41 +198,40 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/__save') {
       let body = ''
       for await (const chunk of req) body += chunk
-      const { slug, status, patches = [] } = JSON.parse(body)
+      const payload = JSON.parse(body)
+      const { slug, status, patches, changes, revision } = payload
       if (!/^[\w/-]+$/.test(slug || '') || slug.includes('..')) throw new Error('slug 非法')
       // slug = 内容相对路径（posts/xxx、en/posts/xxx）——直接映射 content/<slug>.json，zh/镜像无歧义
       const rel = slug + '.json'
       const file = join(SITE, 'content', rel)
       if (!existsSync(file)) throw new Error('页面不存在: ' + slug)
-      const j = JSON.parse(readFileSync(file, 'utf8'))
-      await applyPatches(j, patches)
-      if (status !== undefined) {
-        if (!['draft', 'published'].includes(status)) throw new Error('status 非法: ' + status)
-        j.page.status = status
-      }
-      // i18n 新链（spec §4）：镜像保存 = 人审写回（adoptMirror→TM 置 approved→只落重投影产物，
-      // 投影抛错=本次保存整体失败，不落半成品）；zh 源「发布」= 后台流水线（结构同步+按开关送翻）。草稿保存不触发。
       const segments = rel.split('/')
-      if (segments.length === 3) {
-        // 镜像（en/posts/xxx.json）：人审直改 → TM approved → 重投影（骨架恒 ≡ 源树）
-        const [lang, , pageId] = [segments[0], segments[1], segments[2].replace(/\.json$/, '')]
-        const srcFile = join(SITE, 'content', segments[1], `${pageId}.json`)
-        const srcJ = JSON.parse(readFileSync(srcFile, 'utf8'))
-        const tm = loadTm(srcJ.page.lang, lang)
-        const { n, skipped } = adoptMirror(j, srcJ, tm, lang)
-        // 评审 P4：status 未显式传时【现读盘上最新值】——applyPatches 的 await 窗口里后台流水线可能已按 auto 置 published，拿 await 前的陈旧快照会把 published 拉回 draft
-        const existingStatus = status !== undefined ? status : JSON.parse(readFileSync(file, 'utf8')).page.status ?? 'draft'
-        const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus, existingTrail: j.breadcrumb?.trail })
-        writeFileSync(file, JSON.stringify(mirror, null, 2) + '\n')
-        if (n || skipped) console.log(`  [i18n] 镜像人审写回 ${n} 句${skipped ? `（${skipped} 句段错位被跳过：整段重写保持句数，或用审阅页通过按钮）` : ''}`)
-        let rebuildError = null
-        try { await queueRebuild() } catch (e) { rebuildError = e.message } // 评审 M4：文件已落盘，重建失败≠保存被拒，如实分开报
-        res.writeHead(200, { 'Content-Type': 'application/json' })
-        res.end(JSON.stringify({ ok: true, i18n: { adopted: n, skipped }, ...(rebuildError ? { rebuildError } : {}) })) // skipped 进响应体：被跳过不静默（edit-layer 可提示）
-        return
-      }
-      writeFileSync(file, JSON.stringify(j, null, 2) + '\n')
-      if (status === 'published') {
+      const saved = await queueContentWrite(file, async () => {
+        const bytes = readFileSync(file)
+        const prepared = prepareWriteback({
+          site: SITE,
+          bytes,
+          expectedRevision: revision,
+          ...(changes !== undefined ? { changes } : { patches: patches ?? [] }),
+          status,
+        })
+        if (segments.length === 3) {
+          // 镜像（en/posts/xxx.json）：人审直改 → TM approved → 重投影（骨架恒 ≡ 源树）
+          const [lang, , pageId] = [segments[0], segments[1], segments[2].replace(/\.json$/, '')]
+          const srcFile = join(SITE, 'content', segments[1], `${pageId}.json`)
+          const srcJ = JSON.parse(readFileSync(srcFile, 'utf8'))
+          const tm = loadTm(srcJ.page.lang, lang)
+          const { n, skipped } = adoptMirror(prepared.data, srcJ, tm, lang)
+          const existingStatus = status !== undefined ? status : prepared.data.page.status ?? 'draft'
+          const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus, existingTrail: prepared.data.breadcrumb?.trail })
+          const written = writeJsonAtomic(file, mirror)
+          if (n || skipped) console.log(`  [i18n] 镜像人审写回 ${n} 句${skipped ? `（${skipped} 句段错位被跳过：整段重写保持句数，或用审阅页通过按钮）` : ''}`)
+          return { revision: written.revision, i18n: { adopted: n, skipped } }
+        }
+        const written = writeJsonAtomic(file, prepared.data)
+        return { revision: written.revision }
+      })
+      if (segments.length !== 3 && status === 'published') {
         // zh 源发布：后台流水线——整页送翻可达分钟级，同步等会卡死编辑器保存响应（问题 #6）。
         // 完成后自己排队重建；失败留事件+console（下次发布/手动送翻会再跑）。
         const pageId = segments[segments.length - 1].replace(/\.json$/, '')
@@ -259,11 +253,25 @@ const server = http.createServer(async (req, res) => {
       let rebuildError = null
       try { await queueRebuild() } catch (e) { rebuildError = e.message } // 评审 M4：同镜像分支——保存成功与重建失败分开报
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ ok: true, ...(rebuildError ? { rebuildError } : {}) }))
+      res.end(JSON.stringify({
+        ok: true,
+        saved: true,
+        rebuilt: !rebuildError,
+        revision: saved.revision,
+        ...(saved.i18n ? { i18n: saved.i18n } : {}),
+        ...(rebuildError ? { rebuildError } : {}),
+      }))
       return
     }
     if (req.method === 'POST' && req.url.startsWith('/__upload')) {
-      const name = new URL(req.url, 'http://x').searchParams.get('name') || ''
+      const uploadUrl = new URL(req.url, 'http://x')
+      const name = uploadUrl.searchParams.get('name') || ''
+      const slug = uploadUrl.searchParams.get('slug') || ''
+      if (!/^[\w/-]+$/.test(slug) || slug.includes('..')) throw new Error('上传缺少合法 slug')
+      const pageFile = join(SITE, 'content', `${slug}.json`)
+      if (!existsSync(pageFile)) throw new Error('上传页面不存在: ' + slug)
+      const page = JSON.parse(readFileSync(pageFile, 'utf8')).page
+      const contract = loadEditContract(SITE, page)
       let base = name.replace(/[^\w.-]/g, '-').replace(/^-+/, '')
       if (!base.replace(/\.\w+$/, '').replace(/-/g, '')) base = 'img-' + Date.now() + (base.match(/\.\w+$/)?.[0] || '.jpg') // 纯中文名兜底
       if (!/\.(jpe?g|png|webp)$/i.test(base)) throw new Error('只收 jpg/png/webp')
@@ -271,14 +279,19 @@ const server = http.createServer(async (req, res) => {
       for await (const c of req) chunks.push(c)
       const buf = Buffer.concat(chunks)
       let out = base
-      for (let i = 2; existsSync(join(IMG_DIR, out)); i++) out = base.replace(/(\.\w+)$/, `-${i}$1`) // 撞名自动加序号
+      let target = assetUploadTarget(SITE, contract.assets, out)
+      mkdirSync(target.diskDir, { recursive: true })
+      for (let i = 2; existsSync(join(target.diskDir, out)); i++) {
+        out = base.replace(/(\.\w+)$/, `-${i}$1`)
+        target = assetUploadTarget(SITE, contract.assets, out)
+      }
       let img = sharp(buf).resize({ width: 2560, withoutEnlargement: true }) // 压缩闸门
       if (/\.jpe?g$/i.test(out)) img = img.jpeg({ quality: 82 })
       else if (/\.png$/i.test(out)) img = img.png({ compressionLevel: 9 })
       else img = img.webp({ quality: 82 })
-      await img.toFile(join(IMG_DIR, out))
+      await img.toFile(join(target.diskDir, out))
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ ok: true, src: '/assets/img/product/' + out }))
+      res.end(JSON.stringify({ ok: true, src: target.publicUrl, publicUrl: target.publicUrl, storageValue: target.storageValue }))
       return
     }
     if (req.method === 'POST' && req.url === '/__i18n/tm') {
@@ -555,12 +568,21 @@ document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/app
     const ext = extname(file)
     const data = readFileSync(file)
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' })
-    res.end(ext === '.html' ? data.toString().replace('</body>', INJECT + '</body>') : data)
+    if (ext === '.html') {
+      const slug = pathname.replace(/^\/+|\/+$/g, '')
+      let context = ''
+      try { context = editContextScript(createEditContext(SITE, slug)) }
+      catch (error) {
+        if (!['ENOENT', 'CONTRACT_NOT_FOUND'].includes(error?.code)) console.warn(`  [edit] 上下文不可用 ${slug}: ${error.message}`)
+      }
+      res.end(data.toString().replace('</body>', context + INJECT + '</body>'))
+    } else res.end(data)
   } catch (e) {
     // 评审加固：headers 已发（流中途抛错）时再 writeHead 会 ERR_HTTP_HEADERS_SENT 直接崩进程——降级尽力收尾
     if (!res.headersSent) {
-      res.writeHead(400, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ error: e.message }))
+      const status = e instanceof WritebackError && e.code === 'REVISION_CONFLICT' ? 409 : 400
+      res.writeHead(status, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ error: e.message, ...(e instanceof WritebackError ? { code: e.code, ...e.details } : {}) }))
     } else {
       try { res.end() } catch {}
       console.error(`  [edit] 中途失败 ${req.method} ${req.url}: ${e.message}`)

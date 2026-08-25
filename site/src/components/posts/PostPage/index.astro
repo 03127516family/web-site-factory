@@ -5,12 +5,14 @@
 // chrome（toptitle/TOC/询盘/photoswipe）逐字照抄 post@1 家族；TOC 由全站 post-toc.js 扫
 // .craneinfo 内带 id 的 h2/h3 自动生成——章节 h2 必须带 id（sec-N）。
 import { renderDoc } from '@src/render-doc.mjs'
+import InquiryForm from '@src/components/shared/InquiryForm.astro'
+import { publicAssetPolicy } from '@src/asset-config.mjs'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const { j } = Astro.props
 const repoFrag = name => readFileSync(join(process.cwd(), `src/chrome/${name}.html`), 'utf8') // 站内 chrome
-const IMG = '/assets/img/product/' // 烧制图池/编辑器上传共用产品图目录（上传端点落点，known 惯例）
+const IMG = publicAssetPolicy({ namespace: 'product', valueFormat: 'filename' }).publicPrefix
 const WALK = { imgBase: IMG, headingOffset: 1 } // 章节标题占 h2，正文内标题 +1 起 h3（同 post@1）
 
 // 守卫纪律（T9 同款）：heading 与 body 同守——哪个缺都整章不出（防 renderDoc 炸 + 防空标题进 TOC）
@@ -21,7 +23,7 @@ const sections = (j.body?.sections ?? []).filter(s => s?.heading && s?.body)
 <div class="toptitle">
 	<div class="wrap">
 		<div class="title">
-			<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map(t => <Fragment><span class="crumb"><a data-field="crumb.url" href={t.url}><span data-field="crumb.label">{t.label}</span></a><span class="symbol">&gt;</span></span>{' '}</Fragment>)}</span>{' '}<span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
+				<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-repeat-key="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map(t => <Fragment><span class="crumb" data-item-id={t.id}><a data-field="crumb.url" data-item-field="url" href={t.url}><span data-field="crumb.label" data-item-field="label">{t.label}</span></a><span class="symbol">&gt;</span></span>{' '}</Fragment>)}</span>{' '}<span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
 			<h1 data-field="title" data-required>{j.title}</h1>
 		</div>
 	</div>
@@ -38,15 +40,15 @@ const sections = (j.body?.sections ?? []).filter(s => s?.heading && s?.body)
 			</div>
 
 			<!-- 重复区：N 段顺序章节（标题 + 正文树 + 可选配图） -->
-			<div data-repeat="sections" data-array="body.sections">
-				{sections.map((s, i) => (
-				<Fragment>
-					<h2 id={`sec-${i + 1}`} class="wp-block-heading" data-field="section.heading" data-edit="text">{s.heading}</h2>
-					<div data-field="section.body" data-edit="rich" set:html={renderDoc(s.body, WALK)} />
-					{s.image && (
-					<figure class="wp-block-image size-full"><img data-field="section.image" data-edit="image" src={IMG + s.image} alt={s.alt ?? s.heading} width={s.width || 880} height={s.height || 495} /></figure>
-					)}
-				</Fragment>
+				<div data-repeat="sections" data-repeat-key="sections" data-array="body.sections">
+					{sections.map((s, i) => (
+					<section data-item-id={s.id}>
+						<h2 id={`sec-${i + 1}`} class="wp-block-heading" data-field="section.heading" data-item-field="heading" data-edit="text">{s.heading}</h2>
+						<div data-field="section.body" data-item-field="body" data-edit="rich" set:html={renderDoc(s.body, WALK)} />
+						{s.image && (
+						<figure class="wp-block-image size-full"><img data-field="section.image" data-item-field="image" data-edit="image" src={IMG + s.image} alt={s.alt ?? s.heading} width={s.width || 880} height={s.height || 495} /></figure>
+						)}
+					</section>
 				))}
 			</div>
 
@@ -54,11 +56,8 @@ const sections = (j.body?.sections ?? []).filter(s => s?.heading && s?.body)
 	</div><!-- /.TopicsInfo -->
 </div><!-- /#Topics -->
 
-<!-- ============ 询盘表单（复用动态块） ============ -->
-<section data-template="inquiry-form@1" data-dynamic="inquiry-form" data-form-id="713" data-block-id="inquiry-form" class="post-inquiry wrap" id="from-single">
-	<h3 data-field="inquiry_form.title">填写您的详细资料，我们将在24小时内给您答复!</h3>
-	<Fragment set:html={repoFrag('inquiry-form')} />
-</section>
+<!-- ============ 询盘表单（共享组件） ============ -->
+{j.inquiry_form && <InquiryForm title={j.inquiry_form.title} class="post-inquiry wrap" />}
 
 <!-- ============ photoswipe 灯箱（chrome，逐字复用） ============ -->
 <Fragment set:html={repoFrag('photoswipe')} />

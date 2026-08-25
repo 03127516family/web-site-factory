@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "assets": { "namespace": "post", "valueFormat": "publicPath" },
+  "fields": {
+    "breadcrumb.current": { "path": "breadcrumb.current", "type": "text", "required": true },
+    "title": { "path": "title", "type": "text", "required": true },
+    "lead.body": { "path": "lead.body", "type": "richText" },
+    "body.h_types": { "path": "body.h_types", "type": "text" },
+    "body.img_types": { "path": "body.img_types", "type": "image" },
+    "types.body": { "path": "types.body", "type": "richText" },
+    "body.h_apps": { "path": "body.h_apps", "type": "text" },
+    "apps.body": { "path": "apps.body", "type": "richText" },
+    "body.h_price": { "path": "body.h_price", "type": "text" },
+    "price.body": { "path": "price.body", "type": "richText" },
+    "body.h_price_custom": { "path": "body.h_price_custom", "type": "text" },
+    "price_custom.body": { "path": "price_custom.body", "type": "richText" },
+    "body.h_factors": { "path": "body.h_factors", "type": "text" },
+    "factors.body": { "path": "factors.body", "type": "richText" },
+    "body.h_compare": { "path": "body.h_compare", "type": "text" },
+    "compare.body": { "path": "compare.body", "type": "richText" },
+    "body.h_cases": { "path": "body.h_cases", "type": "text" },
+    "cases.body": { "path": "cases.body", "type": "richText" },
+    "body.h_conclusion": { "path": "body.h_conclusion", "type": "text" },
+    "conclusion.body": { "path": "conclusion.body", "type": "richText" },
+    "inquiry_form.title": { "path": "inquiry_form.title", "type": "text" }
+  },
+  "repeats": {
+    "breadcrumb-trail": {
+      "path": "breadcrumb.trail", "itemIdField": "id", "minItems": 1, "maxItems": 10,
+      "prototype": { "id": null, "label": "", "url": "" },
+      "fields": { "label": { "path": "label", "type": "text" }, "url": { "path": "url", "type": "link" } }
+    }
+  }
+}
