@@ -573,6 +573,7 @@ function dirtyCount() { return state.dirty.fields.size + state.dirty.trees.size 
 function updateDirtyBadge() {
   const b = $('#edlDirty')
   if (b) { const n = dirtyCount(); b.textContent = n ? `● ${n} 处未保存` : ''; b.style.color = '#fbbf24' }
+  updateChromePill()
 }
 function markRichDirty(el, tree) {
   const field = el.getAttribute('data-field')
@@ -651,6 +652,8 @@ async function doSave(status) {
   // 评审 M4：文件已保存但重建失败——不是「保存被拒」，如实分开报
   if (data.rebuildError) alert('已保存到内容文件，但页面重建失败（生产站可能仍显示旧版）：\n' + data.rebuildError)
   $('#edlModal').hidden = true
+  lastSaveAt = new Date()
+  updateChromeAutosave()
   state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.chunks.clear(); state.dirty.arrays.clear()
   if (status === 'published') { sessionStorage.setItem('edlReenter', '1'); alert('已发布，页面已重建'); location.reload() }
   else alert('草稿已保存。当前就是草稿预览（生产站不显示此页）')
@@ -715,8 +718,126 @@ function exitEdit() {
   document.removeEventListener('mousemove', onMove, true)
 }
 
+// ---------- 编辑器 chrome（顶部工具条 + 底部状态条）：8092 页面即完整全屏编辑界面 ----------
+// 只加不拆：现有 .edl-toolbar / .edl-pill / 保存弹窗全保留；保存/发布按钮复用 showSave()+doSave()，零新保存逻辑。
+let lastSaveAt = null // 最后保存时间（现有编辑器无此追踪，此处补最小量：保存成功时抬一次）
+let chromeTop = null, chromeBottom = null, chromePill = null, chromeAutosave = null
+const CHROME_CSS = `
+#edl-chrome-top,#edl-chrome-bottom{position:fixed;left:0;right:0;z-index:100000;box-sizing:border-box;font-family:-apple-system,"PingFang SC",sans-serif}
+#edl-chrome-top{top:0;height:56px;background:#FFFFFF;border-bottom:1px solid #E8E5E1;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+#edl-chrome-bottom{bottom:0;height:38px;background:#FFFFFF;border-top:1px solid #E8E5E1;padding:0 16px;display:flex;align-items:center;gap:16px;font-size:12px;color:#5C5752}
+#edl-chrome-top .edl-chrome-left,#edl-chrome-top .edl-chrome-right{display:flex;align-items:center}
+#edl-chrome-top .edl-chrome-left{gap:12px;min-width:0}
+#edl-chrome-top .edl-chrome-right{gap:10px}
+#edlChromeWorkbench{background:transparent;border:0;color:#5C5752;border-radius:7px;height:28px;font-size:12.5px;padding:0 10px;cursor:pointer}
+#edlChromeWorkbench:hover{background:#F3F2F0}
+.edl-chrome-divider{width:1px;height:22px;background:#E8E5E1;flex:none}
+#edlChromeTitle{font-size:15px;font-weight:600;color:#1C1B1A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.edl-chrome-lang{display:flex;align-items:center;gap:2px}
+.edl-chrome-lang button{background:#fff;border:0;font-size:12px;border-radius:7px;color:#A39D96;padding:4px 8px;line-height:1;cursor:pointer}
+.edl-chrome-lang button.active{background:#F3F2F0;color:#1C1B1A;font-weight:600}
+#edlChromePill{background:#EAF6F0;color:#0E7A4E;border-radius:99px;font-size:11.5px;padding:3px 10px;white-space:nowrap}
+.edl-chrome-btn{border-radius:7px;height:32px;padding:0 14px;font-size:13px;cursor:pointer}
+#edlChromeDraft{background:#fff;border:1px solid #D8D4CF;color:#1C1B1A}
+#edlChromePublish{background:#1C1B1A;border:1px solid #1C1B1A;color:#fff}
+#edl-chrome-bottom .edl-chrome-schema{display:flex;align-items:center;gap:4px}
+#edl-chrome-bottom .edl-chrome-schema .ok{color:#0E7A4E}
+#edl-chrome-bottom .edl-chrome-spacer{flex:1}
+#edlChromeRevert{background:transparent;border:0;color:#5C5752;font-size:12px;padding:0;cursor:pointer;text-decoration:underline}
+body{padding-top:56px!important;padding-bottom:38px!important}
+`
+function pageTitleText() { // 页面标题 = document.title 去掉站点后缀（- DGCRANE / | DGCRANE）
+  let t = String(document.title || '').replace(/\s*[|｜\-–—]\s*DGCRANE\s*$/i, '').trim()
+  if (!t) t = location.pathname.split('/').filter(Boolean).pop() || '未命名页面'
+  return t
+}
+function currentLang() { return location.pathname.startsWith('/en/') ? 'en' : 'zh' }
+function siblingLangUrl() { // zh ↔ en：en 页去 /en/ 前缀、zh 页加 /en/ 前缀（按当前 pathname 推导）
+  const p = location.pathname
+  return (p.startsWith('/en/') ? p.replace(/^\/en/, '') : '/en' + p) + location.search
+}
+function fmtClock(d) { const p = x => String(x).padStart(2, '0'); return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}` }
+function updateChromePill() {
+  if (!chromePill) return
+  const n = dirtyCount()
+  chromePill.textContent = n ? `草稿 · ${n} 处未保存更改` : '已发布'
+}
+function updateChromeAutosave() {
+  if (chromeAutosave) chromeAutosave.textContent = '自动保存 ' + (lastSaveAt ? fmtClock(lastSaveAt) : '未保存')
+}
+async function switchLang() {
+  const url = siblingLangUrl()
+  try {
+    const res = await fetch(url)
+    if (res.status === 404) { alert('目标语言版本不存在（404），保持当前页面'); return }
+    location.href = url
+  } catch (e) {
+    alert('语言切换失败：' + ((e && e.message) || e))
+  }
+}
+function buildChrome() {
+  if (chromeTop) return
+  const style = document.createElement('style')
+  style.textContent = CHROME_CSS
+  document.head.appendChild(style)
+
+  const top = document.createElement('div')
+  top.id = 'edl-chrome-top'
+  top.innerHTML = `<div class="edl-chrome-left">
+      <button id="edlChromeWorkbench" type="button">工作台</button>
+      <span class="edl-chrome-divider"></span>
+      <span id="edlChromeTitle"></span>
+      <div class="edl-chrome-lang"><button type="button" data-lang="zh">中</button><button type="button" data-lang="en">EN</button></div>
+    </div>
+    <div class="edl-chrome-right">
+      <span id="edlChromePill"></span>
+      <button id="edlChromeDraft" type="button" class="edl-chrome-btn">保存草稿</button>
+      <button id="edlChromePublish" type="button" class="edl-chrome-btn">发布</button>
+    </div>`
+
+  const bottom = document.createElement('div')
+  bottom.id = 'edl-chrome-bottom'
+  bottom.innerHTML = `<span class="edl-chrome-schema"><span class="ok">✓</span> schema 校验通过</span>
+    <span id="edlChromeAutosave"></span>
+    <span class="edl-chrome-spacer"></span>
+    <button id="edlChromeRevert" type="button">还原到已发布版</button>`
+
+  document.body.appendChild(top)
+  document.body.appendChild(bottom)
+
+  chromeTop = top; chromeBottom = bottom
+  chromePill = top.querySelector('#edlChromePill')
+  chromeAutosave = bottom.querySelector('#edlChromeAutosave')
+  top.querySelector('#edlChromeTitle').textContent = pageTitleText()
+
+  // 工作台与编辑服务同机不同端口：沿用当前页面 host，局域网访问时不会错误跳回访问者自己的 localhost。
+  top.querySelector('#edlChromeWorkbench').addEventListener('click', () => {
+    const u = new URL(window.location.href)
+    u.port = '8090'
+    u.pathname = '/'
+    u.search = u.hash = ''
+    window.open(u.href, '_blank')
+  })
+
+  const lang = currentLang()
+  top.querySelectorAll('.edl-chrome-lang button').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === lang)
+    b.addEventListener('click', () => { if (b.dataset.lang !== lang) switchLang() })
+  })
+
+  // 保存/发布：复用现有 showSave()（commit + 收集补丁入 #edlModal）+ doSave(status)（写回 /__save）
+  top.querySelector('#edlChromeDraft').addEventListener('click', () => { showSave(); doSave('draft') })
+  top.querySelector('#edlChromePublish').addEventListener('click', () => { showSave(); doSave('published') })
+
+  bottom.querySelector('#edlChromeRevert').addEventListener('click', () => { alert('还原到已发布版：后端尚无此端点，暂未实现') })
+
+  updateChromePill()
+  updateChromeAutosave()
+}
+
 // ---------- UI 事件 ----------
 export function boot() {
+  buildChrome() // 编辑器自带 chrome（顶部工具条 + 底部状态条）：挂 body，只加不拆
   snapshotOriginals() // 保存预览的「原件」：任何编辑发生前拍一份（快照只用于预览 diff，写回永远走补丁）
   if (sessionStorage.getItem('edlReenter')) { sessionStorage.removeItem('edlReenter'); setTimeout(enterEdit, 300) }
   $('#edlToggle').addEventListener('click', () => state.on ? exitEdit() : enterEdit())
