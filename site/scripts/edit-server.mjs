@@ -20,7 +20,7 @@ import { createDeepseekCaller } from '../src/deepseek.mjs'
 import { probe, IMG_DIR } from './img-probe.mjs'
 import { burn, writeDraft } from './deepseek-burn.mjs'
 import { scanKits } from '../src/burn-lib.mjs'
-import { bindHost, accessUrls, lanHostAllowed } from '../../scripts/lan.mjs'
+import { bindHost, accessUrls, lanHostAllowed } from './lan.mjs'
 import sharp from 'sharp'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')

@@ -7,10 +7,9 @@ i18n-lead.json
 # 本地模拟件（后台管理台 / mock 云）——草稿形态，不入库（用户拍定 2026-07-11）
 app/
 
-# 新系统（site/）构建产物 / 缓存 / 开发软链，不入库
+# 新系统（site/）构建产物 / 缓存，不入库（site/public 曾是软链故忽略；2026-08-24 素材真身反转后入库）
 site/.astro/
 site/dist-edit/
-site/public
 
 # 服务端密钥（edit-server 烧制用，--env-file 装载；永不入库）
 .env

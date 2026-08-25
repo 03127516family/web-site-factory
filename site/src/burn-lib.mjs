@@ -11,7 +11,7 @@ import { probe } from '../scripts/img-probe.mjs'
 export { mdToDoc, validateDoc, getIn, setIn }
 
 // ---------- 站点资产约定（换站唯一要改的一处；模版/chrome/内容全是数据自带） ----------
-export const SITE_ASSETS = { dir: '../public/assets/img/product', url: '/assets/img/product/' }
+export const SITE_ASSETS = { dir: 'public/assets/img/product', url: '/assets/img/product/' }
 
 // ---------- 原文分段编号（不给 AI；仅供代码侧反查漏段/位置审计） ----------
 export function numberBlocks(rawText) {

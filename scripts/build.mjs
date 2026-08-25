@@ -504,7 +504,9 @@ async function build() {
   await rm(p("dist"), { recursive: true, force: true });
   await mkdir(p("dist"), { recursive: true });
   // 把本地化资源整体拷进 dist，使 /assets/... 绝对路径在 dist 作为根目录时可解析。
-  await cp(p("public"), p("dist"), { recursive: true });
+  // dereference：public/ 内 assets、favicon 已软链到 site/public/（素材真身 2026-08-24 归 site），
+  // 拷真身进 dist 保持产物自包含可移植；不跟随会把软链原样带进 dist（绝对路径、换机即断）。
+  await cp(p("public"), p("dist"), { recursive: true, dereference: true });
 
   // 先算发布门禁集（U-3）：render 页且 isPublishable。seoHead 的 hreflang 过滤依赖它，故须在
   // 任何 composePage 之前置好。目标页有「从未翻译」字段 → 不入集 → 不写盘、不进 sitemap/hreflang。

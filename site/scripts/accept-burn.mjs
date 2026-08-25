@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { tmpdir } from 'node:os'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
-const RAW = join(SITE, '../src/content/raw/overhead-cranes-for-sale.txt')
+const RAW = join(SITE, 'content/raw/overhead-cranes-for-sale.txt')
 const results = []
 const ok = (name, cond, extra = '') => { results.push({ name, pass: !!cond }); console.log(`${cond ? '✅' : '❌'} ${name}${extra ? ' — ' + extra : ''}`) }
 
