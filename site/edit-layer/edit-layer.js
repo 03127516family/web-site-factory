@@ -173,8 +173,11 @@ function mountEditor(el, kind, at) {
   if (kind === 'rich') { wireTableChips(); showToolbar(); editor.on('selectionUpdate', updateImageChip) }
   // 先同步拿到焦点，避免新空行在下一帧前收到的首批键盘输入丢失；下一帧再按点击坐标精确定位。
   editor.commands.focus('end')
+  const initialSelection = editor.state.selection
   requestAnimationFrame(() => {
     if (state.editor !== editor) return
+    // 用户若已全选、移动光标或开始输入，不再用延迟的鼠标坐标覆盖新选区。
+    if (!editor.state.selection.eq(initialSelection)) return
     try {
       const pos = at ? editor.view.posAtCoords({ left: at.x, top: at.y }) : null
       if (pos && Number.isInteger(pos.pos)) editor.commands.focus(pos.pos)
