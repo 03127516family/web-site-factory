@@ -1,7 +1,7 @@
 // 实时编辑服务：把产品页以「编辑模式」现渲染（带 data-md 写回坐标 + 注入 editor.js），
 // 在页面上原位改文字/图片/链接 → POST /api/save → patch 对应 src/content/*.md。
 //
-// 运行：npm run edit  → http://localhost:8081/
+// 运行：npm run edit  → 默认监听 0.0.0.0:8081（本机 + 局域网；HOST=127.0.0.1 可缩回仅本机）。
 // 生产 build（npm run build）不受影响，编辑器只挂在本服务里。
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
@@ -9,8 +9,10 @@ import { extname, join, normalize } from "node:path";
 import { pages, composePage, p } from "./build.mjs";
 import { patchMarkdown, arrayOp } from "./md-write.mjs";
 import { stampOnSave } from "./i18n-touch.mjs";
+import { bindHost, accessUrls } from "./lan.mjs";
 
 const PORT = process.env.EDIT_PORT ? Number(process.env.EDIT_PORT) : 8081;
+const HOST = bindHost("0.0.0.0");
 const PUBLIC = p("public");
 
 const MIME = {
@@ -153,7 +155,7 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`编辑服务已启动 → http://localhost:${PORT}/`);
+server.listen(PORT, HOST, () => {
+  console.log(`编辑服务已启动 → ${accessUrls(PORT, "/", HOST).join("  ")}  （监听：${HOST}）`);
   console.log(`可编辑页面：${pages.filter((pg) => pg.content).map((pg) => "/" + pg.slug).join("  ")}`);
 });

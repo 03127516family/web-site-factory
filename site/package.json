@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --host 0.0.0.0",
     "build": "astro build && node scripts/link-assets.mjs",
-    "preview": "astro preview",
+    "preview": "astro preview --host 0.0.0.0",
     "geom": "node scripts/geom-check.mjs",
     "check": "node scripts/i18n-registry.mjs --check && node scripts/accept-i18n2.mjs",
     "i18n:registry": "node scripts/i18n-registry.mjs",
@@ -15,7 +15,7 @@
     "accept:burn": "node scripts/accept-burn.mjs",
     "accept:i18n2": "node scripts/accept-i18n2.mjs",
     "bundle:edit": "esbuild edit-layer/edit-layer.js --bundle --format=iife --outfile=edit-layer/dist/edit-layer.js",
-    "edit": "npm run bundle:edit && node scripts/edit-server.mjs"
+    "edit": "npm run bundle:edit && node --env-file-if-exists=.env scripts/edit-server.mjs"
   },
   "dependencies": {
     "astro": "^6.0.5"

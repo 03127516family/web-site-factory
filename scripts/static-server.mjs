@@ -6,6 +6,7 @@ import { createReadStream } from "node:fs";
 import { stat } from "node:fs/promises";
 import { join, resolve, normalize, extname, sep } from "node:path";
 import { pathToFileURL } from "node:url";
+import { bindHost, accessUrls } from "./lan.mjs";
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -30,7 +31,8 @@ const MIME = {
 };
 
 // 起服务，resolve 到「已在监听」的 server（await 后即可请求，无需再轮询）。调用方负责 server.close()。
-export function startServer(dir, port) {
+// host 默认 0.0.0.0（本机 + 局域网均可访问）；HOST=127.0.0.1 可缩回仅本机。
+export function startServer(dir, port, host = bindHost("0.0.0.0")) {
   const root = resolve(dir);
   const server = createServer(async (req, res) => {
     try {
@@ -70,12 +72,13 @@ export function startServer(dir, port) {
       res.writeHead(500).end("500");
     }
   });
-  return new Promise((res) => server.listen(port, () => res(server)));
+  return new Promise((res) => server.listen(port, host, () => res(server)));
 }
 
-// CLI：node scripts/static-server.mjs [dir=dist] [port=8080]
+// CLI：node scripts/static-server.mjs [dir=dist] [port=8080] [host=HOST|0.0.0.0]
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const [dir = "dist", port = "8080"] = process.argv.slice(2);
-  await startServer(dir, Number(port));
-  console.log(`静态服务 → http://localhost:${port}/  （根目录：${resolve(dir)}）`);
+  const [dir = "dist", port = "8080", hostArg] = process.argv.slice(2);
+  const host = hostArg || bindHost("0.0.0.0");
+  await startServer(dir, Number(port), host);
+  console.log(`静态服务 → ${accessUrls(Number(port), "/", host).join("  ")}  （根目录：${resolve(dir)}，监听：${host}）`);
 }
