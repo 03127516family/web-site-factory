@@ -234,12 +234,12 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
   const f1 = burner.writeDraft(jx, 'wd-test')
   const jx2 = await lib.assemble({ slug: 'wd-test', productName: '写回测试2', sectionResults: [], imagePool: [], example: EX_PROD })
   const f2 = burner.writeDraft(jx2, 'wd-test')
-  const p1 = join(SITE, 'content/products', f1 + '.json')
-  const p2 = join(SITE, 'content/products', f2 + '.json')
+  const p1 = join(SITE, '.drafts/products', f1 + '.json')
+  const p2 = join(SITE, '.drafts/products', f2 + '.json')
   try {
     ok('writeDraft 撞名加序号', f1 === 'wd-test' && f2 === 'wd-test-2' && existsSync(p1) && existsSync(p2))
-    ok('writeDraft 强制 draft', JSON.parse(readFileSync(p1, 'utf8')).page.status === 'draft')
-    ok('writeDraft 戳 page.template（路由 glob 依赖，缺则预览构建炸）', JSON.parse(readFileSync(p1, 'utf8')).page.template === 'ProductPage')
+    ok('writeDraft 强制 draft', JSON.parse(readFileSync(p1, 'utf8')).content.page.status === 'draft')
+    ok('writeDraft 戳 page.template（路由 glob 依赖，缺则预览构建炸）', JSON.parse(readFileSync(p1, 'utf8')).content.page.template === 'ProductPage')
     let badSlug = false
     try { burner.writeDraft(jx, '坏 slug!') } catch { badSlug = true }
     ok('writeDraft 非法 slug 拒收', badSlug)
@@ -657,9 +657,9 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
 
   // writeDraft 按 page.type 落 content/posts + template 自带 + draft 强制
   const final = burner.writeDraft(jp, 'zz-accept-post')
-  const ppath = join(SITE, 'content/posts', `${final}.json`)
-  const saved = JSON.parse(readFileSync(ppath, 'utf8'))
-  ok('writeDraft 落 content/posts 带 template 且强制 draft', existsSync(ppath) && saved.page.template === 'PostPage' && saved.page.status === 'draft' && saved.page.slug.startsWith('posts/'))
+  const ppath = join(SITE, '.drafts/posts', `${final}.json`)
+  const saved = JSON.parse(readFileSync(ppath, 'utf8')).content
+  ok('writeDraft 落 .drafts/posts 带 template 且强制 draft', existsSync(ppath) && saved.page.template === 'PostPage' && saved.page.status === 'draft' && saved.page.slug.startsWith('posts/'))
   rmSync(ppath)
 }
 
@@ -705,8 +705,8 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
   ok('草稿自带套件名（template=gantry…）', gj.page.template === 'gantry-cranes-for-sale')
 
   const gfinal = burner.writeDraft(gj, 'zz-gantry-accept')
-  const gpath = join(SITE, 'content/posts', `${gfinal}.json`)
-  ok('writeDraft 按声明的套件落 content/posts', JSON.parse(readFileSync(gpath, 'utf8')).page.template === 'gantry-cranes-for-sale')
+  const gpath = join(SITE, '.drafts/posts', `${gfinal}.json`)
+  ok('writeDraft 按声明的套件落 .drafts/posts', JSON.parse(readFileSync(gpath, 'utf8')).content.page.template === 'gantry-cranes-for-sale')
   rmSync(gpath)
 }
 

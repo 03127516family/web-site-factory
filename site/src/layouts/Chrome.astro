@@ -14,6 +14,22 @@ const doc = readFileSync(join(SITE, 'src/chrome/document.html'), 'utf8')
 
 // 本页在族谱里的坐标（slug 全站唯一：zh=posts/xxx，镜像=en/posts/xxx）
 const pages = scanPages({ withJson: true })
+if (process.env.INCLUDE_DRAFTS === '1') {
+  const parts = j.page.slug.split('/')
+  const current = {
+    pageId: parts.at(-1),
+    type: j.page.type,
+    lang: j.page.lang,
+    langDir: parts.length === 3 ? parts[0] : null,
+    slug: j.page.slug,
+    status: j.page.status ?? 'draft',
+    file: `.drafts/${j.page.slug}.json`,
+    j,
+  }
+  const index = pages.findIndex(page => page.slug === current.slug)
+  if (index >= 0) pages[index] = current
+  else pages.push(current)
+}
 const groups = buildGroups(pages)
 const me = pages.find(p => p.slug === j.page.slug)
 if (!me) throw new Error(`族谱里找不到本页 slug：${j.page.slug}（content 树与路由数据不一致，改坏不静默）`)

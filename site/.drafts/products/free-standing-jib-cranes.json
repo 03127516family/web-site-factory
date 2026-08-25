@@ -1,0 +1,550 @@
+{
+  "version": 1,
+  "baseRevision": null,
+  "savedAt": "2026-08-25T11:07:45.205Z",
+  "content": {
+    "version": 1,
+    "page": {
+      "slug": "products/free-standing-jib-cranes",
+      "type": "product",
+      "lang": "zh-CN",
+      "title": "独立式旋臂起重机 - DGCRANE",
+      "description": "独立式（自由站立式）旋臂起重机制造商与出口商，容量高达16吨、臂长高达16米、旋转120-360°，结构轻巧、占地小、易安装，适用于短距离密集作业单元。",
+      "template": "ProductPage",
+      "family": "product-superset@1",
+      "status": "draft"
+    },
+    "title": "独立式旋臂起重机",
+    "breadcrumb": {
+      "current": "独立式旋臂起重机",
+      "trail": [
+        {
+          "label": "首页",
+          "url": "https://www.dgcrane.com/zh/",
+          "id": "crumb_c6291d1b89"
+        },
+        {
+          "label": "旋臂起重机",
+          "url": "https://www.dgcrane.com/zh/jib-cranes/",
+          "id": "crumb_13079cea46"
+        }
+      ]
+    },
+    "hero": {
+      "headline": "起重机制造商和出口商",
+      "highlights": [
+        "10年以上的起重机出口经验",
+        "起重机已销往120多个国家",
+        "一个由50多人组成的技术团队",
+        "3000多个不同行业的案例"
+      ]
+    },
+    "summary": {
+      "cta": "报价要求"
+    },
+    "specs": [
+      {
+        "text": "容量：高达16吨",
+        "id": "spec_7b99a2fcf6"
+      },
+      {
+        "text": "臂长：高达16米",
+        "id": "spec_d46bdb36db"
+      },
+      {
+        "text": "升降高度：高达12（地面到吊杆底部）",
+        "id": "spec_d273d74a00"
+      },
+      {
+        "text": "工作职责。M3-M5",
+        "id": "spec_b32dc6da88"
+      },
+      {
+        "text": "旋转角度：120-360°",
+        "id": "spec_9f15439332"
+      },
+      {
+        "text": "工作电压：220V~690V，50-60Hz，3ph AC",
+        "id": "spec_4605ed1a0e"
+      },
+      {
+        "text": "新参数请求",
+        "id": "spec_affa09c541"
+      },
+      {
+        "text": "新参数完全",
+        "id": "spec_73c3d73497"
+      }
+    ],
+    "inquiry_form": {
+      "type": "inquiry-form",
+      "form_id": 713,
+      "title": "填写您的详细资料，我们将在24小时内给您答复!"
+    },
+    "related_products": {
+      "type": "related-products",
+      "title": "相关产品",
+      "category": "jib-cranes",
+      "limit": 4,
+      "seed": [
+        {
+          "title": "FEM标准旋臂式起重机",
+          "image": "European_Jib_Crane.jpg",
+          "url": "https://www.dgcrane.com/zh/fem-standard-jib-cranes/",
+          "summary": "欧式旋臂吊结构独特，安全可靠，具有高效、节能、省时、灵活等特点。它特别适用于短距离、高强度的吊装场所。欧式旋臂吊广泛用于车间、仓库、码头等固定场所。工作等级一般为A4或A5。",
+          "id": "related_9ee06a4d24"
+        },
+        {
+          "title": "FEM标准钢丝绳电动葫芦",
+          "image": "European_Wire_Rope_Electric_Hoist.jpg",
+          "url": "https://www.dgcrane.com/zh/products/wire-rope-hoist-suppliers/",
+          "summary": "欧式钢丝绳电动葫芦的起升机构采用行星齿轮，结构紧凑，重量轻，安装在卷筒内，有效地缩小了葫芦的整体尺寸。欧式钢丝绳电动葫芦的设计最大程度地采用了模块化设计，各部件的通用程度高。",
+          "id": "related_8af66756f1"
+        },
+        {
+          "title": "FEM标准电动环链升降机",
+          "image": "European_Electric_Chain_Hoist.jpg",
+          "url": "https://www.dgcrane.com/zh/fem-standard-electric-chain-hoists/",
+          "summary": "欧式环链电动葫芦结构紧凑，性能可靠。模块化设计使我们的产品可以灵活地组成不同的起重吨位、起重速度和工作等级系统。",
+          "id": "related_986a378b2f"
+        },
+        {
+          "title": "FEM标准门式起重机",
+          "image": "European_Gantry_Crane.jpg",
+          "url": "https://www.dgcrane.com/zh/fem-standard-gantry-cranes/",
+          "summary": "欧式龙门吊采用欧洲设计标准和制造技术，达到了国际同类产品的先进水平，如高度低、重量轻、轮压小、直接驱动灵活、无级变速、免维护等。",
+          "id": "related_9a30ea6420"
+        }
+      ]
+    },
+    "summary_intro": {
+      "title": "导语",
+      "body": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "自由站立式JIB起重机通常用于较小的工作单元区域，用于重复性和独特的起重任务。旋臂式起重机的用途非常广泛，也可以与桥式起重机搭配使用，以最大限度地提高生产效率。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "工作范围是一个圆形区域，非常适用于短距离和密集排放的工作场所。"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "具有较大的起重能力，可用于各种行业。它结构轻巧，占用空间小，易于安装。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "overview": {
+      "title": "概述",
+      "body": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "独立悬臂式起重机是由一个立柱、一个摆臂装置和一个电动葫芦组成。它在空间有限的车间里发挥了巨大作用。它占用的面积很小，可以覆盖整个工作区域。根据需要，它可以安装在地面或墙壁上，升降机构可以是电动或手动。广泛应用于各种场所，如装卸码头、港口、船厂等，可与其他臂架式起重机配合使用，也可作为工厂流水线上的配套设备。固定立柱式JIB起重机的安装和拆卸都非常简单，无需拆卸。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "introduction": {
+      "title": "简介",
+      "body": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "独立悬臂式起重机的设计是为了不靠任何其他支撑而靠自己站在陆地上。它由一个可旋转的垂直立柱和一个水平负载支撑臂组成。我们依靠的不是低悬臂式起重机的价格，而是独立悬臂式起重机的高质量来赢得实现我们公司的成长。"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "独立式旋臂起重机"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "与壁挂式和壁行式旋臂吊相比，独立式旋臂吊可以达到更高的能力，更长的跨度和更大的旋转范围。由于结构上的优势，这种悬臂吊可以进行定制化的改造，以满足您的特殊应用要求。唯一的安装限制是，独立悬臂吊所立足的土壤压力必须达到每平方英尺2500磅。哈哈哈啊哈"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "advantages": {
+      "title": "优势",
+      "body": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "充分利用空间"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "易于安装"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "轻量级结构"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "坚固耐用"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "安全性和可靠性"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "低噪音"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "basic_params": {
+      "title": "基本参数",
+      "body": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "它是最近开发的一种中、小型起重设备，非常适用于短距离移动和工作场所的人群升降和运输。"
+              }
+            ]
+          },
+          {
+            "type": "bulletList",
+            "content": [
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "起重机旋转。360度"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "臂长：高达16米"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "旋转速度: 0.5 r/min"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "安全工作负荷：高达16吨"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "提升高度：最高可达12（地面到吊杆底部）"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "工作温度：-20~+40℃"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "行走速度：20或30米/分钟"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "控制模式：吊式手柄、遥控器和座舱"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "应用：广泛应用于各种行业"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "listItem",
+                "content": [
+                  {
+                    "type": "paragraph",
+                    "content": [
+                      {
+                        "type": "text",
+                        "text": "电源。AC 380V, 50HZ, 3P"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "注：用户也可以选择双速、单速环链和钢丝绳葫芦。"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "main_features": {
+      "title": "主要特点",
+      "body": {
+        "type": "doc",
+        "content": [
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "最大的通用性"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "它是最通用的起重机之一。独立悬臂式起重机几乎可以安装在任何地方，无论是室内还是室外，如装卸码头、港口、船厂等。它还可以与其他旋臂起重机一起工作，或作为工厂装配线的补充。独立式悬臂吊的安装和搬迁非常简单，无需拆卸。"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "操作简便"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "我厂生产的起重机可以让操作者精确、有效、迅速地控制运动。凭借先进的技术，我们可以使旋臂吊的运动非常简单和准确。因此，无意的运动将被减少到最小。反过来，对您的工厂、设备甚至人员的损害也会大大减少。起重机的工作寿命可以得到更多的保证，并将被延长。"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "attrs": {
+              "level": 3
+            },
+            "content": [
+              {
+                "type": "text",
+                "text": "安全"
+              }
+            ]
+          },
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "我们始终把安全放在心上！！！我们采用了紧急停止系统来加强安全。我们采用紧急制动系统来加强安全。当操作人员遇到一些紧急情况时，紧急制动系统将启动，以保护相关宝物。我们工厂的每一件产品在传送到你的工作场所之前都经过了良好的测试。如果你不能独立完成安装，我们有经验的工人将不会离开你的工作场所，直到起重机被检查为100%的保证。"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -2,10 +2,11 @@
 // DeepSeek 烧制台·编排层：提示词组包 + HTTP 客户端 + burn() 流水线（一把梭出整页 + 代码逐格验收 + 失败格单独重烧）+ CLI。
 // 纯逻辑全在 burn-lib；本文件只做「问 AI 要值」与「把值交给代码裁决」。
 // 用法: DEEPSEEK_API_KEY=xxx node scripts/deepseek-burn.mjs --text <文件> --slug xxx --name 产品名 [--save]
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as lib from '../src/burn-lib.mjs'
+import { draftPath, publishedPath, writeDraft as writeWorkspaceDraft } from '../src/draft-store.mjs'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const COMPONENTS = join(SITE, 'src/components')   // 套件根
@@ -467,11 +468,11 @@ export function verifyByShape(spec, data, src, productName, paragraphs, warns = 
 
 // ---------- 落 draft（撞名加序号；写前全树过 schema；强制 draft 不信客户端） ----------
 // 页族从数据自带 page.type 推导（post→posts，缺省 products），edit-server 调用零改动。
-export function writeDraft(json, slug) {
+export function writeDraft(json, slug, site = SITE) {
   if (!/^[a-z0-9][a-z0-9-]*$/.test(slug)) throw new Error('slug 非法（小写字母数字连字符）')
   const famDir = json.page.type === 'post' ? 'posts' : 'products'
   let final = slug, n = 2
-  while (existsSync(join(SITE, 'content', famDir, `${final}.json`))) final = `${slug}-${n++}`
+  while (existsSync(publishedPath(site, `${famDir}/${final}`)) || existsSync(draftPath(site, `${famDir}/${final}`))) final = `${slug}-${n++}`
   json.page.slug = `${famDir}/${final}`
   json.page.status = 'draft'
   const kits = lib.scanKits(COMPONENTS)
@@ -485,7 +486,7 @@ export function writeDraft(json, slug) {
     else if (c.shape === 'sections')
       for (const [idx, s] of (lib.getIn(json, c.key) ?? []).entries()) lib.validateDoc(s.body, `${c.key}[${idx}].body`)
   }
-  writeFileSync(join(SITE, 'content', famDir, `${final}.json`), JSON.stringify(json, null, 2) + '\n')
+  writeWorkspaceDraft(site, `${famDir}/${final}`, { baseRevision: null, content: json })
   return final
 }
 

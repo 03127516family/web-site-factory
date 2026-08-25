@@ -360,15 +360,12 @@ const server = http.createServer(async (req, res) => {
       if (!json || typeof json !== 'object' || !json.page) throw new Error('json 缺失或非法')
       const final = writeDraft(json, slug) // 撞名加序号 + 全树 schema + 强制 draft
       const famDir = json.page.type === 'post' ? 'posts' : 'products' // 与 writeDraft 分族同口径（文章草稿不再指错族）
-      console.log(`  [burn] 落 draft: content/${famDir}/${final}.json`)
-      try {
-        await queueRebuild()
-      } catch (e) {
-        rmSync(join(SITE, 'content', famDir, `${final}.json`)) // 毒草稿不留在盘上祸害后续 rebuild
-        throw new Error(`落盘成功但重建失败，已自动删除该草稿：${e.message}`)
-      }
+      console.log(`  [burn] 落 draft: .drafts/${famDir}/${final}.json`)
+      let rebuildError = null
+      try { await queueBuild(() => outputBuilder.rebuildEdit()) }
+      catch (error) { rebuildError = error.message }
       res.writeHead(200, { 'Content-Type': 'application/json' })
-      res.end(JSON.stringify({ ok: true, slug: final, editUrl: `/${famDir}/${final}/` }))
+      res.end(JSON.stringify({ ok: true, slug: final, editUrl: `/${famDir}/${final}/`, rebuilt: !rebuildError, ...(rebuildError ? { rebuildError } : {}) }))
       return
     }
     if (req.method === 'POST' && req.url === '/__mirror') {
