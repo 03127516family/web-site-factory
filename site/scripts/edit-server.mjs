@@ -575,7 +575,7 @@ document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/app
   } catch (e) {
     // 评审加固：headers 已发（流中途抛错）时再 writeHead 会 ERR_HTTP_HEADERS_SENT 直接崩进程——降级尽力收尾
     if (!res.headersSent) {
-      const status = e instanceof WritebackError && e.code === 'REVISION_CONFLICT' ? 409 : 400
+      const status = e instanceof WritebackError ? (e.code === 'REVISION_CONFLICT' ? 409 : 400) : 500
       res.writeHead(status, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ error: e.message, ...(e instanceof WritebackError ? { code: e.code, ...e.details } : {}) }))
     } else {
@@ -587,6 +587,7 @@ document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/app
 server.requestTimeout = 600_000
 const [NODE_MAJOR] = process.versions.node.split('.').map(Number)
 if (NODE_MAJOR < 22) console.warn(`⚠ 当前 node ${process.version} <22：astro rebuild 会失败（/__save、/__burn-save 的重建链路），请用 node 22+ 启动本服务`)
+await outputBuilder.rebuildEdit()
 server.listen(PORT, HOST, () => {
   console.log(`编辑服务 → ${accessUrls(PORT, '/products/single-girder-eot-cranes/', HOST).join('  ')}`)
   console.log(`  监听：${HOST} · 写回/上传/烧制/翻译端点均可经上面局域网地址访问；HOST=127.0.0.1 缩回仅本机`)

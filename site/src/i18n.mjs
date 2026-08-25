@@ -124,13 +124,13 @@ export function langSwitcher(pg, siblings) {
 }
 
 // ---------- 发布门禁（新语义：approved 投影非空即可发；页面永不下线，缺句照发） ----------
-// 生产内容源（单闸）：镜像页的生产 JSON = approved 投影；null = 不可发（核心字段未审/孤儿/状态）。
+// 生产内容源（单闸）：有源镜像按 approved 投影；已发布的孤立镜像保留自身最后正式 JSON。
 // 路由（取 j）与 isPublishable（判可发）与 Chrome（切换器）同调这一处，口径永不分叉。
 export function productionJson(pg, groups, pagesWithJson) {
   if (!pg.langDir) return pg.j ?? null // 源页不投影（调用方不应拿源页来问；给个直白兜底）
   if (pg.status !== 'published') return null
   const source = (groups.get(pg.pageId) || []).find(m => !m.langDir)
-  if (!source) return null // 孤儿镜像不发
+  if (!source) return pg.j ?? JSON.parse(readFileSync(join(CONTENT(), pg.file), 'utf8'))
   const srcJ = (pagesWithJson || []).find(m => m.pageId === source.pageId && !m.langDir)?.j
     ?? JSON.parse(readFileSync(join(CONTENT(), source.file), 'utf8'))
   const tm = loadTm(srcJ.page.lang, pg.lang)

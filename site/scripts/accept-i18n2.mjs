@@ -10,7 +10,7 @@ import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms
 import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
 import { translateSegments } from '../src/i18n-engine.mjs'
 import { runPipeline, adoptMirror, approvePage, consoleData, translateAll, harvestMirror } from '../src/i18n-pipeline.mjs'
-import { isPublishable, scanPages, buildGroups } from '../src/i18n.mjs'
+import { isPublishable, productionJson, scanPages, buildGroups } from '../src/i18n.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
@@ -800,6 +800,14 @@ test('门禁:有已审投影=可发；无=不可发（页级永不下线改句�
   me = pages.find(p => p.slug === `t9/posts/${FIX}`)
   assert.equal(isPublishable(me, groups, pages), true) // approved 投影非空 → 可发
   cleanup()
+})
+
+test('门禁:已发布孤立镜像保留自身正式 JSON', () => {
+  const j = { page: { slug: 'en/products/orphan', status: 'published', lang: 'en' }, title: 'Published mirror' }
+  const pg = { pageId: 'orphan', type: 'product', lang: 'en', langDir: 'en', slug: j.page.slug, status: 'published', file: 'en/products/orphan.json', j }
+  const groups = buildGroups([pg])
+  assert.equal(productionJson(pg, groups, [pg]), j)
+  assert.equal(isPublishable(pg, groups, [pg]), true)
 })
 
 // ---------- Task 10: edit-server 接线（数据层；HTTP 面冒烟走真服务，T12 收口） ----------

@@ -51,7 +51,6 @@ export function createOutputBuilder({ site, runBuild }) {
             output.movedStaging = true
           }
           activated = true
-          for (const output of outputs) rmSync(output.previous, { recursive: true, force: true })
         } catch (error) {
           for (const output of [...outputs].reverse()) {
             if (output.movedStaging && existsSync(output.final)) rmSync(output.final, { recursive: true, force: true })

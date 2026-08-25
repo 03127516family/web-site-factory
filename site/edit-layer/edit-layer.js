@@ -792,7 +792,7 @@ body{padding-top:56px!important;padding-bottom:38px!important}
   .edl-chrome-btn{height:32px;padding:0 8px;font-size:12px}
   #edl-chrome-bottom{padding:0 8px;gap:8px;white-space:nowrap}
   #edlChromeAutosave{display:none}
-  .edl-pill{left:8px;right:8px;bottom:46px;justify-content:space-between}
+  .edl-pill{left:auto;right:8px;bottom:46px;width:auto;max-width:calc(100vw - 16px);justify-content:flex-end}
   .edl-pill button{padding:8px 12px}
 }
 `

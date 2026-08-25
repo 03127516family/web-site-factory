@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// POC-5 验收（R59 V2/V3/V4）：改字写回 / 改正文写回（树）/ schema 拒收 / 状态门。
+// 编辑写回验收：改字 / 富文本树 / repeat / schema / 隔离草稿 / 上传。
 // 跑完自动还原 JSON 并重建。
 import { chromium } from 'playwright-core'
-import { readFileSync, writeFileSync, copyFileSync, existsSync, unlinkSync } from 'node:fs'
+import { readFileSync, copyFileSync, existsSync, unlinkSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -13,7 +13,6 @@ const TM_FILE = join(SITE, 'src/i18n/tm.zh-CN.en.json')
 const DIST_PAGE = join(SITE, 'dist/products/single-girder-eot-cranes/index.html')
 const EDIT_PORT = process.env.EDIT_PORT || 8092 // 可让开被占的 8092 并行跑验收
 const EDIT = `http://localhost:${EDIT_PORT}/products/single-girder-eot-cranes/`
-const PUB = 'http://localhost:8091/products/single-girder-eot-cranes/'
 const results = []
 const ok = (name, cond, extra = '') => { results.push({ name, pass: !!cond }); console.log(`${cond ? '✅' : '❌'} ${name}${extra ? ' — ' + extra : ''}`) }
 const readJ = () => JSON.parse(readFileSync(JSON_FILE, 'utf8'))
@@ -43,14 +42,20 @@ page.on('request', request => {
 })
 
 async function saveAndPublish() {
-  await page.click('#edlSave')
+  const [preview] = await Promise.all([
+    page.waitForResponse(r => r.url().includes('/__preview-save'), { timeout: 30000 }),
+    page.click('#edlChromePublish'),
+  ])
+  ok('发布预览端点 200', preview.status() === 200)
   await page.waitForSelector('#edlModal:not([hidden])')
+  await page.waitForFunction(() => !document.querySelector('#edlConfirmSave')?.disabled)
   const [resp] = await Promise.all([
     page.waitForResponse(r => r.url().includes('/__save'), { timeout: 30000 }),
-    page.click('#edlSavePublish'),
+    page.click('#edlConfirmSave'),
   ])
   ok('保存端点 200', resp.status() === 200)
   ok('保存使用 changes 协议', Array.isArray(lastSavePayload?.changes) && !('patches' in lastSavePayload))
+  ok('保存使用显式 publish intent', lastSavePayload?.intent === 'publish')
   ok('保存携带 revision', typeof lastSavePayload?.revision === 'string' && lastSavePayload.revision.length > 10)
   await page.waitForTimeout(2500) // 给客户端的发布后 reload 留出启动时间
   await page.goto(EDIT, { waitUntil: 'networkidle' }) // 固定在重建后的新文档，避免上一轮 reload 与下一步竞争
@@ -161,7 +166,12 @@ ok('V2c 删除行按同一 itemId 写回', !j.specs.some(item => item.id === ins
 
 // ---- V4：坏树直投端点 → schema 拒收，JSON 不被污染 ----
 const bad = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, {
-  data: { slug: 'products/single-girder-eot-cranes', status: 'published', patches: [{ path: 'overview.body', kind: 'tree', value: { type: 'doc', content: [{ type: 'video', content: [] }] } }] },
+  data: {
+    slug: 'products/single-girder-eot-cranes', intent: 'publish',
+    revision: (await page.evaluate(() => window.__EDIT_CONTEXT__)).revision,
+    publishedRevision: (await page.evaluate(() => window.__EDIT_CONTEXT__)).publishedRevision,
+    changes: [{ targetId: 'overview.body', value: { type: 'doc', content: [{ type: 'video', content: [] }] } }],
+  },
 })
 ok('V4 坏树被拒（400）', bad.status() === 400)
 const badMsg = (await bad.json()).error || ''
@@ -171,25 +181,33 @@ ok('V4 JSON 未被污染', JSON.stringify(readJ().overview.body).includes('验�
 // ---- V4b：未知 target / 陈旧 revision 都由新写回闸拒绝 ----
 const freshContext = await page.evaluate(() => window.__EDIT_CONTEXT__)
 const unknown = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, {
-  data: { slug: 'products/single-girder-eot-cranes', revision: freshContext.revision, changes: [{ targetId: 'not_declared', value: 'x' }] },
+  data: { slug: 'products/single-girder-eot-cranes', intent: 'publish', revision: freshContext.revision, publishedRevision: freshContext.publishedRevision, changes: [{ targetId: 'not_declared', value: 'x' }] },
 })
 ok('V4b 未声明 target 被拒（400）', unknown.status() === 400)
 const stale = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, {
-  data: { slug: 'products/single-girder-eot-cranes', revision: 'stale-revision', changes: [] },
+  data: { slug: 'products/single-girder-eot-cranes', intent: 'publish', revision: 'stale-revision', publishedRevision: freshContext.publishedRevision, changes: [] },
 })
 ok('V4b 陈旧 revision 被拒（409）', stale.status() === 409)
 
-// ---- V3：状态门 ----
-const r1 = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, { data: { slug: 'products/single-girder-eot-cranes', status: 'draft', patches: [] } })
+// ---- V3：隔离草稿不改变正式 JSON / dist，随后可发布 ----
+const beforeDraftJson = readFileSync(JSON_FILE)
+const beforeDraftDist = readFileSync(DIST_PAGE)
+const r1 = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, { data: {
+  slug: 'products/single-girder-eot-cranes', intent: 'draft', revision: freshContext.revision,
+  publishedRevision: freshContext.publishedRevision, changes: [],
+} })
 ok('V3 存草稿端点 200', r1.status() === 200)
-await page.waitForTimeout(2000)
-ok('V3 draft 后 dist 页面消失', !existsSync(DIST_PAGE))
-ok('V3 草稿预览仍在（8092 可见, R33）', existsSync(DIST_PAGE.replace('dist/', 'dist-edit/')))
-ok('V3 JSON 状态 = draft', readJ().page.status === 'draft')
-const r2 = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, { data: { slug: 'products/single-girder-eot-cranes', status: 'published', patches: [] } })
+const draftSaved = await r1.json()
+ok('V3 草稿不改正式 JSON', readFileSync(JSON_FILE).equals(beforeDraftJson))
+ok('V3 草稿不改生产 dist', readFileSync(DIST_PAGE).equals(beforeDraftDist))
+ok('V3 草稿预览仍在', existsSync(DIST_PAGE.replace('dist/', 'dist-edit/')))
+ok('V3 正式 JSON 状态保持 published', readJ().page.status === 'published')
+const r2 = await page.request.post(`http://localhost:${EDIT_PORT}/__save`, { data: {
+  slug: 'products/single-girder-eot-cranes', intent: 'publish', revision: draftSaved.revision,
+  publishedRevision: draftSaved.publishedRevision, changes: [],
+} })
 ok('V3 发布端点 200', r2.status() === 200)
-await page.waitForTimeout(2000)
-ok('V3 published 后 dist 页面回来', existsSync(DIST_PAGE))
+ok('V3 发布后 dist 仍在', existsSync(DIST_PAGE))
 
 // ---- V5：本地上传 → 压缩闸门 → 真实路径 ----
 {
