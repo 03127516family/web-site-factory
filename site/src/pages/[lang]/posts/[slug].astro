@@ -8,12 +8,18 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '@layouts/Chrome.astro'
 import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n.mjs'
+import { loadPageRecords } from '../../../content-source.mjs'
 
 export function getStaticPaths() {
   // glob 须在函数体内现调（Astro 构建把 getStaticPaths 提到独立 chunk，吃不到 frontmatter 顶层变量）
   const flatNames = new Set(Object.keys(import.meta.glob('@components/posts/*.astro')).map(p => p.split('/').pop().replace('.astro', '')))
   const kitNames = new Set(Object.keys(import.meta.glob('@components/posts/*/index.astro')).map(p => p.split('/').at(-2)))
   const haveLayout = new Set([...flatNames, ...kitNames])
+  if (process.env.INCLUDE_DRAFTS === '1') {
+    return langDirs().flatMap(lang => loadPageRecords(process.cwd(), { type: 'posts', lang, includeDrafts: true })
+      .filter(({ params, j }) => flatNames.has(params.slug) || kitNames.has(j.page.template))
+      .map(({ params, j }) => ({ params: { lang, ...params }, props: { j } })))
+  }
   const pages = scanPages({ withJson: true })
   const groups = buildGroups(pages)
   const bySlug = new Map(pages.map(p => [p.slug, p]))
@@ -28,7 +34,6 @@ export function getStaticPaths() {
       // 与 zh 路由同口径：同名布局组件 或 模板套件 任一存在才出页（套件兜底，对称性修复）
       if (!flatNames.has(name) && !kitNames.has(j.page.template)) continue
       const params = { lang, slug: name }
-      if (process.env.INCLUDE_DRAFTS === '1') { out.push({ params, props: { j } }); continue } // 预览=镜像全文
       const me = bySlug.get(j.page.slug)
       if (!me) throw new Error(`镜像 slug 在族谱未登记（page.slug 与文件位置矛盾=数据损坏）：content/${lang}/posts/${f} 声明 ${j.page.slug}`) // 评审 M8：Chrome 侧同情形 throw，路由不静默跳页
       const pj = productionJson(me, groups, pages) // 生产=approved 投影（null=不出页）

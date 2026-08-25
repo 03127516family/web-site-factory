@@ -8,8 +8,13 @@ import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '../../../layouts/Chrome.astro'
 import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n.mjs'
+import { loadPageRecords } from '../../../content-source.mjs'
 
 export function getStaticPaths() {
+  if (process.env.INCLUDE_DRAFTS === '1') {
+    return langDirs().flatMap(lang => loadPageRecords(process.cwd(), { type: 'products', lang, includeDrafts: true })
+      .map(({ params, j }) => ({ params: { lang, ...params }, props: { j } })))
+  }
   const pages = scanPages({ withJson: true })
   const groups = buildGroups(pages)
   const bySlug = new Map(pages.map(p => [p.slug, p]))
@@ -21,7 +26,6 @@ export function getStaticPaths() {
       if (!f.endsWith('.json')) continue
       const j = JSON.parse(readFileSync(join(dir, f), 'utf8'))
       const params = { lang, slug: f.replace('.json', '') }
-      if (process.env.INCLUDE_DRAFTS === '1') { out.push({ params, props: { j } }); continue } // 预览=镜像全文
       const me = bySlug.get(j.page.slug)
       if (!me) throw new Error(`镜像 slug 在族谱未登记（page.slug 与文件位置矛盾=数据损坏）：content/${lang}/products/${f} 声明 ${j.page.slug}`) // 评审 M8：Chrome 侧同情形 throw，路由不静默跳页
       const pj = productionJson(me, groups, pages) // 生产=approved 投影（null=不出页）

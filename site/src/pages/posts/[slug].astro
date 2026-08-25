@@ -3,9 +3,8 @@
 // 双派发：数据声明 page.template（套件名）→ components/posts/<名>/index.astro 套件
 // （烧制落的新页，spec B）；无/旧式 template → 每篇独立布局组件 components/posts/<slug>.astro
 // （T2 拍定，旧 4 篇继续走；旧 JSON 里残留的 src/templates/... 路径式 template 天然落空回退）。
-import { readFileSync, readdirSync } from 'node:fs'
-import { join } from 'node:path'
 import Chrome from '@layouts/Chrome.astro'
+import { loadPageRecords } from '@src/content-source.mjs'
 
 // glob 返回键被 Vite 规范化成「相对本文件」的路径——统一转成后缀键（posts/<名>/index.astro），
 // 查表不再数 ../../../（模式可用 @components 别名；键形后缀化后与文件位置无关）
@@ -14,14 +13,10 @@ const kitLayouts = bySuffix(import.meta.glob('@components/posts/*/index.astro'))
 const flatLayouts = bySuffix(import.meta.glob('@components/posts/*.astro'))
 
 export function getStaticPaths() {
-  const dir = join(process.cwd(), 'content/posts')
   // glob 须在函数体内现调（Astro 构建把 getStaticPaths 提到独立 chunk，吃不到 frontmatter 顶层变量）
   const haveLayout = new Set(Object.keys(import.meta.glob('../../components/posts/*.astro')).map(p => p.split('/').pop().replace('.astro', '')))
   const kitNames = new Set(Object.keys(import.meta.glob('../../components/posts/*/index.astro')).map(p => p.split('/').at(-2)))
-  return readdirSync(dir)
-    .filter(f => f.endsWith('.json'))
-    .map(f => ({ params: { slug: f.replace('.json', '') }, j: JSON.parse(readFileSync(join(dir, f), 'utf8')) }))
-    .filter(p => process.env.INCLUDE_DRAFTS === '1' || p.j.page.status === 'published') // 状态门（R30）；编辑预览构建放行（R33）
+  return loadPageRecords(process.cwd(), { type: 'posts', includeDrafts: process.env.INCLUDE_DRAFTS === '1' })
     .filter(p => haveLayout.has(p.params.slug) || kitNames.has(p.j.page.template)) // 有骨架才出页：扁平组件或套件任一
     .map(({ params, j }) => ({ params, props: { j } }))
 }

@@ -9,6 +9,7 @@ import {
   readWorkspace,
   writeDraft,
 } from '../src/draft-store.mjs'
+import { loadPageRecords } from '../src/content-source.mjs'
 import { revisionOf } from '../src/content-revision.mjs'
 import { WritebackError } from '../src/writeback-core.mjs'
 
@@ -98,6 +99,19 @@ test('rejects malformed draft envelopes', () => {
   mkdirSync(join(site, '.drafts/products'), { recursive: true })
   writeFileSync(file, '{"version":9,"content":{}}\n')
   assert.equal(codeOf(() => readWorkspace(site, 'products/bad')), 'DRAFT_INVALID')
+})
+
+test('production records ignore drafts while edit records overlay them', () => {
+  rmSync(draftPath(site, 'products/bad'), { force: true })
+  writeDraft(site, 'products/x', {
+    baseRevision: readWorkspace(site, 'products/x').publishedRevision,
+    content: { page: { status: 'draft', template: 'ProductPage' }, title: 'Overlay draft' },
+  })
+  const production = loadPageRecords(site, { type: 'products', includeDrafts: false })
+  const editing = loadPageRecords(site, { type: 'products', includeDrafts: true })
+  assert.deepEqual(production.map(record => record.j.title), ['Published'])
+  assert.deepEqual(editing.map(record => record.j.title).sort(), ['New page', 'Overlay draft'])
+  assert.equal(editing.find(record => record.j.title === 'Overlay draft').source, 'draft')
 })
 
 try {
