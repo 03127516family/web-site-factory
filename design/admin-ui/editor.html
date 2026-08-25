@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>跳转到编辑器…</title>
+<style>
+  body{font-family:-apple-system,"PingFang SC",sans-serif;background:#F6F5F3;color:#5C5752;display:grid;place-items:center;height:100vh;margin:0;font-size:14px}
+  a{color:#2456E6}
+</style>
+</head>
+<body>
+<div>正在跳转到编辑器（8092 原生界面）…<br><br>若未自动跳转：<a id="link" href="#">点这里</a></div>
+<script>
+// 编辑器入口统一收敛：/editor.html?p=<slug> → 8092 原生编辑页（自带 chrome，单头单底）
+const qp = new URLSearchParams(location.search).get("p") || "products/single-girder-eot-cranes";
+const target = location.protocol + "//" + location.hostname + ":8092/" + qp.replace(/^en\//, qp.startsWith("en/") ? "en/" : "");
+document.getElementById("link").href = target;
+location.replace(target);
+</script>
+</body>
+</html>
