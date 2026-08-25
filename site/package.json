@@ -16,6 +16,7 @@
     "accept:image-alt": "node scripts/accept-image-alt.mjs",
     "accept:drafts": "node scripts/accept-drafts.mjs",
     "accept:content-diff": "node scripts/accept-content-diff.mjs",
+    "accept:draft-server": "node scripts/accept-draft-server.mjs",
     "accept:writeback": "node scripts/accept-writeback.mjs",
     "migrate:writeback": "node scripts/migrate-writeback-v1.mjs",
     "check:writeback-migration": "node scripts/migrate-writeback-v1.mjs --check",

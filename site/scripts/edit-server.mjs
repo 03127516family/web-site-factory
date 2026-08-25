@@ -2,11 +2,11 @@
 // 编辑服务（8092）：静态预览 + 编辑层注入 + 契约写回端点。
 // 写回链：revision/契约校验 → 原子落盘 → 原子替换构建产物 → 响应。
 import http from 'node:http'
-import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync, renameSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync } from 'node:fs'
 import { join, dirname, extname, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
-import { runPipeline, adoptMirror, approvePage, translateAll, consoleData } from '../src/i18n-pipeline.mjs'
+import { runPipeline, approvePage, translateAll, consoleData } from '../src/i18n-pipeline.mjs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
 import { loadTerms, saveTerms } from '../src/i18n-terms.mjs'
 import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n-project.mjs'
@@ -18,12 +18,12 @@ import { createDeepseekCaller } from '../src/deepseek.mjs'
 import { burn, writeDraft } from './deepseek-burn.mjs'
 import { scanKits } from '../src/burn-lib.mjs'
 import { bindHost, accessUrls, lanHostAllowed } from './lan.mjs'
-import { prepareWriteback } from '../src/writeback-request.mjs'
-import { writeJsonAtomic } from '../src/content-revision.mjs'
 import { createEditContext, editContextScript, previewWorkspaceChanges } from '../src/edit-context.mjs'
 import { WritebackError } from '../src/writeback-core.mjs'
 import { loadEditContract } from '../src/edit-contract.mjs'
 import { assetUploadTarget } from '../src/asset-config.mjs'
+import { createOutputBuilder } from '../src/build-outputs.mjs'
+import { createDraftWorkflow } from '../src/draft-workflow.mjs'
 import sharp from 'sharp'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -139,53 +139,29 @@ body.edl-on .edl-active > .ProseMirror{font:inherit!important;color:inherit!impo
 </style>
 <script src="/__edit/edit-layer.js"></script>`
 
-async function rebuild() {
-  const run = (args, env = {}) => new Promise((res, rej) => {
+const runBuild = ({ out, env = {} }) => {
+  const run = args => new Promise((res, rej) => {
     const c = spawn(process.execPath, args, { cwd: SITE, stdio: 'inherit', env: { ...process.env, ...env } })
     c.on('exit', code => (code === 0 ? res() : rej(new Error(args[args.length - 1] + ' 退出码 ' + code))))
   })
-
-  const buildOutput = async (out, env = {}) => {
-    const staging = `${out}-next-${process.pid}`
-    const previous = `${out}-previous-${process.pid}`
-    rmSync(join(SITE, staging), { recursive: true, force: true })
-    rmSync(join(SITE, previous), { recursive: true, force: true })
-    try {
-      await run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'], { ...env, BUILD_OUT: staging })
-      await run([join(SITE, 'scripts/link-assets.mjs')], { ...env, BUILD_OUT: staging })
-
-      const finalDir = join(SITE, out)
-      const stagingDir = join(SITE, staging)
-      const previousDir = join(SITE, previous)
-      if (existsSync(finalDir)) renameSync(finalDir, previousDir)
-      try {
-        renameSync(stagingDir, finalDir)
-      } catch (error) {
-        if (existsSync(previousDir)) renameSync(previousDir, finalDir)
-        throw error
-      }
-      rmSync(previousDir, { recursive: true, force: true })
-    } finally {
-      rmSync(join(SITE, staging), { recursive: true, force: true })
-      rmSync(join(SITE, previous), { recursive: true, force: true })
-    }
-  }
-
-  // 始终在旁路目录完成构建，再同步换入；后台翻译重建期间编辑页不会短暂 404。
-  await buildOutput('dist')
-  await buildOutput('dist-edit', { INCLUDE_DRAFTS: '1' })
+  return run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'])
+    .then(() => run([join(SITE, 'scripts/link-assets.mjs')]))
 }
 
-// 重建串行链：/__save、烧制落盘、后台翻译流水线共用一条链排队——防两个 astro build 并发写同一 outDir
+const outputBuilder = createOutputBuilder({
+  site: SITE,
+  runBuild: ({ out, env }) => runBuild({ out, env: { ...env, BUILD_OUT: out } }),
+})
+
+// 保存、发布、烧制和翻译共用一条串行链，避免构建与内容事务交叉。
 let rebuildChain = Promise.resolve()
-const queueRebuild = () => { rebuildChain = rebuildChain.catch(() => {}).then(rebuild); return rebuildChain }
-const contentChains = new Map()
-function queueContentWrite(file, operation) {
-  const previous = contentChains.get(file) ?? Promise.resolve()
-  const current = previous.catch(() => {}).then(operation)
-  contentChains.set(file, current)
-  return current.finally(() => { if (contentChains.get(file) === current) contentChains.delete(file) })
-}
+const queueBuild = operation => { rebuildChain = rebuildChain.catch(() => {}).then(operation); return rebuildChain }
+const queueRebuild = () => queueBuild(() => outputBuilder.rebuildPublished())
+const draftWorkflow = createDraftWorkflow({
+  site: SITE,
+  rebuildEdit: () => outputBuilder.rebuildEdit(),
+  stagePublish: () => outputBuilder.stagePublished(),
+})
 let translateAllBusy = false // 全站送翻防重入闸（双击防护）
 const pageBusy = new Set() // 单页送翻防重入闸（pageId|lang）
 
@@ -202,7 +178,7 @@ const server = http.createServer(async (req, res) => {
       if (!['draft', 'publish'].includes(payload.intent)) {
         throw new WritebackError('INVALID_INTENT', `保存意图非法: ${payload.intent || ''}`)
       }
-      const preview = previewWorkspaceChanges(SITE, payload)
+      const preview = await queueBuild(() => Promise.resolve(previewWorkspaceChanges(SITE, payload)))
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({
         ok: true,
@@ -219,42 +195,17 @@ const server = http.createServer(async (req, res) => {
       let body = ''
       for await (const chunk of req) body += chunk
       const payload = JSON.parse(body)
-      const { slug, status, patches, changes, revision } = payload
-      if (!/^[\w/-]+$/.test(slug || '') || slug.includes('..')) throw new Error('slug 非法')
-      // slug = 内容相对路径（posts/xxx、en/posts/xxx）——直接映射 content/<slug>.json，zh/镜像无歧义
-      const rel = slug + '.json'
-      const file = join(SITE, 'content', rel)
-      if (!existsSync(file)) throw new Error('页面不存在: ' + slug)
-      const segments = rel.split('/')
-      const saved = await queueContentWrite(file, async () => {
-        const bytes = readFileSync(file)
-        const prepared = prepareWriteback({
-          site: SITE,
-          bytes,
-          expectedRevision: revision,
-          ...(changes !== undefined ? { changes } : { patches: patches ?? [] }),
-          status,
-        })
-        if (segments.length === 3) {
-          // 镜像（en/posts/xxx.json）：人审直改 → TM approved → 重投影（骨架恒 ≡ 源树）
-          const [lang, , pageId] = [segments[0], segments[1], segments[2].replace(/\.json$/, '')]
-          const srcFile = join(SITE, 'content', segments[1], `${pageId}.json`)
-          const srcJ = JSON.parse(readFileSync(srcFile, 'utf8'))
-          const tm = loadTm(srcJ.page.lang, lang)
-          const { n, skipped } = adoptMirror(prepared.data, srcJ, tm, lang)
-          const existingStatus = status !== undefined ? status : prepared.data.page.status ?? 'draft'
-          const mirror = projectPage(srcJ, tm, 'full', { lang, existingStatus, existingTrail: prepared.data.breadcrumb?.trail })
-          const written = writeJsonAtomic(file, mirror)
-          if (n || skipped) console.log(`  [i18n] 镜像人审写回 ${n} 句${skipped ? `（${skipped} 句段错位被跳过：整段重写保持句数，或用审阅页通过按钮）` : ''}`)
-          return { revision: written.revision, i18n: { adopted: n, skipped } }
-        }
-        const written = writeJsonAtomic(file, prepared.data)
-        return { revision: written.revision }
-      })
-      if (segments.length !== 3 && status === 'published') {
+      if (!['draft', 'publish'].includes(payload.intent)) {
+        throw new WritebackError('INVALID_INTENT', `保存意图非法: ${payload.intent || ''}`)
+      }
+      const saved = await queueBuild(() => payload.intent === 'draft'
+        ? draftWorkflow.saveDraft(payload)
+        : draftWorkflow.publish(payload))
+      const segments = payload.slug.split('/')
+      if (segments.length !== 3 && payload.intent === 'publish') {
         // zh 源发布：后台流水线——整页送翻可达分钟级，同步等会卡死编辑器保存响应（问题 #6）。
         // 完成后自己排队重建；失败留事件+console（下次发布/手动送翻会再跑）。
-        const pageId = segments[segments.length - 1].replace(/\.json$/, '')
+        const pageId = segments.at(-1)
         const cfg = loadConfig()
         const callAI = process.env.DEEPSEEK_API_KEY ? createDeepseekCaller() : null
         ;(async () => {
@@ -270,16 +221,36 @@ const server = http.createServer(async (req, res) => {
           try { await queueRebuild() } catch (e) { console.error(`  [i18n] 流水线后重建失败 ${pageId}: ${e.message}`) }
         })()
       }
-      let rebuildError = null
-      try { await queueRebuild() } catch (e) { rebuildError = e.message } // 评审 M4：同镜像分支——保存成功与重建失败分开报
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({
         ok: true,
         saved: true,
-        rebuilt: !rebuildError,
-        revision: saved.revision,
-        ...(saved.i18n ? { i18n: saved.i18n } : {}),
-        ...(rebuildError ? { rebuildError } : {}),
+        published: payload.intent === 'publish',
+        rebuilt: saved.rebuilt,
+        revision: saved.workspace.workingRevision,
+        publishedRevision: saved.workspace.publishedRevision,
+        hasDraft: saved.workspace.hasDraft,
+        hasPublished: saved.workspace.hasPublished,
+        ...(saved.rebuildError ? { rebuildError: saved.rebuildError } : {}),
+      }))
+      return
+    }
+    if (req.method === 'POST' && req.url === '/__discard-draft') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      const payload = JSON.parse(body)
+      const discarded = await queueBuild(() => draftWorkflow.discardDraft(payload))
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({
+        ok: true,
+        discarded: true,
+        deletedPage: !discarded.workspace,
+        ...(discarded.workspace ? {
+          revision: discarded.workspace.workingRevision,
+          publishedRevision: discarded.workspace.publishedRevision,
+          hasDraft: false,
+          hasPublished: true,
+        } : {}),
       }))
       return
     }
