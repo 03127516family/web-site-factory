@@ -1,18 +1,48 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { browserContract, loadEditContract } from './edit-contract.mjs'
-import { revisionOf } from './content-revision.mjs'
 import { WritebackError } from './writeback-core.mjs'
+import { readWorkspace } from './draft-store.mjs'
+import { prepareWriteback } from './writeback-request.mjs'
+import { diffContent } from './content-diff.mjs'
 
 export function createEditContext(site, slug) {
-  if (!/^[\w/-]+$/.test(slug || '') || slug.includes('..')) throw new WritebackError('CONTENT_INVALID', `slug 非法: ${slug || ''}`)
-  const bytes = readFileSync(join(site, 'content', `${slug}.json`))
-  const page = JSON.parse(bytes.toString('utf8')).page
-  if (!page) throw new WritebackError('CONTENT_INVALID', `页面缺少 page: ${slug}`)
+  const workspace = readWorkspace(site, slug)
+  const page = workspace.workingContent.page
   return {
     slug,
-    revision: revisionOf(bytes),
+    revision: workspace.workingRevision,
+    publishedRevision: workspace.publishedRevision,
+    hasDraft: workspace.hasDraft,
+    hasPublished: workspace.hasPublished,
     contract: browserContract(loadEditContract(site, page)),
+  }
+}
+
+export function previewWorkspaceChanges(site, { slug, revision, publishedRevision, changes }) {
+  const workspace = readWorkspace(site, slug)
+  if (publishedRevision === undefined) {
+    throw new WritebackError('PUBLISHED_REVISION_REQUIRED', '预览必须携带 publishedRevision')
+  }
+  if (publishedRevision !== workspace.publishedRevision) {
+    throw new WritebackError('REVISION_CONFLICT', '正式版本已变化，请刷新后重试', {
+      expectedRevision: publishedRevision,
+      currentRevision: workspace.publishedRevision,
+    })
+  }
+  const prepared = prepareWriteback({
+    site,
+    bytes: workspace.workingBytes,
+    expectedRevision: revision,
+    changes,
+  })
+  return {
+    candidate: prepared.data,
+    contract: prepared.contract,
+    diff: diffContent({
+      published: workspace.publishedContent,
+      candidate: prepared.data,
+      contract: prepared.contract,
+    }),
+    workspace,
   }
 }
 

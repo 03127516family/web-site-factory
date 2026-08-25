@@ -12,11 +12,20 @@ import {
 import { loadPageRecords } from '../src/content-source.mjs'
 import { revisionOf } from '../src/content-revision.mjs'
 import { WritebackError } from '../src/writeback-core.mjs'
+import { createEditContext, previewWorkspaceChanges } from '../src/edit-context.mjs'
 
 const site = mkdtempSync(join(tmpdir(), 'draft-store-'))
 const publishedFile = join(site, 'content/products/x.json')
 mkdirSync(join(site, 'content/products'), { recursive: true })
-writeFileSync(publishedFile, JSON.stringify({ page: { status: 'published' }, title: 'Published' }, null, 2) + '\n')
+writeFileSync(publishedFile, JSON.stringify({ page: { status: 'published', type: 'product', template: 'ProductPage' }, title: 'Published' }, null, 2) + '\n')
+const contractDir = join(site, 'src/components/products/ProductPage')
+mkdirSync(contractDir, { recursive: true })
+writeFileSync(join(contractDir, 'edit-contract.json'), JSON.stringify({
+  version: 1,
+  assets: { namespace: 'product', valueFormat: 'filename' },
+  fields: { title: { path: 'title', type: 'text' } },
+  repeats: {},
+}))
 
 const tests = []
 const test = (name, fn) => tests.push({ name, fn })
@@ -46,7 +55,7 @@ test('draft overrides published content without changing it', () => {
   const publishedRevision = revisionOf(before)
   const saved = writeDraft(site, 'products/x', {
     baseRevision: publishedRevision,
-    content: { page: { status: 'draft' }, title: 'Draft' },
+    content: { page: { status: 'draft', type: 'product', template: 'ProductPage' }, title: 'Draft' },
   })
   assert.equal(saved.baseRevision, publishedRevision)
   assert.equal(saved.hasDraft, true)
@@ -60,7 +69,7 @@ test('rewriting a draft retains the original published base', () => {
   const saved = writeDraft(site, 'products/x', {
     expectedRevision: first.workingRevision,
     baseRevision: first.baseRevision,
-    content: { page: { status: 'draft' }, title: 'Draft 2' },
+    content: { page: { status: 'draft', type: 'product', template: 'ProductPage' }, title: 'Draft 2' },
   })
   assert.equal(saved.workingContent.title, 'Draft 2')
   assert.equal(saved.baseRevision, first.baseRevision)
@@ -70,7 +79,7 @@ test('rejects a stale working revision', () => {
   assert.equal(codeOf(() => writeDraft(site, 'products/x', {
     expectedRevision: 'stale',
     baseRevision: readWorkspace(site, 'products/x').baseRevision,
-    content: { page: { status: 'draft' }, title: 'Lost update' },
+    content: { page: { status: 'draft', type: 'product', template: 'ProductPage' }, title: 'Lost update' },
   })), 'REVISION_CONFLICT')
 })
 
@@ -105,13 +114,40 @@ test('production records ignore drafts while edit records overlay them', () => {
   rmSync(draftPath(site, 'products/bad'), { force: true })
   writeDraft(site, 'products/x', {
     baseRevision: readWorkspace(site, 'products/x').publishedRevision,
-    content: { page: { status: 'draft', template: 'ProductPage' }, title: 'Overlay draft' },
+    content: { page: { status: 'draft', type: 'product', template: 'ProductPage' }, title: 'Overlay draft' },
   })
   const production = loadPageRecords(site, { type: 'products', includeDrafts: false })
   const editing = loadPageRecords(site, { type: 'products', includeDrafts: true })
   assert.deepEqual(production.map(record => record.j.title), ['Published'])
   assert.deepEqual(editing.map(record => record.j.title).sort(), ['New page', 'Overlay draft'])
   assert.equal(editing.find(record => record.j.title === 'Overlay draft').source, 'draft')
+})
+
+test('edit context describes the latest workspace without exposing storage paths', () => {
+  const workspace = readWorkspace(site, 'products/x')
+  const context = createEditContext(site, 'products/x')
+  assert.equal(context.revision, workspace.workingRevision)
+  assert.equal(context.publishedRevision, workspace.publishedRevision)
+  assert.equal(context.hasDraft, true)
+  assert.equal(context.hasPublished, true)
+  assert.equal(context.contract.fields.title.path, undefined)
+})
+
+test('preview compares pending changes with published content without writing them', () => {
+  const before = readWorkspace(site, 'products/x')
+  const preview = previewWorkspaceChanges(site, {
+    slug: 'products/x',
+    revision: before.workingRevision,
+    publishedRevision: before.publishedRevision,
+    changes: [{ targetId: 'title', value: 'Pending title' }],
+  })
+  assert.deepEqual(preview.diff.items, [{
+    kind: 'field', targetId: 'title', type: 'text', before: 'Published', after: 'Pending title',
+  }])
+  assert.equal(readWorkspace(site, 'products/x').workingContent.title, 'Overlay draft')
+  assert.equal(codeOf(() => previewWorkspaceChanges(site, {
+    slug: 'products/x', revision: before.workingRevision, publishedRevision: 'stale', changes: [],
+  })), 'REVISION_CONFLICT')
 })
 
 try {

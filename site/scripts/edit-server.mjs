@@ -20,7 +20,7 @@ import { scanKits } from '../src/burn-lib.mjs'
 import { bindHost, accessUrls, lanHostAllowed } from './lan.mjs'
 import { prepareWriteback } from '../src/writeback-request.mjs'
 import { writeJsonAtomic } from '../src/content-revision.mjs'
-import { createEditContext, editContextScript } from '../src/edit-context.mjs'
+import { createEditContext, editContextScript, previewWorkspaceChanges } from '../src/edit-context.mjs'
 import { WritebackError } from '../src/writeback-core.mjs'
 import { loadEditContract } from '../src/edit-contract.mjs'
 import { assetUploadTarget } from '../src/asset-config.mjs'
@@ -195,6 +195,26 @@ const server = http.createServer(async (req, res) => {
     // DNS rebinding（改 Host 名读 GET）。本机名/IP 字面量/mDNS .local 放行，保证局域网访问
     // 的同时不把任意公网域名放进来；特殊主机名可用 ALLOWED_HOSTS=host1,*.example.com。
     if (!lanHostAllowed(req.headers.host ?? '')) { res.writeHead(403); res.end('403 host not allowed'); return }
+    if (req.method === 'POST' && req.url === '/__preview-save') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      const payload = JSON.parse(body)
+      if (!['draft', 'publish'].includes(payload.intent)) {
+        throw new WritebackError('INVALID_INTENT', `保存意图非法: ${payload.intent || ''}`)
+      }
+      const preview = previewWorkspaceChanges(SITE, payload)
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({
+        ok: true,
+        intent: payload.intent,
+        diff: preview.diff,
+        hasDraft: preview.workspace.hasDraft,
+        hasPublished: preview.workspace.hasPublished,
+        revision: preview.workspace.workingRevision,
+        publishedRevision: preview.workspace.publishedRevision,
+      }))
+      return
+    }
     if (req.method === 'POST' && req.url === '/__save') {
       let body = ''
       for await (const chunk of req) body += chunk

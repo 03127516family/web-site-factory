@@ -67,7 +67,7 @@ export function readWorkspace(site, slug) {
   if (!publishedContent && !envelope) fail('CONTENT_NOT_FOUND', `页面不存在: ${slug}`)
 
   const workingContent = envelope?.content ?? publishedContent
-  const workingBytes = jsonBytes(workingContent)
+  const workingBytes = envelope ? jsonBytes(workingContent) : publishedBytes
   return {
     slug,
     hasPublished: !!publishedContent,
@@ -79,7 +79,7 @@ export function readWorkspace(site, slug) {
     baseRevision: envelope?.baseRevision ?? publishedRevision,
     workingContent,
     workingBytes,
-    workingRevision: revisionOf(workingBytes),
+    workingRevision: envelope ? revisionOf(workingBytes) : publishedRevision,
   }
 }
 
