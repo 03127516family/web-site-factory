@@ -14,6 +14,7 @@
     "accept:poc5": "node scripts/accept-poc5.mjs",
     "accept:item-menu": "node scripts/accept-item-menu.mjs",
     "accept:image-alt": "node scripts/accept-image-alt.mjs",
+    "accept:drafts": "node scripts/accept-drafts.mjs",
     "accept:writeback": "node scripts/accept-writeback.mjs",
     "migrate:writeback": "node scripts/migrate-writeback-v1.mjs",
     "check:writeback-migration": "node scripts/migrate-writeback-v1.mjs --check",
