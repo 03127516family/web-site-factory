@@ -17,7 +17,11 @@ try {
   await image.dispatchEvent('pointerdown')
   await page.locator('#edlImgAlt').fill('图片 alt 保存回归测试')
   await page.click('#edlImgApply')
-  await page.click('#edlSave')
+  const [previewResponse] = await Promise.all([
+    page.waitForResponse(response => response.url().endsWith('/__preview-save')),
+    page.click('#edlChromeDraft'),
+  ])
+  assert.equal(previewResponse.status(), 200)
 
   assert.deepEqual(pageErrors, [], `修改图片 alt 后打开保存预览不能报错: ${pageErrors.join('; ')}`)
   await page.locator('#edlModal:not([hidden])').waitFor()

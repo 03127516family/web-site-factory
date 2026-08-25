@@ -544,116 +544,38 @@ function flashZones() {
 }
 function unflashZones() { document.querySelectorAll('.edl-zoneflash').forEach(z => z.classList.remove('edl-zoneflash')) }
 
-// ---------- 保存预览：boot 拍原件快照，showSave 逐段 diff（改了哪句一眼可见） ----------
-const origSnap = new Map() // key → { text, blocks, src, href }；数组行另有 'rows:<path>' → [行标签]
-const normTxt = s => String(s ?? '').replace(/\s+/g, ' ').trim()
-const stripTags = h => String(h ?? '').replace(/<[^>]*>/g, '')
-function snapBlocks(el) { // body 槽的段级原文：顶层每个孩子一条文本（与 treeBlocks 同款渲染，保证同形可比）
-  const one = c => {
-    if (c.tagName === 'HR') return '———'
-    if (c.tagName === 'FIGURE' || c.tagName === 'IMG') {
-      const img = c.tagName === 'IMG' ? c : c.querySelector('img')
-      return '[图片] ' + normTxt(img?.getAttribute('alt') || img?.getAttribute('src') || '')
-    }
-    if (c.tagName === 'TABLE' || c.querySelector?.('table')) return '[表格] ' + normTxt(c.innerText)
-    return normTxt(c.innerText)
-  }
-  const kids = [...el.children]
-  return (kids.length ? kids.map(one) : [normTxt(el.innerText)]).filter(Boolean)
+// ---------- 保存预览：服务端按模板契约比较「当前候选」与「最后正式版」 ----------
+const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char])
+const cut = value => { const text = String(value ?? ''); return text.length > 220 ? text.slice(0, 220) + '…' : text }
+function richTextSummary(node) {
+  if (!node || typeof node !== 'object') return ''
+  if (typeof node.text === 'string') return node.text
+  if (node.type === 'image') return `[图片] ${node.attrs?.alt || node.attrs?.src || ''}`
+  if (node.type === 'horizontalRule') return '———'
+  return (node.content ?? []).map(richTextSummary).filter(Boolean).join(' ')
 }
-function rowLabel(item) { // 行标签：优先标题字段，其次图名，兜底前 30 字
-  const t = item.querySelector('[data-field$=".title"], [data-field$=".name"], h3, h4')
-  if (t && normTxt(t.innerText)) return normTxt(t.innerText)
-  const img = item.querySelector('img')
-  if (img) return (img.getAttribute('src') || '').split('/').pop()
-  return normTxt(item.innerText).slice(0, 30)
+function valueSummary(value, type) {
+  if (type === 'richText') return richTextSummary(value)
+  if (type === 'image') return `${value?.src || '（无图片）'}${value?.alt ? ` · alt: ${value.alt}` : ''}`
+  if (Array.isArray(value)) return value.join('；')
+  if (value === undefined) return '（不存在）'
+  if (value === null || value === '') return '（空）'
+  return String(value)
 }
-function snapshotOriginals() {
-  document.querySelectorAll('[data-field]').forEach(el => {
-    const key = targetOf(el)
-    if (!key) return
-    if (!origSnap.has(key)) origSnap.set(key, {
-      text: normTxt(stripTags(el.innerHTML)),
-      blocks: snapBlocks(el),
-      src: el.getAttribute('src'), href: el.getAttribute('href'),
-    })
-  })
-  document.querySelectorAll('[data-repeat-key]:not([data-repeat-mirror])').forEach(holder => {
-    origSnap.set('rows:' + holder.getAttribute('data-repeat-key'), [...holder.children].filter(el => el.hasAttribute('data-item-id')).map(rowLabel))
-  })
+function renderSummaryItem(item) {
+  if (item.kind === 'field') {
+    return `<div class="edl-pv"><div class="edl-pv-head"><code>${esc(item.targetId)}</code><span>${esc(item.type)}</span></div><div class="edl-diff"><div class="edl-del">－ ${esc(cut(valueSummary(item.before, item.type)))}</div><div class="edl-add">＋ ${esc(cut(valueSummary(item.after, item.type)))}</div></div></div>`
+  }
+  const label = item.kind === 'repeat-insert' ? '新增一项' : item.kind === 'repeat-delete' ? '删除一项' : '调整顺序'
+  const detail = item.kind === 'repeat-order'
+    ? `${item.before.join(' → ')}  改为  ${item.after.join(' → ')}`
+    : item.itemId
+  return `<div class="edl-pv"><div class="edl-pv-head"><code>${esc(item.regionId)}</code><span>${label}</span></div><div class="edl-note">${esc(detail)}</div></div>`
 }
-function diffLines(a, b) { // 段级 LCS → del/add 操作流（same 不渲染）
-  const n = a.length, m = b.length
-  const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0))
-  for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1])
-  const ops = []
-  let i = 0, j = 0
-  while (i < n && j < m) {
-    if (a[i] === b[j]) { i++; j++ }
-    else if (dp[i + 1][j] >= dp[i][j + 1]) ops.push({ t: 'del', text: a[i++] })
-    else ops.push({ t: 'add', text: b[j++] })
-  }
-  while (i < n) ops.push({ t: 'del', text: a[i++] })
-  while (j < m) ops.push({ t: 'add', text: b[j++] })
-  return ops
-}
-function treeBlocks(doc) { // 新树 → 段级文本（与 snapBlocks 同款渲染，保证同形可比）
-  const inline = n => {
-    if (n.text !== undefined) return n.text
-    if (n.type === 'hardBreak') return ' '
-    const kids = (n.content ?? []).map(inline)
-    const blockish = n.type && !['paragraph', 'heading'].includes(n.type) // 列表/引用等容器：子块间补分隔
-    return kids.join(blockish ? ' ' : '')
-  }
-  return (doc?.content ?? []).map(b => {
-    if (b.type === 'image') return '[图片] ' + normTxt(b.attrs?.alt || b.attrs?.src || '')
-    if (b.type === 'table') return '[表格] ' + normTxt((b.content ?? []).map(r => (r.content ?? []).map(inline).join(' ')).join(' '))
-    if (b.type === 'horizontalRule') return '———'
-    return normTxt(inline(b))
-  }).filter(Boolean)
-}
-function renderDiff(oldBlocks, newBlocks) { // → HTML：红删绿增；文字没变（只动格式）给提示
-  const ops = diffLines(oldBlocks, newBlocks)
-  if (!ops.length) return '<div class="edl-note">文字未变（格式/标记调整）</div>'
-  const esc = s => String(s).replace(/</g, '&lt;')
-  const cut = s => (s.length > 140 ? s.slice(0, 140) + '…' : s)
-  return '<div class="edl-diff">' + ops.map(o =>
-    o.t === 'del' ? `<div class="edl-del">－ ${esc(cut(o.text))}</div>` : `<div class="edl-add">＋ ${esc(cut(o.text))}</div>`
-  ).join('') + '</div>'
-}
-function preview(p) { // 单个补丁的人话预览
-  if (p.kind === 'tree') return renderDiff(origSnap.get(p.path)?.blocks ?? [], treeBlocks(p.value))
-  if (p.kind === 'chunk') return renderDiff(origSnap.get(`${p.path}#${p.index}`)?.blocks ?? [], treeBlocks(p.value))
-  if (p.kind === 'html') {
-    const oldT = origSnap.get(p.path)?.text
-    const newT = normTxt(stripTags(p.value))
-    if (oldT === undefined || oldT === newT) return `<div class="edl-diff"><div class="edl-add">＋ ${newT.replace(/</g, '&lt;').slice(0, 140) || '（富文本片段）'}</div></div>`
-    return renderDiff([oldT], [newT])
-  }
-  if (p.kind === 'image') {
-    const old = origSnap.get(p.path)?.src || ''
-    return `<div class="edl-diff"><div class="edl-del">－ ${old || '（原图未知）'}</div><div class="edl-add">＋ ${p.src}${p.alt ? '（' + p.alt + '）' : ''}</div></div>`
-  }
-  if (p.kind === 'link') {
-    const old = origSnap.get(p.path)?.href
-    return `<div class="edl-diff"><div class="edl-del">－ ${old || ''}</div><div class="edl-add">＋ ${p.href}</div></div>`
-  }
-  if (p.kind === 'array') {
-    const oldRows = origSnap.get('rows:' + p.path) ?? []
-    const newRows = p.value.map(o => normTxt(stripTags(o.title || o.name || o.label || o.image || Object.values(o).find(v => typeof v === 'string') || '')))
-    const head = `<div class="edl-note">整列 ${oldRows.length} 行 → ${newRows.length} 行</div>`
-    return head + renderDiff(oldRows, newRows)
-  }
-  return '<div class="edl-note">（结构改动）</div>'
-}
-function previewChange(change) {
-  if (change.op) return `<div class="edl-note">${change.op}：${change.itemId || ''}</div>`
-  const type = fieldSpec(change.targetId)?.type
-  if (type === 'richText') return preview({ path: change.targetId, kind: 'tree', value: change.value })
-  if (type === 'image') return preview({ path: change.targetId, kind: 'image', src: change.value.src, alt: change.value.alt })
-  if (type === 'link') return preview({ path: change.targetId, kind: 'link', href: change.value })
-  if (type === 'stringList') return renderDiff(origSnap.get(change.targetId)?.blocks ?? [], change.value)
-  return preview({ path: change.targetId, kind: 'html', value: String(change.value ?? '') })
+function renderSaveSummary(diff) {
+  if (diff.firstPublish) return '<div class="edl-note">这是该页面的首次发布，将发布当前完整页面。</div>'
+  if (!diff.items.length) return '<div class="edl-note">当前内容与已发布版本一致。</div>'
+  return diff.items.map(renderSummaryItem).join('')
 }
 // ---------- 写回（POC-5）：收集改动 → 预览 → 存草稿/发布 ----------
 function dirtyCount() { return state.dirty.fields.size + state.dirty.trees.size + state.dirty.operations.length }
@@ -681,41 +603,75 @@ function collectChanges() {
   for (const [targetId, tree] of state.dirty.trees) changes.push({ targetId, value: tree })
   return changes
 }
-function showSave() { // R23：保存前改动可见
+async function showSave(intent) {
   commitActive()
   const changes = collectChanges()
-  $('#edlModalContent').innerHTML = changes.length
-    ? changes.map(change =>
-        `<div class="edl-pv"><div class="edl-pv-head"><code>${change.targetId || change.regionId}</code><span>${change.op || fieldSpec(change.targetId)?.type || 'value'}</span></div>${previewChange(change)}</div>`
-      ).join('')
-    : '<p style="padding:12px;color:#777">没有改动</p>'
-  $('#edlModal').dataset.changes = JSON.stringify(changes)
-  $('#edlModal').hidden = false
+  const modal = $('#edlModal')
+  const publishing = intent === 'publish'
+  $('#edlModalTitle').textContent = publishing
+    ? (state.context?.hasPublished ? '更新发布前确认' : '首次发布前确认')
+    : '保存草稿前确认'
+  $('#edlModalLead').textContent = '以下内容与最后正式版本比较'
+  $('#edlModalContent').innerHTML = '<div class="edl-note">正在核对完整修改...</div>'
+  const confirm = $('#edlConfirmSave')
+  confirm.textContent = publishing ? (state.context?.hasPublished ? '确认更新发布' : '确认首次发布') : '确认保存草稿'
+  confirm.disabled = true
+  modal.dataset.intent = intent
+  modal.dataset.changes = JSON.stringify(changes)
+  modal.hidden = false
+  const slug = state.context?.slug || location.pathname.replace(/\/+$/, '').replace(/^\/+/, '')
+  try {
+    const res = await fetch('/__preview-save', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        slug, intent,
+        revision: state.context?.revision,
+        publishedRevision: state.context?.publishedRevision ?? null,
+        changes,
+      }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw Object.assign(new Error(data.error || String(res.status)), { conflict: res.status === 409 })
+    $('#edlModalContent').innerHTML = renderSaveSummary(data.diff)
+    confirm.disabled = false
+  } catch (error) {
+    $('#edlModalContent').innerHTML = `<div class="edl-note">${esc(error.conflict ? '版本已变化，请刷新页面后重试。' : `无法生成修改摘要：${error.message}`)}</div>`
+  }
 }
-async function doSave(status) {
+async function doSave() {
+  const intent = $('#edlModal').dataset.intent
   const changes = JSON.parse($('#edlModal').dataset.changes || '[]')
   const slug = state.context?.slug || location.pathname.replace(/\/+$/, '').replace(/^\/+/, '')
+  const confirm = $('#edlConfirmSave')
+  confirm.disabled = true
   const res = await fetch('/__save', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ slug, status, revision: state.context?.revision, changes }),
+    body: JSON.stringify({
+      slug, intent,
+      revision: state.context?.revision,
+      publishedRevision: state.context?.publishedRevision ?? null,
+      changes,
+    }),
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     const lead = res.status === 409 ? '页面已被其他保存更新，请刷新后重试：\n' : '保存被拒：\n'
-    alert(lead + (data.error || res.status)); return
+    alert(lead + (data.error || res.status)); confirm.disabled = false; return
   }
-  // 评审 I1：镜像人审写回若跳过句（段句数与源不一致整段不采纳），如实弹窗——服务端落的是重投影产物，
-  // 不提示的话用户会以为自己改的句已生效，reload 后字变回去且零解释
-  if (data.i18n?.skipped) alert(`本次有 ${data.i18n.skipped} 句未采纳（所在段句数与源不一致，整段跳过防张冠李戴）。\n该段请整段重写并保持句数一致，或到翻译控制台用「通过并发布」。`)
-  // 评审 M4：文件已保存但重建失败——不是「保存被拒」，如实分开报
-  if (data.rebuildError) alert('已保存到内容文件，但页面重建失败（生产站可能仍显示旧版）：\n' + data.rebuildError)
   $('#edlModal').hidden = true
-  if (state.context && data.revision) state.context.revision = data.revision
+  if (state.context) {
+    state.context.revision = data.revision
+    state.context.publishedRevision = data.publishedRevision
+    state.context.hasDraft = data.hasDraft
+    state.context.hasPublished = data.hasPublished
+  }
   lastSaveAt = new Date()
   updateChromeAutosave()
   state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0
-  if (status === 'published') { sessionStorage.setItem('edlReenter', '1'); alert('已发布，页面已重建'); location.reload() }
-  else alert('草稿已保存。当前就是草稿预览（生产站不显示此页）')
+  updateDirtyBadge()
+  refreshChromeControls()
+  if (data.rebuildError) alert('草稿已经保存，但草稿预览构建失败：\n' + data.rebuildError)
+  if (intent === 'publish') { sessionStorage.setItem('edlReenter', '1'); location.reload() }
 }
 
 // ---------- 事件路由(pointerdown 捕获即挂载——Swiper 等组件会吞掉兼容性 mousedown, pointerdown 吞不掉) ----------
@@ -775,7 +731,6 @@ function enterEdit() {
   flashZones()
   $('#edlToggle').textContent = '✓ 退出编辑'
   $('#edlMode').hidden = false
-  $('#edlSave').hidden = false
   document.addEventListener('pointerdown', onDown, true)
   document.addEventListener('click', onClickGuard, true)
   document.addEventListener('mousemove', onMove, true)
@@ -792,7 +747,6 @@ function exitEdit() {
   $('#edlModal').hidden = true
   $('#edlToggle').textContent = '✏️ 开始编辑'
   $('#edlMode').hidden = true
-  $('#edlSave').hidden = true
   document.removeEventListener('pointerdown', onDown, true)
   document.removeEventListener('click', onClickGuard, true)
   document.removeEventListener('mousemove', onMove, true)
@@ -823,7 +777,9 @@ const CHROME_CSS = `
 #edl-chrome-bottom .edl-chrome-schema{display:flex;align-items:center;gap:4px}
 #edl-chrome-bottom .edl-chrome-schema .ok{color:#0E7A4E}
 #edl-chrome-bottom .edl-chrome-spacer{flex:1}
-#edlChromeRevert{background:transparent;border:0;color:#5C5752;font-size:12px;padding:0;cursor:pointer;text-decoration:underline}
+.edl-chrome-bottom-btn{background:transparent;border:0;color:#5C5752;font-size:12px;padding:3px 5px;cursor:pointer}
+.edl-chrome-bottom-btn:hover{color:#1C1B1A;text-decoration:underline}
+#edlChromeDiscard{color:#B42318}
 body{padding-top:56px!important;padding-bottom:38px!important}
 @media(max-width:640px){
   #edl-chrome-top{padding:0 8px;gap:6px}
@@ -854,10 +810,46 @@ function fmtClock(d) { const p = x => String(x).padStart(2, '0'); return `${p(d.
 function updateChromePill() {
   if (!chromePill) return
   const n = dirtyCount()
-  chromePill.textContent = n ? `草稿 · ${n} 处未保存更改` : '已发布'
+  chromePill.textContent = n
+    ? `${n} 处未保存更改`
+    : state.context?.hasDraft
+      ? '草稿已保存'
+      : state.context?.hasPublished ? '已发布' : '尚未发布'
 }
 function updateChromeAutosave() {
-  if (chromeAutosave) chromeAutosave.textContent = '自动保存 ' + (lastSaveAt ? fmtClock(lastSaveAt) : '未保存')
+  if (chromeAutosave) chromeAutosave.textContent = lastSaveAt ? `上次手动保存 ${fmtClock(lastSaveAt)}` : '尚未手动保存'
+}
+function refreshChromeControls() {
+  updateChromePill()
+  const publish = $('#edlChromePublish')
+  if (publish) publish.textContent = state.context?.hasPublished ? '更新发布' : '首次发布'
+  const hasDraft = !!state.context?.hasDraft
+  const hasPublished = !!state.context?.hasPublished
+  if ($('#edlChromePreview')) $('#edlChromePreview').hidden = !hasDraft
+  if ($('#edlChromeDiscard')) $('#edlChromeDiscard').hidden = !hasDraft
+  if ($('#edlChromePublished')) $('#edlChromePublished').hidden = !hasPublished
+}
+function openCleanView(view) {
+  const url = new URL(location.href)
+  url.search = ''
+  url.searchParams.set('view', view)
+  window.open(url.href, '_blank', 'noopener')
+}
+async function discardSavedDraft() {
+  if (!state.context?.hasDraft) return
+  const warning = state.context.hasPublished
+    ? '确认丢弃已保存草稿并恢复到正式版本？浏览器内尚未保存的改动也会丢失。'
+    : '该页面从未发布。确认删除整个草稿页面？已上传的图片文件会保留。'
+  if (!confirm(warning)) return
+  const res = await fetch('/__discard-draft', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ slug: state.context.slug, revision: state.context.revision }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) { alert((res.status === 409 ? '草稿版本已变化，请刷新后重试：' : '丢弃草稿失败：') + (data.error || res.status)); return }
+  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0
+  if (data.deletedPage) location.href = '/__burn'
+  else location.reload()
 }
 async function switchLang() {
   const url = siblingLangUrl()
@@ -894,7 +886,9 @@ function buildChrome() {
   bottom.innerHTML = `<span class="edl-chrome-schema"><span class="ok">✓</span> schema 校验通过</span>
     <span id="edlChromeAutosave"></span>
     <span class="edl-chrome-spacer"></span>
-    <button id="edlChromeRevert" type="button">还原到已发布版</button>`
+    <button id="edlChromePreview" class="edl-chrome-bottom-btn" type="button">预览草稿</button>
+    <button id="edlChromePublished" class="edl-chrome-bottom-btn" type="button">查看正式版</button>
+    <button id="edlChromeDiscard" class="edl-chrome-bottom-btn" type="button">丢弃草稿</button>`
 
   document.body.appendChild(top)
   document.body.appendChild(bottom)
@@ -904,12 +898,8 @@ function buildChrome() {
   chromeAutosave = bottom.querySelector('#edlChromeAutosave')
   top.querySelector('#edlChromeTitle').textContent = pageTitleText()
 
-  // 工作台与编辑服务同机不同端口：沿用当前页面 host，局域网访问时不会错误跳回访问者自己的 localhost。
   top.querySelector('#edlChromeWorkbench').addEventListener('click', () => {
-    const u = new URL(window.location.href)
-    u.port = '8090'
-    u.pathname = '/'
-    u.search = u.hash = ''
+    const u = new URL(state.context?.workbenchUrl || '/__burn', window.location.href)
     window.open(u.href, '_blank')
   })
 
@@ -919,20 +909,19 @@ function buildChrome() {
     b.addEventListener('click', () => { if (b.dataset.lang !== lang) switchLang() })
   })
 
-  // 保存/发布：复用现有 showSave()（commit + 收集补丁入 #edlModal）+ doSave(status)（写回 /__save）
-  top.querySelector('#edlChromeDraft').addEventListener('click', () => { showSave(); doSave('draft') })
-  top.querySelector('#edlChromePublish').addEventListener('click', () => { showSave(); doSave('published') })
+  top.querySelector('#edlChromeDraft').addEventListener('click', () => showSave('draft'))
+  top.querySelector('#edlChromePublish').addEventListener('click', () => showSave('publish'))
+  bottom.querySelector('#edlChromePreview').addEventListener('click', () => openCleanView('draft'))
+  bottom.querySelector('#edlChromePublished').addEventListener('click', () => openCleanView('published'))
+  bottom.querySelector('#edlChromeDiscard').addEventListener('click', discardSavedDraft)
 
-  bottom.querySelector('#edlChromeRevert').addEventListener('click', () => { alert('还原到已发布版：后端尚无此端点，暂未实现') })
-
-  updateChromePill()
+  refreshChromeControls()
   updateChromeAutosave()
 }
 
 // ---------- UI 事件 ----------
 export function boot() {
-  buildChrome() // 编辑器自带 chrome（顶部工具条 + 底部状态条）：挂 body，只加不拆
-  snapshotOriginals() // 保存预览的「原件」：任何编辑发生前拍一份（快照只用于预览 diff，写回永远走补丁）
+  buildChrome()
   if (sessionStorage.getItem('edlReenter')) { sessionStorage.removeItem('edlReenter'); setTimeout(enterEdit, 300) }
   $('#edlToggle').addEventListener('click', () => state.on ? exitEdit() : enterEdit())
   $('#edlMode').addEventListener('click', () => {
@@ -941,9 +930,8 @@ export function boot() {
     if (state.toolbar && state.editor && state.kind === 'rich') showToolbar()
     else hideToolbar()
   })
-  $('#edlSave').addEventListener('click', showSave)
-  $('#edlSaveDraft').addEventListener('click', () => doSave('draft'))
-  $('#edlSavePublish').addEventListener('click', () => doSave('published'))
+  $('#edlConfirmSave').addEventListener('click', doSave)
+  $('#edlModalCancel').addEventListener('click', () => { $('#edlModal').hidden = true })
   $('#edlModalClose').addEventListener('click', () => { $('#edlModal').hidden = true })
   $('#edlModal').addEventListener('click', e => { if (e.target === $('#edlModal')) $('#edlModal').hidden = true })
 
@@ -997,7 +985,7 @@ export function boot() {
     closeLinkPopover()
   })
   $('#edlLinkClose').addEventListener('click', closeLinkPopover)
-  window.addEventListener('beforeunload', e => { if (state.on && dirtyCount()) { e.preventDefault(); e.returnValue = '' } })
+  window.addEventListener('beforeunload', e => { if (dirtyCount()) { e.preventDefault(); e.returnValue = '' } })
   document.addEventListener('keydown', e => {
     if (e.key !== 'Escape') return
     if (/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return

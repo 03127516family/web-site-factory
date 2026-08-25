@@ -24,11 +24,13 @@ import { loadEditContract } from '../src/edit-contract.mjs'
 import { assetUploadTarget } from '../src/asset-config.mjs'
 import { createOutputBuilder } from '../src/build-outputs.mjs'
 import { createDraftWorkflow } from '../src/draft-workflow.mjs'
+import { readWorkspace } from '../src/draft-store.mjs'
 import sharp from 'sharp'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 if (process.cwd() !== SITE) process.chdir(SITE) // TM/术语/流水线按 process.cwd() 寻址——从仓库根启动会读错位/写幽灵文件，锚回 site/
-const DIST = join(SITE, 'dist-edit') // 编辑/预览服「含草稿」产物（R33）；生产站另服 dist
+const DIST_EDIT = join(SITE, 'dist-edit')
+const DIST_PUBLISHED = join(SITE, 'dist')
 const PORT = Number(process.env.PORT) || 8092 // 可 PORT=8093 并存冒烟（默认不变）
 const HOST = bindHost('0.0.0.0') // 局域网可访问；HOST=127.0.0.1 缩回仅本机（配 DEEPSEEK_API_KEY 时建议缩回）
 const PREVIEWS = new Map() // 烧制预览暂存（内存，重启即清；上限 20 份 FIFO）
@@ -39,7 +41,6 @@ const INJECT = `
 <div class="edl-ui edl-pill">
   <button id="edlToggle">✏️ 开始编辑</button>
   <button id="edlMode" hidden>工具条：开</button>
-  <button id="edlSave" hidden>💾 保存…</button>
   <span id="edlDirty" style="align-self:center;font-size:12px"></span>
 </div>
 <div class="edl-ui edl-pop" id="edlImgPop" hidden>
@@ -62,11 +63,11 @@ const INJECT = `
 </div>
 <div class="edl-ui edl-modal" id="edlModal" hidden>
   <div class="edl-modal-body">
-    <div class="edl-modal-head"><b>保存确认</b><span>以下改动将写回 JSON（过 schema 校验 → 落盘 → 重建页面）</span><button id="edlModalClose">✕</button></div>
+    <div class="edl-modal-head"><b id="edlModalTitle">保存确认</b><span id="edlModalLead"></span><button id="edlModalClose" aria-label="关闭">✕</button></div>
     <div id="edlModalContent"></div>
     <div class="edl-modal-foot">
-      <button id="edlSaveDraft" class="edl-btn-ghost">存草稿</button>
-      <button id="edlSavePublish" class="edl-btn-main">发布</button>
+      <button id="edlModalCancel" class="edl-btn-ghost">取消</button>
+      <button id="edlConfirmSave" class="edl-btn-main">确认</button>
     </div>
   </div>
 </div>
@@ -77,7 +78,6 @@ const INJECT = `
 .edl-pill button{border:0;border-radius:999px;padding:8px 16px;background:transparent;color:#fff;cursor:pointer;font-size:14px}
 .edl-pill button:hover{background:rgba(255,255,255,.12)}
 #edlToggle{background:#2563eb}
-#edlSave{background:#16a34a}
 body.edl-on [data-field]:hover{outline:2px dashed rgba(37,99,235,.55);outline-offset:2px;cursor:text}
 body.edl-on img[data-field]:hover{cursor:pointer}
 body.edl-on .edl-edit-lift{z-index:1!important}
@@ -259,9 +259,7 @@ const server = http.createServer(async (req, res) => {
       const name = uploadUrl.searchParams.get('name') || ''
       const slug = uploadUrl.searchParams.get('slug') || ''
       if (!/^[\w/-]+$/.test(slug) || slug.includes('..')) throw new Error('上传缺少合法 slug')
-      const pageFile = join(SITE, 'content', `${slug}.json`)
-      if (!existsSync(pageFile)) throw new Error('上传页面不存在: ' + slug)
-      const page = JSON.parse(readFileSync(pageFile, 'utf8')).page
+      const page = readWorkspace(SITE, slug).workingContent.page
       const contract = loadEditContract(SITE, page)
       let base = name.replace(/[^\w.-]/g, '-').replace(/^-+/, '')
       if (!base.replace(/\.\w+$/, '').replace(/-/g, '')) base = 'img-' + Date.now() + (base.match(/\.\w+$/)?.[0] || '.jpg') // 纯中文名兜底
@@ -551,18 +549,27 @@ document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/app
       res.end(html)
       return
     }
-    let pathname = decodeURIComponent(new URL(req.url, 'http://x').pathname)
-    let file = normalize(join(DIST, pathname))
-    if (!file.startsWith(DIST)) { res.writeHead(403); res.end(); return }
+    const pageUrl = new URL(req.url, 'http://x')
+    const view = pageUrl.searchParams.get('view')
+    const cleanView = view === 'draft' || view === 'published'
+    const staticRoot = view === 'published' ? DIST_PUBLISHED : DIST_EDIT
+    let pathname = decodeURIComponent(pageUrl.pathname)
+    let file = normalize(join(staticRoot, pathname))
+    if (!file.startsWith(staticRoot)) { res.writeHead(403); res.end(); return }
     if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html')
     if (!existsSync(file)) { res.writeHead(404); res.end('404'); return }
     const ext = extname(file)
     const data = readFileSync(file)
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' })
-    if (ext === '.html') {
+    if (ext === '.html' && !cleanView) {
       const slug = pathname.replace(/^\/+|\/+$/g, '')
       let context = ''
-      try { context = editContextScript(createEditContext(SITE, slug)) }
+      try {
+        context = editContextScript({
+          ...createEditContext(SITE, slug),
+          workbenchUrl: process.env.WORKBENCH_URL || '/__burn',
+        })
+      }
       catch (error) {
         if (!['ENOENT', 'CONTRACT_NOT_FOUND'].includes(error?.code)) console.warn(`  [edit] 上下文不可用 ${slug}: ${error.message}`)
       }
