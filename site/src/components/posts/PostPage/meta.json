@@ -1,5 +1,5 @@
 [
-  { "key": "title",           "shape": "text",     "level": "similar"  },
-  { "key": "body.sections",   "shape": "sections", "level": "verbatim" },
-  { "key": "page.description", "shape": "seo",     "level": "summary"  }
+  { "key": "title",           "shape": "text",     "level": "similar",  "desc": "文章标题" },
+  { "key": "body.sections",   "shape": "sections", "level": "verbatim", "desc": "正文章节序列（按原文顺序，每章一个小标题+正文）" },
+  { "key": "page.description", "shape": "seo",     "level": "summary",  "desc": "SEO 描述（150 字以内概括，唯一允许概括的格子）" }
 ]

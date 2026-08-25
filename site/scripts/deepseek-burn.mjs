@@ -17,12 +17,14 @@ const RULES = `你是内容结构化器，把原料文章（产品页或文章�
 3. body_md 用 markdown 语法（段落空行分隔、- 列表、| 表格 |）；
 4. 标题允许轻微规范（去序号/标点），正文字句一律逐字；
 5. 文字必须逐字来自给定原文；
-6. 每段原文只许用于一个字段；严禁把同一段内容塞进两个字段，严禁把整篇或大段原文复制到多个字段里——你的角色是搬运工不是作者，只做对应和摘取。`
+6. 每段原文只许用于一个字段；严禁把同一段内容塞进两个字段，严禁把整篇或大段原文复制到多个字段里——你的角色是搬运工不是作者，只做对应和摘取；
+7. 原文里若贴了示例 JSON 结构（如 example.json），它只作格式参考、不是正文：正文段落必须全部映射进对应格子，示例 JSON 里的文字不是搬运对象；
+8. 一次给全：白名单里原文有对应内容的每一个格子都必须输出，漏格会被逐个补烧；只有原文里真没有内容的格子才缺席。`
 
 // 一把梭：一次出整页 JSON（格子缺席合法；代码侧逐格验收，不过的单格重烧）
 // 格式契约按 shape 从 loadCatalog 目录分组生成——目录加段/加格时提示词不漂移；
 // 示例文字从套件 example 现取（真字段真值，换站随模版走，引擎不内置站味）
-export function oneShotMessages(rawText, catalog, productName, sample) {
+export function oneShotMessages(rawText, catalog, productName, sample, strict = false) {
   const contract = [
     ['section', '正文段', '"字段名":{"title":"段标题（原文有栏目名用栏目名；没有栏目名就用产品名，禁止自创）","body_md":"markdown 正文"}'],
     ['sections', '章节序列', '"字段名":{"items":[{"heading":"章节标题（用原文小标题，逐字；无小标题的段落并入相邻章节，禁止自创标题）","body_md":"markdown 正文"}，按原文顺序]}'],
@@ -34,22 +36,31 @@ export function oneShotMessages(rawText, catalog, productName, sample) {
     return keys.length ? `- ${label}（${keys.join('/')}）：${fmt}` : null
   }).filter(Boolean).join('\n')
   const sampleLine = sample ? `\n\n示例（仅示意格式）：${sample}` : ''
+  // 各格含义（治本，2026-08-17）：光秃英文名模型看不懂→漏格（实战只出 3 格）；desc 由套件 meta.json 自带，换站随模版走
+  const descBlock = catalog.filter(c => c.desc).map(c => `- ${c.key}：${c.desc}`).join('\n')
+  const descLine = descBlock ? `\n\n各格含义（判断哪段原文进哪格；格名照白名单逐字抄，别抄冒号后的解释）：\n${descBlock}` : ''
+  // 整行粒度铁律（「我已整理好」模式）：用户的边界一个不许切——只许整行/连续整行搬运
+  const strictLine = strict ? '\n\n搬运粒度铁律（用户已整理好的内容）：每段正文必须正好是原文的一整行或连续几整行（允许连续行拼接还原）；不许截半句、不许跳行挑句拼接。' : ''
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `名称：${productName}\n\n可选字段白名单（逐字一致，别的禁止发明；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}${sampleLine}\n\n原文：\n${rawText}` },
+    { role: 'user', content: `名称：${productName}\n\n可选字段白名单（格名必须逐字照抄这份名单；名单里是点号连写的扁平格名，如 summary.intro、hero.headline、hero.highlights——页面 JSON 里的嵌套块 summary/hero 不是格名，禁止整块输出；原文没有的格子不写，缺席合法）：\n${catalog.map(c => c.key).join('、')}${descLine}${strictLine}\n\n各字段返回格式：\n${contract}\n\n返回 JSON：{"fields":{…}}${sampleLine}\n\n原文：\n${rawText}` },
   ]
 }
 
 // 从套件 example 提一段真值当提示词示例（每 shape 取一，找不到就略）
+// 铁律：示例里的格名必须全部在白名单内——title 只在目录含 title 的页族（posts）出现，否则模型抄了必被枪毙
 export function exampleSnippet(example, catalog) {
   const fields = {}
+  const has = k => catalog.some(c => c.key === k)
   const sec = catalog.find(c => c.shape === 'section' && example?.[c.key])
   if (sec) fields[sec.key] = { title: example[sec.key].title, body_md: '（该段原文…）' }
   const secs = catalog.find(c => c.shape === 'sections' && lib.getIn(example, c.key)?.length)
   if (secs) fields[secs.key] = { items: [{ heading: lib.getIn(example, secs.key)[0].heading, body_md: '（该章原文…）' }] }
   const list = catalog.find(c => c.shape === 'list' && lib.getIn(example, c.key)?.length)
   if (list) fields[list.key] = { items: lib.getIn(example, list.key).slice(0, 2).map(x => x.text ?? x) }
-  if (example?.title) fields.title = { text: example.title }
+  const text = catalog.find(c => c.shape === 'text' && lib.getIn(example, c.key) !== undefined)
+  if (text) fields[text.key] = { text: String(lib.getIn(example, text.key)).slice(0, 40) + '…' }
+  if (has('title') && example?.title) fields.title = { text: example.title }
   if (example?.page?.description) fields['page.description'] = { text: example.page.description.slice(0, 50) + '…' }
   return Object.keys(fields).length ? JSON.stringify({ fields }) : ''
 }
@@ -68,7 +79,7 @@ export function classifyMessages(sample, builtFamilies) {
   ]
 }
 
-export function sectionMessages(key, shape, sliceText, productName) {
+export function sectionMessages(key, shape, sliceText, productName, desc, strict = false) {
   const contract = {
     section: `返回 {"title":"段标题","body_md":"markdown 正文"}`,
     sections: `返回 {"items":[{"heading":"章节标题","body_md":"markdown 正文"}，按原文顺序]}`,
@@ -83,9 +94,10 @@ export function sectionMessages(key, shape, sliceText, productName) {
     text: `示例输出：{"text":"<一句原文>"}`,
     seo: `示例输出：{"text":"<150 字以内本页内容概括>"}`,
   }[shape]
+  // 缺席阀门（2026-08-17）：单格追问必须给「真没内容」的合法出口，否则压力下模型把最像的段落错装进格（逐字闸拦不住错装）
   return [
     { role: 'system', content: RULES },
-    { role: 'user', content: `名称：${productName}\n字段：${key}\n${contract}\n${example}\n\n原文：\n${sliceText}` },
+    { role: 'user', content: `名称：${productName}\n字段：${key}${desc ? `（${desc}）` : ''}\n${contract}\n${example}\n若原文真没有该字段的内容，返回 {"absent":true}（合法缺席，不硬凑）。${strict ? '\n本单为用户已整理好的内容：只许整行搬运（一整行或连续几整行），不许截半句、不许跳行拼接。' : ''}\n\n原文：\n${sliceText}` },
   ]
 }
 
@@ -94,10 +106,11 @@ export function sectionMessages(key, shape, sliceText, productName) {
 import { createDeepseekCaller } from '../src/deepseek.mjs'
 export { createDeepseekCaller }
 
-// ---------- 编排：一把梭出整页 + 代码验收（逐字/位置/漏段）+ 失败格单独重烧（≤2 次/格） ----------
-export async function burn({ text, url, slug, productName, family = 'auto' }, { callAI } = {}) {
+// ---------- 编排：一把梭出整页 + 代码验收（逐字/白名单/重叠/漏段；相似级只提示）+ 失败格单独重烧（≤2 次/格） ----------
+export async function burn({ text, url, slug, productName, family = 'auto', mode = 'raw' }, { callAI, noBackfill = false } = {}) {
   callAI ??= createDeepseekCaller()
   const { rawText, images } = await lib.fetchSource({ text, url })
+  const strict = mode === 'organized' // 「我已整理好」：整行闸（防切）+ 强制安置（防丢）
 
   // 判族：人工显式指定跳过；auto 让 AI 判；族能不能烧 = 有没有完整套件（scanKits 现算，注册表退役）
   // 套件选择：auto 判族后默认「通用件」（命名约定 <族名单数>Page，如 posts→PostPage）；
@@ -137,24 +150,35 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
   // 一把梭：一次出整页；调用失败（含截断）→ 干净报错（自动逐格降级是 roadmap）
   let out
   try {
-    out = await callAI(oneShotMessages(rawText, catalog, productName, exampleSnippet(example, catalog)), 'oneshot')
+    out = await callAI(oneShotMessages(rawText, catalog, productName, exampleSnippet(example, catalog), strict), 'oneshot')
   } catch (e) {
     throw new Error(`整页烧失败：${e.message}。原文过长可先分段贴（自动逐格降级在 roadmap）`)
   }
   const fields = out?.fields
   if (!fields || typeof fields !== 'object' || Array.isArray(fields)) throw new Error('返回结构非法（须为 {fields:{…}}）')
 
-  // 逐格验收（全文逐字查）+ 失败格单独重烧（≤2 次，给全文只出这格）
+  // 逐格验收（全文逐字查）+ 失败格单独重烧（≤2 次，给全文只出这格）。
+  // 先过自然名归一：照 example 结构输出的嵌套块（summary/hero）确定性拆回目录格名，不冤枉模型。
+  // 漏格判定以归一化后的实际收货名单为准：用原始键会把拆回格误判成漏格→重复补烧且后栽覆盖正确值（2026-08-17 mock 实证）
+  const normalized = lib.normalizeFields(fields, catalog, example)
+  const deliveredKeys = new Set(normalized.filter(n => !n.unknown).map(n => n.key))
   const sectionResults = []
-  for (const [key, data0] of Object.entries(fields)) {
+  for (const { key, data: data0, unknown } of normalized) {
     const spec = catalog.find(c => c.key === key)
     const rec = { key, status: 'ok', attempts: 1, issues: [] }
-    if (!spec) { rec.status = 'failed'; rec.issues.push('格子名不在白名单（发明字段）'); report.sections.push(rec); continue }
+    if (unknown) { rec.status = 'failed'; rec.issues.push(unknown); report.sections.push(rec); continue }
+    if (data0?.absent === true) { // one-shot 显式缺席：合法，不验不补（缺席即裁剪）
+      rec.status = 'absent'; rec.issues.push('模型声明原文无此格内容（合法缺席，页面该段不渲染）')
+      report.sections.push(rec)
+      sectionResults.push({ key, shape: spec.shape, titlePath: spec.titlePath, path: spec.path, data: null })
+      continue
+    }
     let data = data0
-    let bad = verifyByShape(spec, data, rawText, productName, paragraphs)
+    let warns = []
+    let bad = verifyByShape(spec, data, rawText, productName, paragraphs, warns, strict)
     if (bad) rec.issues.push(bad)
     for (let attempt = 1; bad && attempt < 3; attempt++) {
-      const msgs = sectionMessages(key, spec.shape, rawText, productName)
+      const msgs = sectionMessages(key, spec.shape, rawText, productName, spec.desc, strict)
       msgs.push({ role: 'user', content: `上次返回被代码拒收：${bad}。只允许逐字搬运原文，请重发。` }) // 喂回拒收原因：温度 0 下同消息重发是确定性重放
       rec.attempts = attempt + 1
       let fix
@@ -166,13 +190,55 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
         data = null
         break
       }
-      bad = verifyByShape(spec, fix, rawText, productName, paragraphs)
+      if (fix?.absent === true) { rec.status = 'absent'; rec.issues.push('模型声明原文无此格内容（合法缺席，页面该段不渲染）'); data = null; bad = null; break } // 缺席阀门：声明即停，不再施压
+      warns = []
+      bad = verifyByShape(spec, fix, rawText, productName, paragraphs, warns, strict)
       if (!bad) { data = fix; rec.status = 'repaired' } else rec.issues.push(bad)
     }
     if (bad) { rec.status = 'failed'; data = null }
+    else rec.issues.push(...warns.map(w => `提示：${w}`)) // 只展示被收下那次判定的提示（被拒批次的提示无意义）
     report.sections.push(rec)
     sectionResults.push({ key, shape: spec.shape, titlePath: spec.titlePath, path: spec.path, data })
   }
+
+  // 漏格补齐（一次输出不完整的兜底，2026-08-17）：one-shot 没返回的目录格逐格补烧——
+  // 同一套提示词与逐字验收、≤2 次、喂回拒收原因；成功照常进后续重叠/schema 全链。
+  // 只补「模型没给的」；给了但验不过的走上面的重烧循环，两条路不重不漏。
+  const absent = catalog.filter(c => !deliveredKeys.has(c.key))
+  if (absent.length && !noBackfill) {
+    report.notes.push(`首次输出漏格 ${absent.length} 个，已逐格补烧（同一套验收标准）`)
+    for (const spec of absent) {
+      const rec = { key: spec.key, status: 'ok', attempts: 0, issues: [] }
+      let data = null
+      let bad = 'one-shot 未输出此格'
+      for (let attempt = 0; attempt < 2 && bad; attempt++) {
+        const msgs = sectionMessages(spec.key, spec.shape, rawText, productName, spec.desc, strict)
+        msgs.push({ role: 'user', content: attempt === 0
+          ? '上次整页输出没有这个格子，请现在只补这一个格。'
+          : `上次返回被代码拒收：${bad}。只允许逐字搬运原文，请重发。` })
+        rec.attempts = attempt + 1
+        let fix
+        try {
+          fix = await callAI(msgs, spec.key)
+        } catch (e) {
+          rec.issues.push(`调用失败：${e.message}`) // 补烧硬失败降级：该格 failed 缺席，不拖垮整次
+          rec.status = 'failed'
+          data = null
+          break
+        }
+        if (fix?.absent === true) { rec.status = 'absent'; rec.issues.push('模型声明原文无此格内容（合法缺席，页面该段不渲染）'); data = null; break } // 缺席阀门：声明即停，不再施压
+        const warns = []
+        bad = verifyByShape(spec, fix, rawText, productName, paragraphs, warns, strict)
+        if (!bad) { data = fix; rec.status = 'repaired'; rec.issues.push(...warns.map(w => `提示：${w}`)) }
+        else rec.issues.push(bad)
+      }
+      if (!data && rec.status !== 'absent') rec.status = 'failed'
+      report.sections.push(rec)
+      sectionResults.push({ key: spec.key, shape: spec.shape, titlePath: spec.titlePath, path: spec.path, data })
+    }
+  }
+  const absentN = report.sections.filter(s => s.status === 'absent').length
+  if (absentN) report.notes.push(`${absentN} 格模型声明原文无内容（合法缺席，页面相应段不渲染）`)
 
   // 重叠硬闸：两格正文重叠 >50% → 带原因重烧一轮；终检仍犯 → failed 缺席
   const dupReason = d => `正文与其他格大面积重复（${d.a}×${d.b}，${d.pct}%）：每格只许用原文中属于它的那一部分，禁止多格共用同一段`
@@ -185,17 +251,20 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
       const idx = sectionResults.findIndex(r => r.key === key)
       const reason = dupReason(dups.find(d => d.a === key || d.b === key))
       let data = null
+      let dwarns = []
       for (let attempt = 1; attempt < 3; attempt++) {
-        const msgs = sectionMessages(key, spec.shape, rawText, productName)
+        const msgs = sectionMessages(key, spec.shape, rawText, productName, spec.desc, strict)
         msgs.push({ role: 'user', content: `上次返回被代码拒收：${reason}。请重发。` })
         try { data = await callAI(msgs, key) } catch (e) { data = null; rec.issues.push(`调用失败：${e.message}`); rec.status = 'failed'; break }
+        if (data?.absent === true) { rec.status = 'absent'; rec.issues.push('模型声明原文无此格内容（合法缺席，页面该段不渲染）'); data = null; break } // 缺席阀门：声明即停
         rec.attempts += 1
-        const bad = verifyByShape(spec, data, rawText, productName, paragraphs)
-        if (!bad) { rec.status = 'repaired'; break }
+        dwarns = []
+        const bad = verifyByShape(spec, data, rawText, productName, paragraphs, dwarns, strict)
+        if (!bad) { rec.status = 'repaired'; rec.issues.push(...dwarns.map(w => `提示：${w}`)); break }
         rec.issues.push(bad)
         if (attempt === 2) data = null
       }
-      if (!data) { rec.status = 'failed'; rec.issues.push(reason) } // 重烧全败=格子缺席，状态必须跟上，不留假 repaired
+      if (!data && rec.status !== 'absent') { rec.status = 'failed'; rec.issues.push(reason) } // 重烧全败=格子缺席，状态必须跟上，不留假 repaired
       sectionResults[idx] = { ...sectionResults[idx], data }
     }
     dups = lib.findDuplicates(sectionResults.filter(r => r.data))
@@ -207,27 +276,104 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
     }
   }
 
-  // 位置审计（防错位）+ 反查漏段
+  // 位置归集（fieldMap 人审辅助）+ 反查漏段
   const audit = lib.auditPositions(sectionResults.filter(r => r.data), rawText, paragraphs)
-  for (const w of audit.warnings) report.notes.push(w)
-  report.fieldMap = audit.fieldMap // 人审辅助：每格命中的原文段号
-  const acceptedTexts = [] // 所有已收格子的文字（段=标题+树块，章节=逐项标题+树块，list=条目，text/seo=text）
-  for (const r of sectionResults) {
-    if (!r.data) continue
-    if (r.shape === 'section') acceptedTexts.push(r.data.title, ...lib.treeBlocks(lib.mdToDoc(r.data.body_md)))
-    else if (r.shape === 'sections') acceptedTexts.push(...r.data.items.flatMap(it => [it.heading, ...lib.treeBlocks(lib.mdToDoc(it.body_md))]))
-    else if (r.shape === 'list') acceptedTexts.push(...r.data.items)
-    else if (r.data.text) acceptedTexts.push(r.data.text)
+  report.fieldMap = audit.fieldMap // 人审辅助：每格命中的原文段号（同段命中不另告警，见 burn-lib 函数注释）
+  const acceptedHay = () => { // 所有已收格子的文字（段=标题+树块，章节=逐项标题+树块，list=条目，text/seo=text）
+    const acceptedTexts = []
+    for (const r of sectionResults) {
+      if (!r.data) continue
+      if (r.shape === 'section') acceptedTexts.push(r.data.title, ...lib.treeBlocks(lib.mdToDoc(r.data.body_md)))
+      else if (r.shape === 'sections') acceptedTexts.push(...r.data.items.flatMap(it => [it.heading, ...lib.treeBlocks(lib.mdToDoc(it.body_md))]))
+      else if (r.shape === 'list') acceptedTexts.push(...r.data.items)
+      else if (r.data.text) acceptedTexts.push(r.data.text)
+    }
+    return acceptedTexts.map(t => lib.normalizeText(t)).join('\n')
   }
-  const jsonTextNorm = acceptedTexts.map(t => lib.normalizeText(t)).join('\n')
-  report.unused = paragraphs.filter(p => !jsonTextNorm.includes(lib.normalizeText(p.text))).map(p => ({ n: p.n, preview: p.text.slice(0, 40) }))
+  // 按行判（2026-08-18 修）：整段匹配对多行块永远误报（行进树后分块、拼不回原样；清单块的「- 」标记同理）。
+  // 一段有任一行不在已收文字里即算未用，preview 直接指到缺的那几行；剥行首标记与树侧口径对齐。
+  const missingOf = (p, hay) => p.text.split('\n').map(x => lib.stripImgMarkers(x).trim()).filter(Boolean)
+    .filter(line => !hay.includes(lib.normalizeText(lib.stripMdMarkers(line))))
+  const computeUnused = () => {
+    const hay = acceptedHay()
+    return paragraphs
+      .map(p => {
+        const missing = missingOf(p, hay)
+        return missing.length ? { n: p.n, preview: missing.join(' ').slice(0, 40) } : null
+      })
+      .filter(Boolean)
+  }
+  report.unused = computeUnused()
+
+  // 强制安置（「我已整理好」模式，防丢兜底，2026-08-18）：用户铁律=内容全部有用、一段不许丢。
+  // 补烧后仍有未用段落 → AI 必须逐段指定并入哪个「已有内容的格」（没有"没有"选项；段落只许整段并入不许拆）；
+  // 无效分配重试 1 次（喂回原因）；仍败 → 确定性兜底：按原顺序并入最后一个有内容的格。
+  // 安置位置是模型的次优判断，报告标出、人审编辑器可挪。
+  if (strict && !noBackfill && report.unused.length) {
+    const filled = sectionResults.filter(r => r.data && (r.shape === 'section' || r.shape === 'sections'))
+    if (filled.length) {
+      // 只安置每段「未用的行」：部分行已入格的段整段并入，会把已用行复制第二份（自检发现的行级防重）
+      const hay0 = acceptedHay()
+      const orphans = report.unused
+        .map(u => paragraphs.find(p => p.n === u.n))
+        .filter(Boolean)
+        .map(p => ({ n: p.n, text: missingOf(p, hay0).join('\n') }))
+        .filter(o => o.text)
+      const cellList = filled.map(r => `- ${r.key}${catalog.find(c => c.key === r.key)?.desc ? `（${catalog.find(c => c.key === r.key).desc}）` : ''}`).join('\n')
+      const placeMsgs = [
+        { role: 'system', content: RULES },
+        { role: 'user', content: `名称：${productName}\n下列原文内容尚未进入任何格子。用户铁律：内容全部有用、一个字都不许丢。请为每段指定并入哪个格子（只能从下列已有内容的格子里选，没有"没有"选项；内容只许整段并入，不许拆）：\n${cellList}\n\n返回 JSON：{"place":[{"n":段号,"key":"格名"}，每段一条]}\n\n段落：\n${orphans.map(p => `第${p.n}段：${p.text}`).join('\n\n')}` },
+      ]
+      let placement = null, placeErr = ''
+      for (let attempt = 0; attempt < 2 && !placement; attempt++) {
+        if (attempt === 1) placeMsgs.push({ role: 'user', content: `上次返回被代码拒收：${placeErr}。请重发。` })
+        try {
+          const v = await callAI(placeMsgs, 'place')
+          const list = Array.isArray(v?.place) ? v.place : null
+          if (!list) { placeErr = '返回结构非法（须为 {place:[…]}）'; continue }
+          const badKey = list.find(x => !filled.some(r => r.key === x.key))
+          if (badKey) { placeErr = `格名不在可选清单：${badKey.key}`; continue }
+          const badN = list.find(x => !orphans.some(p => p.n === x.n))
+          if (badN) { placeErr = `段号不在未用清单：${badN.n}（只许分配未用段落，不许动已入格的）`; continue }
+          const missed = orphans.filter(p => !list.some(x => x.n === p.n))
+          if (missed.length) { placeErr = `漏分配段：${missed.map(p => p.n).join('、')}（每段都必须有去处）`; continue }
+          placement = list
+        } catch (e) { placeErr = `调用失败：${e.message}` }
+      }
+      const placedKeys = new Set()
+      const appendTo = (key, texts) => {
+        const r = sectionResults.find(x => x.key === key && x.data)
+        if (!r) return
+        if (r.shape === 'section') r.data.body_md += '\n\n' + texts.join('\n\n')
+        else if (r.shape === 'sections') r.data.items[r.data.items.length - 1].body_md += '\n\n' + texts.join('\n\n')
+        placedKeys.add(key)
+        const rec = report.sections.find(s => s.key === key)
+        if (rec && !rec.issues.some(i => i.includes('强制安置'))) rec.issues.push('含强制安置段落（防丢兜底），位置请人工核对')
+      }
+      if (placement) {
+        const byKey = new Map()
+        for (const x of placement) {
+          const p = orphans.find(q => q.n === x.n)
+          if (!p) continue
+          if (!byKey.has(x.key)) byKey.set(x.key, [])
+          byKey.get(x.key).push(p.text)
+        }
+        for (const [key, texts] of byKey) appendTo(key, texts)
+      } else {
+        appendTo(filled[filled.length - 1].key, orphans.map(p => p.text))
+        report.notes.push(`强制安置的自动分配失败（${placeErr}），未用段落已按原顺序兜底并入最后一个有内容的格，位置请人工核对`)
+      }
+      report.notes.push(`强制安置 ${orphans.length} 段（防丢兜底：并入 ${[...placedKeys].join('、') || '无'}），位置请人工核对`)
+      report.unused = computeUnused()
+    }
+  }
 
   const json = await lib.assemble({ slug, productName, family: resolved, sectionResults, imagePool: images, example })
   json.page.template = kitName // 草稿自带套件名：路由按它派发（writeDraft 的 ??= 不覆盖）
   if (resolved === 'products') {
     if (!images.length) report.notes.push('图池为空：gallery 缺席（known-leftover）')
-    report.notes.push('hero 横幅图 v1 不烧（图池全进 gallery），待编辑器补传（known-leftover）') // v1 恒提示
-    report.notes.push('breadcrumb.trail 克隆自套件 example，二级分类人工确认')
+    // 「hero 图 v1 不烧」「trail 人工确认」是每次必发的恒提示——告警疲劳（每次都喊=没喊），
+    // 已挪控制台静态常驻区（burn-console.html），不进 per-run 报告
   } else {
     if (images.length) {
       if (catalog.some(c => c.shape === 'sections')) report.notes.push(`图池 ${images.length} 张按顺序配到第 i 段（余图挂末段），人工在编辑器确认`)
@@ -240,47 +386,69 @@ export async function burn({ text, url, slug, productName, family = 'auto' }, { 
 }
 
 // 按 shape 分级校验（对全文逐字查；标题候选=各段首行+产品名）：返回 null=过；字符串=拒收原因
-export function verifyByShape(spec, data, src, productName, paragraphs) {
+// warns 出参收「提示」（不收进返回值）：相似级判定（标题/heading/标语像不像）只提示不拒收——
+// 硬拒收只留给确定判定（子串有无/白名单/重叠/schema）；概率判定硬拒会误杀正文合格的整格（2026-08-17 裁定）
+// strict=true（「我已整理好」模式）：verbatim 级从「子串即过」升为「整行才算搬运」（verifyTreeStrict），防切碎
+export function verifyByShape(spec, data, src, productName, paragraphs, warns = [], strict = false) {
   const firstLines = paragraphs.map(p => p.text.split('\n')[0])
   try {
     if (spec.shape === 'section') {
       if (!data?.title || !data?.body_md) return '缺 title 或 body_md'
-      const v = lib.verifyTree(lib.mdToDoc(data.body_md), src)
-      if (!v.ok) return `原文里找不到：「${v.failures[0].slice(0, 40)}」`
+      if (lib.hasImgMarker(data.title) || lib.hasImgMarker(data.body_md)) return '配图标记是图池元数据不是正文，删去后重发'
+      const v = strict ? lib.verifyTreeStrict(lib.mdToDoc(data.body_md), src) : lib.verifyTree(lib.mdToDoc(data.body_md), src)
+      if (!v.ok) return strict
+        ? `只许整行搬运（整段/整行），不许截半句或跳行拼接：「${v.failures[0].slice(0, 40)}」`
+        : `原文里找不到：「${v.failures[0].slice(0, 40)}」`
       if (!lib.similarToAny(data.title, [...firstLines, ...paragraphs.map(p => p.text)], 0.85)
         && lib.similarity(data.title, productName) < 0.85)
-        return `标题与原文及产品名都不像：「${data.title}」`
+        warns.push(`标题与原文及产品名都不像：「${data.title}」`)
       return null
     }
     if (spec.shape === 'list') {
       if (!Array.isArray(data?.items) || !data.items.length) return 'items 为空'
       const badType = data.items.find(t => typeof t !== 'string' || !t.trim())
       if (badType !== undefined) return 'items 含非字符串或空条目'
+      if (data.items.some(t => lib.hasImgMarker(t))) return '配图标记是图池元数据不是正文，删去后重发'
       if (spec.level === 'verbatim') {
-        const hay = lib.normalizeText(src)
-        const badItem = data.items.find(t => !hay.includes(lib.normalizeText(t)))
-        if (badItem) return `原文里找不到：「${badItem.slice(0, 40)}」`
+        if (strict) {
+          const { whole } = lib.lineAtom(src)
+          const badItem = data.items.find(t => !whole(t, false)) // 条目粒度=一整行，禁拼接
+          if (badItem) return `只许整行搬运（条目须为原文一整行）：「${badItem.slice(0, 40)}」`
+        } else {
+          const hay = lib.normalizeText(src)
+          const badItem = data.items.find(t => !hay.includes(lib.normalizeText(t)))
+          if (badItem) return `原文里找不到：「${badItem.slice(0, 40)}」`
+        }
       }
       return null
     }
     if (spec.shape === 'text') {
       if (!data?.text) return '缺 text'
-      if (spec.level === 'verbatim' && !lib.normalizeText(src).includes(lib.normalizeText(data.text)))
-        return `原文里找不到：「${data.text.slice(0, 40)}」`
+      if (lib.hasImgMarker(data.text)) return '配图标记是图池元数据不是正文，删去后重发'
+      if (spec.level === 'verbatim') {
+        if (strict) {
+          const { whole } = lib.lineAtom(src)
+          if (!whole(data.text)) return `只许整行搬运（整段/整行），不许截半句或跳行拼接：「${data.text.slice(0, 40)}」`
+        } else if (!lib.normalizeText(src).includes(lib.normalizeText(data.text)))
+          return `原文里找不到：「${data.text.slice(0, 40)}」`
+      }
       if (spec.level === 'similar'
         && !lib.similarToAny(data.text, firstLines, 0.85)
         && lib.similarity(data.text, productName) < 0.85)
-        return `与原文及产品名都不像：「${data.text}」`
+        warns.push(`与原文及产品名都不像：「${data.text}」`)
       return null
     }
     if (spec.shape === 'sections') {
       if (!Array.isArray(data?.items) || !data.items.length) return 'items 为空'
       for (const [i, it] of data.items.entries()) {
         if (!it?.heading || !it?.body_md) return `第 ${i + 1} 项缺 heading 或 body_md`
-        const v = lib.verifyTree(lib.mdToDoc(it.body_md), src)
-        if (!v.ok) return `第 ${i + 1} 项原文里找不到：「${v.failures[0].slice(0, 40)}」`
+        if (lib.hasImgMarker(it.heading) || lib.hasImgMarker(it.body_md)) return `第 ${i + 1} 项配图标记是图池元数据不是正文，删去后重发`
+        const v = strict ? lib.verifyTreeStrict(lib.mdToDoc(it.body_md), src) : lib.verifyTree(lib.mdToDoc(it.body_md), src)
+        if (!v.ok) return strict
+          ? `第 ${i + 1} 项只许整行搬运（整段/整行），不许截半句或跳行拼接：「${v.failures[0].slice(0, 40)}」`
+          : `第 ${i + 1} 项原文里找不到：「${v.failures[0].slice(0, 40)}」`
         if (!lib.similarToAny(it.heading, [...firstLines, ...paragraphs.map(p => p.text)], 0.85))
-          return `第 ${i + 1} 项标题与原文不像：「${it.heading}」`
+          warns.push(`第 ${i + 1} 项标题与原文不像：「${it.heading}」`)
       }
       // 段间重叠闸（文章只有一个内容字段，闸收进字段内；产品侧在跨字段 findDuplicates 层）
       const blocks = data.items.map(it => lib.treeBlocks(lib.mdToDoc(it.body_md)).map(lib.normalizeText))
@@ -332,7 +500,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   }
   try {
     const input = opt('text') ? { text: readFileSync(opt('text'), 'utf8') } : { url: opt('url') }
-    const { json, report } = await burn({ ...input, slug: opt('slug'), productName: opt('name') })
+    const { json, report } = await burn({ ...input, slug: opt('slug'), productName: opt('name'), mode: has('organized') ? 'organized' : 'raw' })
     console.log(JSON.stringify(report, null, 2))
     if (has('save')) console.log('已落 draft:', writeDraft(json, opt('slug')))
     else console.log('（未落盘；加 --save 落 draft）')

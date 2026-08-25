@@ -325,7 +325,7 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
     overview: { title: '欧式桥式起重机', body_md: blocks[1].text },
     specs: { items: ['容量 3.2-80吨', '跨度长度 4-31.5米'] },
   } }
-  const r1 = await burner.burn({ text: raw, slug: 'to-ok', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => good })
+  const r1 = await burner.burn({ text: raw, slug: 'to-ok', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => good, noBackfill: true })
   ok('一把梭全过', r1.json.overview?.body?.type === 'doc' && r1.json.specs.length === 2 && r1.report.sections.every(s => s.status === 'ok'))
   ok('未用段落列出（fake 只用了前两段）', r1.report.unused.length > 0 && r1.report.unused[0].preview.length > 0)
 
@@ -336,7 +336,7 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
     calls++
     return { title: '欧式桥式起重机', body_md: blocks[1].text }
   }
-  const r2 = await burner.burn({ text: raw, slug: 'to-rep', productName: '欧式桥式起重机', family: 'product' }, { callAI: liarThenFix })
+  const r2 = await burner.burn({ text: raw, slug: 'to-rep', productName: '欧式桥式起重机', family: 'product' }, { callAI: liarThenFix, noBackfill: true })
   ok('编造句打回且逐格修复', r2.report.sections[0].status === 'repaired' && calls === 1, r2.report.sections[0].issues[0])
   ok('打回原因带原句（人话）', /原文里找不到/.test(r2.report.sections[0].issues[0] ?? ''))
 
@@ -353,13 +353,177 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
   const inv = r4.report.sections.find(s => s.key === 'customization')
   ok('发明字段格被拒、正常格照收', inv.status === 'failed' && /白名单/.test(inv.issues[0]) && r4.json.overview?.body?.type === 'doc' && r4.json.customization === undefined)
 
-  // 5. 位置审计：specs 条目被塞进 overview → 同段复用告警
+  // 4b. 自然名归一（2026-08-17 实战教训）：模型照 example 结构输出嵌套块 summary/hero 不是发明字段——
+  // 确定性拆回目录格名并落盘；chrome 子键（cta/image）不烧；块内无有效子键才枪毙
+  const nested = { fields: {
+    summary: { intro: blocks[1].text, cta: '立即询价（模型瞎给）' },
+    hero: { headline: '欧式桥式起重机', highlights: ['容量 3.2-80吨'], image: 'x.jpg' },
+    overview: { title: '欧式桥式起重机', body_md: blocks[1].text },
+  } }
+  const r4b = await burner.burn({ text: raw, slug: 'to-alias', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => nested })
+  ok('嵌套 summary/hero 拆回正格并落盘', r4b.json.summary?.intro === blocks[1].text && r4b.json.hero?.headline === '欧式桥式起重机' && r4b.json.hero?.highlights?.length === 1)
+  ok('归一后报告格名为目录格名（无 summary/hero 整块）', ['summary.intro', 'hero.headline', 'hero.highlights'].every(k => r4b.report.sections.some(s => s.key === k)) && !r4b.report.sections.some(s => s.key === 'summary' || s.key === 'hero'))
+  ok('chrome 子键不被模型值覆盖（cta 仍是套件默认、image 不落盘）', r4b.json.summary?.cta === EX_PROD.summary.cta && r4b.json.hero?.image === undefined)
+  const heroOnly = { fields: { hero: { image: 'x.jpg' } } }
+  const r4c = await burner.burn({ text: raw, slug: 'to-alias2', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => heroOnly })
+  const heroFail = r4c.report.sections.find(s => s.key === 'hero')
+  ok('别名块内无有效子键 → 枪毙且理由指到点上', heroFail.status === 'failed' && /headline\/highlights/.test(heroFail.issues[0]))
+
+  // 4d. 漏格补齐（2026-08-17 实战教训：one-shot 只出 3 格、正文六大段未用）——未返回的目录格逐格补烧，
+  // 成功落盘、失败缺席；报告注明漏格数
+  const backfillMock = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: blocks[1].text } } }
+    if (tag === 'summary.intro') return { text: blocks[1].text }
+    if (tag === 'hero.headline') return { text: '欧式桥式起重机' }
+    if (tag === 'hero.highlights') return { items: ['容量 3.2-80吨'] }
+    if (tag === 'page.description') return { text: 'AI 概括的描述。' }
+    return { title: '编造标题', body_md: '原文绝对没有这句话。' } // 其余格：内容对不上 → 补烧失败缺席
+  }
+  const r4d = await burner.burn({ text: raw, slug: 'to-gap', productName: '欧式桥式起重机', family: 'product' }, { callAI: backfillMock })
+  const gapIntro = r4d.report.sections.find(s => s.key === 'summary.intro')
+  const gapHl = r4d.report.sections.find(s => s.key === 'hero.highlights')
+  const gapIntroF = r4d.report.sections.find(s => s.key === 'introduction')
+  ok('漏格逐格补烧成功落盘', gapIntro?.status === 'repaired' && gapHl?.status === 'repaired' && r4d.json.summary?.intro === blocks[1].text && r4d.json.hero?.highlights?.length === 1 && r4d.json.page?.description === 'AI 概括的描述。')
+  ok('补烧失败的格照常缺席不整次崩', gapIntroF?.status === 'failed' && r4d.json.introduction === undefined)
+  ok('报告注明漏格补烧（不静默）', r4d.report.notes.some(n => /漏格.*补烧/.test(n)))
+  // 4e. one-shot 全空 → 全目录补烧；不漏格时零补烧（notes 无漏格字样）
+  const catalog4d = lib.loadCatalog(
+    join(SITE, 'src/components/products/ProductPage/meta.json'),
+    join(SITE, 'src/components/products/ProductPage/index.astro'),
+    join(SITE, 'src/components/products/ProductPage/example.json'))
+  const emptyMock = async (m, tag) => tag === 'oneshot' ? { fields: {} } : { text: '原文绝对没有这句话。' }
+  const r4e = await burner.burn({ text: raw, slug: 'to-gap2', productName: '欧式桥式起重机', family: 'product' }, { callAI: emptyMock })
+  ok('one-shot 全空也走补烧（整次不崩）', r4e.report.sections.length === catalog4d.length && r4e.report.sections.every(s => s.status === 'failed' || s.status === 'repaired'))
+  const fullMock = async (m, tag) => {
+    if (tag !== 'oneshot') throw new Error('不该有补烧调用')
+    return { fields: { overview: { title: '欧式桥式起重机', body_md: blocks[1].text } } }
+  }
+  const r4f = await burner.burn({ text: raw, slug: 'to-gap3', productName: '欧式桥式起重机', family: 'product' }, { callAI: fullMock, noBackfill: true })
+  ok('noBackfill 关闸：零补烧调用且无漏格注记（成本开关）', r4f.report.sections.length === 1 && !r4f.report.notes.some(n => /漏格/.test(n)))
+
+  // 4f. 漏格判定用归一化后收货名单（2026-08-17 实证 bug：拆回格被当漏格重复补烧、补烧值后栽覆盖正确值、报告同格矛盾双行）
+  const tags4f = []
+  const nestedThen = async (m, tag) => {
+    tags4f.push(tag)
+    if (tag === 'oneshot') return { fields: {
+      summary: { intro: blocks[1].text },
+      hero: { headline: '欧式桥式起重机', highlights: ['容量 3.2-80吨'] },
+      'page.description': { text: 'AI 概括的描述。' },
+    } }
+    if (tag === 'summary.intro') return { text: blocks[2].text } // 若被重复补烧：另一句原文会顶掉正确值
+    return { title: '编造标题', body_md: '原文绝对没有这句话。' }
+  }
+  const r4fx = await burner.burn({ text: raw, slug: 'to-dup', productName: '欧式桥式起重机', family: 'product' }, { callAI: nestedThen })
+  ok('拆回格不算漏格（summary.intro/hero.* 零补烧调用）', !tags4f.includes('summary.intro') && !tags4f.includes('hero.headline') && !tags4f.includes('hero.highlights'))
+  ok('拆回值不被补烧覆盖', r4fx.json.summary?.intro === blocks[1].text)
+  ok('报告同格不出矛盾双行', r4fx.report.sections.filter(s => s.key === 'summary.intro').length === 1)
+
+  // 4g. 缺席阀门（2026-08-17）：模型声明 {"absent":true} → 干净缺席（absent 非 failed）、只问一次不施压、JSON 缺席、注记可见
+  const tags4g = []
+  const abstMock = async (m, tag) => {
+    tags4g.push(tag)
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: blocks[1].text } } }
+    if (tag === 'protection' || tag === 'which_better') return { absent: true }
+    return { title: '编造标题', body_md: '原文绝对没有这句话。' }
+  }
+  const r4g = await burner.burn({ text: raw, slug: 'to-abs', productName: '欧式桥式起重机', family: 'product' }, { callAI: abstMock })
+  const prot = r4g.report.sections.find(s => s.key === 'protection')
+  ok('声明 absent → 干净缺席（absent 非 failed，JSON 缺席）', prot?.status === 'absent' && r4g.json.protection === undefined)
+  ok('声明后不再施压（该格只问一次）', tags4g.filter(t => t === 'protection').length === 1 && tags4g.filter(t => t === 'which_better').length === 1)
+  ok('合法缺席进注记（人审可见）', r4g.report.notes.some(n => /合法缺席/.test(n)))
+
+  // 4h. 格子语义进提示词（治本：光秃英文名→漏格的根因）+ 单格提示词带格含义与缺席出口
+  let oneShotUser = '', perCellUser = ''
+  const capMock = async (m, tag) => {
+    if (tag === 'oneshot') { oneShotUser = m.map(x => x.content).join('\n'); return { fields: {} } }
+    if (tag === 'overview' && !perCellUser) perCellUser = m.map(x => x.content).join('\n')
+    return { absent: true }
+  }
+  await burner.burn({ text: raw, slug: 'to-desc', productName: '欧式桥式起重机', family: 'product' }, { callAI: capMock })
+  ok('one-shot 提示词带各格含义（desc 自套件 meta.json）', /各格含义/.test(oneShotUser) && /overview：开篇概述/.test(oneShotUser))
+  ok('单格提示词带格含义与缺席出口（不硬凑）', /overview（开篇概述/.test(perCellUser) && /"absent":true/.test(perCellUser))
+
+  // 4i. 整行闸（「我已整理好」模式，2026-08-18）：verbatim 升严——半句/跳行拼接拒收；连续行合并+剥强调符号放行；raw 模式不受影响
+  const strictRaw = '欧式桥式起重机\n\n**起重量大**、工作级别高，广泛用于车间。\n电源为三相交流电，额定频率50Hz。\n\n- 容量 3.2-80吨\n- 跨度 4-31.5米'
+  const cutBody = '工作级别高，广泛用于车间' // 半句：是原文子串但不是任何一整行
+  const cutMock = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: cutBody } } }
+    return { title: '欧式桥式起重机', body_md: '起重量大、工作级别高，广泛用于车间。' } // 重烧交整行（剥了 ** 也过——坑②修正）
+  }
+  const rCut = await burner.burn({ text: strictRaw, slug: 'to-cut', productName: '欧式桥式起重机', family: 'product', mode: 'organized' }, { callAI: cutMock, noBackfill: true })
+  const cutRec = rCut.report.sections.find(s => s.key === 'overview')
+  ok('整行闸拒收半句、重烧整行修复（剥 ** 不冤枉）', cutRec.status === 'repaired' && /整行/.test(cutRec.issues[0]) && rCut.json.overview?.body?.type === 'doc', cutRec.issues[0])
+  let mergeUser = ''
+  const mergeMock = async (m, tag) => {
+    if (tag === 'oneshot') {
+      mergeUser = m.map(x => x.content).join('\n')
+      return { fields: { overview: { title: '欧式桥式起重机', body_md: '起重量大、工作级别高，广泛用于车间。\n电源为三相交流电，额定频率50Hz。' } } }
+    }
+    return { absent: true }
+  }
+  const rMerge = await burner.burn({ text: strictRaw, slug: 'to-merge', productName: '欧式桥式起重机', family: 'product', mode: 'organized' }, { callAI: mergeMock, noBackfill: true })
+  ok('连续两行合并放行（坑①假换行修正）', rMerge.report.sections.find(s => s.key === 'overview').status === 'ok' && rMerge.json.overview?.body?.type === 'doc')
+  ok('organized 提示词带搬运粒度铁律', /搬运粒度铁律|只许整行/.test(mergeUser))
+  const cutRawMock = async (m, tag) => tag === 'oneshot'
+    ? { fields: { overview: { title: '欧式桥式起重机', body_md: cutBody } } }
+    : { absent: true }
+  const rCutRaw = await burner.burn({ text: strictRaw, slug: 'to-cutraw', productName: '欧式桥式起重机', family: 'product' }, { callAI: cutRawMock, noBackfill: true })
+  ok('raw 模式不受整行闸（半句子串即过）', rCutRaw.report.sections.find(s => s.key === 'overview').status === 'ok' && rCutRaw.json.overview?.body?.type === 'doc')
+
+  // 4j. 强制安置（organized 防丢兜底，2026-08-18）：未用段落必须逐段有去处（只许并入已有内容的格）；非法分配 → 兜底并入最后有内容的格
+  const placeMock = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '起重量大、工作级别高，广泛用于车间。' } } }
+    if (tag === 'place') return { place: [{ n: 2, key: 'overview' }, { n: 3, key: 'overview' }] }
+    return { absent: true } // 补烧全部声明缺席
+  }
+  const rPlace = await burner.burn({ text: strictRaw, slug: 'to-place', productName: '欧式桥式起重机', family: 'product', mode: 'organized' }, { callAI: placeMock })
+  const ovPlace = rPlace.report.sections.find(s => s.key === 'overview')
+  ok('强制安置并入且未用清零', rPlace.report.unused.length === 0 && JSON.stringify(rPlace.json.overview?.body ?? {}).includes('容量 3.2-80吨'))
+  ok('强制安置标出（格 issues + 注记），位置人审', /强制安置/.test(ovPlace.issues.join()) && rPlace.report.notes.some(n => /强制安置/.test(n)))
+  const badPlaceMock = async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '起重量大、工作级别高，广泛用于车间。' } } }
+    if (tag === 'place') return { place: [{ n: 2, key: '不存在格' }, { n: 3, key: 'overview' }] } // 非法格名，两次都败
+    return { absent: true }
+  }
+  const rPlaceBad = await burner.burn({ text: strictRaw, slug: 'to-placebad', productName: '欧式桥式起重机', family: 'product', mode: 'organized' }, { callAI: badPlaceMock })
+  ok('分配非法 → 兜底并入最后有内容的格+注记', JSON.stringify(rPlaceBad.json.overview?.body ?? {}).includes('电源为三相交流电') && rPlaceBad.report.notes.some(n => /兜底并入最后一个/.test(n)))
+
+  // 4k. 配图标记=图池元数据不是正文（2026-08-18 自检实证）：organized 下「只搬文字不抄标记」是正确行为，整行闸不得误杀；
+  // 独立标记行不算未用、不进强制安置（防泄漏）；输出里带标记=拒收（两模式同闸）
+  const markerRaw = '欧式桥式起重机\n\n主梁采用Q345B钢板焊接，腹板经过预拱处理。（配图：主梁 Main-Girder-1.jpg）\n\n（配图：整机 overview.jpg）'
+  const rMk = await burner.burn({ text: markerRaw, slug: 'to-marker', productName: '欧式桥式起重机', family: 'product', mode: 'organized' }, { callAI: async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '主梁采用Q345B钢板焊接，腹板经过预拱处理。' } } }
+    return { absent: true }
+  } })
+  const mkOv = rMk.report.sections.find(s => s.key === 'overview')
+  ok('整行闸不误杀「只搬文字不抄标记」', mkOv.status === 'ok' && rMk.json.overview?.body?.type === 'doc', mkOv.issues.join(' | '))
+  ok('独立标记行不算未用、标记不泄漏进 JSON', !rMk.report.unused.some(u => /配图/.test(u.preview)) && !JSON.stringify(rMk.json).includes('配图'))
+  const rMkOut = await burner.burn({ text: markerRaw, slug: 'to-marker2', productName: '欧式桥式起重机', family: 'product' }, { callAI: async (m, tag) => {
+    if (tag === 'oneshot') return { fields: { overview: { title: '欧式桥式起重机', body_md: '主梁采用Q345B钢板焊接，腹板经过预拱处理。（配图：主梁 Main-Girder-1.jpg）' } } }
+    return { absent: true }
+  }, noBackfill: true })
+  ok('输出带配图标记 → 拒收（元数据不是正文）', /配图标记/.test(rMkOut.report.sections.find(s => s.key === 'overview').issues[0]))
+
+  // 5. 同段复用：告警层已裁（分不清「AI 塞两格」与「原文本身重复」，硬误报源）——fieldMap 仍直接呈现
   const misplaced = { fields: {
     overview: { title: '欧式桥式起重机', body_md: blocks[1].text + '\n\n容量 3.2-80吨' },
     specs: { items: ['容量 3.2-80吨'] },
   } }
   const r5 = await burner.burn({ text: raw, slug: 'to-mis', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => misplaced })
-  ok('同段复用告警出现', r5.report.notes.some(n => /同时被|装错格/.test(n)), r5.report.notes.join(' | '))
+  const ovP = r5.report.fieldMap.find(f => f.key === 'overview')?.paras ?? []
+  const spP = r5.report.fieldMap.find(f => f.key === 'specs')?.paras ?? []
+  ok('同段命中在 fieldMap 可见（不再告警）', ovP.some(n => spP.includes(n)) && !r5.report.notes.some(n => /同时被|装错格/.test(n)), `overview←${ovP} specs←${spP}`)
+
+  // 5b. 相似级降级（2026-08-17）：标题/标语不像原文 → 照收 + 提示进 issues，不枪毙整格
+  const fuzzy = { fields: {
+    overview: { title: '企业实力展示', body_md: blocks[1].text },
+    'hero.headline': { text: '品质赢得全球市场信赖' },
+  } }
+  const r5b = await burner.burn({ text: raw, slug: 'to-fuzzy', productName: '欧式桥式起重机', family: 'product' }, { callAI: async () => fuzzy })
+  const fz = r5b.report.sections
+  ok('标题不像照收且正文保留', r5b.json.overview?.body?.type === 'doc' && fz.find(s => s.key === 'overview').status === 'ok')
+  ok('标题提示进 issues', fz.find(s => s.key === 'overview').issues.some(i => /提示：标题与原文/.test(i)), fz.find(s => s.key === 'overview').issues.join(' | '))
+  ok('hero 标语不像也照收带提示', r5b.json.hero.headline === '品质赢得全球市场信赖' && fz.find(s => s.key === 'hero.headline').issues.some(i => /提示：/.test(i)))
 
   // 6. 一把梭调用失败 → 干净报错
   let msg = ''
@@ -376,7 +540,7 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
     if (m.at(-1).content.includes('原文里找不到')) sawReason = true
     return { title: '欧式桥式起重机', body_md: blocks[1].text }
   }
-  const r7 = await burner.burn({ text: raw, slug: 'to-fb', productName: '欧式桥式起重机', family: 'product' }, { callAI: checkFeedback })
+  const r7 = await burner.burn({ text: raw, slug: 'to-fb', productName: '欧式桥式起重机', family: 'product' }, { callAI: checkFeedback, noBackfill: true })
   ok('重烧喂回拒收原因', sawReason && r7.report.sections[0].status === 'repaired')
 
   // 9. 重烧途中硬失败 → 该格降级不拖垮整次
@@ -392,19 +556,19 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
   const r9 = await burner.burn({ text: bigText, slug: 'to-noise', productName: '测试', family: 'product' }, { callAI: async () => ({ fields: { overview: { title: '测试', body_md: '第0段内容' } } }) })
   ok('段数带噪提示', r9.report.notes.some(n => /带噪/.test(n)))
 
-  // 11. 全过路径零告警（防误报回归钉）
-  ok('全过路径零告警', r1.report.notes.filter(n => /颠倒|同时被/.test(n)).length === 0, r1.report.notes.join(' | '))
+  // 11. 全过路径零告警零提示（防误报回归钉）
+  ok('全过路径零告警零提示', r1.report.notes.filter(n => /颠倒|同时被/.test(n)).length === 0 && r1.report.sections.every(s => s.issues.length === 0), r1.report.notes.join(' | '))
 
   // 12. fieldMap 进报告
   ok('fieldMap 呈现格子对应段落', Array.isArray(r1.report.fieldMap) && r1.report.fieldMap.some(f => f.key === 'overview'))
 
-  // 13. auditPositions 直接钉
+  // 13. auditPositions 直接钉（只产 fieldMap——告警层裁后的事实陈列）
   const paras = lib.numberBlocks('甲段\n\n乙段\n\n丙段')
   const w1 = lib.auditPositions([{ key: 'a', shape: 'text', data: { text: '甲段' } }, { key: 'b', shape: 'text', data: { text: '甲段' } }], '甲段\n\n乙段\n\n丙段', paras)
-  ok('audit 同段复用告警', w1.warnings.some(w => /同时被/.test(w)))
+  ok('audit 同段命中在 fieldMap 呈现', w1.fieldMap.length === 2 && w1.fieldMap.every(f => f.paras.includes(1)))
   const w2 = lib.auditPositions([{ key: 'a', shape: 'text', data: { text: '原文没有的话' } }], '甲段\n\n乙段\n\n丙段', paras)
-  ok('audit 未命中不告警', w2.warnings.length === 0)
-  ok('audit 空段落不崩', Array.isArray(lib.auditPositions([], '', []).warnings))
+  ok('audit 未命中段号为空', w2.fieldMap.length === 1 && w2.fieldMap[0].paras.length === 0)
+  ok('audit 空段落不崩', Array.isArray(lib.auditPositions([], '', []).fieldMap))
 
   // 14. 重叠硬闸：one-shot 两格全文重复 → 重烧修复
   {
@@ -420,14 +584,14 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
       if (tag === 'introduction') return { title: '欧式桥式起重机', body_md: blocks[5].text }
       throw new Error('未覆盖 ' + tag)
     }
-    const r10 = await burner.burn({ text: raw, slug: 'to-dup', productName: '欧式桥式起重机', family: 'product' }, { callAI: fixer })
+    const r10 = await burner.burn({ text: raw, slug: 'to-dup', productName: '欧式桥式起重机', family: 'product' }, { callAI: fixer, noBackfill: true })
     ok('重叠格触发重烧且修复', r10.report.sections.every(s => s.status === 'ok' || s.status === 'repaired') && repairCalls === 2 && r10.json.introduction?.body?.type === 'doc')
     ok('重烧原因含重复提示', r10.report.sections.some(s => (s.issues[0] ?? '').includes('重复')) || repairCalls === 2)
 
     // 15. 屡教不改的重叠 → 双格 failed 缺席
     const alwaysDup = async (m, tag) => tag === 'oneshot' ? dupShot
       : { title: '欧式桥式起重机', body_md: blocks[1].text } // 重烧还是给同一段
-    const r11 = await burner.burn({ text: raw, slug: 'to-dup2', productName: '欧式桥式起重机', family: 'product' }, { callAI: alwaysDup })
+    const r11 = await burner.burn({ text: raw, slug: 'to-dup2', productName: '欧式桥式起重机', family: 'product' }, { callAI: alwaysDup, noBackfill: true })
     ok('屡犯重叠双格 failed 缺席', r11.report.sections.every(s => s.status === 'failed') && r11.json.overview === undefined && r11.json.introduction === undefined)
 
     // 16. 判族提示词不含「起重机」（已建族由调用方动态传入）
@@ -443,7 +607,7 @@ const EX_POST = JSON.parse(readFileSync(join(SITE, 'src/components/posts/PostPag
     } }
     const fixer2 = async (m, tag) => {
       if (tag === 'oneshot') return dupShot2
-      if (tag === 'overview') return { title: '原文里不存在的标题', body_md: blocks[2].text } // 重烧仍不过关（标题假）
+      if (tag === 'overview') return { title: '欧式桥式起重机', body_md: '重烧仍编造，原文没有这句。' } // 重烧仍不过关（正文逐字硬闸不过；标题已降级为提示，不能当失败刺激源）
       if (tag === 'introduction') return { title: '欧式桥式起重机', body_md: blocks[5].text }
       throw new Error('未覆盖 ' + tag)
     }

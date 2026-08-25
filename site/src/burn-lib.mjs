@@ -28,6 +28,12 @@ export function extractImages(rawText) {
   return [...new Map(out.map(i => [i.name, i])).values()] // 同名图去重（重复配图标记不重复进 gallery）
 }
 
+// 配图标记 = 图池元数据，不是正文（2026-08-18 自检实证）：比对/安置层必须剥掉——留着会冤枉「只搬文字不抄标记」
+// 的正确搬运（整行闸误杀），也会让独立标记行被误判「未用」、经强制安置泄漏进页面正文。
+const IMG_RE_SRC = '（\\s*配图\\s*[:：]?\\s*[^）]*?[\\w.-]+\\.(?:jpe?g|png|webp)\\s*）'
+export const hasImgMarker = s => new RegExp(IMG_RE_SRC, 'i').test(String(s))
+export const stripImgMarkers = s => String(s).replace(new RegExp(IMG_RE_SRC, 'gi'), '')
+
 // ---------- URL 剥壳（旧站迁移插件：对 dgcrane 旧站调优，换站不保证；贴裸文本路站点无关） ----------
 export function stripHtml(html) {
   // dgcrane 旧站产品页：优先抽 #product 主容器（§7：标题→询盘在其内，related-products 在其外）；抽不到回退整页剥
@@ -134,8 +140,50 @@ export function loadCatalog(metaPath, astroPath, refJsonPath) {
   })
 }
 
-// ---------- 位置审计（防错位）：命中位置机器算，不经 AI 认领 ----------
-// 返回 { warnings: string[]（同段复用/顺序颠倒）, fieldMap: [{key, paras:[n…]}]（每格命中段号，人审辅助） }
+// ---------- 自然名归一：模型照 example 结构输出嵌套块名时，确定性拆回目录格名 ----------
+// meta 白名单用平铺点号格名（summary.intro/hero.headline/hero.highlights），而 example.json 顶层是
+// 嵌套块（summary/hero）。模型照 example 抄整块不该被当「发明字段」枪毙——example 顶层存在、
+// 目录里有点号子键的块名是合法别名，按目录 shape 拆回子格；拆不出有效子格的才落 unknown 枪毙。
+export function normalizeFields(fields, catalog, example) {
+  const byKey = new Map(catalog.map(c => [c.key, c]))
+  const aliases = new Map() // 顶层块名 → Map(子键 → 目录格名)
+  for (const c of catalog) {
+    const dot = c.key.indexOf('.')
+    if (dot <= 0) continue
+    const top = c.key.slice(0, dot)
+    const sub = c.key.slice(dot + 1)
+    if (example && typeof example === 'object' && Object.prototype.hasOwnProperty.call(example, top)) {
+      if (!aliases.has(top)) aliases.set(top, new Map())
+      aliases.get(top).set(sub, c.key)
+    }
+  }
+  const out = []
+  for (const [key, data] of Object.entries(fields ?? {})) {
+    if (byKey.has(key)) { out.push({ key, data }); continue }
+    const sub = aliases.get(key)
+    let mapped = 0
+    if (sub && data && typeof data === 'object' && !Array.isArray(data)) {
+      for (const [sk, ck] of sub) {
+        const v = data[sk]
+        if (v === undefined || v === null) continue
+        const shape = byKey.get(ck).shape
+        if (shape === 'text' && typeof v === 'string') { out.push({ key: ck, data: { text: v } }); mapped++ }
+        else if (shape === 'list' && Array.isArray(v) && v.every(x => typeof x === 'string')) { out.push({ key: ck, data: { items: v } }); mapped++ }
+        else if (shape === 'seo' && typeof v === 'string') { out.push({ key: ck, data: { text: v } }); mapped++ }
+      }
+      if (mapped) continue
+      out.push({ key, data, unknown: `块「${key}」内没有可用的子键（白名单只收 ${[...sub.keys()].join('/')}；图片等 chrome 字段不烧）` })
+      continue
+    }
+    out.push({ key, data, unknown: '格子名不在白名单（发明字段）' })
+  }
+  return out
+}
+
+// ---------- 位置归集（人审辅助）：命中位置机器算，不经 AI 认领 ----------
+// 只产 fieldMap（每格命中的原文段号）。告警层已退役（2026-08-17）：同段复用告警分不清
+// 「AI 把一段塞两格」与「原文本身重复」（散文+规格表同句是常态）——硬误报源修不好；
+// 重度重复（>50%）由 findDuplicates 硬闸管，轻度重复人眼在 fieldMap 行自见。
 export function auditPositions(filledResults, rawText, paragraphs) {
   const normSrc = normalizeText(rawText)
   // 段落规范化区间（normSrc ≡ 各段规范化串的顺序拼接，区间严格相邻）
@@ -160,27 +208,12 @@ export function auditPositions(filledResults, rawText, paragraphs) {
       if (at >= 0) hits.push({ key: r.key, shape: r.shape, pos: at })
     }
   }
-  const warnings = []
   // 人审辅助：每格命中的段号（去重排序）
   const fieldMap = filledResults.map(r => ({
     key: r.key,
     paras: [...new Set(hits.filter(h => h.key === r.key).map(h => paraOf(h.pos)).filter(n => n !== undefined))].sort((a, b) => a - b),
   }))
-  // 同段复用：同类格子（正文类 section/list ｜ chrome 类 text/seo）≥2 个命中同一原文段落才告警——
-  // 跨类不算：headline/intro 引用正文首段是正常修辞，全 shape 混算会系统性误报
-  const kindOf = shape => (shape === 'section' || shape === 'list' || shape === 'sections') ? 'content' : 'chrome'
-  const byPara = new Map() // n → {content:Set, chrome:Set}
-  for (const h of hits) {
-    const n = paraOf(h.pos)
-    if (n === undefined) continue
-    if (!byPara.has(n)) byPara.set(n, { content: new Set(), chrome: new Set() })
-    byPara.get(n)[kindOf(h.shape)].add(h.key)
-  }
-  for (const [n, kinds] of byPara) for (const keys of [kinds.content, kinds.chrome])
-    if (keys.size > 1) warnings.push(`原文第 ${n} 段同时被 ${[...keys].join('、')} 使用——疑似装错格，人工确认`)
-  // 顺序颠倒审计已退役（真 key 复验实证误报）：页面栏序由组件固定，文章的栏目顺序与目录不同是
-  // 合法内容排布，不是装错格的信号；「真句错位」由同段复用 + fieldMap 人审兜。
-  return { warnings, fieldMap }
+  return { fieldMap }
 }
 
 // ---------- 重叠检测（防全文塞多格）：section 格两两比，共享块/最大块数 > 0.5 判重复 ----------
@@ -232,6 +265,53 @@ export function verifyTree(tree, srcSlice) {
   return { ok: failures.length === 0, failures }
 }
 
+// ---------- 整行查验（「我已整理好」模式，2026-08-18）：输出每块必须 = 一整行或连续几整行 ----------
+// 比 verifyTree 更严：子串（半句/挑句拼）也算过 → 整行才算搬运。三个实战修正：
+// ①允许连续行合并（粘贴假换行把一句话折成多行，不许合并则那段无处可去）；跳行拼接不合法（=重组内容）；
+// ②比对前剥 markdown 行首标记（#/列表/有序/引用）与行内强调（**等是排版不是字，不剥会冤枉照抄）；
+// ③粒度单位是「行」而非「段」：一段散文是一行，清单一行一条，表格行按行+单元格双口径。
+export function stripMdMarkers(s) {
+  return String(s)
+    .replace(/^\s*(?:#{1,6}\s+|[-*+]\s+|\d+[.、)]\s*|>\s*)/, '')
+    .replace(/(\*\*|__|~~|`|\*)/g, '')
+}
+
+// 行原子判定器：whole(t)=t 是否恰好等于一整行（或连续几整行拼接，merge=false 时禁拼接）
+export function lineAtom(src) {
+  const norm = t => normalizeText(stripMdMarkers(t))
+  const singles = new Set(), seq = []
+  for (const line of String(src).split('\n').map(t => stripImgMarkers(t).trim()).filter(Boolean)) {
+    const n = norm(line)
+    if (!n) continue
+    singles.add(n); seq.push(n)
+    if (line.includes('|')) // 表格行：单元格也算合法搬运单位
+      for (const c of line.split('|').map(x => norm(x))) if (c) singles.add(c)
+  }
+  const whole = (t, merge = true) => {
+    const n = norm(t)
+    if (!n) return true
+    if (singles.has(n)) return true
+    if (!merge) return false
+    for (let i = 0; i < seq.length; i++) { // 连续行滑窗（至多 40 行，页级文本足够）
+      let acc = ''
+      for (let j = i; j < Math.min(seq.length, i + 40); j++) {
+        acc += seq[j]
+        if (acc === n) return true
+        if (acc.length > n.length) break
+      }
+    }
+    return false
+  }
+  return { whole }
+}
+
+export function verifyTreeStrict(tree, srcSlice) {
+  validateDoc(tree, 'verify') // 顺手过 schema——畸形树与凑字段同罪
+  const { whole } = lineAtom(srcSlice)
+  const failures = treeBlocks(tree).filter(t => !whole(t))
+  return { ok: failures.length === 0, failures }
+}
+
 // ---------- 相似度（纯 Dice bigram；包含关系归 similarToAny 管，不在这里特判） ----------
 export function similarity(a, b) {
   const [x, y] = [normalizeText(a), normalizeText(b)]
@@ -267,9 +347,8 @@ export async function assemble({ slug, productName, family = 'products', section
 // 消化了返回 true，族装配器只处理自己认识的剩余键。
 function plantField(j, r) {
   if (r.shape === 'section' && r.data) {
-    const tree = mdToDoc(r.data.body_md)
-    validateDoc(tree, `${r.key}.body`)
-    j[r.key] = { title: r.data.title, body: tree }
+    // 树在验收期已过 schema（verifyTree 内含 validateDoc），落盘前 writeDraft 再过——此处不重复验
+    j[r.key] = { title: r.data.title, body: mdToDoc(r.data.body_md) }
     if (typeof r.titlePath === 'string') setIn(j, r.titlePath, r.data.title)
     return true
   }
@@ -341,11 +420,8 @@ async function assemblePost({ slug, productName, sectionResults, imagePool = [],
   for (const r of sectionResults) {
     if (!r.data) continue // 失败段缺席
     if (r.shape === 'sections') {
-      j.body.sections = r.data.items.map(it => {
-        const tree = mdToDoc(it.body_md)
-        validateDoc(tree, 'body.sections.body')
-        return { heading: it.heading, body: tree }
-      })
+      // 逐项树验收期已过 schema（verifyTree），落盘前 writeDraft 再过——此处不重复验
+      j.body.sections = r.data.items.map(it => ({ heading: it.heading, body: mdToDoc(it.body_md) }))
     } else if (plantField(j, r)) continue
     else if (r.key === 'title') {
       j.title = r.data.text

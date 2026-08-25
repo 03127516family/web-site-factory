@@ -11,10 +11,9 @@ import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n.
 
 export function getStaticPaths() {
   // glob 须在函数体内现调（Astro 构建把 getStaticPaths 提到独立 chunk，吃不到 frontmatter 顶层变量）
-  const haveLayout = new Set([
-    ...Object.keys(import.meta.glob('@components/posts/*/index.astro')).map(p => p.split('/').at(-2)),
-    ...Object.keys(import.meta.glob('@components/posts/*.astro')).map(p => p.split('/').pop().replace('.astro', '')),
-  ])
+  const flatNames = new Set(Object.keys(import.meta.glob('@components/posts/*.astro')).map(p => p.split('/').pop().replace('.astro', '')))
+  const kitNames = new Set(Object.keys(import.meta.glob('@components/posts/*/index.astro')).map(p => p.split('/').at(-2)))
+  const haveLayout = new Set([...flatNames, ...kitNames])
   const pages = scanPages({ withJson: true })
   const groups = buildGroups(pages)
   const bySlug = new Map(pages.map(p => [p.slug, p]))
@@ -23,9 +22,12 @@ export function getStaticPaths() {
     const dir = join(process.cwd(), 'content', lang, 'posts')
     if (!existsSync(dir)) continue // 该语言还没有此类型镜像
     for (const f of readdirSync(dir)) {
-      if (!f.endsWith('.json') || !haveLayout.has(f.replace('.json', ''))) continue
+      if (!f.endsWith('.json')) continue
+      const name = f.replace('.json', '')
       const j = JSON.parse(readFileSync(join(dir, f), 'utf8'))
-      const params = { lang, slug: f.replace('.json', '') }
+      // 与 zh 路由同口径：同名布局组件 或 模板套件 任一存在才出页（套件兜底，对称性修复）
+      if (!flatNames.has(name) && !kitNames.has(j.page.template)) continue
+      const params = { lang, slug: name }
       if (process.env.INCLUDE_DRAFTS === '1') { out.push({ params, props: { j } }); continue } // 预览=镜像全文
       const me = bySlug.get(j.page.slug)
       if (!me) throw new Error(`镜像 slug 在族谱未登记（page.slug 与文件位置矛盾=数据损坏）：content/${lang}/posts/${f} 声明 ${j.page.slug}`) // 评审 M8：Chrome 侧同情形 throw，路由不静默跳页
