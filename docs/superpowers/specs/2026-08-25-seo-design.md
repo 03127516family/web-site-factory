@@ -167,3 +167,17 @@ SEO 是渲染链的一部分：**三样现成原料 → `src/seo/` 一个纯逻�
 - Organization 站级 JSON-LD、og:locale:alternate——首版可后补
 - 英文 SEO 字段超长（现存 14 处）治理在步 3，属翻译提示词工程
 - 管理界面（面板/体检台）整体在步 4，本期只保数据接口
+
+---
+
+## 附录：实施修正与实证（2026-08-26 落地时核出，已随实施一并处理）
+
+1. seoHead 不发 `<title>`/`<meta description>`——document.html `{{TITLE}}`/`{{DESCRIPTION}}` 已发（重复发=双标签）。
+2. 预览 noindex 用现成 `INCLUDE_DRAFTS` 信号（dist-edit 恒 1，build-outputs.mjs:66），不新加 `SEO_PREVIEW` 环境变量。
+3. `DEFAULT_OG_IMAGE` 默认空=无兜底图不发 `og:image`（死图比缺标签伤）；站里放好默认图后改常量。
+4. `TITLE_TEMPLATE` 默认空=不套（page.title 烧制已含品牌「- DGCRANE」，再套=双品牌）；只作用于 og:title/JSON-LD headline。
+5. §7 步 1「验证字段级 origin」核出两个真缺口并一并修：**adoptMirror 无生产调用方**（镜像人改不进 TM，下次重投影整文件覆盖冲掉人改）；**SITE_BASE '/zh/' 与 dist 拓扑不一致**（dist zh 产物在 /posts/ 无前缀，切换器 zh 链接 404）——D1 翻转即修正。
+6. 「seo 字段进名册」零代码——collectUnits 按 key/值形态自动收 `seo.og.title/description`、自动排除 `image/canonical/noindex`。
+7. **pin 键必须 `pageId::field`**（e2e 实证教训）：TM 全语言对共享，只按字段名做键会一页收养六页污染（每页都有 title）；句账 fp 全局去重本身正确，pin 是页级人决策。另：首次镜像发布会把存量手工调过、从未进 TM 的字段收养成人稿+pin（一次性欠账收割，预期行为）。
+8. 体检基线实跑（2026-08-26，healthData 全站）：15 页、异常 8 页全在 en——标题超长 6 处（32t=111 / 5-ton=82 / safety=89 / gantry=82 / multi-point=75 / overhead=69）、简介超长 8 处（171~319 字符）。治理=步 3 长度预算已上线，存量句重译走 refollow/下轮发布自然补。
+9. 实施验证矩阵：accept-seo 16/16、check 84/84、burn 155/155、writeback 34/34、poc5 56/56、node22 build 15 页、e2e 四步真实链全过。
