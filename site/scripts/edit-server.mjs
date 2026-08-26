@@ -487,24 +487,12 @@ const server = http.createServer(async (req, res) => {
       res.end(js)
       return
     }
-    if (req.url === '/__burn') {
-      let html = readFileSync(join(SITE, 'edit-layer/burn-console.html'), 'utf8')
-      if (!process.env.DEEPSEEK_API_KEY) html = html.replace('</body>', '<style>body{padding-top:44px}</style><div style="position:fixed;top:0;left:0;right:0;background:#fef2f2;color:#dc2626;padding:10px 16px;font:14px sans-serif;text-align:center;z-index:99999">未配置 DEEPSEEK_API_KEY（服务端环境变量）——配置后重启服务再烧制</div></body>')
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      res.end(html)
-      return
-    }
     if (req.url?.startsWith('/__burn-preview/')) {
       const pid = req.url.split('/').pop()
       const html = PREVIEWS.get(pid)
       if (!html) { res.writeHead(404); res.end('预览不存在或已过期（服务重启即清），请重新烧制'); return }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
       res.end(html)
-      return
-    }
-    if (req.url === '/__i18n') {
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      res.end(readFileSync(join(SITE, 'edit-layer/i18n-console.html'), 'utf8'))
       return
     }
     if (req.url === '/__i18n/data') {
@@ -533,72 +521,6 @@ const server = http.createServer(async (req, res) => {
       res.end(data)
       return
     }
-    if (req.method === 'GET' && req.url?.startsWith('/__i18n/review-data')) {
-      // 审阅清单数据：该页全部非 approved 单元（未译/拒收/待审）＋字段位置
-      const u = new URL(req.url, 'http://x')
-      const pageId = u.searchParams.get('pageId')
-      const lang = u.searchParams.get('lang') || 'en'
-      if (!/^[\w-]+$/.test(pageId || '')) throw new Error('pageId 非法')
-      const srcPg = scanPages().find(p => p.pageId === pageId && !p.langDir)
-      if (!srcPg) throw new Error('页面不存在: ' + pageId)
-      const srcJ = JSON.parse(readFileSync(join(SITE, 'content', srcPg.file), 'utf8'))
-      const tm = loadTm(srcJ.page.lang, lang)
-      const items = collectUnits(srcJ).map(u => {
-        const e = tm.sentences[u.fp]
-        const status = e?.status ?? 'untranslated'
-        return { field: u.field, path: u.path || '', text: u.text, translation: e?.translation || '', status }
-      }).filter(i => i.status !== 'approved')
-      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' })
-      res.end(JSON.stringify({ ok: true, pageId, lang, items }))
-      return
-    }
-    if (req.url?.startsWith('/__i18n/review/')) {
-      // 双页审阅（spec §5）：左=中文现状，右=英文草稿（黄底待审句；就地改+保存=人审写回）
-      const u = new URL(req.url, 'http://x')
-      const pageId = decodeURIComponent(u.pathname.split('/').pop())
-      const lang = u.searchParams.get('lang') || 'en'
-      if (!/^[a-z][a-z0-9-]*$/i.test(lang)) throw new Error('lang 非法') // 内联进 iframe/script，白名单形态防注入
-      if (!/^[\w-]+$/.test(pageId)) throw new Error('pageId 非法') // 评审 M5：内联进标题/script，同款形态闸（存在性检查之外加一道）
-      const srcPg = scanPages().find(p => p.pageId === pageId && !p.langDir)
-      if (!srcPg) { res.writeHead(404); res.end('页面不存在'); return }
-      const html = `<!doctype html><html lang="zh"><head><meta charset="utf-8"><title>审校 ${pageId}</title>
-<style>body{margin:0;font:14px -apple-system,"PingFang SC",sans-serif;display:flex;flex-direction:column;height:100vh}
-.bar{display:flex;gap:12px;align-items:center;padding:8px 14px;background:#1f2430;color:#fff}
-.bar button{border:0;border-radius:6px;padding:8px 18px;background:#16a34a;color:#fff;cursor:pointer}
-.bar .tip{font-size:12px;color:#94a3b8}.panes{flex:1;display:flex}.panes iframe{flex:1;border:0;border-right:1px solid #ddd}
-.tag{padding:2px 8px;border-radius:4px;background:#fef9c3;color:#854d0e;font-size:12px}
-.tag.red{background:#fee2e2;color:#991b1b}
-#listbar{max-height:220px;overflow:auto;background:#fff;border-bottom:1px solid #ddd}
-#list{display:flex;flex-direction:column;padding:6px 14px}
-.item{display:flex;gap:10px;align-items:baseline;padding:4px 8px;border-radius:6px;font-size:13px;margin:1px 0}
-.item b{flex:none;font-size:11px;padding:1px 6px;border-radius:4px}
-.item .f{flex:none;font-family:monospace;font-size:11px;color:#64748b;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.item.draft{background:#fefce8}.item.draft b{background:#fef9c3;color:#854d0e}
-.item.untranslated{background:#fef2f2}.item.untranslated b{background:#fee2e2;color:#991b1b}
-.item.failed{background:#fee2e2}.item.failed b{background:#fecaca;color:#7f1d1d}
-.item.ok{color:#16a34a}</style></head>
-<body><div class="bar"><b>${pageId}</b><span class="tag">黄底=待审句</span><span class="tag red">红底=未译/拒收句</span>
-<span class="tip">左中文现状 · 右英文草稿；下方清单列出全部待处理句（含扁平字段，右键页面里 Ctrl+F 定位）</span>
-<button id="ok">✓ 通过并发布</button><span id="msg" class="tip"></span></div>
-<div id="listbar"><div id="list"></div></div>
-<div class="panes"><iframe src="/${srcPg.slug}/"></iframe><iframe src="/${lang}/${srcPg.slug}/"></iframe></div>
-<script>
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LABEL={draft:'待审',untranslated:'未译',failed:'拒收'};
-fetch('/__i18n/review-data?pageId=${pageId}&lang=${lang}').then(r=>r.json()).then(d=>{
-  const el=document.getElementById('list');
-  const items=(d.items||[]).sort((a,b)=>(a.status==='untranslated'||a.status==='failed')&&!(b.status==='untranslated'||b.status==='failed')?-1:0);
-  el.innerHTML=items.length
-    ?items.map(i=>'<div class="item '+i.status+'"><b>'+LABEL[i.status]+'</b><span class="f">'+esc(i.field)+'</span><span class="t">'+esc(i.text.slice(0,90))+(i.translation?'  →  '+esc(i.translation.slice(0,90)):'')+'</span></div>').join('')
-    :'<div class="item ok">✓ 该页没有待处理句</div>';
-}).catch(()=>document.getElementById('list').innerHTML='<div class="item failed">清单加载失败</div>');
-document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/approve',{method:'POST',body:JSON.stringify({pageId:'${pageId}',lang:'${lang}'})});const j=await r.json();document.getElementById('msg').textContent=j.ok?('已通过 '+j.approved+' 句并发布'+(j.remainingFailed?('；仍有 '+j.remainingFailed+' 句失败'):'')+(j.remainingUntranslated?('；'+j.remainingUntranslated+' 句未翻'):'')):('失败：'+j.error)}</script>
-</body></html>`
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
-      res.end(html)
-      return
-    }
     const pageUrl = new URL(req.url, 'http://x')
     const view = pageUrl.searchParams.get('view')
     const cleanView = view === 'draft' || view === 'published'
@@ -617,7 +539,7 @@ document.getElementById('ok').onclick=async()=>{const r=await fetch('/__i18n/app
       try {
         context = editContextScript({
           ...createEditContext(SITE, slug),
-          workbenchUrl: process.env.WORKBENCH_URL || '/__burn',
+          workbenchUrl: process.env.WORKBENCH_URL || `http://${(req.headers.host || `localhost:${PORT}`).replace(/:8092$/, "")}:8090/`,
         })
       }
       catch (error) {
