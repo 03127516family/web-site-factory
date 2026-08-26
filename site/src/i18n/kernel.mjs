@@ -12,7 +12,7 @@ import { projectPage } from './project.mjs'
 
 // ---------- 站点层 i18n 配置（终态迁 site.config，同旧系统决策） ----------
 export const SITE_ROOT = 'https://www.dgcrane.com/'
-export const SITE_BASE = SITE_ROOT + 'zh/' // zh 源走 /zh/ 子路径（2026-07-02 拍板）
+export const SITE_BASE = SITE_ROOT // D1（2026-08-25 拍定）：中文住根；旧 '/zh/' 前缀与 dist 拓扑本就不一致（dist zh 产物在 /posts/ 无前缀），翻转即修正切换器 zh 链接 404
 export const DEPLOY_LANGS = ['zh-CN', 'en']
 export const LANG_LABEL = { 'zh-CN': '简体中文', en: 'English' }
 export const langLabel = lang => LANG_LABEL[lang] || lang
@@ -83,7 +83,7 @@ export function buildGroups(pages) {
 }
 
 // ---------- URL ----------
-// zh 源 → SITE_BASE + slug（dist→/zh/ 部署拓扑）；镜像 slug 自带 "<lang>/" 前缀（URL 即路径）。
+// zh 源 → SITE_BASE + slug（dist 拓扑 = zh 住根，D1）；镜像 slug 自带 "<lang>/" 前缀（URL 即路径）。
 export const pageUrl = pg => (pg.langDir ? SITE_ROOT + pg.slug + '/' : SITE_BASE + pg.slug + '/')
 
 // 同组、且在 deploy 闸内的语言版本（含自身）。publishable 未传 = 预览/测试不设限（同旧系统语义）。
