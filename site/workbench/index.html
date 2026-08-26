@@ -566,6 +566,7 @@ textarea.input{height:auto;padding:9px 11px;line-height:1.6;resize:vertical}
         <div class="nav-item" data-nav="publish"><svg><use href="#i-send"/></svg><span>发布状态</span></div>
         <div class="nav-item" data-nav="inbox"><svg><use href="#i-file"/></svg><span>询盘收件箱</span></div>
         <div class="nav-item" data-nav="i18n"><svg><use href="#i-globe"/></svg><span>多语言</span><span class="nav-badge" id="navCountI18n">48</span></div>
+        <div class="nav-item" data-nav="seo"><svg><use href="#i-eye"/></svg><span>SEO 体检</span><span class="nav-badge" id="navCountSeo" style="display:none"></span></div>
       </div>
       <div class="nav-group">
         <div class="nav-label">系统</div>
@@ -1492,6 +1493,28 @@ textarea.input{height:auto;padding:9px 11px;line-height:1.6;resize:vertical}
           </div>
         </section>
 
+        <!-- ============ 屏 · SEO 体检 ============ -->
+        <section class="screen" id="s-seo" hidden>
+          <div class="screen-head">
+            <div>
+              <h1>SEO 体检</h1>
+              <p class="sub">一行=一篇逻辑页 · 异常机器算（长度/缺失/noindex/pin 待确认）· 数据与构建同源，无人工登记</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn btn-secondary" id="seoShowAll"><svg><use href="#i-list"/></svg>显示全部</button>
+              <button class="btn btn-ghost" onclick="pinDecideAll('keep')"><svg><use href="#i-check"/></svg>全部保持</button>
+              <button class="btn btn-primary" onclick="pinDecideAll('refollow')"><svg><use href="#i-spark"/></svg>全部重跟</button>
+            </div>
+          </div>
+          <div class="stats-strip" id="seoStats"></div>
+          <div style="background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden">
+            <table class="tbl">
+              <thead><tr><th style="width:34%">页面</th><th>语言</th><th>标题长度</th><th>简介长度</th><th>旗</th><th style="width:80px"></th></tr></thead>
+              <tbody id="seoTbody"></tbody>
+            </table>
+          </div>
+        </section>
+
         <!-- ============ 屏 6 · 媒体库 ============ -->
         <section class="screen" id="s-media" hidden>
           <div class="screen-head">
@@ -1775,6 +1798,7 @@ const NAV_TITLES = {
   publish:["发布","发布状态"],
   inbox:["发布","询盘收件箱"],
   i18n:["发布","多语言"],
+  seo:["发布","SEO 体检"],
   settings:["系统","设置"],
 };
 // 侧边栏以内容资产为主线：产品/文章两个 tab 共用一份列表屏（s-pages），靠类型上下文区分；

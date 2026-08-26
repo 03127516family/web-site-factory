@@ -33,7 +33,9 @@ const ui = {
   terms: { query: "" },
   tm: { query: "", status: "all" },
 };
-const bound = { pages: false, mirror: false, terms: false, tm: false };
+const bound = { pages: false, mirror: false, terms: false, tm: false, seo: false };
+let SEO = { rows: [], pins: [], summary: { pages: 0, flagged: 0, pinsPending: 0 } };
+const seoState = { showAll: false };
 
 const setActive = (c, chips) => { chips.forEach((x) => x.classList.remove("active")); c.classList.add("active"); };
 
@@ -274,6 +276,73 @@ function renderI18n(ov, pages, terms, tm) {
   bindTm(); drawTm();
 }
 
+/* ============ SEO 体检屏（抄 Yoast Overview：一行=一逻辑页，默认只显异常） ============ */
+const SEO_FLAG = { "title-missing": "标题缺失", "title-overlength": "标题超长", "description-missing": "简介缺失", "description-overlength": "简介超长", "noindex": "未收录", "noindex-manual": "已关收录" };
+function seoAgg() {
+  const by = new Map();
+  for (const r of SEO.rows) {
+    const g = by.get(r.pageId) || { pageId: r.pageId, langs: [], flags: [], pinCount: 0 };
+    g.langs.push(r.lang);
+    for (const i of r.issues) if (!g.flags.includes(i)) g.flags.push(i);
+    by.set(r.pageId, g);
+  }
+  for (const p of SEO.pins) { const g = by.get(p.pageId); if (g) g.pinCount++; }
+  return [...by.values()];
+}
+function seoTitle(pageId) {
+  const p = PAGES.find(x => x.pageId === pageId && !x.langDir) || PAGES.find(x => x.pageId === pageId);
+  return p ? p.title : pageId;
+}
+function drawSeo() {
+  if ($("seoStats")) $("seoStats").innerHTML = `
+    <div class="sstat"><div class="v">${SEO.summary.pages}<span class="u">页</span></div><div class="l">全站逻辑页</div></div>
+    <div class="sstat"><div class="v">${SEO.summary.flagged}<span class="u">页</span></div><div class="l">体检异常（长度/缺失/收录）</div></div>
+    <div class="sstat"><div class="v">${SEO.summary.pinsPending}<span class="u">条</span></div><div class="l">人稿待确认（源已变·顶住中）</div></div>`;
+  const badge = $("navCountSeo");
+  if (badge) { const n = SEO.summary.flagged + SEO.summary.pinsPending; badge.textContent = n; badge.style.display = n ? "" : "none"; }
+  const btn = $("seoShowAll");
+  if (btn) btn.innerHTML = (seoState.showAll ? "只显异常" : "显示全部");
+  const rows = seoAgg();
+  const show = seoState.showAll ? rows : rows.filter(g => g.flags.length || g.pinCount);
+  if ($("seoTbody")) $("seoTbody").innerHTML = show.map(g => {
+    const detail = SEO.rows.filter(r => r.pageId === g.pageId);
+    const pins = SEO.pins.filter(p => p.pageId === g.pageId);
+    return `<tr>
+      <td><div class="t-title">${esc(seoTitle(g.pageId))}</div><div class="t-sub">${esc(g.pageId)}</div></td>
+      <td>${g.langs.map(l => `<span class="tag">${esc(l)}</span>`).join(" ")}</td>
+      <td class="mono" style="font-size:12px">${detail.map(r => r.titleLength > 60 ? `<span style="color:var(--bad)">${r.titleLength}</span>` : r.titleLength).join(" / ")}</td>
+      <td class="mono" style="font-size:12px">${detail.map(r => r.descriptionLength > 160 ? `<span style="color:var(--bad)">${r.descriptionLength}</span>` : r.descriptionLength).join(" / ")}</td>
+      <td>${g.flags.map(f => `<span class="pill pill-warn">${SEO_FLAG[f] || esc(f)}</span>`).join(" ")}${g.pinCount ? ` <span class="pill pill-bad">待确认 ${g.pinCount}</span>` : ""}</td>
+      <td><button class="btn btn-sm btn-ghost" onclick="seoToggle('${esc(g.pageId)}')">展开</button></td>
+    </tr>
+    <tr id="seoDetail-${esc(g.pageId)}" hidden><td colspan="6" style="background:var(--surface-2)">
+      ${detail.map(r => `<div style="display:flex;gap:10px;align-items:center;padding:4px 8px"><span class="tag">${esc(r.lang)}</span><a class="btn btn-sm btn-ghost" href="${EDIT_BASE}${esc(r.slug)}/" target="_blank">编辑</a><span style="font-size:12px;color:var(--ink-2)">标题 ${r.titleLength} · 简介 ${r.descriptionLength}</span>${r.issues.map(i => `<span class="pill pill-warn">${SEO_FLAG[i] || esc(i)}</span>`).join(" ")}</div>`).join("")}
+      ${pins.map(p => `<div style="display:flex;gap:10px;align-items:center;padding:4px 8px;border-top:1px dashed var(--line)"><span class="tag">${esc(p.lang)}</span><span class="mono" style="font-size:11px;color:var(--ink-3)">${esc(p.field)}</span><span style="font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">源已改「${esc(p.sourceText.slice(0, 36))}」· 人稿顶住「${esc(p.pinnedText.slice(0, 36))}」</span><button class="btn btn-sm btn-ghost" onclick="pinDecideOne('${esc(p.pageId)}','${esc(p.field)}','${esc(p.lang)}','keep')">保持</button><button class="btn btn-sm btn-danger" onclick="pinDecideOne('${esc(p.pageId)}','${esc(p.field)}','${esc(p.lang)}','refollow')">重跟</button></div>`).join("")}
+    </td></tr>`;
+  }).join("") || `<tr><td colspan="6" style="color:var(--ok);padding:22px;text-align:center">✓ 没有异常——全站体检通过</td></tr>`;
+}
+function seoToggle(pageId) { const el = $("seoDetail-" + pageId); if (el) el.hidden = !el.hidden; }
+async function postPinDecisions(action, list) {
+  if (!list.length) { toast("没有待确认项"); return; }
+  if (action === "refollow" && !confirm(`将 ${list.length} 条人稿改为跟源重翻（会产生翻译花费）——确认？`)) return;
+  const byLang = new Map();
+  for (const p of list) { if (!byLang.has(p.lang)) byLang.set(p.lang, []); byLang.get(p.lang).push({ pageId: p.pageId, field: p.field, action }); }
+  let kept = 0, refollowed = 0, retranslated = 0, err = null;
+  for (const [lang, decisions] of byLang) {
+    const r = await fetch("/api/pin-decide", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ lang, decisions }) }).then(x => x.json()).catch(() => ({ error: "请求失败" }));
+    if (r.ok) { kept += r.kept || 0; refollowed += r.refollowed || 0; retranslated += r.retranslated || 0; } else err = r.error || "未知";
+  }
+  toast(err ? "失败：" + err : `${action === "keep" ? "已保持人稿（旗已清）" : "已重跟源"}：保持 ${kept} · 重跟 ${refollowed} · 重译 ${retranslated} 句`);
+  init();
+}
+async function pinDecideOne(pageId, field, lang, action) { await postPinDecisions(action, [{ pageId, field, lang }]); }
+async function pinDecideAll(action) { await postPinDecisions(action, SEO.pins); }
+function bindSeo() {
+  if (bound.seo) return; bound.seo = true;
+  const sw = $("seoShowAll");
+  if (sw) sw.addEventListener("click", () => { seoState.showAll = !seoState.showAll; drawSeo(); });
+}
+
 /* ============ 媒体库（分页 + 筛选 + 搜索） ============ */
 const mediaState = { all: [], used: new Set(), filter: "all", query: "", page: 0, pageSize: 48 };
 function mediaCard(f) {
@@ -405,12 +474,14 @@ async function init() {
   let pages = [], terms = { lock: [], map: [] }, tm = { total: 0, items: [] }, cfg = {}, media = { total: 0, items: [] }, inbox = [];
   // 逐端点容错：单个端点失败不拖垮其余屏
   const j = (url) => fetch(url).then((r) => (r.ok ? r.json() : null)).catch(() => null);
-  const [a, b, c, d, e, f, g, h] = await Promise.all([
+  const [a, b, c, d, e, f, g, h, s] = await Promise.all([
     j("/api/overview"), j("/api/pages"), j("/api/terms"), j("/api/tm"),
     j("/api/config"), j("/api/media"), j("/api/inbox"), j("/api/i18n-data"),
+    j("/api/seo-health"),
   ]);
   OV = a || OV; pages = b || []; terms = c || terms; tm = d || tm; cfg = e || {}; media = f || media; inbox = g || [];
   I18N_DATA = h || I18N_DATA;
+  SEO = s || SEO;
   // 侧边栏多语言徽章 = 全站失败句合计（免审直发后人要管的只有失败句），0 则不显示
   const i18nBadge = $("navCountI18n");
   if (i18nBadge) {
@@ -422,6 +493,7 @@ async function init() {
   TERMS = terms; TM = tm;
   loadTemplates();
   renderDash(OV);
+  bindSeo(); drawSeo();
   renderPages(pages);
   renderI18n(OV, pages, TERMS, TM);
   renderMedia(media);
@@ -812,6 +884,9 @@ window.showJsonTree = showJsonTree;
 window.rebuildSite = rebuildSite;
 window.uploadMedia = uploadMedia;
 window.addMemory = addMemory;
+window.seoToggle = seoToggle;
+window.pinDecideOne = pinDecideOne;
+window.pinDecideAll = pinDecideAll;
 
 // 工作台/编辑服务同机不同端口：固定链接改成跟随当前主机，局域网访问同样可用。
 const prod = $("openProdPreview");
