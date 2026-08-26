@@ -292,8 +292,9 @@ function seoAgg() {
   return [...by.values()];
 }
 function seoTitle(pageId) {
-  const p = PAGES.find(x => x.pageId === pageId && !x.langDir) || PAGES.find(x => x.pageId === pageId);
-  return p ? p.title : pageId;
+  // 屏内自取自足：seo-health 行自带 title（zh 优先）——不依赖 /api/pages（变更窗口期跨端点拉取失败会退化成 slug，UI 过屏实证）
+  const r = SEO.rows.find(x => x.pageId === pageId && x.lang === 'zh-CN') || SEO.rows.find(x => x.pageId === pageId);
+  return r?.title || pageId;
 }
 function drawSeo() {
   if ($("seoStats")) $("seoStats").innerHTML = `
