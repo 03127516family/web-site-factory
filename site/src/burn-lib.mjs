@@ -2,10 +2,10 @@
 // AI 只产 markdown/简单 JSON；树转换、校验、组装全在这里——结构归代码。
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { mdToDoc } from './mdast-tree.mjs'
-import { validateDoc } from './content-schema.mjs'
-import { renderDoc } from './render-doc.mjs'
-import { getIn, setIn } from './tree-utils.mjs'
+import { mdToDoc } from './render/mdast-tree.mjs'
+import { validateDoc } from './content/schema.mjs'
+import { renderDoc } from './render/render.mjs'
+import { getIn, setIn } from './render/tree-utils.mjs'
 import { probe } from '../scripts/img-probe.mjs'
 import { loadSiteAssetConfig, publicAssetPolicy } from './asset-config.mjs'
 

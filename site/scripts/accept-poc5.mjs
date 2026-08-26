@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url'
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const JSON_FILE = join(SITE, 'content/products/single-girder-eot-cranes.json')
 const MIRROR_FILE = join(SITE, 'content/en/products/single-girder-eot-cranes.json')
-const TM_FILE = join(SITE, 'src/i18n/tm.zh-CN.en.json')
+const TM_FILE = join(SITE, 'src/i18n/data/tm.zh-CN.en.json')
 const DIST_PAGE = join(SITE, 'dist/products/single-girder-eot-cranes/index.html')
 const EDIT_PORT = process.env.EDIT_PORT || 8092 // 可让开被占的 8092 并行跑验收
 const EDIT = `http://localhost:${EDIT_PORT}/products/single-girder-eot-cranes/`

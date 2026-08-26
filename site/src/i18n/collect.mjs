@@ -1,6 +1,6 @@
 // 可译单元采集：walk 源 JSON → [{id, kind, field, path?, si?, text, fp}]。
 // 判形不判名：doc 树→树单元；字符串→文本单元；结构性键与 URL/文件形态值排除（U-1 沿用）。
-import { fp, extractInlineUnits, sliceInlineMd, inlineSpans } from './i18n-sent.mjs'
+import { fp, extractInlineUnits, sliceInlineMd, inlineSpans } from './sent.mjs'
 
 export const SKIP_KEYS = new Set(['version', 'status', 'slug', 'lang', 'type', 'template', 'family', 'category', 'id', 'dataSize', 'image', 'src', 'href', 'url', 'video', 'pdf'])
 const SKIP_TOP = new Set(['i18n', 'i18n_rev', 'i18n_fp'])

@@ -3,19 +3,19 @@
 import assert from 'node:assert/strict'
 import { join, dirname } from 'node:path'
 import { rmSync, readFileSync, readdirSync, existsSync, writeFileSync, mkdirSync } from 'node:fs'
-import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n-tm.mjs'
-import { collectUnits, collectTreeUnits } from '../src/i18n-collect.mjs'
-import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n-project.mjs'
-import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n-terms.mjs'
-import { checkSentence, checkCoverage } from '../src/i18n-checks.mjs'
-import { translateSegments } from '../src/i18n-engine.mjs'
-import { runPipeline, adoptMirror, approvePage, consoleData, translateAll, harvestMirror } from '../src/i18n-pipeline.mjs'
-import { isPublishable, productionJson, scanPages, buildGroups } from '../src/i18n.mjs'
+import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n/tm.mjs'
+import { collectUnits, collectTreeUnits } from '../src/i18n/collect.mjs'
+import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n/project.mjs'
+import { loadTerms, saveTerms, relevantTerms, hasToken } from '../src/i18n/terms.mjs'
+import { checkSentence, checkCoverage } from '../src/i18n/checks.mjs'
+import { translateSegments } from '../src/i18n/engine.mjs'
+import { runPipeline, adoptMirror, approvePage, consoleData, translateAll, harvestMirror } from '../src/i18n/pipeline.mjs'
+import { isPublishable, productionJson, scanPages, buildGroups } from '../src/i18n/kernel.mjs'
 const cases = []
 const test = (name, fn) => cases.push([name, fn])
 
 // ---------- Task 1: 句切分 ----------
-import { splitPlain, inlineSpans, sliceInlineMd, extractInlineUnits, applyInlineUnit, fp } from '../src/i18n-sent.mjs'
+import { splitPlain, inlineSpans, sliceInlineMd, extractInlineUnits, applyInlineUnit, fp } from '../src/i18n/sent.mjs'
 
 test('切句:中文句界', () => {
   const r = splitPlain('起重量为3吨。它采用变频控制！适用吗？')
@@ -46,7 +46,7 @@ test('切句:空白段忽略+指纹归一', () => {
   assert.equal(fp('起重量为3吨。'), fp(' 起重量为3吨。\n'))
 })
 test('行内:md 特殊字符转义 round-trip 对称（遗留 #21 实测收案）', async () => {
-  const { inlineMdToNodes } = await import('../src/mdast-tree.mjs')
+  const { inlineMdToNodes } = await import('../src/render/mdast-tree.mjs')
   const rt = text => inlineMdToNodes(sliceInlineMd([{ type: 'text', text }], 0, text.length)).map(n => n.text).join('')
   for (const t of ['宽度 5*3 米。', '下划线 _test_ 变量', '数组 arr[0] 取值。', '价格为 100_000 元', '含 `x` 与 `y` 的文本。'])
     assert.equal(rt(t), t, `round-trip 破裂: ${t}`)
@@ -104,7 +104,7 @@ test('配置:加载现值（en 已拍定 auto 免审直发）', () => {
   assert.equal(c.review.en, 'auto')
 })
 test('TM:saveTm/loadTm 真落盘往返', () => {
-  const f = join(process.cwd(), 'src', 'i18n', 'tm.t-x.t-y.json')
+  const f = join(process.cwd(), 'src', 'i18n', 'data', 'tm.t-x.t-y.json')
   const tm = loadTm('t-x', 't-y')
   upsert(tm, 'k1', { text: '源', translation: '译', status: 'draft', origin: 'engine' })
   saveTm('t-x', 't-y', tm)
@@ -112,7 +112,7 @@ test('TM:saveTm/loadTm 真落盘往返', () => {
   rmSync(f) // 清理，不留测试残留
 })
 test('配置:saveConfig review 深合并不丢键', () => {
-  const f = join(process.cwd(), 'src', 'i18n', 'config.json')
+  const f = join(process.cwd(), 'src', 'i18n', 'data', 'config.json')
   const backup = existsSync(f) ? readFileSync(f, 'utf8') : null // T2 残留修复：备份还原——中途炸不再留脏配置
   try {
     saveConfig({ review: { de: 'auto' } })
@@ -371,7 +371,7 @@ test('术语:hasToken 词边界（CD 不误伤 LDC）', () => {
   assert.ok(!hasToken('LDC 型', 'CD'))
 })
 test('术语:saveTerms 校验拒收空值/重复', () => {
-  const f = join(process.cwd(), 'src', 'i18n', 'terms.t-a.t-b.json')
+  const f = join(process.cwd(), 'src', 'i18n', 'data', 'terms.t-a.t-b.json')
   try {
     assert.throws(() => saveTerms('t-a', 't-b', { lock: ['HD', 'HD'], map: {} }), /重复/)
     assert.throws(() => saveTerms('t-a', 't-b', { lock: [' '], map: {} }), /空/)
@@ -525,7 +525,7 @@ const cleanup = () => {
   for (const f of [FIX_FILE(), MIR_FILE()]) if (existsSync(f)) rmSync(f)
   const t9dir = join(process.cwd(), 'content', 't9')
   if (existsSync(t9dir)) rmSync(t9dir, { recursive: true })
-  const tmf = join(process.cwd(), 'src', 'i18n', 'tm.zh-CN.t9.json')
+  const tmf = join(process.cwd(), 'src', 'i18n', 'data', 'tm.zh-CN.t9.json')
   if (existsSync(tmf)) rmSync(tmf)
 }
 // 修正①：callAI 契约=解析后的对象（T7 实证），不包 OpenAI 外壳
@@ -555,7 +555,7 @@ test('流水线:发布→草稿进 TM+镜像落盘 full', async () => {
 })
 test('流水线:auto 语言引擎译文直写 approved（免审直发）', async () => {
   cleanup(); fixture()
-  const cfgFile = join(process.cwd(), 'src', 'i18n', 'config.json')
+  const cfgFile = join(process.cwd(), 'src', 'i18n', 'data', 'config.json')
   const backup = readFileSync(cfgFile, 'utf8') // 备份还原——中途炸不留脏配置（T2 同款纪律）
   try {
     saveConfig({ review: { t9: 'auto' } })

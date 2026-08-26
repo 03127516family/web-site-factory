@@ -3,9 +3,9 @@
 //   map  = 中文术语 → 固定英文译法（源含该词，译文须含固定英文且不得残留中文）
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { assertLangCode } from './i18n-tm.mjs' // 评审 C1：src/tgt 进路径，同 TM 一道白名单闸
+import { assertLangCode } from './tm.mjs' // 评审 C1：src/tgt 进路径，同 TM 一道白名单闸
 
-const file = (src, tgt) => join(process.cwd(), 'src', 'i18n', `terms.${assertLangCode(src)}.${assertLangCode(tgt)}.json`)
+const file = (src, tgt) => join(process.cwd(), 'src', 'i18n', 'data', `terms.${assertLangCode(src)}.${assertLangCode(tgt)}.json`)
 
 export function loadTerms(srcLang, tgtLang) {
   const f = file(srcLang, tgtLang)

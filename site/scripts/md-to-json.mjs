@@ -6,9 +6,9 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import yaml from 'js-yaml'
-import { mdToDoc } from '../src/mdast-tree.mjs'
-import { validateDoc } from '../src/content-schema.mjs'
-import { migratePageWritebackV1 } from '../src/writeback-migrate.mjs'
+import { mdToDoc } from '../src/render/mdast-tree.mjs'
+import { validateDoc } from '../src/content/schema.mjs'
+import { migratePageWritebackV1 } from '../src/writeback/migrate.mjs'
 import { probe } from './img-probe.mjs'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')

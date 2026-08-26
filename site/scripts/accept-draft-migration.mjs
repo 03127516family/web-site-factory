@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { migrateDrafts } from './migrate-drafts-v1.mjs'
-import { draftPath, readWorkspace } from '../src/draft-store.mjs'
+import { draftPath, readWorkspace } from '../src/draft/store.mjs'
 
 const site = mkdtempSync(join(tmpdir(), 'draft-migration-'))
 mkdirSync(join(site, 'content/products'), { recursive: true })

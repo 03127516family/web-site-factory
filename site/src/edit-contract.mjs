@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { validateContract, WritebackError } from './writeback-core.mjs'
+import { validateContract, WritebackError } from './writeback/core.mjs'
 import { loadSiteAssetConfig, publicAssetPolicy } from './asset-config.mjs'
 
 const SAFE_NAME = /^[A-Za-z0-9][A-Za-z0-9_-]*$/

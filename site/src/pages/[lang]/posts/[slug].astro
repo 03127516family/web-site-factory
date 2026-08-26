@@ -7,8 +7,8 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '@layouts/Chrome.astro'
-import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n.mjs'
-import { loadPageRecords } from '../../../content-source.mjs'
+import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n/kernel.mjs'
+import { loadPageRecords } from '../../../content/source.mjs'
 
 export function getStaticPaths() {
   // glob 须在函数体内现调（Astro 构建把 getStaticPaths 提到独立 chunk，吃不到 frontmatter 顶层变量）

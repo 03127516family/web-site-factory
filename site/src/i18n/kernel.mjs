@@ -7,8 +7,8 @@
 // 物化快照（scripts/i18n-registry.mjs --write），供外部/检查用——可全量重建，不是第二真相。
 import { readdirSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { loadTm } from './i18n-tm.mjs'
-import { projectPage } from './i18n-project.mjs'
+import { loadTm } from './tm.mjs'
+import { projectPage } from './project.mjs'
 
 // ---------- 站点层 i18n 配置（终态迁 site.config，同旧系统决策） ----------
 export const SITE_ROOT = 'https://www.dgcrane.com/'

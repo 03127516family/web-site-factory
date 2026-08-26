@@ -5,7 +5,7 @@
 // {{SEO}} 仍空 = F4（R46）平移。
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { scanPages, buildGroups, siblingsOf, langSwitcher, isPublishable } from '../i18n.mjs'
+import { scanPages, buildGroups, siblingsOf, langSwitcher, isPublishable } from '../i18n/kernel.mjs'
 
 const { j } = Astro.props
 const SITE = process.cwd() // Astro build 的 cwd = site 根

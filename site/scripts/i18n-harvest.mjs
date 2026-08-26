@@ -5,8 +5,8 @@
 // ⚠ 跨进程注意（评审 M1）：本 CLI 与编辑服（edit-server）并发时，TM 侧已做合并防护（只补新句不覆盖），
 // 但镜像文件的重投影仍是整文件覆盖——收割期间最好停编辑服，避免并发人审被重投影回退。
 // 用法：node scripts/i18n-harvest.mjs [lang]   （默认 en）
-import { scanPages, buildGroups } from '../src/i18n.mjs'
-import { harvestMirror } from '../src/i18n-pipeline.mjs'
+import { scanPages, buildGroups } from '../src/i18n/kernel.mjs'
+import { harvestMirror } from '../src/i18n/pipeline.mjs'
 
 const lang = process.argv[2] || 'en'
 const groups = buildGroups(scanPages())

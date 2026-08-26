@@ -5,7 +5,7 @@
 //   node scripts/i18n-registry.mjs --check   校验落盘文件 ≡ 现算派生（防漂移，可进 check）
 import { writeFileSync, readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import { scanPages, buildGroups } from '../src/i18n.mjs'
+import { scanPages, buildGroups } from '../src/i18n/kernel.mjs'
 
 export function deriveRegistry() {
   const pages = scanPages()

@@ -2,7 +2,7 @@
 // post@1 — 本篇独立布局组件（T2 落定）：机械移植自旧 posts/crane-lifting-safety-training.html；值 = JSON。
 // 守卫纪律（T9）：镜像 approved 投影删未审段——h2/h3 与配对段体同守（j.body?.h_x && j.x，
 // 哪个缺都整段不出，防 renderDoc 炸 + 防空标题进 TOC）；zh 源恒全，守卫对 zh 零影响。
-import { renderDoc } from '@src/render-doc.mjs'
+import { renderDoc } from '@src/render/render.mjs'
 import InquiryForm from '@src/components/shared/InquiryForm.astro'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'

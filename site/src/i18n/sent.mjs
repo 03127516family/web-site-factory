@@ -3,7 +3,7 @@
 // 护栏：小数点不切（3.5）；字母缩写不切（U.S.A.）；英文句点须跟空格/换行/结尾；
 // 连续终结标点（！！！/？！/……）并入前句不出纯标点单元；hardBreak 强制成界；链接跨句不硬切（合并为一单元，保 marks 不烂）。
 import { createHash } from 'node:crypto'
-import { inlineMdToNodes } from './mdast-tree.mjs'
+import { inlineMdToNodes } from '../render/mdast-tree.mjs'
 
 export const norm = t => String(t ?? '').trim().replace(/\s+/g, ' ')
 export const fp = text => createHash('sha1').update(norm(text)).digest('hex').slice(0, 12)

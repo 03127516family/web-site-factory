@@ -2,7 +2,7 @@
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs'
 import { join, relative, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { draftPath, readWorkspace, writeDraft } from '../src/draft-store.mjs'
+import { draftPath, readWorkspace, writeDraft } from '../src/draft/store.mjs'
 
 const DEFAULT_SITE = join(fileURLToPath(new URL('.', import.meta.url)), '..')
 

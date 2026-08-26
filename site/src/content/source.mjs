@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { readWorkspace } from './draft-store.mjs'
-import { WritebackError } from './writeback-core.mjs'
+import { readWorkspace } from '../draft/store.mjs'
+import { WritebackError } from '../writeback/core.mjs'
 
 const fail = (message) => { throw new WritebackError('CONTENT_INVALID', message) }
 const segment = (value, label) => {

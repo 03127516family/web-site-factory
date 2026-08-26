@@ -6,7 +6,7 @@ import { readFileSync, existsSync } from 'node:fs'
 import { join, dirname, basename } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import * as lib from '../src/burn-lib.mjs'
-import { draftPath, publishedPath, writeDraft as writeWorkspaceDraft } from '../src/draft-store.mjs'
+import { draftPath, publishedPath, writeDraft as writeWorkspaceDraft } from '../src/draft/store.mjs'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const COMPONENTS = join(SITE, 'src/components')   // 套件根

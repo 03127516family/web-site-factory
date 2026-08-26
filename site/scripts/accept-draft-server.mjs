@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { createDraftWorkflow } from '../src/draft-workflow.mjs'
-import { draftPath, readWorkspace } from '../src/draft-store.mjs'
-import { WritebackError } from '../src/writeback-core.mjs'
+import { createDraftWorkflow } from '../src/draft/workflow.mjs'
+import { draftPath, readWorkspace } from '../src/draft/store.mjs'
+import { WritebackError } from '../src/writeback/core.mjs'
 import { createOutputBuilder } from '../src/build-outputs.mjs'
 
 const site = mkdtempSync(join(tmpdir(), 'draft-server-'))

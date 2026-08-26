@@ -2,15 +2,15 @@
 // 结构同步 = 重投影的免费结果（镜像骨架恒 ≡ 源树，无需独立同步逻辑）。
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
-import { scanPages, buildGroups } from './i18n.mjs'
-import { collectUnits } from './i18n-collect.mjs'
-import { projectPage, PENDING_CLASS, ANNO_CLASSES } from './i18n-project.mjs'
-import { loadTm, saveTm, upsert, loadConfig } from './i18n-tm.mjs'
-import { loadTerms } from './i18n-terms.mjs'
-import { translateSegments } from './i18n-engine.mjs'
-import { extractInlineUnits, inlineSpans, sliceInlineMd, norm } from './i18n-sent.mjs'
-import { getIn } from './tree-utils.mjs'
-import { logEvent } from './i18n-events.mjs'
+import { scanPages, buildGroups } from './kernel.mjs'
+import { collectUnits } from './collect.mjs'
+import { projectPage, PENDING_CLASS, ANNO_CLASSES } from './project.mjs'
+import { loadTm, saveTm, upsert, loadConfig } from './tm.mjs'
+import { loadTerms } from './terms.mjs'
+import { translateSegments } from './engine.mjs'
+import { extractInlineUnits, inlineSpans, sliceInlineMd, norm } from './sent.mjs'
+import { getIn } from '../render/tree-utils.mjs'
+import { logEvent } from './events.mjs'
 
 const CONTENT = () => join(process.cwd(), 'content')
 const readJ = f => { // M-2：报错带文件路径（loadConfig 同款纪律）

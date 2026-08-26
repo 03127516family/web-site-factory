@@ -7,8 +7,8 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import Chrome from '../../../layouts/Chrome.astro'
-import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n.mjs'
-import { loadPageRecords } from '../../../content-source.mjs'
+import { scanPages, buildGroups, productionJson, langDirs } from '../../../i18n/kernel.mjs'
+import { loadPageRecords } from '../../../content/source.mjs'
 
 export function getStaticPaths() {
   if (process.env.INCLUDE_DRAFTS === '1') {

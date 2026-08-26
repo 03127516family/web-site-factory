@@ -1,5 +1,5 @@
 // 机器验收（§5）：译文硬校验，不合格不落盘。六道：lock/map/数字/URL/CJK 残留/覆盖率。
-import { hasToken } from './i18n-terms.mjs'
+import { hasToken } from './terms.mjs'
 
 export function checkSentence(srcText, tgtMd, terms) {
   const fails = []

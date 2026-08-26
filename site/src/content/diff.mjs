@@ -1,4 +1,4 @@
-import { validateContract } from './writeback-core.mjs'
+import { validateContract } from '../writeback/core.mjs'
 
 const BLOCKED_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
 

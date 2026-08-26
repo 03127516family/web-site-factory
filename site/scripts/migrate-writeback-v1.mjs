@@ -2,8 +2,8 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { migratePageWritebackV1 } from '../src/writeback-migrate.mjs'
-import { writeJsonAtomic } from '../src/content-revision.mjs'
+import { migratePageWritebackV1 } from '../src/writeback/migrate.mjs'
+import { writeJsonAtomic } from '../src/content/revision.mjs'
 
 const SITE = join(dirname(fileURLToPath(import.meta.url)), '..')
 const check = process.argv.includes('--check')

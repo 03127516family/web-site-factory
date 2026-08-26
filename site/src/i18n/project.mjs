@@ -1,9 +1,9 @@
 // 投影器（§2/§6）：镜像 = project(源树, TM)。full=预览/编辑（草稿+占位+pending 注解）；
 // approved=生产（只出已审，空段删，核心字段未审→null 不可发）。纯函数，零 IO。
-import { fp, extractInlineUnits, sliceInlineMd, inlineSpans, applyInlineUnit } from './i18n-sent.mjs'
-import { inlineMdToNodes } from './mdast-tree.mjs'
-import { validateDoc } from './content-schema.mjs'
-import { SKIP_KEYS, skipPath, VALUE_SKIP } from './i18n-collect.mjs' // 同一套排除：键+路径前缀+值形态（值形态命中的串直通保留——它们永远不进 TM，删了就是生产镜像丢图）
+import { fp, extractInlineUnits, sliceInlineMd, inlineSpans, applyInlineUnit } from './sent.mjs'
+import { inlineMdToNodes } from '../render/mdast-tree.mjs'
+import { validateDoc } from '../content/schema.mjs'
+import { SKIP_KEYS, skipPath, VALUE_SKIP } from './collect.mjs' // 同一套排除：键+路径前缀+值形态（值形态命中的串直通保留——它们永远不进 TM，删了就是生产镜像丢图）
 
 export const PENDING_CLASS = 'i18n-pending'
 export const FAILED_CLASS = 'i18n-failed' // 引擎拒收句（红深）——审阅时重点看

@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { revisionOf, writeJsonAtomic } from './content-revision.mjs'
-import { WritebackError } from './writeback-core.mjs'
+import { revisionOf, writeJsonAtomic } from '../content/revision.mjs'
+import { WritebackError } from '../writeback/core.mjs'
 
 const fail = (code, message, details) => { throw new WritebackError(code, message, details) }
 

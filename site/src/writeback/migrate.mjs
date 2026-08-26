@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { splitByHeading } from './tree-utils.mjs'
+import { splitByHeading } from '../render/tree-utils.mjs'
 
 const canonicalSlug = slug => String(slug || 'page').replace(/^[a-z]{2}(?:-[A-Z]{2})?\/(?=(?:products|posts)\/)/, '')
 const shortHash = value => createHash('sha256').update(value).digest('hex').slice(0, 10)

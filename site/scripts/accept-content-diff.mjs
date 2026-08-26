@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import assert from 'node:assert/strict'
-import { diffContent } from '../src/content-diff.mjs'
+import { diffContent } from '../src/content/diff.mjs'
 
 const doc = text => ({ type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text }] }] })
 const contract = {

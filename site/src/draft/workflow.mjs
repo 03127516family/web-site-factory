@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
-import { discardDraft, draftPath, publishedPath, readWorkspace, writeDraft } from './draft-store.mjs'
-import { previewWorkspaceChanges } from './edit-context.mjs'
-import { writeJsonAtomic } from './content-revision.mjs'
-import { WritebackError } from './writeback-core.mjs'
+import { discardDraft, draftPath, publishedPath, readWorkspace, writeDraft } from './store.mjs'
+import { previewWorkspaceChanges } from '../edit-context.mjs'
+import { writeJsonAtomic } from '../content/revision.mjs'
+import { WritebackError } from '../writeback/core.mjs'
 
 const fail = (code, message, details) => { throw new WritebackError(code, message, details) }
 

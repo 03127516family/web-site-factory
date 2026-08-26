@@ -1,7 +1,7 @@
-import { loadEditContract } from './edit-contract.mjs'
-import { revisionOf } from './content-revision.mjs'
-import { applyChanges, WritebackError } from './writeback-core.mjs'
-import { loadSiteAssetConfig, publicAssetPolicy, toStoredAssetValue } from './asset-config.mjs'
+import { loadEditContract } from '../edit-contract.mjs'
+import { revisionOf } from '../content/revision.mjs'
+import { applyChanges, WritebackError } from './core.mjs'
+import { loadSiteAssetConfig, publicAssetPolicy, toStoredAssetValue } from '../asset-config.mjs'
 
 const fail = (code, message, details) => { throw new WritebackError(code, message, details) }
 const CLIENT_OPERATIONS = new Set(['insertItem', 'deleteItem', 'moveItem'])

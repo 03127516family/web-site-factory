@@ -1,5 +1,5 @@
-import { validateDoc } from './content-schema.mjs'
-import { normalizeTree } from './tree-utils.mjs'
+import { validateDoc } from '../content/schema.mjs'
+import { normalizeTree } from '../render/tree-utils.mjs'
 
 const FIELD_TYPES = new Set(['text', 'number', 'richText', 'image', 'link', 'stringList'])
 const BLOCKED_KEYS = new Set(['__proto__', 'prototype', 'constructor'])

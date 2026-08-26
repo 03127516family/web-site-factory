@@ -8,10 +8,10 @@ import {
   draftPath,
   readWorkspace,
   writeDraft,
-} from '../src/draft-store.mjs'
-import { loadPageRecords } from '../src/content-source.mjs'
-import { revisionOf } from '../src/content-revision.mjs'
-import { WritebackError } from '../src/writeback-core.mjs'
+} from '../src/draft/store.mjs'
+import { loadPageRecords } from '../src/content/source.mjs'
+import { revisionOf } from '../src/content/revision.mjs'
+import { WritebackError } from '../src/writeback/core.mjs'
 import { createEditContext, previewWorkspaceChanges } from '../src/edit-context.mjs'
 
 const site = mkdtempSync(join(tmpdir(), 'draft-store-'))

@@ -9,7 +9,7 @@ export const assertLangCode = x => {
   return x
 }
 
-export const tmPath = (src, tgt) => join(process.cwd(), 'src', 'i18n', `tm.${assertLangCode(src)}.${assertLangCode(tgt)}.json`)
+export const tmPath = (src, tgt) => join(process.cwd(), 'src', 'i18n', 'data', `tm.${assertLangCode(src)}.${assertLangCode(tgt)}.json`)
 
 export function loadTm(src, tgt) {
   const f = tmPath(src, tgt)
@@ -28,7 +28,7 @@ export function upsert(tm, fp, entry) {
 }
 
 // 站点层 i18n 配置（控制台开关 + 语言分级）
-const CONFIG = () => join(process.cwd(), 'src', 'i18n', 'config.json')
+const CONFIG = () => join(process.cwd(), 'src', 'i18n', 'data', 'config.json')
 const DEFAULTS = { auto: true, review: { en: 'required' } }
 export function loadConfig() {
   if (!existsSync(CONFIG())) return structuredClone(DEFAULTS)

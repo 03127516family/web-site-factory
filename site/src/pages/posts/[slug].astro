@@ -4,7 +4,7 @@
 // （烧制落的新页，spec B）；无/旧式 template → 每篇独立布局组件 components/posts/<slug>.astro
 // （T2 拍定，旧 4 篇继续走；旧 JSON 里残留的 src/templates/... 路径式 template 天然落空回退）。
 import Chrome from '@layouts/Chrome.astro'
-import { loadPageRecords } from '@src/content-source.mjs'
+import { loadPageRecords } from '@src/content/source.mjs'
 
 // glob 返回键被 Vite 规范化成「相对本文件」的路径——统一转成后缀键（posts/<名>/index.astro），
 // 查表不再数 ../../../（模式可用 @components 别名；键形后缀化后与文件位置无关）

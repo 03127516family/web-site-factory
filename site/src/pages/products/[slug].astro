@@ -2,7 +2,7 @@
 // 产品页路由：content/products/*.json 每份数据出一个页（数据驱动路由）。
 // 模版由数据声明：page.template → components/products/<名>/index.astro（glob 派发）。
 import Chrome from '@layouts/Chrome.astro'
-import { loadPageRecords } from '@src/content-source.mjs'
+import { loadPageRecords } from '@src/content/source.mjs'
 
 export function getStaticPaths() {
   return loadPageRecords(process.cwd(), { type: 'products', includeDrafts: process.env.INCLUDE_DRAFTS === '1' })

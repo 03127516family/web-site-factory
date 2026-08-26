@@ -1,8 +1,8 @@
 import { browserContract, loadEditContract } from './edit-contract.mjs'
-import { WritebackError } from './writeback-core.mjs'
-import { readWorkspace } from './draft-store.mjs'
-import { prepareWriteback } from './writeback-request.mjs'
-import { diffContent } from './content-diff.mjs'
+import { WritebackError } from './writeback/core.mjs'
+import { readWorkspace } from './draft/store.mjs'
+import { prepareWriteback } from './writeback/request.mjs'
+import { diffContent } from './content/diff.mjs'
 
 export function createEditContext(site, slug) {
   const workspace = readWorkspace(site, slug)
