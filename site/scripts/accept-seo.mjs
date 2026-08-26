@@ -246,6 +246,25 @@ test('pin:decidePins——keep 清旗并保人稿、refollow 删 pin 放行重�
   assert.ok(mir3.page.title.startsWith('EN translation'))
 })
 
+test('长度预算:SEO 字段送翻带 budget，提示词可见', async () => {
+  fixture()
+  const seen = []
+  const spyAI = async messages => {
+    seen.push(messages[0].content, messages[1].content) // RULES 在 system、budget 在 user——两头都要看
+    const ss = JSON.parse(messages[1].content.match(/sentences：\n(.+?)\n\n返回/s)[1])
+    const translations = {}
+    let i = 0
+    for (const s of ss) translations[s.id] = `EN translation ${++i}.`
+    return { translations }
+  }
+  const { runPipeline } = await import('../src/i18n/pipeline.mjs')
+  await runPipeline(FIX, { lang: 't8', callAI: spyAI })
+  const blob = seen.join('\n')
+  assert.ok(/"budget":\s*60/.test(blob), 'page.title 句应带 budget:60')
+  assert.ok(/"budget":\s*160/.test(blob), 'page.description 句应带 budget:160')
+  assert.ok(blob.includes('不得超过该字符数'), 'RULES 应含长度约束条')
+})
+
 // ---------- 汇总 ----------
 let pass = 0
 for (const [name, fn] of cases) {

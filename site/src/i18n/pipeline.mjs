@@ -11,6 +11,7 @@ import { translateSegments } from './engine.mjs'
 import { extractInlineUnits, inlineSpans, sliceInlineMd, norm } from './sent.mjs'
 import { getIn } from '../render/tree-utils.mjs'
 import { logEvent } from './events.mjs'
+import { LENGTH_BUDGET } from '../seo/config.mjs'
 
 const CONTENT = () => join(process.cwd(), 'content')
 const readJ = f => { // M-2：报错带文件路径（loadConfig 同款纪律）
@@ -67,6 +68,7 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   }
   if (pinned) saveTm(srcJ.page.lang, lang, tm)
   const missing = withContext(units).filter(u => !tm.sentences[u.fp] || (retryFailed && tm.sentences[u.fp]?.status === 'failed'))
+  missing.forEach(u => { const b = LENGTH_BUDGET[u.field]; if (b) u.budget = b }) // SEO 字段长度预算（提示词级，非硬闸）
   let translated = 0, failed = 0
   if (translate && missing.length) {
     inflight.add(`${pageId}|${lang}`)

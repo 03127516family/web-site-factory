@@ -11,10 +11,11 @@ const RULES = `你是工业起重机外贸网站的翻译引擎（中→英）�
 4. 数字、单位、URL 一个不许丢不许改；
 5. 保留行内 markdown 标记（**加粗**、[链接](url)）；
 6. 只翻译 sentences 里 id 对应的 text；before/after 是上下文仅供把握连贯，绝不翻译它们；
-7. B2B 工业营销腔：简洁、专业、直接。`
+7. B2B 工业营销腔：简洁、专业、直接；
+8. 带 budget 的字段句：译文长度不得超过该字符数——措辞从简、保关键词、可舍修饰语，但不许截断句子。`
 
 export function translateMessages(batch, terms, lastFails = {}) {
-  const sentences = batch.map(s => ({ id: s.id, text: s.text, before: s.before ?? null, after: s.after ?? null }))
+  const sentences = batch.map(s => ({ id: s.id, text: s.text, before: s.before ?? null, after: s.after ?? null, ...(s.budget ? { budget: s.budget } : {}) }))
   const retryNote = Object.keys(lastFails).length ? `\n\n上次这些 id 被机器验收拒收：${JSON.stringify(lastFails)}——逐条修正后重发。` : '' // 温度 0 下不喂原因=确定性重放（烧制台 2026-08-11 教训）
   return [
     { role: 'system', content: RULES },
