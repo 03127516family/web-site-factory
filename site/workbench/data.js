@@ -57,7 +57,7 @@ function renderDash(ov) {
       rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">${ov.mirrors.length} 个 en 镜像</div><div class="s">${ov.mirrors.map((m) => esc(m.title.slice(0, 20))).join(" · ")}</div></div><span class="pill pill-ok"><span class="dot"></span>已发布 ${ov.mirrors.filter((m) => m.enStatus === "published").length} · 草稿 ${ov.mirrors.length - ov.mirrors.filter((m) => m.enStatus === "published").length}</span><button class="btn btn-sm btn-secondary" onclick="navTo('i18n')">查看镜像</button></div>`);
     if (ov.mirrorless)
       rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">${ov.mirrorless} 个页面尚无英文镜像</div><div class="s">新语言 onboarding：克隆骨架 → 门禁挡 → 翻译回路 → 转 published</div></div><span class="pill pill-warn"><span class="dot"></span>无镜像 ${ov.mirrorless}</span><button class="btn btn-sm btn-secondary" onclick="createAllMirrors()">批量建镜像</button></div>`);
-    ov.draftPages.forEach((p) => rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">${esc(p.title)}</div><div class="s">草稿状态 · ${fmtTime(p.mtime)} 编辑</div></div><span class="pill pill-gray"><span class="dot"></span>草稿</span><a class="btn btn-sm btn-secondary" href="/editor.html?p=${esc(slugOf(p))}" target="_blank">继续编辑</a></div>`));
+    ov.draftPages.forEach((p) => rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">${esc(p.title)}</div><div class="s">草稿状态 · ${fmtTime(p.mtime)} 编辑</div></div><span class="pill pill-gray"><span class="dot"></span>草稿</span><a class="btn btn-sm btn-secondary" href="${EDIT_BASE}${esc(slugOf(p))}/" target="_blank">继续编辑</a></div>`));
     const pendingTotal = I18N_DATA.pages.filter((x) => x.lang === "en").reduce((a, x) => a + (x.pending || 0), 0);
     if (pendingTotal > 0)
       rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">${pendingTotal} 句译文待人工审</div><div class="s">引擎译文已生成 · 审阅页逐句通过后发布（或矩阵「通过并发布」一键批）</div></div><span class="pill pill-warn"><span class="dot"></span>待审 ${pendingTotal}</span><button class="btn btn-sm btn-secondary" onclick="navTo('i18n')">去审阅</button></div>`);
@@ -91,10 +91,10 @@ function pagesRow(p) {
     <td><input type="checkbox" class="ck"></td>
     <td><div class="t-title">${esc(p.title)}</div><div class="t-sub">${esc(slugOf(p))}</div></td>
     <td><span class="tag">${p.type === "products" ? "产品" : "文章"}</span></td>
-    <td><span class="tag">中</span>${p.hasEn ? ' <span class="tag">EN</span>' : ""}</td>
+    <td>${(p.langs || []).map(l => `<span class="tag">${l === "zh-CN" ? "中" : esc(l)}</span>`).join(" ")}</td>
     <td>${STATUS_PILL[p.status] || STATUS_PILL.draft}</td>
     <td class="mono" style="font-size:12px;color:var(--ink-2)">${fmtTime(p.mtime)}</td>
-    <td><div class="cell-actions"><a class="btn btn-sm btn-ghost" href="/editor.html?p=${esc(slugOf(p))}" target="_blank">编辑</a><button class="icon-btn"><svg><use href="#i-dots"/></svg></button></div></td>
+    <td><div class="cell-actions"><a class="btn btn-sm btn-ghost" href="${EDIT_BASE}${esc(slugOf(p))}/" target="_blank">编辑</a><button class="icon-btn"><svg><use href="#i-dots"/></svg></button></div></td>
   </tr>`;
 }
 function pagesBase() {
@@ -167,8 +167,7 @@ function matrixRow(p) {
         if (en.failed > 0) cell += ` <span class="pill pill-bad" title="翻译失败句"><span class="dot"></span>失败 ${en.failed}</span>`;
         if (en.untranslated > 0) cell += ` <span class="pill pill-bad" title="源已改动/新增 · 从未翻译 · 门禁拦截"><span class="dot"></span>未译 ${en.untranslated}</span>`;
       }
-      cell += ` <a class="link-btn" href="/editor.html?p=en/${esc(p.type)}/${esc(p.pageId)}" target="_blank"><svg><use href="#i-ext"/></svg>打开镜像</a>`;
-      cell += ` <a class="link-btn" href="${EDIT_BASE}__i18n/review/${esc(p.pageId)}?lang=en" target="_blank" title="逐句复查译文 · 失败句救济入口（免审直发后非常用）"><svg><use href="#i-eye"/></svg>复查</a>`;
+      cell += ` <a class="link-btn" href="${EDIT_BASE}en/${esc(p.type)}/${esc(p.pageId)}/" target="_blank"><svg><use href="#i-ext"/></svg>打开镜像</a>`;
       if (en && (en.untranslated > 0 || en.failed > 0)) cell += ` <button class="link-btn" onclick="translatePage('${esc(p.pageId)}')"><svg><use href="#i-spark"/></svg>送翻</button>`;
       if (en && en.pending > 0) cell += ` <button class="link-btn" onclick="approvePage('${esc(p.pageId)}')"><svg><use href="#i-check"/></svg>通过并发布</button>`;
       return cell;
@@ -205,12 +204,12 @@ function drawTerms() {
   const q = (ui.terms.query || "").toLowerCase();
   const lockHit = TERMS.lock.filter((w) => !q || w.toLowerCase().includes(q));
   const mapHit = TERMS.map.filter((t) => !q || t.zh.toLowerCase().includes(q) || t.en.toLowerCase().includes(q));
-  if ($("lockRows")) $("lockRows").innerHTML = lockHit.map((w) => `<div class="lrow"><span>${esc(w)}</span><button class="x" title="移除" onclick="toast('移除待接评审端点 · 界面已就位')">×</button></div>`).join("") || `<div class="lrow" style="color:var(--ink-3);justify-content:center">无匹配</div>`;
+  if ($("lockRows")) $("lockRows").innerHTML = lockHit.map((w) => `<div class="lrow"><span>${esc(w)}</span><button class="x" title="移除" onclick="lockDel('${esc(w)}')">×</button></div>`).join("") || `<div class="lrow" style="color:var(--ink-3);justify-content:center">无匹配</div>`;
   if ($("mapTbody")) $("mapTbody").innerHTML = mapHit.map((t) => `
     <tr>
       <td style="font-weight:550">${esc(t.zh)}</td>
       <td style="color:var(--ink-2)">${esc(t.en)}</td>
-      <td><div class="cell-actions"><button class="btn btn-sm btn-ghost">编辑</button><button class="btn btn-sm btn-danger" onclick="toast('移除待接评审端点 · 界面已就位')">删除</button></div></td>
+      <td><div class="cell-actions"><button class="btn btn-sm btn-ghost" onclick="termEdit('${esc(t.zh)}')">编辑</button><button class="btn btn-sm btn-danger" onclick="termDel('${esc(t.zh)}')">删除</button></div></td>
     </tr>`).join("") || `<tr><td colspan="3" style="color:var(--ink-3);padding:18px">无匹配</td></tr>`;
 }
 function bindTerms() {
@@ -438,9 +437,9 @@ function renderSettings(cfg, ov) {
   const card = $("setI18n");
   if (!card) return;
   card.innerHTML = `
-    <div class="card-h"><h3>翻译引擎 · 现状</h3><span class="hint">只读 · 写回端点待接（loadConfig/saveConfig 已备）</span></div>
+    <div class="card-h"><h3>翻译引擎 · 现状</h3><span class="hint">开关写回即存（config-save 已接线）</span></div>
     <div class="card-b">
-      <div class="set-row"><div class="txt"><div class="t">自动翻译（auto）</div><div class="s">发布钩子触发 DeepSeek 批量送翻（引擎已建，触发器待接）。</div></div>
+      <div class="set-row"><div class="txt"><div class="t">自动翻译（auto）</div><div class="s">发布钩子触发 DeepSeek 批量送翻（已接线：zh 发布→后台流水线）。</div></div>
         <button class="toggle ${cfg.auto ? "on" : ""}" onclick="toggleAuto(this)"></button></div>
       <div class="set-row"><div class="txt"><div class="t">en 评审模式</div><div class="s">镜像发布前的人工评审要求。</div></div>
         <span class="pill ${cfg.review?.en === "auto" ? "pill-ok" : "pill-warn"}"><span class="dot"></span>${cfg.review?.en === "auto" ? "auto · 直发" : "required · 人审后发"}</span></div>
@@ -522,7 +521,7 @@ function bindGlobalSearch() {
         return;
       }
       drop.innerHTML = `<div class="sd-head"><span>${r.length} 个页面命中 · 点击打开编辑器</span><kbd>Esc</kbd></div>` + r.map((p) => `
-        <div class="sd-item" onclick="window.open('/editor.html?p=${esc(p.slug)}','_blank')">
+        <div class="sd-item" onclick="window.open('${EDIT_BASE}${esc(p.slug)}/','_blank')">
           <div class="t">${esc(p.title)} <span class="mono" style="font-size:10px;color:var(--ink-3)">${esc(p.lang)}</span></div>
           <div class="slug">${esc(p.slug)}</div>
           ${p.hits.map((h) => `<div class="sd-hit"><span class="f">${esc(h.field)}</span><span class="s">${esc(h.snippet)}</span></div>`).join("")}
@@ -604,6 +603,13 @@ async function postTerms(lock, mapArr) {
   const r = await fetch("/api/terms-save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ src: "zh-CN", tgt: "en", lock, map: mapObj }) }).then((x) => x.json()).catch(() => ({ error: "请求失败" }));
   if (r.ok) { toast("术语表已保存（saveTerms 校验通过）"); init(); }
   else toast("保存失败：" + (r.error || "未知"));
+}
+function lockDel(w) { if (!confirm(`移除锁词「${w}」？`)) return; postTerms(TERMS.lock.filter(x => x !== w), TERMS.map); }
+function termDel(zh) { if (!confirm(`删除译法「${zh}」？`)) return; postTerms(TERMS.lock, TERMS.map.filter(t => t.zh !== zh)); }
+function termEdit(zh) {
+  const t = TERMS.map.find(x => x.zh === zh); if (!t) return;
+  const en = prompt("英文译法：", t.en); if (en === null || !en.trim()) return;
+  postTerms(TERMS.lock, TERMS.map.map(x => x.zh === zh ? { zh, en: en.trim() } : x));
 }
 function addLock() {
   const w = (window.prompt("新锁定词（品牌/型号，翻译时原样保留）：") || "").trim();
@@ -887,6 +893,9 @@ window.showJsonTree = showJsonTree;
 window.rebuildSite = rebuildSite;
 window.uploadMedia = uploadMedia;
 window.addMemory = addMemory;
+window.lockDel = lockDel;
+window.termDel = termDel;
+window.termEdit = termEdit;
 window.seoToggle = seoToggle;
 window.pinDecideOne = pinDecideOne;
 window.pinDecideAll = pinDecideAll;

@@ -30,7 +30,6 @@ const readJson = (f) => JSON.parse(readFileSync(f, "utf8"));
 const readJsonSafe = (f) => (existsSync(f) ? readJson(f) : null);
 
 // ---------- 页面清单（正源）：scanPages 全语言 + 门禁口径（与 8092 出页同一条规则） ----------
-// hasEn 为兼容字段（data.js pagesRow 现渲染它），Task 6 换 langs 后删。
 function pagesData() {
   const pages = scanPages({ withJson: true });
   const groups = buildGroups(pages);
@@ -45,7 +44,6 @@ function pagesData() {
       family: p.j.page.family || "",
       status: p.status, lang: p.lang, langDir: p.langDir,
       langs: fam.map(m => m.lang),
-      hasEn: fam.some(m => m.lang === "en"),
       publishable: pubSet.has(p.slug),
       mtime: statSync(join(SITE, "content", p.file)).mtimeMs,
     };
