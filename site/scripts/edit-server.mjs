@@ -6,7 +6,8 @@ import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync } 
 import { join, dirname, extname, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
-import { runPipeline, approvePage, translateAll, consoleData, adoptMirror, decidePins } from '../src/i18n/pipeline.mjs'
+import { runPipeline, approvePage, translateAll, consoleData, adoptMirror, decidePins, pinQueue } from '../src/i18n/pipeline.mjs'
+import { healthData } from '../src/seo/kernel.mjs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n/tm.mjs'
 import { loadTerms, saveTerms } from '../src/i18n/terms.mjs'
 import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n/project.mjs'
@@ -508,6 +509,18 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.url === '/__i18n/data') {
       const data = JSON.stringify(consoleData()) // 先取数再写头（同 /__edit 分支注释）
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(data)
+      return
+    }
+    if (req.url === '/__seo/health') {
+      // 体检数据（spec §4 管理层接口预留：本期只出数据，UI 在步 4 另立计划）。
+      // rows = 每页长度/缺失/noindex 旗；pins = 各 review 语言 pin 待确认队列。
+      const pages = scanPages({ withJson: true })
+      const rows = healthData(pages)
+      const pins = Object.keys(loadConfig().review).flatMap(lang => pinQueue(lang))
+      const summary = { pages: rows.length, flagged: rows.filter(r => r.issues.length).length, pinsPending: pins.length }
+      const data = JSON.stringify({ ok: true, summary, rows, pins }) // 先取数再写头（同上）
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(data)
       return

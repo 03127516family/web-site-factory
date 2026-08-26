@@ -200,8 +200,8 @@ test('pin:镜像人改 title → TM 收养 + pin 记账 → 源 title 再改 →
   const tm = loadTm('zh-CN', 't8')
   adoptMirror(mir, srcJ, tm, 't8')
   // pin 已记账：字段级 { srcFp, text }
-  assert.equal(tm.pins['page.title'].text, 'Human Polished Title')
-  assert.equal(tm.pins['page.title'].srcFp, collectUnits(srcJ).find(u => u.field === 'page.title').fp)
+  assert.equal(tm.pins[`${FIX}::page.title`].text, 'Human Polished Title')
+  assert.equal(tm.pins[`${FIX}::page.title`].srcFp, collectUnits(srcJ).find(u => u.field === 'page.title').fp)
   // ② 源 title 改（fp 变）
   srcJ.page.title = 'SEO 夹具页（新标题）'
   writeFileSync(FIX_FILE(), JSON.stringify(srcJ, null, 2))
@@ -233,12 +233,12 @@ test('pin:decidePins——keep 清旗并保人稿、refollow 删 pin 放行重�
   assert.equal(r.kept, 1)
   const tm1 = loadTm('zh-CN', 't8')
   const curFp = collectUnits(JSON.parse(readFileSync(FIX_FILE(), 'utf8'))).find(u => u.field === 'page.title').fp
-  assert.equal(tm1.pins['page.title'].srcFp, curFp)
+  assert.equal(tm1.pins[`${FIX}::page.title`].srcFp, curFp)
   // refollow：删 pin + 删复植条 → 再跑流水线时机翻接管
   r = decidePins('t8', [{ pageId: FIX, field: 'page.title', action: 'refollow' }])
   assert.equal(r.refollowed, 1)
   const tm2 = loadTm('zh-CN', 't8')
-  assert.ok(!tm2.pins['page.title'])
+  assert.ok(!tm2.pins[`${FIX}::page.title`])
   assert.ok(!tm2.sentences[curFp])
   await runPipeline(FIX, { lang: 't8', callAI: mockAI })
   const mir3 = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))

@@ -60,7 +60,7 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   // 镜像照发人稿；srcFp ≠ 当前 fp = 待确认（pinQueue / 体检台）。
   let pinned = 0
   for (const u of units) {
-    const pin = u.kind === 'field' ? tm.pins?.[u.field] : null
+    const pin = u.kind === 'field' ? tm.pins?.[`${pageId}::${u.field}`] : null
     if (pin && !tm.sentences[u.fp]) {
       upsert(tm, u.fp, { text: u.text, translation: pin.text, status: 'approved', origin: 'human' })
       pinned++
@@ -126,7 +126,10 @@ const sameish = (a, b) =>
 export function adoptMirror(mirrorJ, srcJ, tm, lang) {
   const units = collectUnits(srcJ)
   const { aligned, skipped } = alignSentGroups(mirrorJ, units) // C-1：sent 句级必须先过段守卫
-  const pinField = (u, cur) => { tm.pins = { ...tm.pins, [u.field]: { srcFp: u.fp, text: cur } } } // 人精修过的字段记账（D5 pin）：srcFp=收养时的源指纹，源变更后顶住机翻
+  // pin 键 = pageId::field（e2e 实证教训：TM 全语言对共享，只按字段名做键会跨页污染——每页都有 title；
+  // 句账没这问题是因为 fp 全局去重本身正确，pin 是页级人决策必须带 pageId）
+  const pageId = srcJ.page.slug.split('/').at(-1)
+  const pinField = (u, cur) => { tm.pins = { ...tm.pins, [`${pageId}::${u.field}`]: { srcFp: u.fp, text: cur } } } // 人精修过的字段记账（D5 pin）：srcFp=收养时的源指纹，源变更后顶住机翻
   let n = 0
   for (const u of units) {
     const cur = u.kind === 'sent' ? aligned.get(`${u.field}|${u.path}`)?.[u.si] ?? null : mirrorSentence(mirrorJ, u)
@@ -281,7 +284,7 @@ export function pinQueue(lang) {
     const tm = loadTm(srcJ.page.lang, lang)
     for (const u of collectUnits(srcJ)) {
       if (u.kind !== 'field') continue
-      const pin = tm.pins?.[u.field]
+      const pin = tm.pins?.[`${pg.pageId}::${u.field}`]
       if (pin && pin.srcFp !== u.fp) out.push({ pageId: pg.pageId, lang, field: u.field, sourceText: u.text, pinnedText: pin.text })
     }
   }
@@ -303,7 +306,8 @@ export function decidePins(lang, decisions) {
     const srcJ = readJ(srcPg.file)
     const u = collectUnits(srcJ).find(x => x.field === d.field)
     const tm = loadTm(srcJ.page.lang, lang)
-    const pin = tm.pins?.[d.field]
+    const key = `${d.pageId}::${d.field}`
+    const pin = tm.pins?.[key]
     if (!pin || !u) continue
     if (d.action === 'keep') {
       pin.srcFp = u.fp
@@ -312,7 +316,7 @@ export function decidePins(lang, decisions) {
     } else {
       const e = tm.sentences[u.fp]
       if (e?.origin === 'human' && e?.translation === pin.text) delete tm.sentences[u.fp] // 只删复植条
-      delete tm.pins[d.field]
+      delete tm.pins[key]
       refollowed++
     }
     saveTm(srcJ.page.lang, lang, tm)
