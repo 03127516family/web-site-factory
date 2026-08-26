@@ -2,10 +2,15 @@
 // 读=正源直算（import site/src 模块，口径与 8092 恒一致——Task 2 重写）；
 // 写=全部代理 8092（单一写路径+其内部串行构建链）。8092 健康探测并入 overview。
 import http from "node:http";
-import { readFileSync, writeFileSync, mkdirSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, extname, resolve, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { bindHost, accessUrls } from "../scripts/lan.mjs";
+import { scanPages, buildGroups, isPublishable } from "../src/i18n/kernel.mjs";
+import { loadTm, loadConfig } from "../src/i18n/tm.mjs";
+import { loadTerms } from "../src/i18n/terms.mjs";
+import { consoleData, pinQueue } from "../src/i18n/pipeline.mjs";
+import { healthData } from "../src/seo/kernel.mjs";
 
 const HERE = dirnameOfThis();
 function dirnameOfThis() {
@@ -14,7 +19,6 @@ function dirnameOfThis() {
 }
 const SITE = resolve(HERE, "..");                  // site 根（正源模块以 process.cwd() 为基，启动器保证 cwd=site）
 const CONTENT = join(SITE, "content");
-const I18N = join(SITE, "src", "i18n");            // Task 2 整体换正源 import，此处先保路径可算
 const DIST = join(SITE, "dist");
 const IMG = join(SITE, "public", "assets", "img");
 const EVENTS = join(SITE, ".i18n-events.jsonl");
@@ -25,39 +29,27 @@ const HOST = bindHost("0.0.0.0");
 const readJson = (f) => JSON.parse(readFileSync(f, "utf8"));
 const readJsonSafe = (f) => (existsSync(f) ? readJson(f) : null);
 
-// ---------- 内容扫描（自带实现，不 import 在改的 i18n.mjs） ----------
-function scanContent() {
-  const pages = [];
-  for (const type of ["products", "posts"]) {
-    const dir = join(CONTENT, type);
-    if (!existsSync(dir)) continue;
-    for (const name of readdirSync(dir)) {
-      if (!name.endsWith(".json") || name.endsWith(".bak")) continue;
-      const file = join(dir, name);
-      const pageId = name.replace(/\.json$/, "");
-      let j;
-      try { j = readJson(file); } catch { continue; }
-      const page = j.page || {};
-      const enFile = join(CONTENT, "en", type, name);
-      const hasEn = existsSync(enFile);
-      let enStatus = null;
-      if (hasEn) {
-        try { enStatus = (readJson(enFile).page || {}).status || null; } catch { enStatus = null; }
-      }
-      pages.push({
-        pageId, type,
-        file: `content/${type}/${name}`,
-        slug: page.slug || "",
-        title: typeof j.title === "string" ? j.title : (page.title || pageId),
-        family: page.family || "",
-        status: page.status || "draft",
-        lang: page.lang || "zh-CN",
-        hasEn, enStatus,
-        mtime: statSync(file).mtimeMs,
-      });
-    }
-  }
-  return pages;
+// ---------- 页面清单（正源）：scanPages 全语言 + 门禁口径（与 8092 出页同一条规则） ----------
+// hasEn 为兼容字段（data.js pagesRow 现渲染它），Task 6 换 langs 后删。
+function pagesData() {
+  const pages = scanPages({ withJson: true });
+  const groups = buildGroups(pages);
+  const pubSet = new Set(pages.filter(p => p.status === "published" && isPublishable(p, groups, pages)).map(p => p.slug));
+  return pages.map(p => {
+    const fam = (groups.get(p.pageId) || []).filter(m => pubSet.has(m.slug));
+    return {
+      pageId: p.pageId,
+      type: p.type === "product" ? "products" : "posts",
+      file: p.file, slug: p.slug,
+      title: typeof p.j.title === "string" ? p.j.title : (p.j.page.title || p.pageId),
+      family: p.j.page.family || "",
+      status: p.status, lang: p.lang, langDir: p.langDir,
+      langs: fam.map(m => m.lang),
+      hasEn: fam.some(m => m.lang === "en"),
+      publishable: pubSet.has(p.slug),
+      mtime: statSync(join(SITE, "content", p.file)).mtimeMs,
+    };
+  });
 }
 
 function distFacts() {
@@ -201,6 +193,7 @@ const POST_PROXY = {
   "/api/terms-save": "/__i18n/terms",
   "/api/build": "/__build",
   "/api/tm-save": "/__i18n/tm",
+  "/api/pin-decide": "/__i18n/pin-decide",
 };
 
 // 模版套件扫描（一 astro 一模版：index.astro + meta.json + example.json 三件套齐全 = 可烧制）
@@ -227,22 +220,22 @@ function inboxList() {
 // ---------- API ----------
 const api = {
   "/api/overview": () => {
-    const pages = scanContent();
-    const published = pages.filter((p) => p.status === "published");
-    const draft = pages.filter((p) => p.status === "draft");
-    const mirrors = pages.filter((p) => p.hasEn);
-    const tm = readJsonSafe(join(I18N, "tm.zh-CN.en.json")) || { sentences: {} };
-    const terms = readJsonSafe(join(I18N, "terms.zh-CN.en.json")) || { lock: [], map: {} };
+    const pages = pagesData();
+    const tm = loadTm("zh-CN", "en");
+    const terms = loadTerms("zh-CN", "en");
+    const sources = pages.filter(p => !p.langDir);
+    const withMirror = sources.filter(p => pages.some(m => m.langDir && m.pageId === p.pageId));
+    const enOf = pid => pages.find(m => m.langDir && m.pageId === pid);
     return {
-      pages: pages.length,
-      published: published.length,
-      draft: draft.length,
-      products: pages.filter((p) => p.type === "products").length,
-      posts: pages.filter((p) => p.type === "posts").length,
-      mirrors: mirrors.map((m) => ({ pageId: m.pageId, title: m.title, status: m.status, enStatus: m.enStatus })),
-      mirrorless: pages.filter((p) => !p.hasEn).length,
+      pages: sources.length,
+      published: sources.filter(p => p.status === "published").length,
+      draft: sources.filter(p => p.status === "draft").length,
+      products: sources.filter(p => p.type === "products").length,
+      posts: sources.filter(p => p.type === "posts").length,
+      mirrors: withMirror.map(m => ({ pageId: m.pageId, title: m.title, status: m.status, enStatus: enOf(m.pageId)?.status ?? null })),
+      mirrorless: sources.filter(p => !pages.some(m => m.langDir && m.pageId === p.pageId)).length,
       tmTotal: Object.keys(tm.sentences).length,
-      tmApproved: Object.values(tm.sentences).filter((s) => s.status === "approved").length,
+      tmApproved: Object.values(tm.sentences).filter(s => s.status === "approved").length,
       termsMap: Object.keys(terms.map || {}).length,
       termsLock: (terms.lock || []).length,
       dist: distFacts(),
@@ -250,18 +243,23 @@ const api = {
       events: recentEvents(5),
     };
   },
-  "/api/pages": () => scanContent(),
+  "/api/pages": () => pagesData(),
   "/api/terms": () => {
-    const terms = readJsonSafe(join(I18N, "terms.zh-CN.en.json")) || { lock: [], map: {} };
-    return { lock: terms.lock || [], map: Object.entries(terms.map || {}).map(([zh, en]) => ({ zh, en })) };
+    const t = loadTerms("zh-CN", "en");
+    return { lock: t.lock || [], map: Object.entries(t.map || {}).map(([zh, en]) => ({ zh, en })) };
   },
   "/api/tm": () => {
-    const tm = readJsonSafe(join(I18N, "tm.zh-CN.en.json")) || { pair: "zh-CN>en", sentences: {} };
+    const tm = loadTm("zh-CN", "en");
     const items = Object.values(tm.sentences).sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
     return { pair: tm.pair, total: items.length, items: items.slice(0, 300) };
   },
-  "/api/config": () => readJsonSafe(join(I18N, "config.json")) || {},
+  "/api/config": () => loadConfig(),
   "/api/templates": () => scanKits(),
+  "/api/seo-health": () => {
+    const rows = healthData(scanPages({ withJson: true }));
+    const pins = Object.keys(loadConfig().review).flatMap(l => pinQueue(l));
+    return { ok: true, rows, pins, summary: { pages: rows.length, flagged: rows.filter(r => r.issues.length).length, pinsPending: pins.length } };
+  },
   "/api/media": () => {
     const items = mediaList().sort((a, b) => b.mtime - a.mtime);
     return { total: 0, items, used: usedMedia(items) };
