@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync } 
 import { join, dirname, extname, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
-import { runPipeline, approvePage, translateAll, consoleData, adoptMirror } from '../src/i18n/pipeline.mjs'
+import { runPipeline, approvePage, translateAll, consoleData, adoptMirror, decidePins } from '../src/i18n/pipeline.mjs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n/tm.mjs'
 import { loadTerms, saveTerms } from '../src/i18n/terms.mjs'
 import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n/project.mjs'
@@ -353,6 +353,27 @@ const server = http.createServer(async (req, res) => {
       await queueRebuild()
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true, approved: r.approved, remainingFailed: r.remainingFailed, remainingUntranslated: r.remainingUntranslated })); return
+    }
+    if (req.method === 'POST' && req.url === '/__i18n/pin-decide') {
+      let body = ''
+      for await (const chunk of req) body += chunk
+      const { lang = 'en', decisions = [] } = JSON.parse(body)
+      if (!/^[\w-]+$/.test(lang)) throw new Error('lang 非法')
+      if (!Array.isArray(decisions) || !decisions.length) throw new Error('decisions 须为非空数组')
+      const r = decidePins(lang, decisions)
+      // refollow 页重翻（有 key 才真翻；无 key 只清账，下轮送翻补）
+      const callAI = process.env.DEEPSEEK_API_KEY ? createDeepseekCaller() : null
+      let retranslated = 0
+      for (const pageId of r.pages) {
+        const didRefollow = decisions.some(d => d.pageId === pageId && d.action === 'refollow')
+        if (!didRefollow || !callAI) continue
+        const out = await runPipeline(pageId, { lang, translate: true, callAI })
+        retranslated += out.translated
+      }
+      await queueRebuild()
+      logEvent(`pin-decide:${lang}`, 'pin-decide', { ...r, retranslated })
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ ok: true, ...r, retranslated })); return
     }
     if (req.method === 'POST' && req.url === '/__burn') {
       if (!process.env.DEEPSEEK_API_KEY) { res.writeHead(503, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: '未配置 DEEPSEEK_API_KEY（服务端环境变量）' })); return }

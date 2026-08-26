@@ -285,3 +285,36 @@ export function pinQueue(lang) {
   }
   return out
 }
+
+// pin 批量决定（体检台「全部重跟 / 全部保持 / 挑选」的数据层，WPML Translation Dashboard 同款交互）。
+// keep = 认可人稿顶住新源：srcFp 抬到当前 + 复植条补齐（防投影露中文）。
+// refollow = 跟源重翻：删 pin + 只删「复植条」（origin human 且译文=pinnedText 的那条；真机翻/真人审条不动）。
+// 返回 { kept, refollowed, pages: [pageId] }——调用方对 refollow 页再跑 runPipeline。
+export function decidePins(lang, decisions) {
+  let kept = 0, refollowed = 0
+  const touched = new Set()
+  for (const d of decisions) {
+    if (!d?.pageId || !d?.field || !['keep', 'refollow'].includes(d.action))
+      throw new Error(`决定项非法: ${JSON.stringify(d)}`)
+    const srcPg = scanPages().find(p => p.pageId === d.pageId && !p.langDir)
+    if (!srcPg) throw new Error(`页面不存在: ${d.pageId}`)
+    const srcJ = readJ(srcPg.file)
+    const u = collectUnits(srcJ).find(x => x.field === d.field)
+    const tm = loadTm(srcJ.page.lang, lang)
+    const pin = tm.pins?.[d.field]
+    if (!pin || !u) continue
+    if (d.action === 'keep') {
+      pin.srcFp = u.fp
+      if (!tm.sentences[u.fp]) upsert(tm, u.fp, { text: u.text, translation: pin.text, status: 'approved', origin: 'human' })
+      kept++
+    } else {
+      const e = tm.sentences[u.fp]
+      if (e?.origin === 'human' && e?.translation === pin.text) delete tm.sentences[u.fp] // 只删复植条
+      delete tm.pins[d.field]
+      refollowed++
+    }
+    saveTm(srcJ.page.lang, lang, tm)
+    touched.add(d.pageId)
+  }
+  return { kept, refollowed, pages: [...touched] }
+}

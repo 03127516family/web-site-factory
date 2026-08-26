@@ -215,6 +215,37 @@ test('pin:镜像人改 title → TM 收养 + pin 记账 → 源 title 再改 →
   assert.ok(q.some(x => x.pageId === FIX && x.field === 'page.title'))
 })
 
+test('pin:decidePins——keep 清旗并保人稿、refollow 删 pin 放行重翻', async () => {
+  const { runPipeline, decidePins, adoptMirror } = await import('../src/i18n/pipeline.mjs')
+  const { loadTm } = await import('../src/i18n/tm.mjs')
+  const { collectUnits } = await import('../src/i18n/collect.mjs')
+  fixture()
+  await runPipeline(FIX, { lang: 't8', callAI: mockAI })
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  mir.page.title = 'Human Polished Title'
+  const srcJ0 = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  adoptMirror(mir, srcJ0, loadTm('zh-CN', 't8'), 't8')
+  srcJ0.page.title = '新中文标题'
+  writeFileSync(FIX_FILE(), JSON.stringify(srcJ0, null, 2))
+  await runPipeline(FIX, { lang: 't8', callAI: mockAI }) // 触发复植（人稿顶住）
+  // keep：清待确认旗（srcFp 抬到当前），人稿继续顶
+  let r = decidePins('t8', [{ pageId: FIX, field: 'page.title', action: 'keep' }])
+  assert.equal(r.kept, 1)
+  const tm1 = loadTm('zh-CN', 't8')
+  const curFp = collectUnits(JSON.parse(readFileSync(FIX_FILE(), 'utf8'))).find(u => u.field === 'page.title').fp
+  assert.equal(tm1.pins['page.title'].srcFp, curFp)
+  // refollow：删 pin + 删复植条 → 再跑流水线时机翻接管
+  r = decidePins('t8', [{ pageId: FIX, field: 'page.title', action: 'refollow' }])
+  assert.equal(r.refollowed, 1)
+  const tm2 = loadTm('zh-CN', 't8')
+  assert.ok(!tm2.pins['page.title'])
+  assert.ok(!tm2.sentences[curFp])
+  await runPipeline(FIX, { lang: 't8', callAI: mockAI })
+  const mir3 = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  assert.notEqual(mir3.page.title, 'Human Polished Title') // 机翻接管
+  assert.ok(mir3.page.title.startsWith('EN translation'))
+})
+
 // ---------- 汇总 ----------
 let pass = 0
 for (const [name, fn] of cases) {
