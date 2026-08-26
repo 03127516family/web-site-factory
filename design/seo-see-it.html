@@ -1,0 +1,90 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+<title>SEO 眼见为实</title><style>
+  body{font:15px/1.7 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#f1f3f4;color:#202124;margin:0;padding:32px 16px 80px}
+  .wrap{max-width:860px;margin:0 auto}
+  h1{font-size:20px;margin:0 0 4px} .sub{color:#5f6368;font-size:13px;margin-bottom:28px}
+  h2{font-size:16px;margin:38px 0 4px;color:#202124}
+  .note{color:#5f6368;font-size:13px;margin:0 0 14px}
+  .serp{background:#fff;border-radius:12px;padding:26px 30px;max-width:640px;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .g{margin-bottom:30px}.g:last-child{margin-bottom:4px}
+  .g-site{font-size:13px;color:#202124;margin-bottom:2px}
+  .g-title{font-size:21px;color:#1a0dab;line-height:1.3;cursor:pointer;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:600px}
+  .g-url{font-size:13px;color:#202124;margin-bottom:4px}
+  .g-desc{font-size:14px;color:#4d5156;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:600px}
+  .cut{background:#fce8e6;border-radius:8px;padding:2px 8px;color:#c5221f;font-size:12px;white-space:nowrap}
+  .wx{background:#ededed;padding:22px;max-width:640px;border-radius:12px}
+  .wx-card{background:#fff;border-radius:8px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(0,0,0,.1)}
+  .wx-card img{width:100%;height:220px;object-fit:cover;display:block}
+  .wx-txt{padding:12px 14px}
+  .wx-title{font-size:15px;font-weight:600;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wx-desc{font-size:12px;color:#888;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  pre{background:#202124;color:#e8eaed;border-radius:10px;padding:16px 18px;font:12.5px/1.7 ui-monospace,Menlo,monospace;overflow-x:auto}
+  pre .cm{color:#9aa0a6}code.tag{color:#8ab4f8}code.v{color:#fdd663}
+  table{border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:13px;width:100%}
+  th,td{border-bottom:1px solid #e8eaed;padding:8px 12px;text-align:left;vertical-align:top}
+  th{background:#f8f9fa;color:#5f6368;font-weight:600}
+  .ok{color:#188038;font-weight:600}.bad{color:#c5221f;font-weight:600}
+  .card{background:#fff;border-radius:12px;padding:20px 24px;box-shadow:0 1px 2px rgba(0,0,0,.08);margin-bottom:14px}
+  .lbl{display:inline-block;font-size:11px;color:#fff;background:#1a73e8;border-radius:4px;padding:1px 8px;margin-right:8px;vertical-align:2px}
+</style></head><body><div class="wrap">
+<h1>SEO 眼见为实</h1>
+<div class="sub">以下全部由「真实内容文件 + 真实语言点名」现场生成 —— 不是效果图，是刚才那 100 行代码的输出画成了你能看的样子</div>
+
+<h2>① 你在谷歌搜「单梁桥式起重机」，看到的搜索结果</h2>
+<p class="note">蓝字=信息卡的 title，黑字=信息卡的 description。现在网站没这些标签，谷歌只能瞎猜着显示；有了卡，显示的就是你定的字。</p>
+<div class="serp">
+  
+  <div class="g">
+    <div class="g-site">DGF CRANE · www.dgcrane.com</div>
+    <div class="g-title">单梁桥式起重机 - DGCRANE</div>
+    <div class="g-url">products › single-girder-eot-cranes</div>
+    <div class="g-desc">单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120 多个国家。</div>
+  </div>
+  
+  <div class="g">
+    <div class="g-site">DGF CRANE · www.dgcrane.com</div>
+    <div class="g-title">Single Girder Overhead Crane - DGCRANE</div>
+    <div class="g-url">en › products › single-girder-eot-cranes</div>
+    <div class="g-desc">Single Girder Overhead Crane manufacturer and exporter, suitable for high-speed production lines, with over 10 years of export experience, sold to more than 120 countries.</div>
+  </div>
+</div>
+
+<h2>② 微信里转发这个网页链接，弹出的卡片</h2>
+<p class="note">图=自动取的页面头图（真图），标题/简介=自动复用信息卡。没有卡的话，微信经常显示空白或乱抓一图。</p>
+<div class="wx"><div class="wx-card">
+  <img src="../site/public/assets/img/product/Single-Girder-Overhead-Crane-scaled.jpg">
+  <div class="wx-txt"><div class="wx-title">单梁桥式起重机 - DGCRANE</div><div class="wx-desc">单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120… · dgcrane.com</div></div>
+</div></div>
+
+<h2>③ 这些信息藏在网页的哪里？</h2>
+<p class="note">网页源码最顶上这几行，访客永远看不见，谷歌和微信来读。这就是「信息卡」的真身：</p>
+<pre><span class="cm">&lt;title>单梁桥式起重机 - DGCRANE<span class="cm">&lt;/title>
+<span class="cm">&lt;meta name=&quot;description&quot; content=&quot;单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120 多个国家。&quot;>
+<span class="cm">&lt;link rel=&quot;canonical&quot; href=&quot;https://www.dgcrane.com/products/single-girder-eot-cranes/&quot;>
+<span class="cm">&lt;link rel=&quot;alternate&quot; hreflang=&quot;zh-CN&quot; href=&quot;https://www.dgcrane.com/products/single-girder-eot-cranes/&quot;>
+<span class="cm">&lt;link rel=&quot;alternate&quot; hreflang=&quot;en&quot; href=&quot;https://www.dgcrane.com/en/products/single-girder-eot-cranes/&quot;>
+<span class="cm">&lt;link rel=&quot;alternate&quot; hreflang=&quot;x-default&quot; href=&quot;https://www.dgcrane.com/en/products/single-girder-eot-cranes/&quot;>
+<span class="cm">&lt;meta property=&quot;og:title&quot; content=&quot;单梁桥式起重机 - DGCRANE&quot;>
+<span class="cm">&lt;meta property=&quot;og:description&quot; content=&quot;单梁桥式起重机制造商与出口商，适用于高速产线，10 年以上出口经验，销往 120 多个国家。&quot;>
+<span class="cm">&lt;meta property=&quot;og:image&quot; content=&quot;https://www.dgcrane.com/assets/img/product/Single-Girder-Overhead-Crane-scaled.jpg&quot;>
+<span class="cm">&lt;meta property=&quot;og:url&quot; content=&quot;https://www.dgcrane.com/products/single-girder-eot-cranes/&quot;></pre>
+
+<h2>④ 全站地图（sitemap）里这一页长啥样</h2>
+<p class="note">给谷歌的清单文件里，这页占两条（中英各一），每条都声明自己有哪几个语言兄弟：</p>
+<table><tr><th>网址</th><th>声明的语言版本</th></tr>
+<tr><td>https://www.dgcrane.com/products/single-girder-eot-cranes/</td><td>zh-CN（自己）、en <span class="ok">✓ 互指</span></td></tr>
+<tr><td>https://www.dgcrane.com/en/products/single-girder-eot-cranes/</td><td>zh-CN、en（自己）<span class="ok">✓ 与中文页完全一致</span></td></tr></table>
+
+<h2>⑤ 体检台当场抓到的真问题（英文页标题超长 → 谷歌截断）</h2>
+<p class="note">下面是 32 吨文章的英文页。完整标题 111 字符，谷歌约 60 截断——右边就是真实效果：</p>
+<div class="serp">
+  
+  <div class="g">
+    <div class="g-site">DGF CRANE · www.dgcrane.com</div>
+    <div class="g-title">32-Ton Rail-Mounted Container Gantry Crane Exported to Russia: Built for Low-Temperature Environments | DGCRANE</div>
+    <div class="g-url">en › posts › 32t-rail-mounted-container-gantry-crane-exported-to-russia</div>
+    <div class="g-desc">Case study: a 32-ton Rail-Mounted Container Gantry Crane exported to Russia—Q355E low-temperature steel, stable operation at -40°C, Russian localization, comprehensive safety and transport protection, delivering a complete and reliable container-handling solution.</div>
+  </div>
+</div>
+<div class="card" style="margin-top:10px">标题完整长度 <b class="bad">111 字符</b>（建议 ≤60）· 简介完整长度 <b class="bad">264 字符</b>（建议 ≤160）——全站此类问题 <b class="bad">14 处</b>，全是英文页。将来在体检台一键看到、在翻译指令里根治。</div>
+</div></body></html>

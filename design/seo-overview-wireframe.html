@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>总览台线框图</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+  :root {
+    --ground: #F4F6F7;
+    --surface: #FFFFFF;
+    --surface-2: #EDF0F2;
+    --ink: #1F272E;
+    --muted: #66727C;
+    --line: #D9DEE2;
+    --accent: #2F5D8C;
+    --ok: #1E8449;
+    --ok-bg: #E4F2E9;
+    --warn: #9C6B12;
+    --warn-bg: #F9EFDA;
+    --err: #B3261E;
+    --err-bg: #F9E5E3;
+    --pin: #6C3E9E;
+    --pin-bg: #EFE8F8;
+    --radius: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #14181C;
+      --surface: #1D2329;
+      --surface-2: #242B33;
+      --ink: #E8ECEF;
+      --muted: #9AA5AE;
+      --line: #333C45;
+      --accent: #7FA8D0;
+      --ok: #57B77E;
+      --ok-bg: #1E3328;
+      --warn: #D9A94E;
+      --warn-bg: #38300F;
+      --err: #E58079;
+      --err-bg: #3D1F1D;
+      --pin: #B292DD;
+      --pin-bg: #2C2340;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #14181C;
+    --surface: #1D2329;
+    --surface-2: #242B33;
+    --ink: #E8ECEF;
+    --muted: #9AA5AE;
+    --line: #333C45;
+    --accent: #7FA8D0;
+    --ok: #57B77E;
+    --ok-bg: #1E3328;
+    --warn: #D9A94E;
+    --warn-bg: #38300F;
+    --err: #E58079;
+    --err-bg: #3D1F1D;
+    --pin: #B292DD;
+    --pin-bg: #2C2340;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 14px/1.6 "IBM Plex Sans", -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-variant-numeric: tabular-nums;
+    padding: 28px 16px 64px;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+
+  /* ---- 头部 ---- */
+  header.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 16px; margin-bottom: 6px; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0; letter-spacing: .01em; }
+  .top .meta { color: var(--muted); font-size: 12.5px; }
+  .top .wire-tag {
+    margin-left: auto; font-size: 11.5px; color: var(--muted);
+    border: 1px dashed var(--line); padding: 2px 10px; border-radius: 999px;
+  }
+
+  /* ---- 汇总条 ---- */
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 14px; }
+  .stat {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 10px 14px; min-width: 118px;
+  }
+  .stat .num { font-size: 22px; font-weight: 600; line-height: 1.2; }
+  .stat .lbl { font-size: 12px; color: var(--muted); }
+  .stat.bad .num { color: var(--err); }
+  .stat.warn .num { color: var(--warn); }
+  .stat.ok .num { color: var(--ok); }
+
+  /* ---- 过滤器 ---- */
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    border-radius: 999px; padding: 4px 12px; font-size: 12.5px; cursor: pointer;
+    transition: background .12s ease, border-color .12s ease;
+    user-select: none;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip:focus-visible, .row-head:focus-visible, .lang:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .chip.on { color: #10151A; }
+  .chip .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: .55; }
+  .chip.on .dot { background: #fff; opacity: 1; }
+  :root[data-theme="dark"] .chip.on .dot { background: #10151A; }
+  .filters .spacer { flex: 1; }
+  .filters a.plain { font-size: 12.5px; color: var(--accent); text-decoration: none; cursor: pointer; }
+  .filters a.plain:hover { text-decoration: underline; }
+
+  /* ---- 列表 ---- */
+  .list { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+  .row { border-bottom: 1px solid var(--line); }
+  .row:last-child { border-bottom: none; }
+  .row-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+    cursor: pointer; background: transparent; border: none; width: 100%; text-align: left;
+    color: inherit; font: inherit;
+    transition: background .12s ease;
+  }
+  .row-head:hover { background: var(--surface-2); }
+  .row.warnrow .row-head { border-left: 3px solid var(--warn); }
+  .row.errrow .row-head { border-left: 3px solid var(--err); }
+  .row.healthy { opacity: .62; }
+  .row.healthy .row-head { border-left: 3px solid transparent; padding-left: 15px; }
+  .row.hidden { display: none; }
+
+  .pg-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pg-type { font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; flex: none; }
+  .badge { flex: none; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 2px 10px; }
+  .badge.all-ok { background: var(--ok-bg); color: var(--ok); }
+  .badge.some { background: var(--warn-bg); color: var(--warn); }
+  .badge.bad { background: var(--err-bg); color: var(--err); }
+  .flags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .flag {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12px;
+    border-radius: 4px; padding: 2px 8px; cursor: pointer; border: 1px solid transparent;
+  }
+  .flag:hover { border-color: currentColor; }
+  .flag i { width: 8px; height: 8px; border-radius: 50%; background: currentColor; font-style: normal; flex: none; }
+  .flag.stale { background: var(--warn-bg); color: var(--warn); }
+  .flag.failed { background: var(--err-bg); color: var(--err); }
+  .flag.pin { background: var(--pin-bg); color: var(--pin); }
+  .flag.missing { background: var(--surface-2); color: var(--muted); }
+  .row-head .arrow { margin-left: auto; color: var(--muted); flex: none; transition: transform .15s ease; font-size: 11px; }
+  .row.open .arrow { transform: rotate(90deg); }
+
+  /* ---- 展开区 ---- */
+  .detail { display: none; padding: 4px 16px 16px 18px; border-top: 1px dashed var(--line); }
+  .row.open .detail { display: block; }
+  .detail h4 { font-size: 12px; color: var(--muted); font-weight: 600; margin: 14px 0 8px; letter-spacing: .04em; }
+  .issue-list { display: grid; gap: 6px; }
+  .issue { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .issue .go { color: var(--accent); text-decoration: none; white-space: nowrap; }
+  .issue .go:hover { text-decoration: underline; }
+
+  .lang-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 6px; }
+  .lang {
+    display: flex; align-items: center; gap: 6px; justify-content: flex-start;
+    font-size: 12px; padding: 4px 8px; border-radius: 4px;
+    background: var(--surface-2); cursor: pointer; border: 1px solid transparent;
+    transition: border-color .12s ease;
+  }
+  .lang:hover { border-color: var(--accent); }
+  .lang i { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); font-style: normal; flex: none; }
+  .lang.src { font-weight: 600; }
+  .lang.src::after { content: "源"; font-size: 10px; color: var(--muted); margin-left: auto; }
+  .lang.stale { background: var(--warn-bg); }
+  .lang.stale i { background: var(--warn); }
+  .lang.pin { background: var(--pin-bg); }
+  .lang.pin i { background: var(--pin); }
+
+  /* ---- 展开其余行 ---- */
+  .showrest {
+    width: 100%; padding: 11px 14px; border: none; background: transparent;
+    color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; text-align: center;
+  }
+  .showrest:hover { background: var(--surface-2); color: var(--ink); }
+
+  /* ---- 图例 ---- */
+  .legend { margin-top: 20px; padding: 14px 16px; border: 1px dashed var(--line); border-radius: var(--radius); font-size: 12.5px; color: var(--muted); }
+  .legend strong { color: var(--ink); font-weight: 600; }
+  .legend ul { margin: 8px 0 10px; padding: 0; list-style: none; display: grid; gap: 4px; }
+  .legend li { display: flex; align-items: center; gap: 8px; }
+  .legend li i { width: 8px; height: 8px; border-radius: 50%; font-style: normal; flex: none; }
+  .legend li.ok i { background: var(--ok); }
+  .legend li.stale i { background: var(--warn); }
+  .legend li.failed i { background: var(--err); }
+  .legend li.missing i { background: var(--muted); }
+  .legend li.pin i { background: var(--pin); }
+  .annot { margin-top: 22px; font-size: 12.5px; color: var(--muted); }
+  .annot b { color: var(--ink); font-weight: 600; }
+  @media (prefers-reduced-motion: reduce) {
+    .chip, .row-head, .arrow, .lang { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>全站体检报告</h1>
+    <span class="meta">dgcrane.com · 34 种语言 · 52 个页面 · 状态随构建自动更新</span>
+    <span class="wire-tag">线框图 · 示例数据</span>
+  </header>
+
+  <div class="stats">
+    <div class="stat ok"><div class="num">48</div><div class="lbl">页全绿</div></div>
+    <div class="stat warn"><div class="num">3</div><div class="lbl">页有异常</div></div>
+    <div class="stat bad"><div class="num">4</div><div class="lbl">句机翻失败</div></div>
+    <div class="stat"><div class="num">1</div><div class="lbl">SEO 待确认</div></div>
+  </div>
+
+  <div class="filters">
+    <span class="chip on" id="onlyBad" role="switch" aria-checked="true" tabindex="0"><span class="dot"></span>只看有异常</span>
+    <span class="chip" tabindex="0">语言：全部 ▾</span>
+    <span class="chip" tabindex="0">类型：全部 ▾</span>
+    <span class="spacer"></span>
+    <a class="plain" id="showAll">显示全部 52 页</a>
+  </div>
+
+  <div class="list">
+
+    <!-- 异常行 1：默认展开 -->
+    <div class="row warnrow open">
+      <button class="row-head" aria-expanded="true">
+        <span class="pg-type">产品</span>
+        <span class="pg-name">单梁桥式起重机</span>
+        <span class="badge some">⚠ 2 处</span>
+        <span class="flags">
+          <span class="flag stale" title="去编辑俄语版"><i></i>ru 过期</span>
+          <span class="flag pin" title="去确认英文 SEO 标题"><i></i>en 待确认</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+      <div class="detail">
+        <h4>异常明细（点旗直达）</h4>
+        <div class="issue-list">
+          <div class="issue"><span class="flag stale"><i></i>ru</span> 源页 3 天前修改，俄语镜像未跟 <a class="go" href="#">重跑机翻 →</a></div>
+          <div class="issue"><span class="flag pin"><i></i>en</span> SEO 标题人工精修过，源页已变，是否重跟？ <a class="go" href="#">查看差异 →</a></div>
+        </div>
+        <h4>本页全部语言（34）</h4>
+        <div class="lang-grid">
+          <span class="lang src" title="源语言"><i></i>zh-CN</span>
+          <span class="lang pin" title="待确认"><i></i>en</span>
+          <span class="lang stale" title="过期"><i></i>ru</span>
+          <span class="lang"><i></i>fr</span><span class="lang"><i></i>de</span><span class="lang"><i></i>es</span>
+          <span class="lang"><i></i>pt</span><span class="lang"><i></i>it</span><span class="lang"><i></i>nl</span>
+          <span class="lang"><i></i>pl</span><span class="lang"><i></i>tr</span><span class="lang"><i></i>ar</span>
+          <span class="lang"><i></i>fa</span><span class="lang"><i></i>hi</span><span class="lang"><i></i>id</span>
+          <span class="lang"><i></i>vi</span><span class="lang"><i></i>th</span><span class="lang"><i></i>ko</span>
+          <span class="lang"><i></i>ja</span><span class="lang"><i></i>ms</span><span class="lang"><i></i>uk</span>
+          <span class="lang"><i></i>cs</span><span class="lang"><i></i>sk</span><span class="lang"><i></i>hu</span>
+          <span class="lang"><i></i>ro</span><span class="lang"><i></i>bg</span><span class="lang"><i></i>el</span>
+          <span class="lang"><i></i>he</span><span class="lang"><i></i>sv</span><span class="lang"><i></i>fi</span>
+          <span class="lang"><i></i>da</span><span class="lang"><i></i>nb</span><span class="lang"><i></i>sr</span>
+          <span class="lang"><i></i>hr</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 异常行 2 -->
+    <div class="row errrow">
+      <button class="row-head" aria-expanded="false">
+        <span class="pg-type">文章</span>
+        <span class="pg-name">桁架龙门起重机出口印尼</span>
+        <span class="badge bad">✕ 1 处</span>
+        <span class="flags">
+          <span class="flag failed" title="重试失败句"><i></i>fr 4 句失败</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+    </div>
+
+    <!-- 异常行 3：未建 -->
+    <div class="row warnrow">
+      <button class="row-head" aria-expanded="false">
+        <span class="pg-type">产品</span>
+        <span class="pg-name">双梁桥式起重机</span>
+        <span class="badge some">30 语言未建</span>
+        <span class="flags">
+          <span class="flag missing" title="跑机翻"><i></i>机翻排程中 12/30</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+    </div>
+
+    <!-- 健康行（默认收起、弱化） -->
+    <div class="row healthy hideable">
+      <button class="row-head" aria-expanded="false">
+        <span class="pg-type">文章</span>
+        <span class="pg-name">32吨轨道式龙门起重机出口俄罗斯</span>
+        <span class="badge all-ok">34/34</span>
+        <span class="arrow">▶</span>
+      </button>
+    </div>
+    <div class="row healthy hideable">
+      <button class="row-head" aria-expanded="false">
+        <span class="pg-type">产品</span>
+        <span class="pg-name">MH 型电动葫芦门式起重机</span>
+        <span class="badge all-ok">34/34</span>
+        <span class="arrow">▶</span>
+      </button>
+    </div>
+
+    <button class="showrest" id="showRest">▸ 显示其余 44 页（全部 ✅）</button>
+  </div>
+
+  <div class="legend">
+    <strong>状态由族谱 + 翻译戳自动算出，零人工登记</strong>
+    <ul>
+      <li class="ok"><i></i>已上线 —— 机翻完成自动发布（常态，不占注意力）</li>
+      <li class="stale"><i></i>过期 —— 源页改了，该语言镜像未跟（WPML 的 🔄 同义）</li>
+      <li class="failed"><i></i>部分失败 —— 有机翻失败句，可一键重试</li>
+      <li class="missing"><i></i>未建 —— 该语言还没跑（WPML 的 ➕ 同义）</li>
+      <li class="pin"><i></i>待确认 —— 人工精修过的 SEO 字段受源变更波及，人决定跟不跟</li>
+    </ul>
+    旗子 = 有异常的语言常驻露脸、点旗直达该语言编辑页；健康语言收进展开层。
+  </div>
+
+  <p class="annot">
+    <b>线框要点</b>：① 一行 = 一篇逻辑页，语言是它的属性（WPML 同构）；② 默认只显异常行，健康页折叠成统计；③ 点行展开 34 语言明细网格；④ 顶部「只看有异常 / 按语言筛」是日常入口（Crowdin 同构）。
+  </p>
+
+</div>
+<script>
+  // 最小交互演示：行展开、只看异常、显示其余
+  document.querySelectorAll('.row-head').forEach(h => {
+    h.addEventListener('click', () => {
+      const row = h.closest('.row')
+      row.classList.toggle('open')
+      h.setAttribute('aria-expanded', row.classList.contains('open'))
+    })
+  })
+  const onlyBad = document.getElementById('onlyBad')
+  const toggleOnlyBad = () => {
+    onlyBad.classList.toggle('on')
+    const on = onlyBad.classList.contains('on')
+    onlyBad.setAttribute('aria-checked', on)
+    document.querySelectorAll('.row.healthy').forEach(r => r.classList.toggle('hidden', on))
+  }
+  onlyBad.addEventListener('click', toggleOnlyBad)
+  document.getElementById('showAll').addEventListener('click', () => {
+    if (onlyBad.classList.contains('on')) toggleOnlyBad()
+  })
+  document.getElementById('showRest').addEventListener('click', e => {
+    const rest = document.createElement('div')
+    rest.className = 'row healthy'
+    rest.innerHTML = '<button class="row-head" aria-expanded="false"><span class="pg-type">产品</span><span class="pg-name">欧式起重机 / 防爆起重机 / ……（其余 44 页示意）</span><span class="badge all-ok">34/34</span><span class="arrow">▶</span></button>'
+    e.target.before(rest)
+    e.target.remove()
+  })
+</script>
+</body>
+</html>
