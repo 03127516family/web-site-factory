@@ -583,10 +583,20 @@ function renderSaveSummary(diff) {
 // ---------- SEO 面板（Yoast metabox 落位：编辑页上改 head 字段；无 DOM 坐标 → dirty.meta 通道） ----------
 function seoCurrent(key) {
   if (state.dirty.meta.has(key)) return state.dirty.meta.get(key)
-  if (key === 'page.title') return String(document.title || '')
-  if (key === 'page.description') return document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+  const s = state.context?.seo
+  if (key === 'page.title') return s?.title ?? String(document.title || '')
+  if (key === 'page.description') return s?.description ?? (document.querySelector('meta[name="description"]')?.getAttribute('content') || '')
+  if (key === 'page.seo.og.title') return s?.og?.title ?? ''
+  if (key === 'page.seo.og.description') return s?.og?.description ?? ''
+  if (key === 'page.seo.og.image') return s?.og?.image ?? ''
+  if (key === 'page.seo.canonical') return s?.canonical ?? ''
+  if (key === 'page.seo.noindex') return s?.noindex === true
   return ''
 }
+const SEO_TEXT_FIELDS = [ // [targetId, 输入框 id, 是否 og 区]
+  ['page.seo.og.title', 'edlSeoOgT'], ['page.seo.og.description', 'edlSeoOgD'],
+  ['page.seo.og.image', 'edlSeoOgI'], ['page.seo.canonical', 'edlSeoCanon'],
+]
 function ensureSeoModal() {
   let m = $('#edlSeoModal')
   if (m) return m
@@ -594,7 +604,7 @@ function ensureSeoModal() {
   m.id = 'edlSeoModal'
   m.hidden = true
   m.innerHTML = `<div class="edl-seo-body">
-    <div class="edl-seo-head"><div><b>SEO 设置</b><span class="hint">谷歌搜索呈现的标题与简介 · 改动随「发布」一同保存</span></div><button id="edlSeoClose" type="button">✕</button></div>
+    <div class="edl-seo-head"><div><b>SEO 设置</b><span class="hint">改动随「发布」一同保存</span></div><button id="edlSeoClose" type="button">✕</button></div>
     <div class="edl-seo-main">
       <div class="edl-seo-preview" id="edlSeoPreview" title="点击编辑">
         <div class="p-site">DGCRANE · www.dgcrane.com</div>
@@ -604,6 +614,17 @@ function ensureSeoModal() {
       </div>
       <div class="edl-seo-field"><label>SEO 标题（≤60）</label><input id="edlSeoT" type="text"><div class="edl-seo-count" id="edlSeoCntT"></div></div>
       <div class="edl-seo-field"><label>SEO 简介（≤160）</label><textarea id="edlSeoD" rows="3"></textarea><div class="edl-seo-count" id="edlSeoCntD"></div></div>
+      <details class="edl-seo-details">
+        <summary>社交卡覆盖 <span class="hint">微信/Facebook 分享卡 · 留空=自动复用 SEO 标题/简介/页面头图</span></summary>
+        <div class="edl-seo-field"><label>社交标题</label><input id="edlSeoOgT" type="text" placeholder="留空 = 复用 SEO 标题"></div>
+        <div class="edl-seo-field"><label>社交简介</label><textarea id="edlSeoOgD" rows="2" placeholder="留空 = 复用 SEO 简介"></textarea></div>
+        <div class="edl-seo-field"><label>社交图</label><input id="edlSeoOgI" type="text" placeholder="留空 = 页面头图，如 /assets/img/product/xxx.jpg"></div>
+      </details>
+      <details class="edl-seo-details">
+        <summary>高级 <span class="hint">95% 的页面不用碰</span></summary>
+        <div class="edl-seo-field"><label>canonical 覆盖</label><input id="edlSeoCanon" type="text" placeholder="留空 = 本页地址（自指）"></div>
+        <label class="edl-seo-toggle"><input id="edlSeoNoindex" type="checkbox"><span>不收录本页（noindex + 撤出 sitemap）</span></label>
+      </details>
     </div>
   </div>`
   document.body.appendChild(m)
@@ -614,13 +635,20 @@ function ensureSeoModal() {
     m.querySelector('#edlSeoCntT').innerHTML = t.value.length > 60 ? `<b class="over">${t.value.length}</b>/60` : `${t.value.length}/60`
     m.querySelector('#edlSeoCntD').innerHTML = d.value.length > 160 ? `<b class="over">${d.value.length}</b>/160` : `${d.value.length}/160`
   }
+  const norm = v => (v ?? '')
   const mark = (key, value, base) => {
-    if (value === base) state.dirty.meta.delete(key)
+    if (norm(value) === norm(base)) state.dirty.meta.delete(key)
     else state.dirty.meta.set(key, value)
     updateDirtyBadge()
   }
-  t.addEventListener('input', () => { upd(); mark('page.title', t.value, t.dataset.base ?? '') })
-  d.addEventListener('input', () => { upd(); mark('page.description', d.value, d.dataset.base ?? '') })
+  t.addEventListener('input', () => { upd(); mark('page.title', t.value, t.dataset.base) })
+  d.addEventListener('input', () => { upd(); mark('page.description', d.value, d.dataset.base) })
+  for (const [key, id] of SEO_TEXT_FIELDS) {
+    const el = m.querySelector('#' + id)
+    el.addEventListener('input', () => mark(key, el.value.trim(), el.dataset.base))
+  }
+  const ni = m.querySelector('#edlSeoNoindex')
+  ni.addEventListener('change', () => mark('page.seo.noindex', ni.checked, ni.dataset.base === 'true'))
   m.querySelector('#edlSeoPreview').addEventListener('click', () => t.focus()) // Yoast：点预览聚焦标题
   m.querySelector('#edlSeoClose').addEventListener('click', () => { m.hidden = true })
   m.addEventListener('click', e => { if (e.target === m) m.hidden = true })
@@ -630,10 +658,18 @@ function openSeoPanel() {
   commitActive() // 先收编正在编辑的字段，面板数值=最新
   const m = ensureSeoModal()
   const t = m.querySelector('#edlSeoT'), d = m.querySelector('#edlSeoD')
-  t.dataset.base = String(document.title || '')
-  d.dataset.base = document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+  t.dataset.base = state.context?.seo?.title ?? String(document.title || '')
+  d.dataset.base = state.context?.seo?.description ?? (document.querySelector('meta[name="description"]')?.getAttribute('content') || '')
   t.value = seoCurrent('page.title')
   d.value = seoCurrent('page.description')
+  for (const [key, id] of SEO_TEXT_FIELDS) {
+    const el = m.querySelector('#' + id)
+    el.dataset.base = seoCurrent(key) // 原值（null→''，空=未覆盖）
+    el.value = state.dirty.meta.has(key) ? state.dirty.meta.get(key) : el.dataset.base
+  }
+  const ni = m.querySelector('#edlSeoNoindex')
+  ni.dataset.base = String(state.context?.seo?.noindex === true)
+  ni.checked = seoCurrent('page.seo.noindex')
   m.querySelector('#edlSeoPvU').textContent = location.pathname.replace(/^\/+|\/+$/g, '').replaceAll('/', ' › ')
   t.dispatchEvent(new Event('input'))
   m.hidden = false
@@ -866,6 +902,14 @@ const CHROME_CSS = `
 .edl-seo-field textarea{resize:vertical}
 .edl-seo-count{font-size:11px;color:#A39D96;margin-top:3px;font-family:ui-monospace,Menlo,monospace}
 .edl-seo-count b.over{color:#B3261E}
+.edl-seo-details{border:1px solid #E8E5E1;border-radius:8px;padding:10px 12px}
+.edl-seo-details summary{cursor:pointer;font-size:12.5px;font-weight:600;color:#1C1B1A;user-select:none}
+.edl-seo-details summary .hint{font-weight:400;font-size:11px;color:#A39D96;margin-left:6px}
+.edl-seo-details[open] summary{margin-bottom:10px}
+.edl-seo-details .edl-seo-field{margin-bottom:10px}
+.edl-seo-details .edl-seo-field:last-child{margin-bottom:0}
+.edl-seo-toggle{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#1C1B1A;cursor:pointer;padding:4px 0}
+.edl-seo-toggle input{width:15px;height:15px;accent-color:#B3261E}
 body{padding-top:56px!important;padding-bottom:38px!important}
 @media(max-width:640px){
   #edl-chrome-top{padding:0 8px;gap:6px}

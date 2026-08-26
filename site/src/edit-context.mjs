@@ -14,6 +14,14 @@ export function createEditContext(site, slug) {
     hasDraft: workspace.hasDraft,
     hasPublished: workspace.hasPublished,
     contract: browserContract(loadEditContract(site, page)),
+    // SEO 面板原值（含覆盖块）：区分「未覆盖=null」与「覆盖值=兜底值」——DOM 里只有渲染后值，分不清
+    seo: {
+      title: page.title ?? '',
+      description: page.description ?? '',
+      og: { title: page.seo?.og?.title ?? null, description: page.seo?.og?.description ?? null, image: page.seo?.og?.image ?? null },
+      canonical: page.seo?.canonical ?? null,
+      noindex: page.seo?.noindex === true,
+    },
   }
 }
 

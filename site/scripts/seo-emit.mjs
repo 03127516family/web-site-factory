@@ -12,7 +12,7 @@ const site = join(dirname(fileURLToPath(import.meta.url)), '..')
 const out = process.env.BUILD_OUT || 'dist'
 const pages = scanPages({ withJson: true })
 const groups = buildGroups(pages)
-const pubSet = new Set(pages.filter(p => p.status === 'published' && isPublishable(p, groups, pages)).map(p => p.slug))
+const pubSet = new Set(pages.filter(p => p.status === 'published' && p.j?.page?.seo?.noindex !== true && isPublishable(p, groups, pages)).map(p => p.slug)) // seo.noindex 同草稿：不进 sitemap（spec §3）
 mkdirSync(join(site, out), { recursive: true })
 writeFileSync(join(site, out, 'sitemap.xml'), sitemapXml(groups, pages, pubSet))
 writeFileSync(join(site, out, 'robots.txt'), robotsTxt())

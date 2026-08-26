@@ -160,6 +160,12 @@ test('sitemap:孤立镜像组单行自指（真例 free-standing-jib-cranes 形�
   assert.equal((sm.match(/xhtml:link/g) || []).length, 1)
 })
 
+test('sitemap:seo.noindex 页不进 sitemap（seo-emit pubSet 口径，spec §3）', async () => {
+  // seo-emit 的 pubSet 过滤逻辑：status published + seo.noindex!==true + 门禁——此处直接验过滤行本身
+  const src = (await import('node:fs')).readFileSync(new URL('./seo-emit.mjs', import.meta.url), 'utf8')
+  assert.ok(src.includes("seo?.noindex !== true"), 'seo-emit pubSet 须排除 seo.noindex 页')
+})
+
 test('robots:3 行 + sitemap 绝对地址', async () => {
   const { robotsTxt } = await import('../src/seo/kernel.mjs')
   const r = robotsTxt()

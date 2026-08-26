@@ -1,7 +1,7 @@
 import { validateDoc } from '../content/schema.mjs'
 import { normalizeTree } from '../render/tree-utils.mjs'
 
-const FIELD_TYPES = new Set(['text', 'number', 'richText', 'image', 'link', 'stringList'])
+const FIELD_TYPES = new Set(['text', 'number', 'richText', 'image', 'link', 'stringList', 'boolean'])
 const BLOCKED_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
 const ID_RE = /^[A-Za-z0-9][A-Za-z0-9_.:-]*$/
 
@@ -92,6 +92,9 @@ function safeHref(value) {
 function normalizeValue(field, value, targetId) {
   const invalid = message => fail('INVALID_VALUE', `${targetId}: ${message}`, { targetId })
   switch (field.type) {
+    case 'boolean':
+      if (typeof value !== 'boolean') invalid('必须是布尔值')
+      return value
     case 'text':
       if (typeof value !== 'string') invalid('必须是字符串')
       if (field.required && !value.trim()) invalid('不能为空')
@@ -139,6 +142,16 @@ function requireItem(items, region, regionId, itemId) {
   return index
 }
 
+function ensurePath(data, path) { // 契约声明过的路径中间层缺失 → 建空对象（声明即可写，如 page.seo.og.* 首次落键；setAt 的「不存在即拒」防的是未声明乱写）
+  const keys = pathKeys(path)
+  let cur = data
+  for (let i = 0; i < keys.length - 1; i++) {
+    if (cur == null || typeof cur !== 'object') fail('TARGET_NOT_FOUND', `写回路径不存在: ${path}`, { path })
+    if (!(keys[i] in cur)) cur[keys[i]] = {}
+    cur = cur[keys[i]]
+  }
+}
+
 function applyValue(data, contract, change) {
   if (typeof change.targetId !== 'string' || !change.targetId) fail('TARGET_NOT_FOUND', 'change 缺少 targetId')
   const parts = change.targetId.split('/')
@@ -152,7 +165,7 @@ function applyValue(data, contract, change) {
     if (field.type === 'image') {
       setAt(data, field.path, value.src)
       if (field.altPath) setAt(data, field.altPath, value.alt)
-    } else setAt(data, field.path, value)
+    } else { ensurePath(data, field.path); setAt(data, field.path, value) }
     return { inverse: { targetId: change.targetId, value: old }, touched: change.targetId }
   }
   if (parts.length !== 3) fail('TARGET_NOT_FOUND', `repeat targetId 格式非法: ${change.targetId}`, { targetId: change.targetId })
