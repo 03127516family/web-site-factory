@@ -17,7 +17,7 @@ const state = {
   editor: null, el: null, kind: null, listItem: null,
   hadTableWrap: false,
   context: window.__EDIT_CONTEXT__ ?? null,
-  dirty: { fields: new Map(), trees: new Map(), operations: [] },
+  dirty: { fields: new Map(), trees: new Map(), operations: [], meta: new Map() },
 }
 const $ = (s) => document.querySelector(s)
 
@@ -580,8 +580,68 @@ function renderSaveSummary(diff) {
   if (!diff.items.length) return '<div class="edl-note">当前内容与已发布版本一致。</div>'
   return diff.items.map(renderSummaryItem).join('')
 }
+// ---------- SEO 面板（Yoast metabox 落位：编辑页上改 head 字段；无 DOM 坐标 → dirty.meta 通道） ----------
+function seoCurrent(key) {
+  if (state.dirty.meta.has(key)) return state.dirty.meta.get(key)
+  if (key === 'page.title') return String(document.title || '')
+  if (key === 'page.description') return document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+  return ''
+}
+function ensureSeoModal() {
+  let m = $('#edlSeoModal')
+  if (m) return m
+  m = document.createElement('div')
+  m.id = 'edlSeoModal'
+  m.hidden = true
+  m.innerHTML = `<div class="edl-seo-body">
+    <div class="edl-seo-head"><div><b>SEO 设置</b><span class="hint">谷歌搜索呈现的标题与简介 · 改动随「发布」一同保存</span></div><button id="edlSeoClose" type="button">✕</button></div>
+    <div class="edl-seo-main">
+      <div class="edl-seo-preview" id="edlSeoPreview" title="点击编辑">
+        <div class="p-site">DGCRANE · www.dgcrane.com</div>
+        <div class="p-title" id="edlSeoPvT"></div>
+        <div class="p-url" id="edlSeoPvU"></div>
+        <div class="p-desc" id="edlSeoPvD"></div>
+      </div>
+      <div class="edl-seo-field"><label>SEO 标题（≤60）</label><input id="edlSeoT" type="text"><div class="edl-seo-count" id="edlSeoCntT"></div></div>
+      <div class="edl-seo-field"><label>SEO 简介（≤160）</label><textarea id="edlSeoD" rows="3"></textarea><div class="edl-seo-count" id="edlSeoCntD"></div></div>
+    </div>
+  </div>`
+  document.body.appendChild(m)
+  const t = m.querySelector('#edlSeoT'), d = m.querySelector('#edlSeoD')
+  const upd = () => {
+    m.querySelector('#edlSeoPvT').textContent = t.value
+    m.querySelector('#edlSeoPvD').textContent = d.value
+    m.querySelector('#edlSeoCntT').innerHTML = t.value.length > 60 ? `<b class="over">${t.value.length}</b>/60` : `${t.value.length}/60`
+    m.querySelector('#edlSeoCntD').innerHTML = d.value.length > 160 ? `<b class="over">${d.value.length}</b>/160` : `${d.value.length}/160`
+  }
+  const mark = (key, value, base) => {
+    if (value === base) state.dirty.meta.delete(key)
+    else state.dirty.meta.set(key, value)
+    updateDirtyBadge()
+  }
+  t.addEventListener('input', () => { upd(); mark('page.title', t.value, t.dataset.base ?? '') })
+  d.addEventListener('input', () => { upd(); mark('page.description', d.value, d.dataset.base ?? '') })
+  m.querySelector('#edlSeoPreview').addEventListener('click', () => t.focus()) // Yoast：点预览聚焦标题
+  m.querySelector('#edlSeoClose').addEventListener('click', () => { m.hidden = true })
+  m.addEventListener('click', e => { if (e.target === m) m.hidden = true })
+  return m
+}
+function openSeoPanel() {
+  commitActive() // 先收编正在编辑的字段，面板数值=最新
+  const m = ensureSeoModal()
+  const t = m.querySelector('#edlSeoT'), d = m.querySelector('#edlSeoD')
+  t.dataset.base = String(document.title || '')
+  d.dataset.base = document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+  t.value = seoCurrent('page.title')
+  d.value = seoCurrent('page.description')
+  m.querySelector('#edlSeoPvU').textContent = location.pathname.replace(/^\/+|\/+$/g, '').replaceAll('/', ' › ')
+  t.dispatchEvent(new Event('input'))
+  m.hidden = false
+  t.focus()
+}
+
 // ---------- 写回（POC-5）：收集改动 → 预览 → 存草稿/发布 ----------
-function dirtyCount() { return state.dirty.fields.size + state.dirty.trees.size + state.dirty.operations.length }
+function dirtyCount() { return state.dirty.fields.size + state.dirty.trees.size + state.dirty.operations.length + state.dirty.meta.size }
 function updateDirtyBadge() {
   const b = $('#edlDirty')
   if (b) { const n = dirtyCount(); b.textContent = n ? `● ${n} 处未保存` : ''; b.style.color = '#fbbf24' }
@@ -604,6 +664,7 @@ function collectChanges() {
     else changes.push({ targetId, value: el.textContent.trim() })
   }
   for (const [targetId, tree] of state.dirty.trees) changes.push({ targetId, value: tree })
+  for (const [targetId, value] of state.dirty.meta) changes.push({ targetId, value }) // 页面级元字段（SEO 面板：page.title/description，head 字段无 DOM 坐标）
   return changes
 }
 async function showSave(intent) {
@@ -670,7 +731,7 @@ async function doSave() {
   }
   lastSaveAt = new Date()
   updateChromeAutosave()
-  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0
+  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0; state.dirty.meta.clear()
   updateDirtyBadge()
   refreshChromeControls()
   if (data.rebuildError) alert('草稿已经保存，但草稿预览构建失败：\n' + data.rebuildError)
@@ -783,6 +844,28 @@ const CHROME_CSS = `
 .edl-chrome-bottom-btn{background:transparent;border:0;color:#5C5752;font-size:12px;padding:3px 5px;cursor:pointer}
 .edl-chrome-bottom-btn:hover{color:#1C1B1A;text-decoration:underline}
 #edlChromeDiscard{color:#B42318}
+/* SEO 面板（Yoast metabox 同构：谷歌预览点击聚焦标题，改动进 dirty 走同一发布链） */
+#edlSeoModal{position:fixed;inset:0;z-index:100001;background:rgba(28,27,26,.45);display:flex;align-items:flex-start;justify-content:center;padding-top:88px;font-family:-apple-system,"PingFang SC",sans-serif}
+#edlSeoModal[hidden]{display:none}
+#edlSeoModal .edl-seo-body{background:#fff;border-radius:12px;box-shadow:0 16px 60px rgba(0,0,0,.3);width:660px;max-width:calc(100vw - 32px);max-height:calc(100vh - 120px);overflow:auto}
+.edl-seo-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #E8E5E1}
+.edl-seo-head b{font-size:14px;color:#1C1B1A}
+.edl-seo-head .hint{font-size:11.5px;color:#A39D96;font-weight:400;margin-left:8px}
+#edlSeoClose{border:0;background:transparent;font-size:16px;color:#5C5752;cursor:pointer;padding:4px 8px;border-radius:6px}
+#edlSeoClose:hover{background:#F3F2F0}
+.edl-seo-main{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.edl-seo-preview{border:1px solid #E8E5E1;border-radius:8px;padding:12px 14px;cursor:pointer;background:#FBFAF9}
+.edl-seo-preview:hover{border-color:#2456E6}
+.edl-seo-preview .p-site{font-size:12px;color:#202124}
+.edl-seo-preview .p-title{font-size:17px;color:#1a0dab;line-height:1.3;margin:2px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.edl-seo-preview .p-url{font-size:11px;color:#202124;margin-bottom:3px}
+.edl-seo-preview .p-desc{font-size:12.5px;color:#4d5156;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.edl-seo-field label{display:block;font-size:11.5px;color:#5C5752;margin-bottom:4px}
+.edl-seo-field input,.edl-seo-field textarea{width:100%;box-sizing:border-box;border:1px solid #D8D4CF;border-radius:7px;padding:8px 10px;font-size:13px;font-family:inherit;color:#1C1B1A;outline:none}
+.edl-seo-field input:focus,.edl-seo-field textarea:focus{border-color:#2456E6}
+.edl-seo-field textarea{resize:vertical}
+.edl-seo-count{font-size:11px;color:#A39D96;margin-top:3px;font-family:ui-monospace,Menlo,monospace}
+.edl-seo-count b.over{color:#B3261E}
 body{padding-top:56px!important;padding-bottom:38px!important}
 @media(max-width:640px){
   #edl-chrome-top{padding:0 8px;gap:6px}
@@ -850,7 +933,7 @@ async function discardSavedDraft() {
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) { alert((res.status === 409 ? '草稿版本已变化，请刷新后重试：' : '丢弃草稿失败：') + (data.error || res.status)); return }
-  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0
+  state.dirty.fields.clear(); state.dirty.trees.clear(); state.dirty.operations.length = 0; state.dirty.meta.clear()
   if (data.deletedPage) location.href = '/__burn'
   else location.reload()
 }
@@ -880,6 +963,7 @@ function buildChrome() {
     </div>
     <div class="edl-chrome-right">
       <span id="edlChromePill"></span>
+      <button id="edlChromeSeo" type="button" class="edl-chrome-btn" style="background:#fff;border:1px solid #D8D4CF;color:#1C1B1A">SEO</button>
       <button id="edlChromeDraft" type="button" class="edl-chrome-btn">保存草稿</button>
       <button id="edlChromePublish" type="button" class="edl-chrome-btn">发布</button>
     </div>`
@@ -912,6 +996,7 @@ function buildChrome() {
     b.addEventListener('click', () => { if (b.dataset.lang !== lang) switchLang() })
   })
 
+  top.querySelector('#edlChromeSeo').addEventListener('click', openSeoPanel)
   top.querySelector('#edlChromeDraft').addEventListener('click', () => showSave('draft'))
   top.querySelector('#edlChromePublish').addEventListener('click', () => showSave('publish'))
   bottom.querySelector('#edlChromePreview').addEventListener('click', () => openCleanView('draft'))
