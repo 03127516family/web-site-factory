@@ -11,6 +11,7 @@ import { loadTm, loadConfig } from "../src/i18n/tm.mjs";
 import { loadTerms } from "../src/i18n/terms.mjs";
 import { consoleData, pinQueue } from "../src/i18n/pipeline.mjs";
 import { healthData } from "../src/seo/kernel.mjs";
+import { readWorkspace } from "../src/draft/store.mjs";
 
 const HERE = dirnameOfThis();
 function dirnameOfThis() {
@@ -287,6 +288,44 @@ setInterval(pingEdit, 5000);
 
 const server = http.createServer(async (req, res) => {
   const [urlPath, queryString] = decodeURIComponent(req.url || "/").split("?");
+  if (req.method === "POST" && urlPath === "/api/seo-save") {
+    // SEO 字段写回（体检屏展开行）：组装 changes 协议 + 现取 workspace revision，代理 8092 /__save。
+    // targetId page.title/page.description 已注册进两族 edit-contract（写回校验/重建/翻译联动全复用 /__save 链）。
+    let body = "";
+    req.on("data", (c) => (body += c));
+    req.on("end", async () => {
+      let payload;
+      try { payload = JSON.parse(body || "{}"); } catch { payload = {}; }
+      const { slug, title, description } = payload;
+      if (typeof slug !== "string" || !/^[\w/-]+$/.test(slug) || slug.includes("..")) {
+        res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "slug 非法" }));
+        return;
+      }
+      const changes = [];
+      if (typeof title === "string") changes.push({ targetId: "page.title", value: title });
+      if (typeof description === "string") changes.push({ targetId: "page.description", value: description });
+      if (!changes.length) {
+        res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: "title/description 至少给一个" }));
+        return;
+      }
+      let ws;
+      try { ws = readWorkspace(SITE, slug); } catch (e) {
+        res.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
+        res.end(JSON.stringify({ error: `页面不存在或无工作区: ${e.message}` }));
+        return;
+      }
+      const { status, json } = await proxy8092("POST", "/__save", {
+        slug, intent: "publish",
+        revision: ws.workingRevision, publishedRevision: ws.publishedRevision,
+        changes,
+      });
+      res.writeHead(status, { "Content-Type": "application/json; charset=utf-8" });
+      res.end(JSON.stringify(json));
+    });
+    return;
+  }
   if (req.method === "POST" && urlPath in POST_PROXY) {
     let body = "";
     req.on("data", (c) => (body += c));

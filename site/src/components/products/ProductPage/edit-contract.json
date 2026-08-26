@@ -1,104 +1,369 @@
 {
   "version": 1,
-  "assets": { "namespace": "product", "valueFormat": "filename" },
+  "assets": {
+    "namespace": "product",
+    "valueFormat": "filename"
+  },
   "fields": {
-    "hero.image": { "path": "hero.image", "type": "image" },
-    "hero.headline": { "path": "hero.headline", "type": "text" },
-    "hero.highlights": { "path": "hero.highlights", "type": "stringList" },
-    "breadcrumb.current": { "path": "breadcrumb.current", "type": "text", "required": true },
-    "title": { "path": "title", "type": "text", "required": true },
-    "summary_intro.body": { "path": "summary_intro.body", "type": "richText" },
-    "summary.intro": { "path": "summary.intro", "type": "text" },
-    "summary.cta": { "path": "summary.cta", "type": "text" },
-    "overview.title": { "path": "overview.title", "type": "text" },
-    "overview.body": { "path": "overview.body", "type": "richText" },
-    "basic_params.title": { "path": "basic_params.title", "type": "text" },
-    "basic_params.body": { "path": "basic_params.body", "type": "richText" },
-    "advantages.title": { "path": "advantages.title", "type": "text" },
-    "advantages.body": { "path": "advantages.body", "type": "richText" },
-    "protection.title": { "path": "protection.title", "type": "text" },
-    "protection.body": { "path": "protection.body", "type": "richText" },
-    "main_features.title": { "path": "main_features.title", "type": "text" },
-    "main_features.body": { "path": "main_features.body", "type": "richText" },
-    "introduction.title": { "path": "introduction.title", "type": "text" },
-    "introduction.body": { "path": "introduction.body", "type": "richText" },
-    "spec_compare.title": { "path": "spec_compare.title", "type": "text" },
-    "spec_compare.body": { "path": "spec_compare.body", "type": "richText" },
-    "spec_detail.title": { "path": "spec_detail.title", "type": "text" },
-    "spec_detail.body": { "path": "spec_detail.body", "type": "richText" },
-    "which_better.title": { "path": "which_better.title", "type": "text" },
-    "which_better.body": { "path": "which_better.body", "type": "richText" },
-    "components.title": { "path": "components.title", "type": "text" },
-    "production_flow.title": { "path": "production_flow.title", "type": "text" },
-    "production_flow.tips": { "path": "production_flow.tips", "type": "text" },
-    "crane_types.title": { "path": "crane_types.title", "type": "text" },
-    "installation.title": { "path": "installation.title", "type": "text" },
-    "installation.body": { "path": "installation.body", "type": "richText" },
-    "inquiry_form.title": { "path": "inquiry_form.title", "type": "text" },
-    "related_products.title": { "path": "related_products.title", "type": "text" }
+    "page.title": {
+      "path": "page.title",
+      "type": "text",
+      "required": true
+    },
+    "page.description": {
+      "path": "page.description",
+      "type": "text"
+    },
+    "hero.image": {
+      "path": "hero.image",
+      "type": "image"
+    },
+    "hero.headline": {
+      "path": "hero.headline",
+      "type": "text"
+    },
+    "hero.highlights": {
+      "path": "hero.highlights",
+      "type": "stringList"
+    },
+    "breadcrumb.current": {
+      "path": "breadcrumb.current",
+      "type": "text",
+      "required": true
+    },
+    "title": {
+      "path": "title",
+      "type": "text",
+      "required": true
+    },
+    "summary_intro.body": {
+      "path": "summary_intro.body",
+      "type": "richText"
+    },
+    "summary.intro": {
+      "path": "summary.intro",
+      "type": "text"
+    },
+    "summary.cta": {
+      "path": "summary.cta",
+      "type": "text"
+    },
+    "overview.title": {
+      "path": "overview.title",
+      "type": "text"
+    },
+    "overview.body": {
+      "path": "overview.body",
+      "type": "richText"
+    },
+    "basic_params.title": {
+      "path": "basic_params.title",
+      "type": "text"
+    },
+    "basic_params.body": {
+      "path": "basic_params.body",
+      "type": "richText"
+    },
+    "advantages.title": {
+      "path": "advantages.title",
+      "type": "text"
+    },
+    "advantages.body": {
+      "path": "advantages.body",
+      "type": "richText"
+    },
+    "protection.title": {
+      "path": "protection.title",
+      "type": "text"
+    },
+    "protection.body": {
+      "path": "protection.body",
+      "type": "richText"
+    },
+    "main_features.title": {
+      "path": "main_features.title",
+      "type": "text"
+    },
+    "main_features.body": {
+      "path": "main_features.body",
+      "type": "richText"
+    },
+    "introduction.title": {
+      "path": "introduction.title",
+      "type": "text"
+    },
+    "introduction.body": {
+      "path": "introduction.body",
+      "type": "richText"
+    },
+    "spec_compare.title": {
+      "path": "spec_compare.title",
+      "type": "text"
+    },
+    "spec_compare.body": {
+      "path": "spec_compare.body",
+      "type": "richText"
+    },
+    "spec_detail.title": {
+      "path": "spec_detail.title",
+      "type": "text"
+    },
+    "spec_detail.body": {
+      "path": "spec_detail.body",
+      "type": "richText"
+    },
+    "which_better.title": {
+      "path": "which_better.title",
+      "type": "text"
+    },
+    "which_better.body": {
+      "path": "which_better.body",
+      "type": "richText"
+    },
+    "components.title": {
+      "path": "components.title",
+      "type": "text"
+    },
+    "production_flow.title": {
+      "path": "production_flow.title",
+      "type": "text"
+    },
+    "production_flow.tips": {
+      "path": "production_flow.tips",
+      "type": "text"
+    },
+    "crane_types.title": {
+      "path": "crane_types.title",
+      "type": "text"
+    },
+    "installation.title": {
+      "path": "installation.title",
+      "type": "text"
+    },
+    "installation.body": {
+      "path": "installation.body",
+      "type": "richText"
+    },
+    "inquiry_form.title": {
+      "path": "inquiry_form.title",
+      "type": "text"
+    },
+    "related_products.title": {
+      "path": "related_products.title",
+      "type": "text"
+    }
   },
   "repeats": {
     "breadcrumb-trail": {
-      "path": "breadcrumb.trail", "itemIdField": "id", "minItems": 1, "maxItems": 10,
-      "prototype": { "id": null, "label": "", "url": "" },
+      "path": "breadcrumb.trail",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 10,
+      "prototype": {
+        "id": null,
+        "label": "",
+        "url": ""
+      },
       "fields": {
-        "label": { "path": "label", "type": "text" },
-        "url": { "path": "url", "type": "link" }
+        "label": {
+          "path": "label",
+          "type": "text"
+        },
+        "url": {
+          "path": "url",
+          "type": "link"
+        }
       }
     },
     "specs": {
-      "path": "specs", "itemIdField": "id", "minItems": 1, "maxItems": 50,
-      "prototype": { "id": null, "text": "" },
-      "fields": { "text": { "path": "text", "type": "text" } }
+      "path": "specs",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 50,
+      "prototype": {
+        "id": null,
+        "text": ""
+      },
+      "fields": {
+        "text": {
+          "path": "text",
+          "type": "text"
+        }
+      }
     },
     "gallery": {
-      "path": "gallery", "itemIdField": "id", "minItems": 1, "maxItems": 100,
-      "prototype": { "id": null, "image": "", "alt": "" },
-      "fields": { "image": { "path": "image", "altPath": "alt", "type": "image" } }
+      "path": "gallery",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 100,
+      "prototype": {
+        "id": null,
+        "image": "",
+        "alt": ""
+      },
+      "fields": {
+        "image": {
+          "path": "image",
+          "altPath": "alt",
+          "type": "image"
+        }
+      }
     },
     "components": {
-      "path": "components.items", "itemIdField": "id", "minItems": 1, "maxItems": 50,
-      "prototype": { "id": null, "name": "", "image": null, "body": { "type": "doc", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "新组件" }] }] } },
+      "path": "components.items",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 50,
+      "prototype": {
+        "id": null,
+        "name": "",
+        "image": null,
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "新组件"
+                }
+              ]
+            }
+          ]
+        }
+      },
       "fields": {
-        "name": { "path": "name", "type": "text" },
-        "image": { "path": "image", "type": "image" },
-        "body": { "path": "body", "type": "richText" }
+        "name": {
+          "path": "name",
+          "type": "text"
+        },
+        "image": {
+          "path": "image",
+          "type": "image"
+        },
+        "body": {
+          "path": "body",
+          "type": "richText"
+        }
       }
     },
     "production-flow": {
-      "path": "production_flow.steps", "itemIdField": "id", "minItems": 1, "maxItems": 50,
-      "prototype": { "id": null, "label": "", "image": "", "dataSize": "" },
+      "path": "production_flow.steps",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 50,
+      "prototype": {
+        "id": null,
+        "label": "",
+        "image": "",
+        "dataSize": ""
+      },
       "fields": {
-        "label": { "path": "label", "type": "text" },
-        "image": { "path": "image", "type": "image" }
+        "label": {
+          "path": "label",
+          "type": "text"
+        },
+        "image": {
+          "path": "image",
+          "type": "image"
+        }
       }
     },
     "crane-types": {
-      "path": "crane_types.items", "itemIdField": "id", "minItems": 1, "maxItems": 50,
-      "prototype": { "id": null, "name": "", "image": "", "body": { "type": "doc", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "新类型" }] }] } },
+      "path": "crane_types.items",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 50,
+      "prototype": {
+        "id": null,
+        "name": "",
+        "image": "",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "新类型"
+                }
+              ]
+            }
+          ]
+        }
+      },
       "fields": {
-        "name": { "path": "name", "type": "text" },
-        "image": { "path": "image", "type": "image" },
-        "body": { "path": "body", "type": "richText" }
+        "name": {
+          "path": "name",
+          "type": "text"
+        },
+        "image": {
+          "path": "image",
+          "type": "image"
+        },
+        "body": {
+          "path": "body",
+          "type": "richText"
+        }
       }
     },
     "cases": {
-      "path": "installation.cases", "itemIdField": "id", "minItems": 1, "maxItems": 50,
-      "prototype": { "id": null, "title": "", "image": "", "url": "" },
+      "path": "installation.cases",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 50,
+      "prototype": {
+        "id": null,
+        "title": "",
+        "image": "",
+        "url": ""
+      },
       "fields": {
-        "title": { "path": "title", "type": "text" },
-        "image": { "path": "image", "type": "image" },
-        "url": { "path": "url", "type": "link" }
+        "title": {
+          "path": "title",
+          "type": "text"
+        },
+        "image": {
+          "path": "image",
+          "type": "image"
+        },
+        "url": {
+          "path": "url",
+          "type": "link"
+        }
       }
     },
     "related-products": {
-      "path": "related_products.seed", "itemIdField": "id", "minItems": 0, "maxItems": 50,
-      "prototype": { "id": null, "title": "", "summary": "", "image": "", "url": "" },
+      "path": "related_products.seed",
+      "itemIdField": "id",
+      "minItems": 0,
+      "maxItems": 50,
+      "prototype": {
+        "id": null,
+        "title": "",
+        "summary": "",
+        "image": "",
+        "url": ""
+      },
       "fields": {
-        "title": { "path": "title", "type": "text" },
-        "summary": { "path": "summary", "type": "text" },
-        "image": { "path": "image", "type": "image" },
-        "url": { "path": "url", "type": "link" }
+        "title": {
+          "path": "title",
+          "type": "text"
+        },
+        "summary": {
+          "path": "summary",
+          "type": "text"
+        },
+        "image": {
+          "path": "image",
+          "type": "image"
+        },
+        "url": {
+          "path": "url",
+          "type": "link"
+        }
       }
     }
   }

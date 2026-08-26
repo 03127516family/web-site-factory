@@ -319,12 +319,59 @@ function drawSeo() {
       <td><button class="btn btn-sm btn-ghost" onclick="seoToggle('${esc(g.pageId)}')">展开</button></td>
     </tr>
     <tr id="seoDetail-${esc(g.pageId)}" hidden><td colspan="6" style="background:var(--surface-2)">
-      ${detail.map(r => `<div style="display:flex;gap:10px;align-items:center;padding:4px 8px"><span class="tag">${esc(r.lang)}</span><a class="btn btn-sm btn-ghost" href="${EDIT_BASE}${esc(r.slug)}/" target="_blank">编辑</a><span style="font-size:12px;color:var(--ink-2)">标题 ${r.titleLength} · 简介 ${r.descriptionLength}</span>${r.issues.map(i => `<span class="pill pill-warn">${SEO_FLAG[i] || esc(i)}</span>`).join(" ")}</div>`).join("")}
+      ${detail.map(r => `<div style="padding:8px;border-bottom:1px dashed var(--line)">
+        <div style="display:flex;gap:10px;align-items:center"><span class="tag">${esc(r.lang)}</span><a class="btn btn-sm btn-ghost" href="${EDIT_BASE}${esc(r.slug)}/" target="_blank">编辑页面</a><span style="font-size:12px;color:var(--ink-2)">标题 ${r.titleLength} · 简介 ${r.descriptionLength}</span>${r.issues.map(i => `<span class="pill pill-warn">${SEO_FLAG[i] || esc(i)}</span>`).join(" ")}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+          <div>
+            <div style="font-size:11px;color:var(--ink-3);margin-bottom:3px">SEO 标题（≤60）</div>
+            <input class="input" id="seoT-${esc(r.slug)}" value="${esc(r.title)}" style="width:100%;font-size:12.5px">
+            <div style="font-size:11px;color:var(--ink-3);margin:7px 0 3px">SEO 简介（≤160）</div>
+            <textarea class="input" id="seoD-${esc(r.slug)}" rows="2" style="width:100%;font-size:12.5px;resize:vertical">${esc(r.description)}</textarea>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:7px">
+              <button class="btn btn-sm btn-primary" onclick="seoSave('${esc(r.slug)}')">保存（发布）</button>
+              <span class="mono" style="font-size:11px;color:var(--ink-3)" id="seoCnt-${esc(r.slug)}"></span>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--line);border-radius:8px;padding:12px 14px;align-self:start">
+            <div style="font-size:11px;color:var(--ink-3);margin-bottom:6px">谷歌搜索预览</div>
+            <div style="font-size:12px;color:#202124">DGCRANE · www.dgcrane.com</div>
+            <div style="font-size:16px;color:#1a0dab;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="seoPvT-${esc(r.slug)}">${esc(r.title)}</div>
+            <div style="font-size:11px;color:#202124;margin:2px 0">${esc(r.slug.replaceAll('/', ' › '))}</div>
+            <div style="font-size:12px;color:#4d5156;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden" id="seoPvD-${esc(r.slug)}">${esc(r.description)}</div>
+          </div>
+        </div>
+      </div>`).join("")}
       ${pins.map(p => `<div style="display:flex;gap:10px;align-items:center;padding:4px 8px;border-top:1px dashed var(--line)"><span class="tag">${esc(p.lang)}</span><span class="mono" style="font-size:11px;color:var(--ink-3)">${esc(p.field)}</span><span style="font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">源已改「${esc(p.sourceText.slice(0, 36))}」· 人稿顶住「${esc(p.pinnedText.slice(0, 36))}」</span><button class="btn btn-sm btn-ghost" onclick="pinDecideOne('${esc(p.pageId)}','${esc(p.field)}','${esc(p.lang)}','keep')">保持</button><button class="btn btn-sm btn-danger" onclick="pinDecideOne('${esc(p.pageId)}','${esc(p.field)}','${esc(p.lang)}','refollow')">重跟</button></div>`).join("")}
     </td></tr>`;
   }).join("") || `<tr><td colspan="6" style="color:var(--ok);padding:22px;text-align:center">✓ 没有异常——全站体检通过</td></tr>`;
+  for (const r of SEO.rows) seoWireRow(r.slug);
 }
 function seoToggle(pageId) { const el = $("seoDetail-" + pageId); if (el) el.hidden = !el.hidden; }
+// SEO 字段编辑（Yoast metabox 同构：标题/简介输入 + 长度计数 + 谷歌预览，保存走 /__save 发布链）
+function seoWireRow(slug) {
+  const t = $("seoT-" + slug), d = $("seoD-" + slug), cnt = $("seoCnt-" + slug);
+  if (!t || !d || t.dataset.wired) return;
+  t.dataset.wired = "1";
+  const upd = () => {
+    const over = (n, m) => n > m ? ` style="color:var(--bad)"` : "";
+    if (cnt) cnt.innerHTML = `标题 <b${over(t.value.length, 60)}>${t.value.length}</b>/60 · 简介 <b${over(d.value.length, 160)}>${d.value.length}</b>/160`;
+    const pvT = $("seoPvT-" + slug), pvD = $("seoPvD-" + slug);
+    if (pvT) pvT.textContent = t.value;
+    if (pvD) pvD.textContent = d.value;
+  };
+  t.addEventListener("input", upd); d.addEventListener("input", upd); upd();
+}
+async function seoSave(slug) {
+  const t = $("seoT-" + slug), d = $("seoD-" + slug);
+  if (!t || !d) return;
+  if (!t.value.trim()) { toast("SEO 标题不能为空"); return; }
+  const r = await fetch("/api/seo-save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ slug, title: t.value, description: d.value }) }).then(x => x.json()).catch(() => ({ error: "请求失败" }));
+  if (r.ok) {
+    const isMirror = slug.split("/").length === 3;
+    toast(isMirror ? "已发布 · 人稿进 TM 并 pin（源再改不冲掉）" : "已发布 · 后台流水线自动重翻镜像");
+    init();
+  } else toast("保存失败：" + (r.error || "未知"));
+}
 async function postPinDecisions(action, list) {
   if (!list.length) { toast("没有待确认项"); return; }
   if (action === "refollow" && !confirm(`将 ${list.length} 条人稿改为跟源重翻（会产生翻译花费）——确认？`)) return;
@@ -898,6 +945,7 @@ window.lockDel = lockDel;
 window.termDel = termDel;
 window.termEdit = termEdit;
 window.seoToggle = seoToggle;
+window.seoSave = seoSave;
 window.pinDecideOne = pinDecideOne;
 window.pinDecideAll = pinDecideAll;
 

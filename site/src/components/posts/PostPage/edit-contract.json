@@ -1,24 +1,93 @@
 {
   "version": 1,
-  "assets": { "namespace": "product", "valueFormat": "filename" },
+  "assets": {
+    "namespace": "product",
+    "valueFormat": "filename"
+  },
   "fields": {
-    "breadcrumb.current": { "path": "breadcrumb.current", "type": "text", "required": true },
-    "title": { "path": "title", "type": "text", "required": true },
-    "inquiry_form.title": { "path": "inquiry_form.title", "type": "text" }
+    "page.title": {
+      "path": "page.title",
+      "type": "text",
+      "required": true
+    },
+    "page.description": {
+      "path": "page.description",
+      "type": "text"
+    },
+    "breadcrumb.current": {
+      "path": "breadcrumb.current",
+      "type": "text",
+      "required": true
+    },
+    "title": {
+      "path": "title",
+      "type": "text",
+      "required": true
+    },
+    "inquiry_form.title": {
+      "path": "inquiry_form.title",
+      "type": "text"
+    }
   },
   "repeats": {
     "breadcrumb-trail": {
-      "path": "breadcrumb.trail", "itemIdField": "id", "minItems": 1, "maxItems": 10,
-      "prototype": { "id": null, "label": "", "url": "" },
-      "fields": { "label": { "path": "label", "type": "text" }, "url": { "path": "url", "type": "link" } }
+      "path": "breadcrumb.trail",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 10,
+      "prototype": {
+        "id": null,
+        "label": "",
+        "url": ""
+      },
+      "fields": {
+        "label": {
+          "path": "label",
+          "type": "text"
+        },
+        "url": {
+          "path": "url",
+          "type": "link"
+        }
+      }
     },
     "sections": {
-      "path": "body.sections", "itemIdField": "id", "minItems": 1, "maxItems": 100,
-      "prototype": { "id": null, "heading": "新章节", "body": { "type": "doc", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "新章节内容" }] }] } },
+      "path": "body.sections",
+      "itemIdField": "id",
+      "minItems": 1,
+      "maxItems": 100,
+      "prototype": {
+        "id": null,
+        "heading": "新章节",
+        "body": {
+          "type": "doc",
+          "content": [
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "新章节内容"
+                }
+              ]
+            }
+          ]
+        }
+      },
       "fields": {
-        "heading": { "path": "heading", "type": "text" },
-        "body": { "path": "body", "type": "richText" },
-        "image": { "path": "image", "altPath": "alt", "type": "image" }
+        "heading": {
+          "path": "heading",
+          "type": "text"
+        },
+        "body": {
+          "path": "body",
+          "type": "richText"
+        },
+        "image": {
+          "path": "image",
+          "altPath": "alt",
+          "type": "image"
+        }
       }
     }
   }
