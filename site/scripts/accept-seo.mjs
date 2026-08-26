@@ -38,6 +38,24 @@ test('URL:中文源住根（D1 翻转）', () => {
   if (en) assert.equal(pageUrl(en), SITE_ROOT + 'en/products/single-girder-eot-cranes/')
 })
 
+// ---------- 配置收拢 ----------
+test('配置:SEO 常量齐备且口径自洽', async () => {
+  const c = await import('../src/seo/config.mjs')
+  assert.equal(c.X_DEFAULT_LANG, 'en')                       // D7：兜底英文
+  assert.equal(c.BRAND, 'DGCRANE')
+  assert.equal(c.TITLE_TEMPLATE, '')                          // 空=不套（page.title 已含品牌）
+  assert.equal(c.DEFAULT_OG_IMAGE, '')                        // 空=无兜底图则不发 og:image
+  assert.equal(c.OG_IMAGE_PREFIX, '/assets/img/product/')     // F14：两族同 namespace
+  // OG_LOCALE 覆盖 deploy 语言全集
+  for (const l of ['zh-CN', 'en']) assert.ok(c.OG_LOCALE[l], `OG_LOCALE 缺 ${l}`)
+  assert.equal(c.OG_LOCALE['zh-CN'], 'zh_CN')                 // og:locale 下划线格式
+  // 长度预算覆盖四个 SEO 字段
+  for (const f of ['page.title', 'page.description', 'page.seo.og.title', 'page.seo.og.description'])
+    assert.ok(c.LENGTH_BUDGET[f], `LENGTH_BUDGET 缺 ${f}`)
+  assert.equal(c.LENGTH_BUDGET['page.title'], 60)
+  assert.equal(c.LENGTH_BUDGET['page.description'], 160)
+})
+
 // ---------- 汇总 ----------
 let pass = 0
 for (const [name, fn] of cases) {
