@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, existsSync, statSync, rmSync, mkdirSync } 
 import { join, dirname, extname, normalize } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { spawn } from 'node:child_process'
-import { runPipeline, approvePage, translateAll, consoleData } from '../src/i18n/pipeline.mjs'
+import { runPipeline, approvePage, translateAll, consoleData, adoptMirror } from '../src/i18n/pipeline.mjs'
 import { loadTm, saveTm, upsert, loadConfig, saveConfig } from '../src/i18n/tm.mjs'
 import { loadTerms, saveTerms } from '../src/i18n/terms.mjs'
 import { projectPage, PENDING_CLASS, FAILED_CLASS, UNTRANSLATED_CLASS } from '../src/i18n/project.mjs'
@@ -221,6 +221,24 @@ const server = http.createServer(async (req, res) => {
           }
           try { await queueRebuild() } catch (e) { console.error(`  [i18n] 流水线后重建失败 ${pageId}: ${e.message}`) }
         })()
+      }
+      if (segments.length === 3 && payload.intent === 'publish') {
+        // 镜像发布 = 人审写回（2026-08-18「改完存 TM 永不再犯」落点，F10 补线）：
+        // 收养人改进 TM + pin 记账。失败不炸保存响应（内容已落盘），留事件供体检台看到。
+        const [mirLang] = segments
+        try {
+          const pageId = segments.at(-1)
+          const srcPg = scanPages().find(p => p.pageId === pageId && !p.langDir)
+          if (!srcPg) throw new Error(`镜像 ${payload.slug} 找不到源页 ${pageId}`)
+          const srcJ = JSON.parse(readFileSync(join(SITE, 'content', srcPg.file), 'utf8'))
+          const mirJ = JSON.parse(readFileSync(join(SITE, 'content', `${payload.slug}.json`), 'utf8'))
+          const tm = loadTm(srcJ.page.lang, mirLang)
+          const r = adoptMirror(mirJ, srcJ, tm, mirLang)
+          logEvent(payload.slug, 'mirror-adopt', { lang: mirLang, ...r })
+        } catch (e) {
+          console.error(`  [i18n] 镜像收养失败 ${payload.slug}: ${e.message}`)
+          logEvent(payload.slug, 'mirror-adopt-error', { lang: mirLang, error: e.message })
+        }
       }
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({

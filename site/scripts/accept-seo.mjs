@@ -178,6 +178,43 @@ test('healthData:超长/缺失/noindex 标记（体检数据）', async () => {
   assert.equal(rows[0].titleLength, 61)
 })
 
+// ---------- pin：人稿不被机翻冲掉（D5 锁定层） ----------
+const mockAI = async messages => {
+  const ss = JSON.parse(messages[1].content.match(/sentences：\n(.+?)\n\n返回/s)[1])
+  const translations = {}
+  let i = 0
+  for (const s of ss) translations[s.id] = `EN translation ${++i}.`
+  return { translations }
+}
+
+test('pin:镜像人改 title → TM 收养 + pin 记账 → 源 title 再改 → 机翻不冲人稿', async () => {
+  const { runPipeline, adoptMirror, pinQueue } = await import('../src/i18n/pipeline.mjs')
+  const { loadTm, saveTm } = await import('../src/i18n/tm.mjs')
+  const { collectUnits } = await import('../src/i18n/collect.mjs')
+  fixture()
+  await runPipeline(FIX, { lang: 't8', callAI: mockAI })
+  // ① 人在镜像页把 title 精修（模拟编辑器发布后的镜像文件）
+  const mir = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  mir.page.title = 'Human Polished Title'
+  const srcJ = JSON.parse(readFileSync(FIX_FILE(), 'utf8'))
+  const tm = loadTm('zh-CN', 't8')
+  adoptMirror(mir, srcJ, tm, 't8')
+  // pin 已记账：字段级 { srcFp, text }
+  assert.equal(tm.pins['page.title'].text, 'Human Polished Title')
+  assert.equal(tm.pins['page.title'].srcFp, collectUnits(srcJ).find(u => u.field === 'page.title').fp)
+  // ② 源 title 改（fp 变）
+  srcJ.page.title = 'SEO 夹具页（新标题）'
+  writeFileSync(FIX_FILE(), JSON.stringify(srcJ, null, 2))
+  saveTm('zh-CN', 't8', tm)
+  await runPipeline(FIX, { lang: 't8', callAI: mockAI })
+  // ③ 重投影后镜像 title 仍是人稿（pin 顶住），不是机翻 "EN translation N."
+  const mir2 = JSON.parse(readFileSync(MIR_FILE(), 'utf8'))
+  assert.equal(mir2.page.title, 'Human Polished Title')
+  // ④ 待确认旗：pin.srcFp ≠ 源当前 fp
+  const q = pinQueue('t8')
+  assert.ok(q.some(x => x.pageId === FIX && x.field === 'page.title'))
+})
+
 // ---------- 汇总 ----------
 let pass = 0
 for (const [name, fn] of cases) {

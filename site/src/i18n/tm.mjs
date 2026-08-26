@@ -13,9 +13,9 @@ export const tmPath = (src, tgt) => join(process.cwd(), 'src', 'i18n', 'data', `
 
 export function loadTm(src, tgt) {
   const f = tmPath(src, tgt)
-  if (!existsSync(f)) return { pair: `${src}>${tgt}`, sentences: {} }
+  if (!existsSync(f)) return { pair: `${src}>${tgt}`, sentences: {}, pins: {} }
   const j = JSON.parse(readFileSync(f, 'utf8'))
-  return { pair: j.pair ?? `${src}>${tgt}`, sentences: j.sentences ?? {} }
+  return { pair: j.pair ?? `${src}>${tgt}`, sentences: j.sentences ?? {}, pins: j.pins ?? {} }
 }
 export function saveTm(src, tgt, tm) {
   const f = tmPath(src, tgt)

@@ -55,6 +55,17 @@ export async function runPipeline(pageId, { lang = 'en', translate = true, retry
   const cfg = loadConfig()
   const autoReview = cfg.review[lang] === 'auto' // 免审语言（2026-08-18 拍定拆人审闸）：机翻直写 approved 即时上线；翻错靠镜像就地改 → TM 人审条永远压过机翻
   const units = collectUnits(srcJ)
+  // pin 复植（D5 锁定层）：人精修字段在源变更后顶住机翻——人稿按当前 fp 注入 TM（origin human，不送翻），
+  // 镜像照发人稿；srcFp ≠ 当前 fp = 待确认（pinQueue / 体检台）。
+  let pinned = 0
+  for (const u of units) {
+    const pin = u.kind === 'field' ? tm.pins?.[u.field] : null
+    if (pin && !tm.sentences[u.fp]) {
+      upsert(tm, u.fp, { text: u.text, translation: pin.text, status: 'approved', origin: 'human' })
+      pinned++
+    }
+  }
+  if (pinned) saveTm(srcJ.page.lang, lang, tm)
   const missing = withContext(units).filter(u => !tm.sentences[u.fp] || (retryFailed && tm.sentences[u.fp]?.status === 'failed'))
   let translated = 0, failed = 0
   if (translate && missing.length) {
@@ -113,6 +124,7 @@ const sameish = (a, b) =>
 export function adoptMirror(mirrorJ, srcJ, tm, lang) {
   const units = collectUnits(srcJ)
   const { aligned, skipped } = alignSentGroups(mirrorJ, units) // C-1：sent 句级必须先过段守卫
+  const pinField = (u, cur) => { tm.pins = { ...tm.pins, [u.field]: { srcFp: u.fp, text: cur } } } // 人精修过的字段记账（D5 pin）：srcFp=收养时的源指纹，源变更后顶住机翻
   let n = 0
   for (const u of units) {
     const cur = u.kind === 'sent' ? aligned.get(`${u.field}|${u.path}`)?.[u.si] ?? null : mirrorSentence(mirrorJ, u)
@@ -123,9 +135,11 @@ export function adoptMirror(mirrorJ, srcJ, tm, lang) {
       if (sameish(cur, e.translation)) continue // 只是投影 artifact，非人工编辑
       upsert(tm, u.fp, { translation: cur, status: 'approved', origin: 'human' })
       delete tm.sentences[u.fp].error // 人审转正清旧 error 键（评审 D1：引擎路 2c5be01 清了，人审两条路漏同款）
+      if (u.kind === 'field') pinField(u, cur)
       n++
     } else if (!sameish(cur, u.text)) {
       upsert(tm, u.fp, { text: u.text, translation: cur, status: 'approved', origin: 'human' }); n++
+      if (u.kind === 'field') pinField(u, cur)
     }
   }
   if (n || skipped) { if (n) saveTm(srcJ.page.lang, lang, tm); logEvent(srcJ.page.slug, 'review-edit', { lang, sentences: n, skipped }) }
@@ -254,4 +268,20 @@ export function harvestMirror(pageId, lang) {
   writeJ(mirFile, mirror)
   logEvent(source.slug, 'harvest', { lang, sentences: n, skipped }) // 段不对齐跳过的句数留痕（宁可漏收养错）
   return { harvested: n, skipped } // T13 CLI 如实报「收 N 句、跳 M 句」
+}
+
+// pin 待确认队列（体检台/批量端点数据源）：pin 的 srcFp ≠ 源当前 fp = 源已变、人稿顶住中、等人决定。
+export function pinQueue(lang) {
+  const out = []
+  for (const pg of scanPages().filter(p => !p.langDir)) {
+    const srcJ = readJ(pg.file)
+    if (srcJ.page.lang === lang) continue
+    const tm = loadTm(srcJ.page.lang, lang)
+    for (const u of collectUnits(srcJ)) {
+      if (u.kind !== 'field') continue
+      const pin = tm.pins?.[u.field]
+      if (pin && pin.srcFp !== u.fp) out.push({ pageId: pg.pageId, lang, field: u.field, sourceText: u.text, pinnedText: pin.text })
+    }
+  }
+  return out
 }
