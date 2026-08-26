@@ -26,6 +26,8 @@
     "accept:burn": "node scripts/accept-burn.mjs",
     "accept:i18n2": "node scripts/accept-i18n2.mjs",
     "accept:seo": "node scripts/accept-seo.mjs",
+    "accept:workbench": "node scripts/accept-workbench.mjs",
+    "workbench": "node scripts/workbench.mjs",
     "bundle:edit": "esbuild edit-layer/edit-layer.js --bundle --format=iife --outfile=edit-layer/dist/edit-layer.js",
     "edit": "npm run bundle:edit && node --env-file-if-exists=.env scripts/edit-server.mjs"
   },
