@@ -64,3 +64,37 @@ export function seoHead(pg, siblings, opts = {}) {
   L.push(`<script type="application/ld+json">${JSON.stringify(jsonLd(pg, { title, desc, img }))}</script>`)
   return L.join('\n')
 }
+
+// sitemap：pubSet 逐成员 <url>，全员 xhtml:link 互认（WPML+Yoast 同款单文件合并式，D8-2）。
+// 无 lastmod（无可靠时间源，瞎填有害——spec §8 已知限制）。
+export function sitemapXml(groups, _pages, pubSet) {
+  const rows = []
+  for (const [, g] of groups) {
+    const live = g.filter(m => pubSet.has(m.slug))
+    for (const m of live)
+      rows.push(['  <url>', `    <loc>${pageUrl(m)}</loc>`,
+        ...live.map(s => `    <xhtml:link rel="alternate" hreflang="${escAttr(s.lang)}" href="${escAttr(pageUrl(s))}"/>`),
+        '  </url>'].join('\n'))
+  }
+  return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n  xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + rows.join('\n') + '\n</urlset>\n'
+}
+
+// robots：允许全站 + sitemap 指路。部署注意（spec §3）：与老站共存同域时 robots.txt 归域名根所有者，此文件不上传——代码照产。
+export function robotsTxt() {
+  return `User-agent: *\nAllow: /\n\nSitemap: ${SITE_ROOT}sitemap.xml\n`
+}
+
+// 体检数据（总览台直接吃）：一行=一页，异常机器算（族谱+长度+状态），零人工登记。
+export function healthData(pages) {
+  return pages.map(p => {
+    const title = p.j?.page?.title ?? '', desc = p.j?.page?.description ?? ''
+    const issues = []
+    if (!title) issues.push('title-missing')
+    else if (title.length > 60) issues.push('title-overlength')
+    if (!desc) issues.push('description-missing')
+    else if (desc.length > 160) issues.push('description-overlength')
+    if (p.status !== 'published') issues.push('noindex')
+    if (p.j?.page?.seo?.noindex) issues.push('noindex-manual')
+    return { pageId: p.pageId, lang: p.lang, slug: p.slug, type: p.type, title, titleLength: title.length, description: desc, descriptionLength: desc.length, issues }
+  })
+}

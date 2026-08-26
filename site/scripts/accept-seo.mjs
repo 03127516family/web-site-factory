@@ -134,6 +134,50 @@ test('seoHead:互指一致性（谷歌硬规则）——组内各版本集合两
   assert.equal(setOf(zhH), setOf(enH))
 })
 
+// ---------- sitemap / robots / 体检 ----------
+test('sitemap:条数=生产页、draft 排除、互认全列', async () => {
+  const { sitemapXml } = await import('../src/seo/kernel.mjs')
+  const g = new Map([['x', [pg(), mirPg]]]) // 一组两语言
+  const pub = new Set(['posts/x', 'en/posts/x'])
+  const sm = sitemapXml(g, null, pub)
+  assert.equal((sm.match(/<loc>/g) || []).length, 2)
+  assert.ok(sm.includes('<loc>https://www.dgcrane.com/posts/x/</loc>'))
+  // 每条 url 都列全部两语言互认
+  for (const u of ['https://www.dgcrane.com/posts/x/', 'https://www.dgcrane.com/en/posts/x/'])
+    assert.equal((sm.split(`<loc>${u}</loc>`)[1].split('</url>')[0].match(/xhtml:link/g) || []).length, 2)
+  assert.ok(sm.startsWith('<?xml version="1.0" encoding="UTF-8"?>'))
+  assert.ok(sm.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'))
+  // draft 排除
+  const sm2 = sitemapXml(g, null, new Set(['posts/x']))
+  assert.equal((sm2.match(/<loc>/g) || []).length, 1)
+})
+
+test('sitemap:孤立镜像组单行自指（真例 free-standing-jib-cranes 形态）', async () => {
+  const { sitemapXml } = await import('../src/seo/kernel.mjs')
+  const orphan = { pageId: 'o', type: 'product', lang: 'en', langDir: 'en', slug: 'en/products/o', status: 'published', j: null }
+  const sm = sitemapXml(new Map([['o', [orphan]]]), null, new Set(['en/products/o']))
+  assert.equal((sm.match(/<loc>/g) || []).length, 1)
+  assert.equal((sm.match(/xhtml:link/g) || []).length, 1)
+})
+
+test('robots:3 行 + sitemap 绝对地址', async () => {
+  const { robotsTxt } = await import('../src/seo/kernel.mjs')
+  const r = robotsTxt()
+  assert.equal(r, 'User-agent: *\nAllow: /\n\nSitemap: https://www.dgcrane.com/sitemap.xml\n')
+})
+
+test('healthData:超长/缺失/noindex 标记（体检数据）', async () => {
+  const { healthData } = await import('../src/seo/kernel.mjs')
+  const long = { pageId: 'l', type: 'post', lang: 'en', langDir: 'en', slug: 'en/posts/l', status: 'published',
+    j: { page: { title: 'x'.repeat(61), description: 'y'.repeat(161), status: 'published' } } }
+  const miss = { pageId: 'm', type: 'post', lang: 'zh-CN', langDir: null, slug: 'posts/m', status: 'draft',
+    j: { page: { title: '', description: '', status: 'draft' } } }
+  const rows = healthData([long, miss])
+  assert.deepEqual(rows[0].issues, ['title-overlength', 'description-overlength'])
+  assert.deepEqual(rows[1].issues, ['title-missing', 'description-missing', 'noindex'])
+  assert.equal(rows[0].titleLength, 61)
+})
+
 // ---------- 汇总 ----------
 let pass = 0
 for (const [name, fn] of cases) {
