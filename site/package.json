@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev --host 0.0.0.0",
-    "build": "astro build && node scripts/link-assets.mjs",
+    "build": "astro build && node scripts/link-assets.mjs && node scripts/seo-emit.mjs",
     "preview": "astro preview --host 0.0.0.0",
     "geom": "node scripts/geom-check.mjs",
     "check": "node scripts/i18n-registry.mjs --check && node scripts/accept-i18n2.mjs",

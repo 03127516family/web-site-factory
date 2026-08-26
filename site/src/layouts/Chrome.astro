@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { scanPages, buildGroups, siblingsOf, langSwitcher, isPublishable } from '../i18n/kernel.mjs'
+import { seoHead } from '../seo/kernel.mjs'
 
 const { j } = Astro.props
 const SITE = process.cwd() // Astro build 的 cwd = site 根
@@ -37,13 +38,17 @@ if (!me) throw new Error(`族谱里找不到本页 slug：${j.page.slug}（conte
 const publishable = process.env.INCLUDE_DRAFTS === '1'
   ? null
   : new Set(pages.filter(p => p.status === 'published' && isPublishable(p, groups, pages)).map(p => p.slug))
-const switcher = langSwitcher(me, siblingsOf(me, groups, publishable))
+const siblings = siblingsOf(me, groups, publishable)
+const switcher = langSwitcher(me, siblings)
+// SEO 头（spec 2026-08-25）：与切换器同源同位置的第二个消费者。
+// 预览构建（dist-edit 恒带 INCLUDE_DRAFTS=1，build-outputs.mjs:66）统一 noindex——防收录草稿预览。
+const seoBits = seoHead(me, siblings, { preview: process.env.INCLUDE_DRAFTS === '1' })
 
 const composed = doc
   .replaceAll('{{LANG}}', j.page.lang)
   .replaceAll('{{TITLE}}', j.page.title)
   .replaceAll('{{DESCRIPTION}}', j.page.description)
-  .replaceAll('{{SEO}}', '') // SEO 头（canonical/OG/JSON-LD）= F4（R46）平移，现先空
+  .replaceAll('{{SEO}}', seoBits)
   .replace('{{HEADER}}', repoFrag('header'))
   .replace('{{FOOTER}}', repoFrag('footer'))
   .replaceAll('{{LANG_SWITCH}}', switcher)
