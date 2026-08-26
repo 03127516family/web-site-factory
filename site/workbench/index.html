@@ -1726,7 +1726,7 @@ textarea.input{height:auto;padding:9px 11px;line-height:1.6;resize:vertical}
                       <span class="tag">简体中文</span><span class="tag">English</span><span class="tag" style="border-style:dashed;color:var(--ink-3)">＋ 添加</span>
                     </div>
                   </div>
-                  <div class="field w-full"><label>SEO 基址</label><input class="input mono" style="width:100%" value="/zh/"><div class="help">canonical / OG / sitemap 的绝对 URL 前缀（为多语言预留子路径）。</div></div>
+                  <div class="field w-full"><label>SEO 基址</label><div class="help" style="padding:8px 0">内置于代码常量（中文住根，2026-08-26 D1）——canonical/sitemap 全站一致；换站改 <span class="mono">src/i18n/kernel.mjs</span> 的 SITE_ROOT 即全站生效（冒烟已验证）。</div></div>
                 </div>
               </div>
             </div>

@@ -50,6 +50,9 @@ function renderDash(ov) {
     <div class="stat"><span class="eyebrow">草稿</span><div class="v">${ov.draft}</div><div class="d">未发布 · 不会进入构建</div></div>`;
   if ($("dashTodo")) {
     const rows = [];
+    const seoBad = (SEO.summary.flagged || 0) + (SEO.summary.pinsPending || 0);
+    if (seoBad > 0)
+      rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">SEO 体检：${SEO.summary.flagged} 页异常 · ${SEO.summary.pinsPending} 条人稿待确认</div><div class="s">标题超长会被谷歌截断 · 待确认=源已改而人稿顶住中</div></div><span class="pill pill-warn"><span class="dot"></span>${seoBad}</span><button class="btn btn-sm btn-secondary" onclick="navTo('seo')">去体检</button></div>`);
     if (ov.mirrors.length)
       rows.push(`<div class="todo-row"><div class="todo-main"><div class="t">${ov.mirrors.length} 个 en 镜像</div><div class="s">${ov.mirrors.map((m) => esc(m.title.slice(0, 20))).join(" · ")}</div></div><span class="pill pill-ok"><span class="dot"></span>已发布 ${ov.mirrors.filter((m) => m.enStatus === "published").length} · 草稿 ${ov.mirrors.length - ov.mirrors.filter((m) => m.enStatus === "published").length}</span><button class="btn btn-sm btn-secondary" onclick="navTo('i18n')">查看镜像</button></div>`);
     if (ov.mirrorless)
