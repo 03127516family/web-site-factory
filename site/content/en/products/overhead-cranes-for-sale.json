@@ -15,13 +15,13 @@
     "current": "FEM Standard Overhead Crane",
     "trail": [
       {
-        "label": "首页",
-        "url": "https://www.dgcrane.com/zh/",
+        "label": "Home",
+        "url": "https://www.dgcrane.com/en/",
         "id": "crumb_a2e6095740"
       },
       {
-        "label": "桥式起重机",
-        "url": "https://www.dgcrane.com/zh/overhead-cranes/",
+        "label": "Overhead Cranes",
+        "url": "https://www.dgcrane.com/en/overhead-cranes/",
         "id": "crumb_820719e79f"
       }
     ]

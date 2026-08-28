@@ -15,13 +15,13 @@
     "current": "Single Girder Overhead Crane",
     "trail": [
       {
-        "label": "首页",
-        "url": "https://www.dgcrane.com/zh/",
+        "label": "Home",
+        "url": "https://www.dgcrane.com/en/",
         "id": "crumb_ec0b4b3cfb"
       },
       {
         "label": "Eot Cranes",
-        "url": "https://www.dgcrane.com/zh/eot-cranes/",
+        "url": "https://www.dgcrane.com/en/eot-cranes/",
         "id": "crumb_c07a55fa5a"
       }
     ]

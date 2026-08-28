@@ -134,7 +134,9 @@ export function productionJson(pg, groups, pagesWithJson) {
   const srcJ = (pagesWithJson || []).find(m => m.pageId === source.pageId && !m.langDir)?.j
     ?? JSON.parse(readFileSync(join(CONTENT(), source.file), 'utf8'))
   const tm = loadTm(srcJ.page.lang, pg.lang)
-  return projectPage(srcJ, tm, 'approved', { lang: pg.lang, existingStatus: 'published' })
+  // 分语言手写 trail（U-1 结构排除字段）不进 TM，投影须从镜像文件取回——否则生产页面包屑漏中文（2026-08-28 geom 快照实证）
+  const mirror = pg.j ?? JSON.parse(readFileSync(join(CONTENT(), pg.file), 'utf8'))
+  return projectPage(srcJ, tm, 'approved', { lang: pg.lang, existingStatus: 'published', existingTrail: mirror?.breadcrumb?.trail })
 }
 export function isPublishable(pg, groups, pagesWithJson) {
   if (!pg.langDir) return true

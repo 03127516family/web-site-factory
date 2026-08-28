@@ -15,13 +15,13 @@
     "current": "Multi-Point Suspension Crane",
     "trail": [
       {
-        "label": "首页",
-        "url": "https://www.dgcrane.com/zh/",
+        "label": "Home",
+        "url": "https://www.dgcrane.com/en/",
         "id": "crumb_1473013b57"
       },
       {
         "label": "Eot Cranes",
-        "url": "https://www.dgcrane.com/zh/eot-cranes/",
+        "url": "https://www.dgcrane.com/en/eot-cranes/",
         "id": "crumb_fdf9aff210"
       }
     ]

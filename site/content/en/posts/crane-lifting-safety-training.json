@@ -15,13 +15,13 @@
     "current": "Crane Operation Safety Management: Core Standards, Hazards, and Risk Prevention",
     "trail": [
       {
-        "label": "首页",
-        "url": "https://www.dgcrane.com/zh/",
+        "label": "Home",
+        "url": "https://www.dgcrane.com/en/",
         "id": "crumb_448b0ef7c0"
       },
       {
-        "label": "案例",
-        "url": "https://www.dgcrane.com/zh/posts/",
+        "label": "Cases",
+        "url": "https://www.dgcrane.com/en/posts/",
         "id": "crumb_390f42ecb8"
       }
     ]

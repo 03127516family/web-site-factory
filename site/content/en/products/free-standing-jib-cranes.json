@@ -15,13 +15,13 @@
     "current": "Freestanding Jib Crane",
     "trail": [
       {
-        "label": "首页",
-        "url": "https://www.dgcrane.com/zh/",
+        "label": "Home",
+        "url": "https://www.dgcrane.com/en/",
         "id": "crumb_c6291d1b89"
       },
       {
-        "label": "旋臂起重机",
-        "url": "https://www.dgcrane.com/zh/jib-cranes/",
+        "label": "Jib Cranes",
+        "url": "https://www.dgcrane.com/en/jib-cranes/",
         "id": "crumb_13079cea46"
       }
     ]

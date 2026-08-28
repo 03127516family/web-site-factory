@@ -23,7 +23,7 @@ const sections = (j.body?.sections ?? []).filter(s => s?.heading && s?.body)
 <div class="toptitle">
 	<div class="wrap">
 		<div class="title">
-				<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-repeat-key="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map(t => <Fragment><span class="crumb" data-item-id={t.id}><a data-field="crumb.url" data-item-field="url" href={t.url}><span data-field="crumb.label" data-item-field="label">{t.label}</span></a><span class="symbol">&gt;</span></span>{' '}</Fragment>)}</span>{' '}<span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
+				<div class="breadcrumb"><span class="unique_one" data-repeat="breadcrumb-trail" data-repeat-key="breadcrumb-trail" data-array="breadcrumb.trail" data-required>{j.breadcrumb.trail.map((t, i) => <Fragment>{i > 0 && ' '}<span class="crumb" data-item-id={t.id}><a data-field="crumb.url" data-item-field="url" href={t.url}><span data-field="crumb.label" data-item-field="label">{t.label}</span></a><span class="symbol">&gt;</span></span></Fragment>)}</span><span class="current" data-field="breadcrumb.current" data-required>{j.breadcrumb.current}</span></div><!-- .breadcrumbs -->
 			<h1 data-field="title" data-required>{j.title}</h1>
 		</div>
 	</div>

@@ -15,13 +15,13 @@
     "current": "Gantry Crane Buying Guide: Price Trends, Smart Selection & Expert Advice",
     "trail": [
       {
-        "label": "首页",
-        "url": "https://www.dgcrane.com/zh/",
+        "label": "Home",
+        "url": "https://www.dgcrane.com/en/",
         "id": "crumb_045db90a52"
       },
       {
-        "label": "案例",
-        "url": "https://www.dgcrane.com/zh/posts/",
+        "label": "Cases",
+        "url": "https://www.dgcrane.com/en/posts/",
         "id": "crumb_72d53ed0b6"
       }
     ]
