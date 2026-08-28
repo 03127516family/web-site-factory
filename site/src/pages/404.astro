@@ -1,0 +1,17 @@
+---
+// 404：静态托管通用约定（S3/CloudFront、GH Pages 都认 dist/404.html）。
+import { composeStatic } from '@src/static-chrome.mjs'
+const [head, tail] = composeStatic(process.cwd(), {
+  title: '页面未找到 | DGCRANE',
+  description: '您访问的页面不存在。',
+  seo: '<meta name="robots" content="noindex">',
+})
+---
+<Fragment set:html={head} />
+<div class="wrap" style="max-width:720px;margin:80px auto 120px;padding:0 20px;text-align:center">
+  <p style="font-size:110px;font-weight:700;color:#001A4F;margin:0;line-height:1">404</p>
+  <h1 style="font-size:24px;color:#001A4F;margin:14px 0 18px">页面未找到</h1>
+  <p style="color:#666">您访问的页面不存在或已被移动。</p>
+  <p style="margin-top:28px"><a href="/" style="color:#036AAE">返回首页 →</a></p>
+</div>
+<Fragment set:html={tail} />
