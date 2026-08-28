@@ -103,16 +103,16 @@
 
 已知缺口：**无一键全矩阵命令**（`check` 只覆盖 2 项，其余散跑）——待建 `npm run doctor`。
 
-## 4. 当前状态与已知缺口（2026-08-28）
+## 4. 当前状态（2026-08-28 旧系统退役后）
 
-已达成：内容迁移完（8 源 + 8 镜像）、i18n 免审直发、SEO 全字段、工作台唯一管理界面、素材自包含。
+**仓库只有一个系统：site/**。根目录旧系统（MD 时代）已删除：派生页（404/搜索/首页/两列表页）已补齐进 site，geom 基准已快照化（`site/geom-baseline/`），CI/pre-push 已切 site 矩阵，根 package.json 为代理壳。
 
-未达成（对照根目录旧 dist 还缺）：
-- **404.html**（site 无）
-- **首页 index**（site 无；旧 dist 有 index.html）
-- **站内搜索**（旧 dist 有 search/ + search-index.json；site 无，header 搜索框仍指旧 WP）
-- **部署**：本仓库无 deploy workflow，线上仍是旧 WordPress；本系统处于「待部署」态
-- 旧系统（仓库根 `scripts/`、`src/`、`dist/`、根 `package.json`、CI `.github/workflows/check.yml`）仍在服役：CI 每次跑旧三件套；`geom-check.mjs` 拿根 dist 当基准。**退役路线图见决策日志 2026-08-28 条。**
+仍真实的缺口：
+- **部署未接**：无 deploy workflow，dist 等待首次上线。
+- 表单后端 mock（真后端未定，AWS 禁令见 CLAUDE.md §8）。
+- 历史大图未回压；导航分类链接指旧站。
+
+不再缺的：404 ✅、首页 ✅、站内搜索 ✅（search-index.json + /search/ 页）、产品/案例列表页 ✅、free-standing-jib-cranes zh 源 ✅。
 
 ## 5. 不属于本系统的
 

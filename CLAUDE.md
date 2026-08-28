@@ -6,140 +6,74 @@
 
 ---
 
-## 1. 核心架构：「两个都要」（AI 创作 + 代码装配）
+## 1. 核心架构：JSON 内容 + Astro kit + 双界面
 
 ```
-纯文章(内容方给的, 散文零格式)
-   │  ← 【AI 创作 · 烧一次】判断归类 → 结构化 MD
-src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
-   │  ← 【代码装配 · 确定性, 零 AI, 每次 build 免费】
-产品页 HTML
+裸文章 → 【AI 烧制·烧一次】→ site/content/<type>/<id>.json（持久工件，落盘进 git，这才是资产）
+JSON 内容 → 【代码装配·确定性,零 AI】→ Astro kit 渲染 → site/dist/
 ```
 
-- **AI(我)负责**：把裸文章映射成合规 MD（判断哪段是概述/简介/规格/组件…，这步需要判断，不是机械转换）。
-- **代码负责**：渲染器读 MD → 填字段 / 克隆重复项 / 裁可选段 → 出页面。确定性、可重现。
-- **关键认知**：能脱离对话上下文还原页面的，是 **MD**，不是裸文章。MD→页面才是确定性的。**上下文是耗材，MD 是资产。**
+- **AI 负责**：把裸文章烧成合规 JSON（判断归类）；翻译节点出手翻字段。
+- **代码负责**：渲染/写回/翻译流水线/SEO 头——确定性、可重现。
+- **关键认知**：能脱离对话上下文还原页面的是 **JSON 内容文件**。上下文是耗材，JSON 是资产。
+- **两个界面**：8092 编辑页（所见即所得改页面）、8090 工作台（翻译/SEO/烧制/收件箱）。**唯一管理界面是工作台，新管理功能只长在工作台里。**
+- 全景导览（文件级）：`site/docs/architecture.md`。
 
-## 2. 引擎铁律：一个 render + 一个 edit，通用、永不写死
-
-三层分离，**引擎永远只有 1 个、不动；会变多的只是「模版」这种 HTML 声明文件**：
+## 2. 引擎铁律：一个 render + 一个写回，通用、永不写死
 
 | 层 | 是什么 | 几个 |
 |---|---|---|
-| 引擎 `scripts/render.mjs` + `public/assets/js/editor.js` | 纯逻辑，**不认任何具体名字** | 永远 1 |
-| 模版 `src/templates/*.html` | 用 markers 自报结构 | 每页族 1 |
-| 内容 `src/content/*.md` | 内容 | 每页 1 |
-
-**标记词汇表**（模版自声明结构，引擎只读这些、不读名字）：
-
-| 声明 | 含义 |
-|---|---|
-| `data-field="点路径"` | 内容点，数据取 MD 该路径 |
-| `data-edit="text\|rich\|image\|link"` | 该点如何编辑/填 |
-| `data-repeat="名"`（目标加 `data-array="md.路径"`） | 重复区，按该 MD 数组克隆首个单元 |
-| `data-optional="key"` | MD 无该 key → 删整段 |
-| `data-no-add` | 该重复区不显示增删 UI |
-| MD `<!--block:KEY-->` ↔ 模版 `data-field="KEY.body"` | 富文本长正文块（KEY 任意，自动映射） |
+| 引擎 `site/src/render/render.mjs` + `site/edit-layer/edit-layer.js` + `site/src/writeback/` | 纯逻辑，**不认任何具体名字** | 永远 1 |
+| 模版 kit `site/src/components/<type>s/<名>/` | 四件套：index.astro + meta.json + example.json + edit-contract.json | 每页族/每篇 post 1 |
+| 内容 `site/content/**.json` | 内容真相 | 每页 1 |
 
 **守这套，引擎就不会烂**：
-1. **禁止在引擎里按字段名/产品名/段名写 `if` 逻辑分支或白名单表**。引擎判断只许靠两类信息：**markers（上表）+ 内容形态**（`value.includes("<")`→rich、body 含 `<table>`→套 `.custom_tables`、列表/多段→rich）。
-2. **渲染侧与编辑侧对称**：写回坐标由 `buildData` 在「字段实际取自哪」就地产出（取自 `## 块`→`mdhead:/mdbody:`，取自 frontmatter→`fm:`），`classifyField` 查这张随数据同源的动态表，不写死白名单。`htmlToMd` 与 `mdToHtml` 互逆（含 `<table>`↔管道表格）。
-3. **加新页族（文章/分类…）= AI 写一个自声明模版（一次），引擎零改动**；之后该页族每页只写 MD。新增/改名一个段，只要模版有对应 `data-optional/data-field`，即「能渲染也能编辑」，**不改 render.mjs**。
-4. **多段富文本用 `<div data-field="X.body">` + 一个 `## 块`，不用 `<p data-field>`**（`<p>` 装不下多个 `<p>`，浏览器会拆成兄弟节点致只有首段可编辑）。
-5. `editor.js` 已是此标准（只读 `data-md/edit/group/idx`）。`render.mjs` 残留的名字注册表（`REPEAT_FM_ARRAY`/`NO_STRUCT_EDIT`）属声明式配置、非产品特判，可暂留；**搬到模版属性（`data-array` 等）的时机 = 做第二个页族时**；在此之前先守规矩、不新增名字逻辑。
+1. **禁止在引擎里按字段名/产品名/段名写 `if` 分支或白名单表**。引擎判断只许靠：schema 声明（content-schema 注册表）+ 节点 type + edit-contract 声明。
+2. **写回走契约**：可写字段 = 该页 kit 的 edit-contract.json 声明；未声明路径拒写；boolean/ensurePath 等类型行为由契约类型驱动。
+3. **加新页族 = 加一套 kit（`kit-init` 升格），引擎零改动**；之后该族每页只写 JSON。
+4. **body 树在编辑 commit 时缓存 TipTap getJSON()，保存永不 DOM 反解**；写回端点 normalizeTree → validateDoc → 落盘 → astro build。HTML→树方向的解析不存在。
+5. 翻译骨架恒 ≡ 源树（run 制克隆回植），译文永远爆不了骨架。
 
-## 3. 用户工作流协议（用户只需说三件事）
+## 3. 用户工作流协议
 
-用户要加/改一个产品页时，只需给：① **文章**（路径或直接贴）② **产品名** ③ **slug**（网址用英文标识）。
-默认用标准超集模版，无需指定。例：
+- **加页面**：工作台烧制台贴裸文/URL → 预览 → 落 draft → 8092 精修 → 发布。（或照旧给 AI：文章+产品名+slug。）
+- **改页面**：`npm run edit` → 8092 所见即可编辑 → 发布走同一链（写回契约校验 → JSON 落盘 → 自动重翻 → 重建）。
+- **翻译/SEO/体检**：`npm run workbench` → 8090。
+- **用户不用碰**：JSON 结构、字段名、模版裁剪、术语表机制（发现译错补 `site/src/i18n/data/terms.zh-CN.en.json` 修一片）。
 
-> "把 `src/content/raw/<slug>.txt` 这篇做成产品页。产品名:XXX，slug:xxx。"
+## 4. 模版方针：一 astro 一模版 + 换站零改动（2026-08-14 拍定）
 
-**我(AI)负责剩下全部**：烧 MD → 接模版 → `npm run build` → `npm run verify:geom` 验 1:1 → 给页面，不对再改。
-**用户不用碰**：MD 格式、字段名、模版裁剪。裸文章原料放 `src/content/raw/<slug>.txt`；成品 MD 放 `src/content/<slug>.md`。
+- 一 astro 一模版：配齐 index/meta/example/edit-contract 四件即入烧制可选列表（`kit-init` 升格）。
+- 自己套自己；通用件不吞并；对不上就空着（缺席槽由守卫裁掉，逐字闸防编造）。
+- **换站验收标准**：换站 = 只带模版套件 + 内容 JSON + 站点 chrome（site/src/chrome/），引擎/脚本零 diff。
 
-## 4. 模版方针：一份超集，按 MD 裁剪（2026-06-25 拍定）
-
-- **同一网站同一风格 → 只用一份超集模版**，所有产品共用；渲染器按 MD「数据在不在」用 `data-optional` 裁出不同产品页。**加同风格产品 = 只写一份 MD，零新模版。**
-- 真出现**别的风格**，才另起一份超集。
-- 超集模版：`src/templates/product-superset.html`（单梁 12 段 + overhead 独有 5 段 = 17 段，每可省段带 `data-optional`）。
-- 收敛中：单梁/overhead 历史上各有独立模版（`product.html` / `overhead-cranes-for-sale.html`），目标是都改指向超集后退役它们。
-
-## 5. MD 规范要点（权威细节见 `src/templates/product.contract.md`）
-
-- MD = **YAML frontmatter + markdown 正文**，`---` 分隔；自带 `slug` 与 `template`。
-- `data-field="a.b"` → frontmatter 点路径 `a.b`；正文块 `## 标题 <!--block:KEY-->`，KEY 对模版 `.body` 字段。
-- 重复块 `data-repeat="X"` → frontmatter 一个数组（目标加 `data-array` 自声明，现暂登记于 `render.mjs` 的 `REPEAT_FM_ARRAY`）。
-- `components`/`crane-types` 暂为**双处结构**（frontmatter `*_images` + 正文 `###` 同 index，待收单处）。
-- ⚠ **契约文档会漂移**：最终权威 = `render.mjs` 实际行为 + 现行 `single-girder-eot-cranes.md`；契约当设计意图参考。
-
-## 6. 命令
+## 6. 命令（都在 site/ 下；根 package.json 有同名代理）
 
 | 命令 | 作用 |
 |---|---|
-| `npm run build` | 生产构建（产物零 `data-*`，干净 HTML） |
-| `npm run edit` | 可见即可编辑服务 → localhost:8081（原位改文字/图/链接、增删重复项，写回 MD） |
-| `npm run verify:geom` | 几何回归：逐元素比对「渲染产物 vs 原静态模版」，1:1 即无损（支持 `baseline` 跨模版比对） |
-| `npm run serve` | build + 本地预览 localhost:8080 |
+| `npm run build` | 生产构建 dist/（astro build + link-assets + seo-emit + search-index；须 node ≥22） |
+| `npm run edit` | 8092 所见即可编辑服务（写回走契约，保存自动抬戳+重翻+重建双产物） |
+| `npm run workbench` | 一键起 8090 工作台 + 8092（唯一管理界面） |
+| `npm run check` | registry 校验 + accept-i18n2 + accept-derived |
+| `npm run geom` | 几何快照回归（对 geom-baseline/，±2px） |
+| `npm run accept:*` | 各机制验收（poc5/writeback/burn/seo/drafts/content-diff/workbench/derived） |
 
 > CDP 用端口 9456（避开系统 Chrome/Edge 的 9222，**勿杀** Edge 进程）。
 
 ## 7. 不可破坏的铁律（结构）
 
-- **结构只许存在于 MD**：模版固定、不可编辑；某产品多/少段、多/少行，只改 MD。
-- **`#product` 包裹关系**：须从标题一直包到询盘表单才闭合（`main.css` 89 条 `#product xxx` 作用域规则依赖它，提前闭合整片塌过两次）；`related-products` 在 `#product` 外（全宽）。
-- **改完必验**：动了渲染器/模版/MD，跑 `verify:geom` 确认仍 1:1。
+- **结构只许存在于 JSON 内容与 kit**：某产品多/少段、多/少行，只改 JSON；页面骨架只改 kit。
+- **改完必验**：动了渲染/模版/内容，跑 `npm run check` + `npm run geom`。
 - **沟通记录**：重要会话存 `对话记录-YYYY-MM-DD-主题.md`（仓库根）。
 
 ## 8. 已知遗留
 
-> 2026-07-11 核账：原列的「面包屑未 data 化」「SEO 技术 hygiene 全面缺失」两条已**过时销账**——
-> trail 已由 MD 驱动（`{{BREADCRUMB}}` fragment + 渲染器填值，含 en 镜像英文 trail；single-girder
-> 显示「Eot Cranes」是忠实原站的**数据**，非缺口）；canonical/OG/JSON-LD（含 BreadcrumbList）/
-> sitemap.xml/hreflang/favicon/404 均已实现。仍真实的遗留如下：
-
-- 个别素材缺失需补图（如 overhead 组件 `Crane-electric-control-bo.jpg`，原站亦缺）。
-- **图片落盘未压缩**（如 crane-lifting-safety-training 的图 3-4MB/张），拖 LCP；以后素材落 `public/assets/img/` 前应先压缩（图片闸门未建）。
-- `robots.txt` 共存期有意不生成（域名根归老站管，蓝图 08 §2.3），整站切换后再接管。
-- **表单后端仍是假发送**（2026-07-11 起）：站侧已接线——`assets/js/form-submit.js` 拦截提交 fetch 到相对端点（询盘 `/api/inquiry`、订阅 `/api/subscribe`），本地由 mock 接收器（`app/`，不入库）落收件箱；**真实后端方案未定、未接**——曾讨论自建 Lambda（环境里有真实 AWS 凭证，账号 `125131361182`/`aws-cn`），用户明确"先别真发"，**不要在没有进一步明确指示前，往这个真实 AWS 账号里创建任何云资源**。生产期把端点换成真实 URL 即可，页面与 JS 零改动。
-- header 站内搜索框 action 仍指旧 WP 站（待站内搜索实现后接管）。
-- 语言切换/导航大菜单里的分类与栏目链接仍指旧站 `https://www.dgcrane.com/zh/...` 绝对地址（那些页面尚未迁入本系统，链接过去仍可用；迁入后应改相对路径）。
-
----
-
-## 9. 真实页 → 模版转换规则（页族无关，所有页族通用）
-
-> 与 §2 对称的另一面：§2 说**引擎**不认页族、只读 marker + 内容形态；§9 说**造模版的人（AI）**也不认页族、只按内容形态挂 marker。
-> **这套规则对 product / category / post / 任何未来页族一字不改**——变的只是切出来的块、起的名，规则本身恒定。若某页族要"特殊切法"，即等于在规则层重新引入 §2.1 禁止的页族特判，自相矛盾。
-> 触发：每次「加新页族」或「把一张真实页做成自声明模版」，照这 7 步走，**先按此规则、再动手生模版**，不靠记忆。
-
-**7 步流程：**
-
-```
-① 切块   真实页正文从上到下切成段，每段单独判定
-② 判形   每段归入 4 形态之一（决定挂哪种 marker，见下表）
-③ 命名   按「同名接线」起名；跨页族复用的照搬产品模版（hero / inquiry_form /
-           related_products / breadcrumb.trail），不另起
-④ 抽模子 重复区只保留第 1 个单元当克隆模子，其余删
-⑤ 复 chrome  head/header/nav/footer/photoswipe 从现成产物页逐字复制，不重写
-⑥ 守硬约束  多段富文本用 <div data-field> 不用 <p>（§2.4）；#product 包到询盘才闭合（§7）
-⑦ 验      落基准 MD → validateBlocks 过 → npm run build → npm run verify:geom 1:1
-```
-
-**形态 → marker 速查表（②③的依据，4 形态穷尽任何页面）：**
-
-| 看到这种内容 | 判为 | 挂这对 marker（成对，缺一不可） |
-|---|---|---|
-| 一个标题 / 一张图 / 一个链接 | 单值 | `data-field="路径"` + `data-edit="text\|rich\|image\|link"` |
-| 连续好几段说明文字 | 长正文 | `<div data-field="KEY.body">` + MD `<!--block:KEY-->`（同 KEY） |
-| 同结构出现 N 次（子型号 / 案例 / FAQ / 组件 / 章节） | 重复 | `data-repeat="名"` + 容器 `data-array="md.数组路径"` |
-| 本页有、同族别页可能没有 | 可选 | `data-optional="key"` |
-
-**命名唯一铁律（接线，非审美）：模版的名 = MD 的路径，一字不差**。`data-field="hero.title"`→去 MD 取 `hero.title`；`data-repeat`+`data-array="md.subtypes"`→对 frontmatter `subtypes:` 数组；单元内字段用单数相对名（`title`/`body`/`image`）。起名习惯：语义英文小写、点分层、重复区用复数名。
-
-> 状态：本规则首次固化于做 category 页族（`double-girder-overhead-crane` 等品类页，结构区别于单产品页 product@1——子型号各自带规格表 + FAQ + 案例，不是"一张总表"）时。先用它实跑 category 当试金石，证明够用后此规则即所有页族通用方法论。
-
----
+- **表单后端仍是 mock**：站侧已接线（询盘 `/api/inquiry`、订阅 `/api/subscribe`），本地由 mock 接收器（`app/`，不入库）落收件箱；真实后端未定。**环境里挂着真实 AWS 凭证（账号 125131361182/aws-cn），未经用户明确指示，不要往这个真实账号创建任何云资源。**
+- 个别素材缺失需补图；**历史大图未回压**（上传闸门已建，存量 3-4MB/张的图未处理，拖 LCP）。
+- `robots.txt` 代码照产但**共存期不上传**（域名根归老 WordPress 管），整站切换后再接管。
+- 导航大菜单/语言切换器里的分类与栏目链接仍指旧站 `https://www.dgcrane.com/zh/...` 绝对地址（那些页面未迁入，迁入后改相对路径）。
+- **部署未接**：本仓库无 deploy workflow，dist 产物等待首次上线。
+- 旧系统已退役（2026-08-28）：geom 基准 = `site/geom-baseline/` 快照；旧代码历史在 git。
 
 ## 决策日志（新拍定的约定往这里追加，带日期）
 
@@ -242,3 +176,6 @@ src/content/<slug>.md  (持久工件, 落盘进 git, 这才是资产)
 - **2026-08-26（深夜·续）** **SEO 面板全量字段补齐（用户追问「还有一些设置不用写吗？比如 noindex」→上条「仍后补」清零）**。8092 SEO 面板加社交/高级两个 details 区（Yoast metabox 同构）：`page.seo.og.title/description/image`（留空=复用主标题/简介/hero 图，占位符明示）、`page.seo.canonical`、`page.seo.noindex`（复选框）。配套机制三处：①writeback 新增 **boolean 字段类型**（typeof 硬查）+ **ensurePath**——契约声明过的路径中间层缺失→建空对象（`page.seo` 首次落键可写），`setAt` 的「不存在即拒」仍防未声明乱写，边界=契约声明；②edit-context 增 **seo 原值块**（覆盖键原样上呈，null=未覆盖）——DOM 里只有渲染后兜底值，区分不了「没填」与「填成和兜底一样」；③**seo-emit 补漏**：`seo.noindex` 页不进 sitemap（spec §3 原欠，此前 noindex 只能靠 status/draft 触发，本 UI 是首个真实触发源）。e2e 实证全链：勾选 noindex+填 og.title → dirty 2 处 → diff 逐字 → 发布 → JSON 落盘 → 页头 `<meta name="robots" content="noindex">` + sitemap 除名；还原后重建恢复正常。回归矩阵：writeback 34/34、seo 17/17（新增 noindex-sitemap 断言）、check 84/84、burn 155/155、poc5 56/56、workbench 7/7。**有意不做**：focus keyphrase（2026-07-01 已排除）、slug 编辑（需跳转机制）、sitemap lastmod、Article datePublished、Organization JSON-LD、og:locale:alternate——触发条件=真有对应运营需求时。
 
 - **2026-08-27 概念更正：「git 内容库」说法废除（用户拍定）**。git 只是代码仓；内容文件暂存其中仅是 POC T3 的「先行」安排，**「内容库」这个概念终态 = S3（尚未建立）**，git 从不承担内容库职能（内容真相/变更检测早已不在 git，2026-07-07 i18n 去 git 化）。此后一切表述（含架构背书）不得把 git 说成内容库；正确说法：**内容文件暂存于代码仓，内容库（终态 S3）尚未建立**。系统代码对 git 的实际依赖仅剩 `site/src/i18n/events.mjs` 读 user.name 做事件归因（产品期由 auth 提供 actor，预留）。
+
+- **2026-08-28** **旧系统正式退役（先补再删）**。补齐：free-standing-jib-cranes zh 源（孤儿 en 镜像配对复原）、404/搜索/首页/产品目录/案例列表五个派生页（`static-chrome.mjs` 静态 chrome 组装 + `listing.mjs` 卡片助手平移 + `search-index.mjs` 进双产物链）、sitemap 收派生页。断绳：geom 改快照回归（`geom-baseline/` 10 页固化，geom-post 并入 geom-check）、CI 切 site 矩阵（node22 + 全验收）、pre-push 改 site 检查、根 package.json 瘦身为代理。删除：根 `scripts/`、`src/`、`dist/`、`public/`、`.i18n-events.jsonl`。**此后仓库只有一个系统：site/**。MD 时代 doctrine（本文件旧 §2/§4/§5/§9）作废，以现行文件为准。架构导览落盘 `site/docs/architecture.md`。执行中 geom 快照首跑实证三处旧有偏差并修复：productionJson 投影丢镜像手写 trail（en 面包屑漏中文）、6 个 en 镜像 trail 数据中文化、post kit 面包屑空白差 4px；en/5-ton 案例段因 TM 译文措辞与旧手写不同以当前渲染重新固化基准（基准文件 source 字段自描述）。
+
