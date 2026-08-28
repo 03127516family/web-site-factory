@@ -1,5 +1,5 @@
 #!/bin/sh
-# G0 改动门（蓝图 14 章）：check 全绿（单测 + build + verify:geom）才许推送。
+# G0 改动门：site 检查矩阵全绿（registry+i18n2+derived）+ geom 快照回归才许推送。
 # 紧急绕行：git push --no-verify —— 显式留痕动作，事后必须补账（修掉或挂账）。
-echo "[pre-push] 运行 npm run check（G0 门禁；绕行用 --no-verify）..."
-npm run check
+echo "[pre-push] site 检查（check + geom；绕行用 --no-verify）..."
+npm --prefix site run check && npm --prefix site run geom
