@@ -1,0 +1,49 @@
+---
+// 站内搜索结果页（noindex，不进 sitemap）：自包含 HTML + 页内 JS 读静态索引，零运行时组装。
+import { composeStatic } from '@src/static-chrome.mjs'
+const [head, tail] = composeStatic(process.cwd(), {
+  title: '站内搜索 | DGCRANE',
+  description: 'DGCRANE 站内搜索',
+  seo: '<meta name="robots" content="noindex">',
+})
+---
+<Fragment set:html={head} />
+<div class="wrap" style="max-width:900px;margin:40px auto 80px;padding:0 20px">
+  <h1 style="font-size:26px;color:#001A4F;margin:0 0 24px">站内搜索</h1>
+  <div id="search-results"><p style="color:#666">加载中…</p></div>
+</div>
+<script is:inline>
+(function () {
+  var q = (new URLSearchParams(location.search).get("s") || "").trim();
+  var box = document.getElementById("search-results");
+  var input = document.getElementById("s");
+  if (input) input.value = q;
+  if (!q) { box.innerHTML = '<p style="color:#666">请输入关键词后搜索。</p>'; return; }
+  fetch("/search-index.json").then(function (r) { return r.json(); }).then(function (idx) {
+    var terms = q.toLowerCase().split(/\s+/).filter(Boolean);
+    var hits = idx.filter(function (e) {
+      var hay = (e.title + " " + e.description + " " + e.text).toLowerCase();
+      return terms.every(function (t) { return hay.indexOf(t) !== -1; });
+    });
+    box.textContent = "";
+    var head = document.createElement("p");
+    head.style.cssText = "color:#666;margin:0 0 20px";
+    head.textContent = "“" + q + "” 共 " + hits.length + " 条结果";
+    box.appendChild(head);
+    hits.forEach(function (e) {
+      var item = document.createElement("div");
+      item.style.cssText = "margin:0 0 22px";
+      var a = document.createElement("a");
+      a.href = "/" + e.slug + "/";
+      a.style.cssText = "font-size:17px;color:#036AAE;font-weight:600";
+      a.textContent = e.title;
+      var snip = document.createElement("p");
+      snip.style.cssText = "margin:6px 0 0;color:#555;font-size:13px;line-height:1.7";
+      var hay = e.text || e.description, pos = hay.toLowerCase().indexOf(terms[0]);
+      snip.textContent = pos >= 0 ? (pos > 40 ? "…" : "") + hay.slice(Math.max(0, pos - 40), pos + 90) + "…" : e.description.slice(0, 130);
+      item.appendChild(a); item.appendChild(snip); box.appendChild(item);
+    });
+  }).catch(function () { box.innerHTML = '<p style="color:#c62828">索引加载失败，请刷新重试。</p>'; });
+})();
+</script>
+<Fragment set:html={tail} />

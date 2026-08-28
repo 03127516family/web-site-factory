@@ -148,6 +148,7 @@ const runBuild = ({ out, env = {} }) => {
   return run([join(SITE, 'node_modules/astro/bin/astro.mjs'), 'build'])
     .then(() => run([join(SITE, 'scripts/link-assets.mjs')]))
     .then(() => run([join(SITE, 'scripts/seo-emit.mjs')]))
+    .then(() => run([join(SITE, 'scripts/search-index.mjs')]))
 }
 
 const outputBuilder = createOutputBuilder({
