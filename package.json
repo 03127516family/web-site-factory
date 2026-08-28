@@ -1,26 +1,17 @@
 {
   "name": "dgcrane-placement-system",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "serve": "node scripts/build.mjs && node scripts/static-server.mjs dist 8080",
-    "edit": "node scripts/edit-server.mjs",
-    "verify:geom": "node --experimental-websocket scripts/verify-geom.mjs",
-    "edit:probe": "node scripts/edit-probe.mjs",
-    "i18n:status": "node scripts/i18n-status.mjs",
-    "i18n:touch": "node scripts/i18n-touch.mjs",
-    "i18n:apply": "node scripts/i18n-apply.mjs",
-    "i18n:validate": "node scripts/i18n-validate.mjs",
-    "check": "node --test scripts/ && npm run i18n:validate && npm run edit:probe && npm run verify:geom",
+    "build": "npm --prefix site run build",
+    "edit": "npm --prefix site run edit",
+    "workbench": "npm --prefix site run workbench",
+    "check": "npm --prefix site run check",
+    "geom": "npm --prefix site run geom",
     "prepare": "git config core.hooksPath .githooks || true"
-  },
-  "dependencies": {
-    "node-html-parser": "^8.0.3",
-    "yaml": "^2.9.0"
   }
 }
