@@ -1,5 +1,6 @@
-# CI 质量门（蓝图 06 章 §2 / 14 章 G0）：push/PR 即跑 单测 + build + 几何回归。
-# geom 用 runner 预装的 Google Chrome（verify-geom.mjs 支持 CHROME 环境变量覆盖路径）。
+# CI 质量门（site 时代）：push/PR 即跑 site 构建 + 检查矩阵 + 几何快照回归。
+# geom 用 runner 预装的 Google Chrome（playwright channel:'chrome' 自动找到 /usr/bin/google-chrome）。
+# accept:poc5 需 8092 编辑服在线（它不自起），先于本步后台拉起并等就绪。
 name: check
 on:
   push:
@@ -9,18 +10,27 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
           cache: npm
+          cache-dependency-path: site/package-lock.json
       - run: npm ci
-      - name: 单测
-        run: node --test scripts/
       - name: 构建
         run: npm run build
-      - name: 几何回归（双跑其一；本地钩子为另一道）
-        run: npm run verify:geom
-        env:
-          CHROME: /usr/bin/google-chrome
+      - name: 检查矩阵（registry + i18n2 + derived）
+        run: npm run check
+      - name: 机制验收
+        run: npm run accept:writeback && npm run accept:burn && npm run accept:seo && npm run accept:drafts && npm run accept:content-diff && npm run accept:workbench
+      - name: 8092 端到端
+        run: |
+          npm run edit &
+          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:8092/products/single-girder-eot-cranes/ && break; sleep 1; done
+          npm run accept:poc5
+      - name: 几何快照回归
+        run: npm run geom
