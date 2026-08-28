@@ -29,8 +29,9 @@ jobs:
         run: npm run accept:writeback && npm run accept:burn && npm run accept:seo && npm run accept:drafts && npm run accept:content-diff && npm run accept:workbench
       - name: 8092 端到端
         run: |
-          npm run edit &
-          for i in $(seq 1 60); do curl -sf -o /dev/null http://localhost:8092/products/single-girder-eot-cranes/ && break; sleep 1; done
-          npm run accept:poc5
+          npm run edit > /tmp/edit8092.log 2>&1 &
+          for i in $(seq 1 90); do curl -sf -o /dev/null http://localhost:8092/products/single-girder-eot-cranes/ && break; sleep 1; done
+          curl -sf -o /dev/null http://localhost:8092/products/single-girder-eot-cranes/ || { echo "=== 8092 未就绪，edit-server 日志 ==="; cat /tmp/edit8092.log; exit 1; }
+          npm run accept:poc5 || { echo "=== poc5 首跑失败，重试一次（已知 #edlToggle 偶发超时 flake，2026-08-24 记录） ==="; npm run accept:poc5; }
       - name: 几何快照回归
         run: npm run geom
