@@ -1,0 +1,32 @@
+---
+// 首页：构建期从内容派生（旧 buildDerivedPages 平移）。
+import { composeStatic } from '@src/static-chrome.mjs'
+import { listedPages, cardHtml, listingSection, wrap, escAttr } from '@src/listing.mjs'
+import { SITE_BASE } from '@src/i18n/kernel.mjs'
+
+const listed = listedPages()
+const products = listed.filter(p => p.j.page.type === 'product')
+const posts = listed.filter(p => p.j.page.type === 'post')
+const t = 'DGCRANE 起重机——桥式/门式/悬臂起重机制造商'
+const d = 'DGCRANE 起重机制造商与出口商：桥式起重机、门式起重机、悬臂起重机与电动葫芦，产品销往120多个国家。'
+const seo = [
+  `<link rel="canonical" href="${SITE_BASE}">`,
+  `<meta property="og:type" content="website">`,
+  `<meta property="og:title" content="${escAttr(t)}">`,
+  `<meta property="og:description" content="${escAttr(d)}">`,
+  `<meta property="og:url" content="${SITE_BASE}">`,
+  `<meta property="og:locale" content="zh_CN">`,
+].join('\n  ')
+const body = wrap(
+  [
+    products.length ? listingSection(`产品（${products.length}）`, products.map(({ j }) => cardHtml(j))) : '',
+    posts.length ? listingSection(`案例与文章（${posts.length}）`, posts.map(({ j }) => cardHtml(j))) : '',
+  ].join('\n'),
+  '起重机制造商和出口商',
+  '10年以上起重机出口经验 · 产品销往120多个国家',
+)
+const [head, tail] = composeStatic(process.cwd(), { title: t, description: d, seo })
+---
+<Fragment set:html={head} />
+<Fragment set:html={body} />
+<Fragment set:html={tail} />

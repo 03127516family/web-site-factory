@@ -5,7 +5,7 @@
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { scanPages, buildGroups, isPublishable } from '../src/i18n/kernel.mjs'
+import { scanPages, buildGroups, isPublishable, SITE_BASE } from '../src/i18n/kernel.mjs'
 import { sitemapXml, robotsTxt } from '../src/seo/kernel.mjs'
 
 const site = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -14,6 +14,6 @@ const pages = scanPages({ withJson: true })
 const groups = buildGroups(pages)
 const pubSet = new Set(pages.filter(p => p.status === 'published' && p.j?.page?.seo?.noindex !== true && isPublishable(p, groups, pages)).map(p => p.slug)) // seo.noindex 同草稿：不进 sitemap（spec §3）
 mkdirSync(join(site, out), { recursive: true })
-writeFileSync(join(site, out, 'sitemap.xml'), sitemapXml(groups, pages, pubSet))
+writeFileSync(join(site, out, 'sitemap.xml'), sitemapXml(groups, pages, pubSet, [SITE_BASE, SITE_BASE + 'products/', SITE_BASE + 'posts/']))
 writeFileSync(join(site, out, 'robots.txt'), robotsTxt())
 console.log(`seo-emit: sitemap ${pubSet.size} 条 + robots.txt → ${out}/`)

@@ -67,7 +67,7 @@ export function seoHead(pg, siblings, opts = {}) {
 
 // sitemap：pubSet 逐成员 <url>，全员 xhtml:link 互认（WPML+Yoast 同款单文件合并式，D8-2）。
 // 无 lastmod（无可靠时间源，瞎填有害——spec §8 已知限制）。
-export function sitemapXml(groups, _pages, pubSet) {
+export function sitemapXml(groups, _pages, pubSet, extraLocs = []) {
   const rows = []
   for (const [, g] of groups) {
     const live = g.filter(m => pubSet.has(m.slug))
@@ -76,6 +76,7 @@ export function sitemapXml(groups, _pages, pubSet) {
         ...live.map(s => `    <xhtml:link rel="alternate" hreflang="${escAttr(s.lang)}" href="${escAttr(pageUrl(s))}"/>`),
         '  </url>'].join('\n'))
   }
+  for (const loc of extraLocs) rows.push(['  <url>', `    <loc>${loc}</loc>`, '  </url>'].join('\n'))
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n  xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + rows.join('\n') + '\n</urlset>\n'
 }
 

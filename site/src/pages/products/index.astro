@@ -1,0 +1,23 @@
+---
+// 产品目录页（旧 buildDerivedPages products 分支平移）。
+import { composeStatic } from '@src/static-chrome.mjs'
+import { listedPages, cardHtml, listingSection, wrap, escAttr } from '@src/listing.mjs'
+import { SITE_BASE } from '@src/i18n/kernel.mjs'
+
+const products = listedPages().filter(p => p.j.page.type === 'product')
+const t = '起重机产品目录 | DGCRANE'
+const d = `DGCRANE 起重机产品目录：${products.map(p => p.j.page.title.split('|')[0].trim()).join('、')}。`
+const seo = [
+  `<link rel="canonical" href="${SITE_BASE}products/">`,
+  `<meta property="og:type" content="website">`,
+  `<meta property="og:title" content="${escAttr(t)}">`,
+  `<meta property="og:description" content="${escAttr(d)}">`,
+  `<meta property="og:url" content="${SITE_BASE}products/">`,
+  `<meta property="og:locale" content="zh_CN">`,
+].join('\n  ')
+const body = wrap(listingSection('全部产品', products.map(({ j }) => cardHtml(j))), '产品目录', `共 ${products.length} 个产品`)
+const [head, tail] = composeStatic(process.cwd(), { title: t, description: d, seo })
+---
+<Fragment set:html={head} />
+<Fragment set:html={body} />
+<Fragment set:html={tail} />
