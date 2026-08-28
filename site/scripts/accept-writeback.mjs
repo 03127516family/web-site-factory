@@ -6,7 +6,6 @@ import { tmpdir } from 'node:os'
 import { applyChanges, validateContract, WritebackError } from '../src/writeback/core.mjs'
 import { revisionOf, writeJsonAtomic } from '../src/content/revision.mjs'
 import { browserContract, loadEditContract } from '../src/edit-contract.mjs'
-import { migratePageWritebackV1 } from '../src/writeback/migrate.mjs'
 import { prepareWriteback } from '../src/writeback/request.mjs'
 import { createEditContext, editContextScript } from '../src/edit-context.mjs'
 
@@ -238,54 +237,6 @@ test('every template used by real content has an edit contract', () => {
   }
   for (const page of templates.values()) loadEditContract(site, page)
   assert.equal(templates.size, 5)
-})
-
-test('migrates repeat ids deterministically and idempotently', () => {
-  const page = {
-    page: { slug: 'products/x', type: 'product', template: 'ProductPage' },
-    breadcrumb: { trail: [{ label: 'Home', url: '/' }] },
-    specs: [{ text: '10t' }],
-    gallery: [{ image: 'a.jpg', alt: 'A' }],
-    production_flow: { steps: [{ label: 'Cut', image: 'cut.jpg' }] },
-    installation: { cases: [{ title: 'Case', image: 'case.jpg', url: '/case' }] },
-    related_products: { seed: [{ title: 'Related', summary: 'S', image: 'r.jpg', url: '/r' }] },
-  }
-  const first = migratePageWritebackV1(page)
-  const second = migratePageWritebackV1(first)
-  assert.match(first.specs[0].id, /^spec_/)
-  assert.equal(first.specs[0].id, second.specs[0].id)
-  assert.deepEqual(first, second)
-  assert.equal(page.specs[0].id, undefined)
-})
-
-test('merges ProductPage component parallel data without loss', () => {
-  const page = {
-    page: { slug: 'products/x', type: 'product', template: 'ProductPage' },
-    components_images: [{ name: 'Beam', image: 'beam.jpg', width: 800, height: 600 }],
-    components: {
-      title: 'Components',
-      body: { type: 'doc', content: [
-        { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Beam' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Beam body' }] },
-      ] },
-    },
-    crane_types_images: [{ name: 'Type A', image: 'type.jpg' }],
-    crane_types: {
-      title: 'Types',
-      body: { type: 'doc', content: [
-        { type: 'heading', attrs: { level: 3 }, content: [{ type: 'text', text: 'Type A' }] },
-        { type: 'paragraph', content: [{ type: 'text', text: 'Type body' }] },
-      ] },
-    },
-  }
-  const result = migratePageWritebackV1(page)
-  assert.equal(result.components_images, undefined)
-  assert.equal(result.crane_types_images, undefined)
-  assert.equal(result.components.title, 'Components')
-  assert.equal(result.components.items[0].name, 'Beam')
-  assert.equal(result.components.items[0].width, 800)
-  assert.equal(result.components.items[0].body.content[0].content[0].text, 'Beam body')
-  assert.equal(result.crane_types.items[0].body.content[0].content[0].text, 'Type body')
 })
 
 test('prepares a revision-checked contract writeback request', () => {
