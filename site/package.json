@@ -8,7 +8,7 @@
     "build": "astro build && node scripts/link-assets.mjs && node scripts/seo-emit.mjs",
     "preview": "astro preview --host 0.0.0.0",
     "geom": "node scripts/geom-check.mjs",
-    "check": "node scripts/i18n-registry.mjs --check && node scripts/accept-i18n2.mjs",
+    "check": "node scripts/i18n-registry.mjs --check && node scripts/accept-i18n2.mjs && node scripts/accept-derived.mjs",
     "i18n:registry": "node scripts/i18n-registry.mjs",
     "i18n:harvest": "node scripts/i18n-harvest.mjs",
     "accept:poc5": "node scripts/accept-poc5.mjs",
@@ -23,6 +23,7 @@
     "accept:i18n2": "node scripts/accept-i18n2.mjs",
     "accept:seo": "node scripts/accept-seo.mjs",
     "accept:workbench": "node scripts/accept-workbench.mjs",
+    "accept:derived": "node scripts/accept-derived.mjs",
     "workbench": "node scripts/workbench.mjs",
     "bundle:edit": "esbuild edit-layer/edit-layer.js --bundle --format=iife --outfile=edit-layer/dist/edit-layer.js",
     "edit": "npm run bundle:edit && node --env-file-if-exists=.env scripts/edit-server.mjs"
