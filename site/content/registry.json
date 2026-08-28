@@ -51,6 +51,12 @@
     "free-standing-jib-cranes": {
       "type": "product",
       "langs": {
+        "zh-CN": {
+          "slug": "products/free-standing-jib-cranes",
+          "file": "content/products/free-standing-jib-cranes.json",
+          "status": "published",
+          "source": true
+        },
         "en": {
           "slug": "en/products/free-standing-jib-cranes",
           "file": "content/en/products/free-standing-jib-cranes.json",
