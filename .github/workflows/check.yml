@@ -1,6 +1,8 @@
-# CI 质量门（site 时代）：push/PR 即跑 site 构建 + 检查矩阵 + 几何快照回归。
-# geom 用 runner 预装的 Google Chrome（playwright channel:'chrome' 自动找到 /usr/bin/google-chrome）。
+# CI 质量门（site 时代）：push/PR 即跑 site 构建 + 检查矩阵 + 机制验收 + 8092 端到端。
+# geom/poc5 用 runner 预装的 Google Chrome（playwright channel:'chrome' 自动找到 /usr/bin/google-chrome）。
 # accept:poc5 需 8092 编辑服在线（它不自起），先于本步后台拉起并等就绪。
+# 几何快照回归（npm run geom）不在 CI：基准冻结于 macOS 字体环境（中文走 PingFang SC），
+# ubuntu runner 中文回退 Noto CJK，逐像素比对恒假红——该闸门由 .githooks/pre-push 在开发机本地执行。
 name: check
 on:
   push:
@@ -33,5 +35,3 @@ jobs:
           for i in $(seq 1 90); do curl -sf -o /dev/null http://localhost:8092/products/single-girder-eot-cranes/ && break; sleep 1; done
           curl -sf -o /dev/null http://localhost:8092/products/single-girder-eot-cranes/ || { echo "=== 8092 未就绪，edit-server 日志 ==="; cat /tmp/edit8092.log; exit 1; }
           npm run accept:poc5 || { echo "=== poc5 首跑失败，重试一次（防慢机时序抖动；2026-08-29 前的 CI 红已定位为 Meta/Control 平台 bug，非 flake） ==="; npm run accept:poc5; }
-      - name: 几何快照回归
-        run: npm run geom
