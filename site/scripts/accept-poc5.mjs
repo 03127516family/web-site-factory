@@ -13,6 +13,9 @@ const TM_FILE = join(SITE, 'src/i18n/data/tm.zh-CN.en.json')
 const DIST_PAGE = join(SITE, 'dist/products/single-girder-eot-cranes/index.html')
 const EDIT_PORT = process.env.EDIT_PORT || 8092 // 可让开被占的 8092 并行跑验收
 const EDIT = `http://localhost:${EDIT_PORT}/products/single-girder-eot-cranes/`
+// 全选修饰键按平台分：macOS=Cmd，Linux（CI runner）上 Meta=Super、Chrome 全选是 Ctrl+A。
+// 曾致 CI 确定性红：Meta+a 在 Linux 无效→输入变追加→精确断言全挂（2026-08-29 定位）。
+const SELECT_ALL = process.platform === 'darwin' ? 'Meta+a' : 'Control+a'
 const results = []
 const ok = (name, cond, extra = '') => { results.push({ name, pass: !!cond }); console.log(`${cond ? '✅' : '❌'} ${name}${extra ? ' — ' + extra : ''}`) }
 const readJ = () => JSON.parse(readFileSync(JSON_FILE, 'utf8'))
@@ -90,7 +93,7 @@ const listMounted = await highlight.evaluate(el => {
   return el.getAttribute('contenteditable') === 'plaintext-only'
 })
 ok('V2a2 stringList 挂载具体 LI', listMounted)
-await page.keyboard.press('Meta+a')
+await page.keyboard.press(SELECT_ALL)
 await page.keyboard.type('列表原位编辑POC5')
 await page.keyboard.press('Escape')
 const listShape = await page.locator('[data-field="hero.highlights"]').evaluate(el => ({
@@ -102,7 +105,7 @@ ok('V2a2 stringList 保留唯一外层 UL', listShape.tag === 'UL' && listShape.
 
 await page.click('h1[data-field="title"]')
 await page.waitForTimeout(300)
-await page.keyboard.press('Meta+a')
+await page.keyboard.press(SELECT_ALL)
 await page.keyboard.type('单梁桥式起重机POC5')
 await page.keyboard.press('Escape')
 await page.waitForTimeout(200)

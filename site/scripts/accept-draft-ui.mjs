@@ -5,6 +5,8 @@ import { chromium } from 'playwright-core'
 const port = process.env.EDIT_PORT || 8094
 const base = `http://localhost:${port}`
 const path = '/products/single-girder-eot-cranes/'
+// 全选修饰键按平台分：macOS=Cmd，Linux 上 Meta=Super、Chrome 全选是 Ctrl+A（同 accept-poc5）。
+const SELECT_ALL = process.platform === 'darwin' ? 'Meta+a' : 'Control+a'
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
 
@@ -18,7 +20,7 @@ try {
 
   await page.click('#edlToggle')
   await page.click('h1[data-field="title"]')
-  await page.keyboard.press('Meta+a')
+  await page.keyboard.press(SELECT_ALL)
   await page.keyboard.type('草稿工作流验收一')
   await page.keyboard.press('Escape')
   assert.equal(await page.evaluate(() => {
@@ -54,7 +56,7 @@ try {
   assert.ok(cleanPublished.includes(originalTitle))
 
   await page.click('h1[data-field="title"]')
-  await page.keyboard.press('Meta+a')
+  await page.keyboard.press(SELECT_ALL)
   await page.keyboard.type('草稿工作流验收二')
   await page.keyboard.press('Escape')
   const [publishPreviewResponse] = await Promise.all([
