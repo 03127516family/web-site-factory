@@ -1,0 +1,28 @@
+.article-page { background: #ebeff7; }
+/* 未提供的作者、标签或相关文章不占访客版面，编辑态仍保留补内容的入口。 */
+html:not(.visual-editor-enabled) .article-page .pack-empty-section { display: none !important; }
+.article-page .pack-breadcrumb { margin-top: -156px; margin-bottom: 14px; position: relative; }
+.article-page .pack-breadcrumb a, .article-page .pack-breadcrumb .current, .article-page .pack-breadcrumb .symbol { color: white; }
+.article-page .pack-breadcrumb [data-collection-view="breadcrumb-items"] > [data-repeat-item]:last-child .symbol { font-size: 0; margin-right: 4px; }
+.article-page .pack-breadcrumb [data-collection-view="breadcrumb-items"] > [data-repeat-item]:last-child .symbol::after { content: '/'; color: #92a8d4; font-size: 16px; }
+.article-page .pack-breadcrumb .current { color: #92a8d4; }
+.article-page #blogs .info img { height: auto; }
+.article-page #blogs .con .info #p_author .contact-prefix { color: #000; font-size: 14px; font-weight: 700; margin: 0 !important; }
+.article-page #p_author .rightname h5 a [data-bind] { color: #003399; font-size: 14px; font-weight: 700; margin: 0 !important; }
+@media (max-width: 1199px) {
+  .article-page #blogs { width: 100%; }
+  .article-page #blogs > .con { width: calc(100% - 40px); padding: 40px; }
+  .article-page #blogs .info, .article-page #blogs .news_title { width: 100%; }
+  .article-page #blogs .newblogs { width: calc(100% - 40px); }
+  .article-page #blogs .newblogs .grid { margin: 0; gap: 24px; }
+  .article-page #blogs .newblogs .grid_2 { width: calc(50% - 12px); padding: 0; }
+}
+@media (max-width: 767px) {
+  .article-page .bannerbg { height: 180px; }
+  .article-page .pack-breadcrumb { margin-top: -130px; margin-bottom: 30px; }
+  .article-page #blogs > .con { padding: 24px 20px; }
+  .article-page #blogs .news_title h1 { font-size: 28px; line-height: 1.4; }
+  .article-page #p_author .authorphoto, .article-page #p_author .rightname { float: none; width: 100%; }
+  .article-page #p_author .authorphoto { max-width: 158px; margin-bottom: 24px !important; }
+  .article-page #blogs .newblogs .grid_2 { width: 100%; }
+}

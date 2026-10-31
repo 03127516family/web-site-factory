@@ -1,0 +1,188 @@
+/* 产品网页与模板预览复用响应式布局；仅预览隐藏的入口仍由 pack.css 单独限定。 */
+.product-content-flow #product .pcon .lt h1 { line-height: 1.3; }
+.product-content-flow #product .pcon .rt { margin-top: 0; }
+.product-content-flow #product .pcon .rt p { font-size: 16px; line-height: 24px; }
+#product .section-flow { margin-bottom: 100px; }
+#product .section-flow:has(+ .section-continuation) { margin-bottom: 50px; }
+#product .section-flow:has([data-contract-type="rich"] > h3:last-child):has(+ .section-continuation) { margin-bottom: 0; }
+@media (min-width: 1200px) {
+  /* 原站首组选型图紧接右栏正文，左侧长标题可继续占用空白列。 */
+  .product-leading-media #product .pcon .lt { height: 0; overflow: visible; }
+  .product-leading-media #product .content { margin-top: 0; }
+}
+#product .section-flow > h2 {
+  float: left;
+  width: 240px;
+  margin: 0 50px 40px 0;
+  font-size: 20px;
+  line-height: 26px;
+  text-align: left;
+}
+#product .section-flow > h2:empty { min-height: 1px; }
+#product .section-flow [data-contract-type="rich"] h3,
+#product .section-heading-inline > h3 {
+  font-size: 18px;
+  line-height: 23.4px;
+  margin-bottom: 20px;
+}
+#product .section-flow [data-contract-type="rich"] h3 {
+  float: none;
+  width: auto;
+  margin: 0 0 20px;
+}
+#product :is(.content, .craneinfo) .pro-info.section-heading-inline > h3 {
+  float: none;
+  width: 880px;
+  margin-left: 290px;
+}
+#product .pro-info.section-heading-inline > .section-main { float: none; margin-left: 290px; }
+#product .section-flow p { margin-bottom: 20px; }
+#product .section-flow [data-contract-type="rich"] li { margin-bottom: 0; }
+#product .section-flow [data-contract-type="rich"] li > p { margin: 0; color: inherit; }
+#product .section-flow .section-main [data-contract-type="rich"] table { margin: 0 0 20px; }
+#product .pro-info.section-flow .section-main [data-contract-type="rich"] table th { padding: 10px 6px; }
+#product .pro-info.section-flow .section-main [data-contract-type="rich"] table td { padding: 6px 10px; }
+#product .section-flow [data-contract-type="rich"] :is(td, th) p { margin: 0; font: inherit; color: inherit; }
+#product .section-flow .section-main .cases .grid { gap: 40px; }
+#product .section-flow .section-card a:not([href]) h4 { color: #4a4a4a; }
+@media (max-width: 1199px) {
+  #product .section-flow > h2,
+  #product :is(.content, .craneinfo) .pro-info.section-heading-inline > h3,
+  #product .pro-info.section-heading-inline > .section-main {
+    float: none;
+    width: 100%;
+    margin-left: 0;
+  }
+}
+/* 原站 2/3 图片、1/3 正文的并列区块；布局标识随内容保存，不依赖标题。 */
+#product .section-body-media-left { display: flow-root; }
+#product :is(.section-body-media-left, .section-body-media-left > [contenteditable]) > img:first-child {
+  float: left;
+  width: calc((100% - 40px) * 2 / 3);
+  height: auto;
+  margin: 0 40px 0 0;
+}
+#product :is(.section-body-media-left, .section-body-media-left > [contenteditable]) > :not(img:first-child, [contenteditable]) {
+  margin-left: calc((100% - 40px) * 2 / 3 + 40px);
+}
+@media (max-width: 781px) {
+  #product :is(.section-body-media-left, .section-body-media-left > [contenteditable]) > img:first-child {
+    float: none;
+    width: 100%;
+    margin: 0 0 24px;
+  }
+  #product :is(.section-body-media-left, .section-body-media-left > [contenteditable]) > :not(img:first-child, [contenteditable]) {
+    margin-left: 0;
+  }
+}
+.product-without-banner #header .con_menu { background: #003296; }
+.product-without-banner #header .con { background: #ebeff7; }
+:is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-thumbs {
+  width: 288px;
+  height: 580px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+:is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-thumbs .swiper-wrapper {
+  display: grid;
+  grid-template-columns: repeat(3, 95px);
+  gap: 1px;
+  width: max-content;
+  height: auto;
+  transform: none !important;
+}
+:is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-thumbs .swiper-slide {
+  width: 95px !important;
+  height: 63px;
+  margin: 0;
+  float: none;
+  cursor: pointer;
+}
+:is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-thumbs .swiper-slide[aria-current=true] {
+  outline: 2px solid #345ca6;
+  outline-offset: -2px;
+}
+.gallery-editor-toolbar, .gallery-editor-empty { display: none; }
+.visual-editor-enabled [data-product-gallery] { position: relative; }
+.visual-editor-enabled [data-product-gallery] .gallery-editor-toolbar {
+  display: flex;
+  position: absolute;
+  top: 4px;
+  left: 300px;
+  gap: 6px;
+  z-index: 3;
+}
+.visual-editor-enabled [data-product-gallery] .gallery-editor-toolbar button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid #dfe5f0;
+  border-radius: 8px;
+  background: white;
+  color: #345ca6;
+  font: 13px system-ui;
+  cursor: pointer;
+}
+.visual-editor-enabled [data-product-gallery] .gallery-editor-toolbar [data-gallery-delete] { color: #b42318; }
+.visual-editor-enabled [data-product-gallery] .gallery-editor-toolbar button:disabled { opacity: .5; cursor: not-allowed; }
+.visual-editor-enabled [data-product-gallery] .gallery-editor-toolbar button[hidden] { display: none; }
+.visual-editor-enabled #product [data-product-gallery]:not(:has([data-repeat-item])) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 160px;
+}
+.visual-editor-enabled [data-product-gallery]:not(:has([data-repeat-item])) .gallery-editor-toolbar { position: static; }
+.visual-editor-enabled [data-product-gallery]:not(:has([data-repeat-item])) .gallery-editor-empty {
+  display: block;
+  margin: 0;
+  color: #566579;
+  font: 14px system-ui;
+}
+:is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort .button2 {
+  height: auto;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 10px 20px;
+  line-height: 1.5;
+  text-align: center;
+}
+:is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort .button2 > [data-bind] {
+  color: inherit;
+  font: inherit;
+}
+@media (min-width: 768px) {
+  /* 没有 Banner 时也给固定导航留位置，不能靠原文补一个空 Banner。 */
+  .product-without-banner #wrapper { padding-top: 110px; }
+}
+@media (max-width: 1199px) {
+  :is(.dgcrane-pack, .dgcrane-responsive) #product { width: calc(100% - 40px); }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .lt { width: 28%; margin-right: 4%; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .rt, :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort { width: 68%; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .ltgallery { display: flex; flex-direction: column; width: 100%; height: auto; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-top { width: 100%; height: auto; aspect-ratio: 3 / 2; float: none; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-top img { width: 100%; height: 100%; object-fit: contain; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-thumbs { width: 100%; height: 66px; overflow-x: auto; overflow-y: hidden; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .gallery-thumbs .swiper-wrapper { display: flex; width: max-content; }
+  .visual-editor-enabled [data-product-gallery] .gallery-editor-toolbar { left: 8px; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .content, :is(.dgcrane-pack, .dgcrane-responsive) #product .craneinfo { width: 100%; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pro-info > h3, :is(.dgcrane-pack, .dgcrane-responsive) #product .pro-info > h2,
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pro-info > div { width: 100%; float: none; margin: 0 0 24px; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .process, :is(.dgcrane-pack, .dgcrane-responsive) #product .process .tips,
+  :is(.dgcrane-pack, .dgcrane-responsive) #product :is(#parts, [data-product-parts]) .faq_block, :is(.dgcrane-pack, .dgcrane-responsive) #product :is(#parts, [data-product-parts]) .faq_q,
+  :is(.dgcrane-pack, .dgcrane-responsive) #product :is(#parts, [data-product-parts]) .faq_q dd,
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .craneinfo #from-single #from-2 { width: 100%; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .content img { max-width: 100%; height: auto; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .process .grid { width: 100%; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .custom_tables { overflow-x: auto; }
+}
+@media (max-width: 767px) {
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .lt, :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .rt,
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort { width: 100%; float: none; margin: 0 0 20px; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .lt h1 { font-size: 25px !important; line-height: 1.4; margin-bottom: 20px; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .rt li::after { width: 100%; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .content { margin: 40px auto; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .pro-info { margin-bottom: 45px; }
+  :is(.dgcrane-pack, .dgcrane-responsive) #product .craneinfo .pro-info .type_cases { grid-template-columns: 1fr; }
+}

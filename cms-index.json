@@ -1,0 +1,28 @@
+{
+  "pages": [
+    {
+      "id": "article-south-africa",
+      "type": "article",
+      "title": "5 Tons Overhead Crane For South Africa Customer",
+      "locale": "en",
+      "filePath": "src/pages/posts/article-south-africa.astro",
+      "url": "/posts/article-south-africa/"
+    },
+    {
+      "id": "double-trolley-overhead-cranes",
+      "type": "product",
+      "title": "Double Trolley Overhead Cranes: High-Efficiency Handling and Versatile Applications",
+      "locale": "en",
+      "filePath": "src/pages/products/double-trolley-overhead-cranes.astro",
+      "url": "/products/double-trolley-overhead-cranes/"
+    },
+    {
+      "id": "shipyard-portal-cranes",
+      "type": "product",
+      "title": "Shipyard Portal Cranes",
+      "locale": "en",
+      "filePath": "src/pages/products/shipyard-portal-cranes.astro",
+      "url": "/products/shipyard-portal-cranes/"
+    }
+  ]
+}

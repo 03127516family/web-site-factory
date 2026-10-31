@@ -1,0 +1,35 @@
+/* 用户主动留出的空段落在退出编辑、重新构建后仍占一行。 */
+#product [data-contract-type="rich"] p:empty {
+  min-height: 1lh;
+}
+
+/* 用户新插入的表格没有旧站专用 class，提供本站一致的基础呈现。 */
+#product [data-contract-type="rich"] table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+#product [data-contract-type="rich"] td,
+#product [data-contract-type="rich"] th {
+  border: 1px solid #d9dfe8;
+  min-width: 48px;
+  padding: 10px 12px;
+  vertical-align: top;
+  position: relative;
+}
+#product [data-contract-type="rich"] th {
+  background: #f3f6fa;
+  font-weight: 600;
+}
+#product [data-contract-type="rich"] td > p,
+#product [data-contract-type="rich"] th > p {
+  margin: 0;
+  min-height: 1.5em;
+}
+#product [data-contract-type="rich"] .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #527bea22;
+  pointer-events: none;
+}

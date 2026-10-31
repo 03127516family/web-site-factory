@@ -1,0 +1,65 @@
+/* 双按钮使用原站 main.css；仅恢复产品响应式补丁改写的询价按钮尺寸。 */
+:is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort[data-product-hero-download] .button2 {
+  height: 40px;
+  padding: 2px 20px 2px 51px;
+  line-height: 36px;
+  text-align: left;
+}
+#product .pcon .prort[data-product-hero-download] a > [data-bind] {
+  color: inherit;
+  font: inherit;
+}
+
+#product .product-section-resource.wp-block-file {
+  font-size: 12.8px;
+  font-weight: 700;
+  line-height: 24px;
+  margin: 0 0 19.2px;
+}
+#product .product-section-resource.wp-block-file .wp-block-file__embed {
+  display: inline;
+  width: 100%;
+  height: 600px;
+  margin-bottom: 12.8px;
+}
+#product .product-section-resource.wp-block-file a {
+  color: #003399;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 19.2px;
+}
+#product .product-section-resource.wp-block-file .wp-block-file__button {
+  display: inline-block;
+  color: #fff;
+  background: #003399;
+  border-radius: 32px;
+  padding: 6px 20px;
+  margin-left: 12px;
+  text-transform: uppercase;
+}
+#product .product-section-resource.wp-block-file [data-bind] {
+  color: inherit;
+  font: inherit;
+}
+#product .product-section-video iframe {
+  display: inline;
+  max-width: 100%;
+  border: 0;
+}
+#product .product-section-video .product-video-source { display: none; }
+.visual-editor-enabled #product .product-section-video .product-video-source {
+  display: block;
+  width: fit-content;
+  margin: 8px 0 16px;
+  color: #003399;
+  font: 14px/1.5 system-ui;
+}
+
+/* 主题为动作和嵌入指定了 display；清空后的 hidden 状态也必须压过这些规则。 */
+#product .pcon .prort[hidden],
+#product .pcon .prort [data-product-hero-action][hidden],
+#product .pcon .prort [data-product-hero-inquiry-icon][hidden],
+#product .product-section-resource[hidden],
+#product .product-section-resource.wp-block-file .wp-block-file__button[hidden] {
+  display: none;
+}

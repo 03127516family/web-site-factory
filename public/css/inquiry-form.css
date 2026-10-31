@@ -1,0 +1,163 @@
+/* The same inquiry form appears on all crane-site product pages. */
+#product #from-single .inquiry-form {
+  width: 700px;
+  max-width: 100%;
+  float: left;
+}
+
+#product #from-single .inquiry-form .inquiry-field,
+#product #from-single .inquiry-form .inquiry-upload,
+#product #from-single .inquiry-form .inquiry-submit {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+#product #from-single .inquiry-form .inquiry-field {
+  margin-bottom: 20px;
+}
+
+#product #from-single .inquiry-form .inquiry-name {
+  margin-bottom: 16px;
+}
+
+#product #from-single .inquiry-form .inquiry-label {
+  display: block;
+  margin-bottom: 4px;
+  color: #5e7dbc;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+#product #from-single .inquiry-form .inquiry-label [data-bind] {
+  color: #5e7dbc;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+#product #from-single .inquiry-form .inquiry-label span[aria-hidden] {
+  color: #d0021b;
+  font-size: inherit;
+}
+
+#product #from-single .inquiry-form .inquiry-sublabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+#product #from-single .inquiry-name-inputs,
+#product #from-single .inquiry-contact-inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+#product #from-single .inquiry-contact-inputs .inquiry-field {
+  margin-bottom: 20px;
+}
+
+#product #from-single .inquiry-form input,
+#product #from-single .inquiry-form textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  background: #ebeff7;
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 35%);
+  color: #000;
+  font: 16px/22px NotoSans, sans-serif;
+  padding: 9px 12px;
+}
+
+#product #from-single .inquiry-form input {
+  height: 40px;
+}
+
+#product #from-single .inquiry-form textarea {
+  height: 140px;
+  resize: vertical;
+}
+
+#product #from-single .inquiry-form .inquiry-message {
+  margin-bottom: 25px;
+}
+
+#product #from-single .inquiry-form input:focus,
+#product #from-single .inquiry-form textarea:focus {
+  outline: 1px solid #003296;
+}
+
+#product #from-single .inquiry-upload {
+  display: flex;
+  height: 135px;
+  margin-bottom: 20px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #d3daf0;
+  background: #fafaff;
+  color: #4a4a4a;
+  text-align: center;
+}
+
+#product #from-single .inquiry-upload [data-bind] {
+  display: block;
+  color: #4a4a4a;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+#product #from-single .inquiry-upload input[type="file"] {
+  width: auto;
+  max-width: calc(100% - 24px);
+  height: auto;
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #4a4a4a;
+  font-size: 13px;
+}
+
+#product #from-single .inquiry-submit button {
+  margin-top: 10px;
+  padding: 9px 30px;
+  border: 0;
+  background: #f5a623;
+  color: #fff;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#product #from-single .inquiry-submit button [data-bind] {
+  color: #fff;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
+}
+
+#product #from-single .inquiry-submit button:disabled {
+  opacity: .7;
+  cursor: not-allowed;
+}
+
+#product #from-single .inquiry-unavailable {
+  margin-top: 8px;
+  color: #5e7dbc;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+#product #from-single .inquiry-submit img {
+  display: none;
+}

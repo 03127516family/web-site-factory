@@ -1,0 +1,400 @@
+/* 原 landing-page.css 通过固定 ID 设置容器；模块副本使用可重复标记，保留相同布局。 */
+:is(#parts, [data-product-parts]) { width: 100%; margin: 0 auto; overflow-wrap: break-word; overflow: hidden; }
+:is(#parts, [data-product-parts]) * { margin: 0; padding: 0; border: 0; }
+:is(#parts, [data-product-parts]) *,
+:is(#parts, [data-product-parts]) ::before,
+:is(#parts, [data-product-parts]) ::after { box-sizing: border-box; }
+
+:is(#parts, [data-product-parts]) [data-collection-disclosure].on > .faq_a { display: block; }
+:is(#parts, [data-product-parts]) [data-collection-disclosure] > .faq_q { position: relative; }
+:is(#parts, [data-product-parts]) [data-collection-disclosure] .faq_q dd { width: calc(100% - 72px); }
+:is(#parts, [data-product-parts]) [data-collection-disclosure] .faq_q dd::before,
+:is(#parts, [data-product-parts]) [data-collection-disclosure] .faq_q dd::after { display: none; }
+:is(#parts, [data-product-parts]) [data-disclosure-toggle] {
+  position: absolute; right: 40px; top: 5px; width: 32px; height: 32px;
+  border: 0; border-radius: 5px; background: transparent; color: #003296;
+  font-size: 22px; cursor: pointer;
+}
+:is(#parts, [data-product-parts]) [data-disclosure-toggle]:hover { background: #dce4f3; }
+:is(#parts, [data-product-parts]) [data-disclosure-toggle][aria-expanded="true"] { transform: rotate(180deg); }
+
+/* 原站标题用伪元素画加减号；编辑空标题时把这个位置交回输入提示。 */
+.visual-editor-enabled :is(#parts, [data-product-parts]) [data-contract-type="text"]:empty::before {
+  content: '点击填写标题';
+  display: block;
+  position: static;
+  width: auto;
+  height: auto;
+  background: none;
+  color: #8592a8;
+  font-weight: 400;
+}
+
+#product .process .grid .grid3 > a {
+  display: block;
+  height: auto;
+}
+
+/* 图片上的放大装饰不接收点击，编辑器才能识别真正被点中的图片。 */
+.visual-editor-enabled #product .process .grid a::before,
+.visual-editor-enabled #product .process .grid a::after {
+  pointer-events: none;
+}
+
+.gallery-editor-navigation { display: none; }
+.visual-editor-enabled [data-product-gallery] { position: relative; }
+.visual-editor-enabled .gallery-editor-navigation {
+  display: flex;
+  position: absolute;
+  right: 44px;
+  top: 4px;
+  gap: 6px;
+  z-index: 3;
+}
+.visual-editor-enabled .gallery-editor-navigation button {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #dfe5f0;
+  border-radius: 8px;
+  background: white;
+  color: #345ca6;
+  font: 24px/1 system-ui;
+  cursor: pointer;
+}
+.visual-editor-enabled [data-product-gallery]:not(:has([data-repeat-item])) > .swiper-container,
+.visual-editor-enabled [data-product-gallery]:not(:has([data-repeat-item])) > .gallery-editor-navigation { display: none; }
+.visual-editor-enabled [data-gallery-thumbnails] { cursor: pointer; }
+.visual-editor-enabled [data-collection-view] a::before,
+.visual-editor-enabled [data-collection-view] a::after { pointer-events: none; }
+
+.banner-classic .con li [data-bind] { color: #fff; }
+
+/* 双小车小节卡片：图上文下、蓝色标题，与原站卡片一致；卡片项另用
+   section-card，不复用 grid_2 写死 430x104 的横条样式。网格按卡片数量自动分列：
+   2 张时两栏、5 张时三栏加两栏。卡片随 section-main 处在 pro-info 右栏（880px）。 */
+/* 空标题小节（如选择图、结尾段）的右栏仍要对齐 880 列：空的浮动 h3 高度为 0，
+   拦不住后面的浮动块，section-main 会掉回左缘；补 1px 让它在水平方向占位。 */
+#product .pro-info > h3:empty { min-height: 1px; }
+#product .pro-info .section-main .cases { width: auto; float: none; }
+#product .pro-info .section-main .cases .grid {
+  width: auto !important;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+/* main.css 用 .grid::before/::after 清浮动；伪元素在 grid 容器里会变成网格项，
+   占用第一轨导致所有卡片右移一列。本网格内没有浮动项，直接关闭。 */
+#product .pro-info .section-main .cases .grid::before,
+#product .pro-info .section-main .cases .grid::after { display: none; }
+#product .pro-info .section-main .cases .grid .section-card a { display: block; }
+#product .pro-info .section-main .cases .grid .section-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 0 12px;
+}
+#product .pro-info .section-main .cases .grid .section-card h4 {
+  margin: 0;
+  font-size: 18px;
+  color: #003296;
+  line-height: 26px;
+  font-weight: 400;
+}
+#product .pro-info .section-main .cases .grid .section-card:hover h4 {
+  color: #F5A623;
+  -webkit-transition: all .2s ease;
+}
+
+/* 案例页面需要在正文右栏按两列展示左图右文，其他内容段继续使用标准卡片。 */
+#product .pro-info .section-main .cases .grid.section-card-grid-horizontal {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+#product .pro-info .section-main .cases .grid.section-card-grid-horizontal .section-card a {
+  display: flex;
+  min-height: 104px;
+  background: #edf0f8;
+}
+#product .pro-info .section-main .cases .grid.section-card-grid-horizontal .section-card img {
+  flex: none;
+  width: 156px;
+  height: 104px;
+  margin: 0;
+  object-fit: cover;
+}
+#product .pro-info .section-main .cases .grid.section-card-grid-horizontal .section-card h4 {
+  align-self: center;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  margin: 0;
+  padding: 0 14px;
+  color: #484848;
+  line-height: 24px;
+}
+@media (max-width: 800px) {
+  #product .pro-info .section-main .cases .grid.section-card-grid-horizontal {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 独立正文图文卡不使用旧 cases/grid/section-card，避开横条入口的皮肤。 */
+#product .product-section-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 40px;
+  margin-bottom: 35px;
+}
+#product .product-section-cards-columns-1 { grid-template-columns: minmax(0, 1fr); }
+#product .product-section-cards-columns-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#product .product-section-cards-columns-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#product .pro-info .section-main .cases .grid.product-section-cards-columns-1 { grid-template-columns: minmax(0, 1fr); }
+#product .pro-info .section-main .cases .grid.product-section-cards-columns-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+#product .pro-info .section-main .cases .grid.product-section-cards-columns-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+#product .product-section-card { min-width: 0; }
+/* 父段落与首行正文列各有操作按钮；编辑时给父按钮单独留一行。 */
+.visual-editor-enabled:not([data-editor-review]) #product .product-section-cards-text-columns {
+  padding-top: 32px;
+}
+#product .product-section-card-media { display: block; min-width: 0; }
+#product .product-section-card figure { margin: 0 0 10px; }
+#product .pro-info .product-section-card figure img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 0 10px;
+}
+#product .product-section-card-caption {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 19.2px;
+  color: #4a4a4a;
+}
+#product .product-section-card-media[href] .product-section-card-caption { color: #003296; }
+#product .product-section-card-media[href]:hover .product-section-card-caption { color: #f5a623; }
+#product .product-section-card-media > h4:empty,
+#product .product-section-card-caption:empty,
+#product .product-section-card-body:empty { display: none; }
+.visual-editor-enabled:not([data-editor-review]) #product .product-section-card-media > h4:empty,
+.visual-editor-enabled:not([data-editor-review]) #product .product-section-card-caption:empty,
+.visual-editor-enabled:not([data-editor-review]) #product .product-section-card-body:empty {
+  display: block;
+  min-height: 1lh;
+}
+#product .product-section-cards-media-left-third .product-section-card,
+#product .product-section-cards-media-left-half .product-section-card {
+  display: grid;
+  gap: 40px;
+  align-items: start;
+}
+#product .product-section-cards-media-left-third .product-section-card {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+}
+#product .product-section-cards-media-left-half .product-section-card {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+/* 来源图文列的方点与文字间距独立于旧 .pro-info 的 6px 方点和 28px 缩进。 */
+#product .product-section-card-body { min-width: 0; }
+#product .pro-info .product-section-card-body :is(ul, ol) {
+  margin: 0 0 40px;
+  padding: 0;
+  list-style-position: outside;
+}
+#product .pro-info .product-section-card-body ul { list-style-type: none; }
+#product .pro-info .product-section-card-body ol { list-style-type: decimal; padding-left: 38px; }
+#product .pro-info .product-section-card-body li {
+  margin: 0;
+  padding: 0;
+  color: #4a4a4a;
+  font-size: 16px;
+  line-height: 24px;
+}
+#product .pro-info .product-section-card-body ul > li { padding-left: 38px; position: relative; }
+#product .pro-info .product-section-card-body ul > li::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 11px;
+  width: 8px;
+  height: 8px;
+  margin-top: 8px;
+  background: #92a8d4;
+}
+#product .pro-info .product-section-card-body ol > li::before { display: none; }
+#product .pro-info .product-section-card-body li > p { margin: 0; color: inherit; }
+@media (max-width: 781px) {
+  #product .product-section-cards,
+  #product .pro-info .section-main .cases .grid:is(.product-section-cards-columns-1, .product-section-cards-columns-2, .product-section-cards-columns-3),
+  #product .product-section-cards-media-left-third .product-section-card,
+  #product .product-section-cards-media-left-half .product-section-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* 经典产品页的价格、方案对比表沿用原站的轻量表格排版。 */
+#product .pro-info .section-main [data-contract-type="rich"] table {
+  margin: 68px 0 18px;
+  font-size: 14px;
+}
+#product .pro-info .section-main [data-contract-type="rich"] th,
+#product .pro-info .section-main [data-contract-type="rich"] td {
+  min-width: 0;
+  padding: 7px 10px;
+  border: 0;
+  border-bottom: 1px solid #aebddd;
+  border-right: 1px dashed #bdcae1;
+  background: #fff;
+  font-weight: 400;
+}
+#product .pro-info .section-main [data-contract-type="rich"] tr > :last-child {
+  border-right: 0;
+}
+
+/* 宽比较只扩展声明的这一节；同时覆盖 flow 和 inline 标题的原侧栏位置。 */
+#product :is(.content, .craneinfo) .pro-info.section-content-guide > :is(h2, h3, .section-main) {
+  float: none;
+  width: 100%;
+  max-width: 970px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+#product :is(.content, .craneinfo) .pro-info.section-content-guide > :is(h2, h3) {
+  margin-bottom: 20px;
+}
+#product :is(.content, .craneinfo) .pro-info.section-content-guide > :is(h2, h3):empty {
+  min-height: 0;
+  margin-bottom: 0;
+}
+
+/* 富文本本身负责表格横滚，避免宽表把页面或纯正文网格撑开。 */
+#product .product-section-cards-text-columns [data-contract-type="rich"],
+#product .pro-info:is(.section-tables-technical, .section-tables-comparison) .section-main [data-contract-type="rich"] {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* 钢轨技术表保留来源边框和行高；Tiptap 的段落不能额外撑高单元格。 */
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 0;
+  border-top: 2px solid #92a8d4;
+  margin: 0 0 20px;
+  text-align: left;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] :is(th, td) {
+  min-width: 0;
+  border: 0;
+  border-bottom: 1px solid #92a8d4;
+  border-right: 1px dashed #92a8d4;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+  letter-spacing: -0.4px;
+  vertical-align: middle;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] th {
+  padding: 10px 6px;
+  color: #143059;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] td {
+  padding: 6px 10px;
+  border-top: 1px solid #92a8d4;
+  color: #4a4a4a;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] tr > :last-child {
+  border-right: 0;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] > p,
+#product :is(.content, .craneinfo) .pro-info.section-tables-technical .section-main [data-contract-type="rich"] > .ProseMirror > p {
+  margin-bottom: 20px;
+}
+#product :is(.content, .craneinfo) .pro-info:is(.section-tables-technical, .section-tables-comparison) .section-main [data-contract-type="rich"] :is(th, td) p {
+  min-height: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+}
+
+/* 比较仍是一张两列表；列的位置定义红绿身份，表头文字可独立编辑。 */
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] {
+  overflow-x: scroll;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"]::-webkit-scrollbar {
+  display: block;
+  height: 6px;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"]::-webkit-scrollbar-thumb {
+  background: #92a8d4;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] table {
+  width: 100%;
+  min-width: 970px;
+  border-collapse: collapse;
+  border: 0;
+  border-top: 2px solid #bbcee1;
+  border-bottom: 2px solid #bbcee1;
+  margin: 0;
+  text-align: left;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] :is(th, td) {
+  width: 50%;
+  min-width: 0;
+  border: 0;
+  background: #fff;
+  vertical-align: text-top;
+  letter-spacing: normal;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] th {
+  padding: 30px 20px 0;
+  border-bottom: 1px solid transparent;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22.4px;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] td {
+  padding: 10px;
+  border-top: 1px solid #92a8d4;
+  border-bottom: 1px solid #92a8d4;
+  color: #4a4a4a;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 21px;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] :is(ul, ol) {
+  margin: 20px 0 30px;
+  padding: 0;
+  list-style: none;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] li {
+  position: relative;
+  margin: 0 0 8px;
+  padding-left: 28px;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24px;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] th:nth-child(1),
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] td:nth-child(1) li {
+  color: #03c03c;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] th:nth-child(2),
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] td:nth-child(2) li {
+  color: #b31b1b;
+}
+#product :is(.content, .craneinfo) .pro-info.section-tables-comparison .section-main [data-contract-type="rich"] li::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 10px;
+  width: 6px;
+  height: 6px;
+  margin-top: 8px;
+  background: currentColor;
+}

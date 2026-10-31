@@ -1,0 +1,149 @@
+/* The sample site retains the original content styles, with a small shared
+   navigation and responsive corrections that do not require the old runtime. */
+.site-header {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  background: #003296;
+}
+.site-header a {
+  color: inherit;
+}
+.site-topbar,
+.site-navigation {
+  max-width: 1170px;
+  margin: auto;
+  padding: 12px 20px;
+}
+.site-topbar {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  border-bottom: 1px solid #ffffff30;
+}
+.site-navigation {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  min-height: 86px;
+}
+.site-navigation > a:first-child {
+  margin-right: auto;
+}
+.site-navigation img {
+  display: block;
+}
+.site-footer {
+  margin-top: 80px;
+  padding: 56px max(24px, calc((100% - 1170px) / 2));
+  color: #fff;
+  background: #002971;
+}
+.footer-columns {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 24px;
+}
+.site-footer a {
+  display: block;
+  margin-bottom: 12px;
+  color: #e2eafa;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.footer-contact {
+  display: flex;
+  gap: 32px;
+  padding-top: 28px;
+  margin-top: 30px;
+  border-top: 1px solid #ffffff30;
+}
+.site-footer p {
+  color: #fff;
+  margin-top: 20px;
+}
+.sample-home {
+  max-width: 1170px;
+  margin: 80px auto;
+  padding: 0 24px;
+}
+.sample-home h1 {
+  font-size: 40px;
+  margin-bottom: 24px;
+}
+.sample-home a {
+  color: #003296;
+  text-decoration: underline;
+}
+.dgcrane-responsive .banner {
+  top: 0;
+  margin: 0;
+}
+.dgcrane-responsive .banner .con {
+  top: 50%;
+  transform: translateY(-50%);
+}
+.sample-gallery {
+  margin: 36px auto 64px;
+  text-align: center;
+}
+.sample-gallery img {
+  max-width: 100%;
+  height: auto;
+}
+#product .craneinfo .pro-info .section-main > img {
+  display: block;
+  max-height: 660px;
+  width: auto;
+  object-fit: contain;
+}
+.inquiry-contact {
+  padding: 30px;
+  background: #f0f4fb;
+}
+.inquiry-contact a {
+  display: inline-block;
+  margin: 8px 20px 8px 0;
+}
+.author-section::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+@media (max-width: 767px) {
+  .site-topbar,
+  .site-navigation,
+  .footer-contact {
+    flex-wrap: wrap;
+  }
+  .site-navigation {
+    gap: 16px;
+    font-size: 13px;
+  }
+  .site-navigation > a:first-child {
+    width: 100%;
+  }
+  .footer-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .dgcrane-responsive .banner .con {
+    top: auto;
+    transform: none;
+  }
+  .dgcrane-responsive .banner .con li {
+    padding-left: 20px;
+  }
+}
+
+/* The original article rule fixes max-width at 600px. Bound it to the reading
+   column as well so narrow screens do not crop the delivery photographs. */
+.article-page #blogs .con .info img {
+  max-width: min(600px, 100%);
+}
+#product .pcon > a.button2 {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 22px;
+  color: #fff;
+  background: #003296;
+}

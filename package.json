@@ -1,10 +1,16 @@
 {
-  "name": "dgcrane-static-shell-prototype",
+  "name": "dgcrane-astro-samples",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "test": "node --test tests/*.test.mjs",
-    "preview": "python3 -m http.server 4173 --directory dist"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "astro": "5.18.2"
   }
 }

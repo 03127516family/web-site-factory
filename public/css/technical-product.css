@@ -1,0 +1,290 @@
+/* Only the technical product sections use this layout; main.css remains shared by this site. */
+.banner .con h2 {
+  font-weight: 400;
+}
+
+#product .pcon .button2 [data-bind] {
+  color: #fff;
+}
+
+#product .craneinfo .pro-info .infogrid {
+  margin: 0 0 60px;
+  overflow: auto;
+}
+
+#product .craneinfo .pro-info img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+#product .craneinfo .pro-info .feature-intro ul {
+  margin: 0 0 20px;
+}
+
+#product .craneinfo .pro-info .custom_tables {
+  float: right;
+  width: 100%;
+  margin: 20px 0;
+  overflow-x: auto;
+}
+
+/* Tiptap stores cell text in paragraphs; the source table has plain cell text. */
+#product .craneinfo .pro-info .custom_tables td p,
+#product .craneinfo .pro-info .custom_tables th p {
+  margin: 0;
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+#product .craneinfo .pro-info .type_cases {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+#product .craneinfo .pro-info .type_cases img {
+  margin: 0 0 12px;
+}
+
+#product .craneinfo .pro-info .type_cases p {
+  margin: 0;
+}
+
+#product .craneinfo .pro-info .type_cases .grid_2:nth-child(odd) {
+  padding: 0 10px 30px 0;
+}
+
+#product .craneinfo .pro-info .type_cases .grid_2:nth-child(even) {
+  padding: 0 0 30px 10px;
+}
+
+/* The technical page keeps its wider right-hand content column. */
+#product .craneinfo #from-single #from-2 {
+  width: 880px;
+}
+
+@media (max-width: 1199px) {
+  /* The inherited desktop theme fixes the page at 1260px. Keep those rules for
+     wide screens, but let this product page use the actual viewport below it. */
+  #wrapper {
+    min-width: 0;
+  }
+
+  .wrap,
+  #product,
+  #footer .new-from,
+  #footer .grid {
+    width: calc(100% - 32px);
+    max-width: 1170px;
+  }
+
+  #header,
+  #header .con {
+    width: 100%;
+    left: 0;
+    margin-left: 0;
+  }
+
+  #header .topmenu {
+    width: calc(100% - 32px);
+  }
+
+  #header .con_menu .wrap {
+    display: flex;
+    align-items: center;
+  }
+
+  #header .logo {
+    flex: none;
+    margin-right: 16px;
+    order: 0;
+  }
+
+  #header .menu {
+    flex: 1;
+    min-width: 0;
+    height: 62px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    order: 1;
+  }
+
+  #header .menu::-webkit-scrollbar {
+    display: none;
+  }
+
+  #header .menu > ul {
+    width: max-content;
+    white-space: nowrap;
+  }
+
+  #header .online-chat,
+  #header .search_btn {
+    flex: none;
+  }
+
+  #header .online-chat {
+    order: 2;
+  }
+
+  #header .search_btn {
+    order: 3;
+  }
+
+  .banner .con {
+    left: 16px;
+    width: calc(100% - 32px);
+    margin-left: 0;
+  }
+
+  .banner .con ul {
+    width: 100%;
+  }
+
+  .banner .con li {
+    width: 50%;
+    min-width: 0;
+    max-width: none;
+    margin-right: 0;
+  }
+
+  #product .pcon .lt {
+    width: 30%;
+    margin-right: 4%;
+  }
+
+  #product .pcon .rt,
+  #product .pcon .prort {
+    width: 66%;
+  }
+
+  #product .ltgallery {
+    display: flex;
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+  }
+
+  #product .ltgallery .gallery-top {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    float: none;
+  }
+
+  #product .ltgallery .gallery-top img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #product .ltgallery .gallery-thumbs {
+    width: 100%;
+    height: 66px;
+    overflow-x: auto;
+  }
+
+  #product .ltgallery .gallery-thumbs .swiper-wrapper {
+    display: flex;
+    width: max-content;
+  }
+
+  #product .craneinfo {
+    width: 100%;
+  }
+
+  #product .craneinfo .pro-info > h2,
+  #product .craneinfo .pro-info > div {
+    float: none;
+    width: 100%;
+  }
+
+  #product .craneinfo .pro-info > h2 {
+    margin: 0 0 24px;
+  }
+
+  #product .craneinfo #from-single #from-2 {
+    width: 100%;
+  }
+
+  #product .craneinfo .custom_tables table {
+    min-width: 640px;
+  }
+
+  #footer .new-from .con-4 {
+    width: 100%;
+  }
+
+  #edm-form {
+    width: 100%;
+    margin-top: 20px;
+  }
+
+  #edm-form .wpforms-field-container,
+  #edm-form input[type="email"] {
+    width: calc(100% - 130px);
+  }
+
+  #footer .grid .grid_6 {
+    width: calc(33.333% - 25px);
+  }
+}
+
+@media (max-width: 900px) {
+  #header .topmenu,
+  #header .con,
+  #header .online-chat {
+    display: none;
+  }
+
+  #header .con_menu {
+    background: #003296;
+  }
+}
+
+@media (max-width: 700px) {
+  #header .menu {
+    margin-right: 12px;
+  }
+
+  .banner .con {
+    top: 82px;
+  }
+
+  .banner .con h2 {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .banner .con li {
+    width: 100%;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  #product .pcon .lt,
+  #product .pcon .rt,
+  #product .pcon .prort {
+    width: 100%;
+    float: none;
+  }
+
+  #product .pcon .lt h1 {
+    margin-bottom: 16px;
+  }
+
+  #product .craneinfo .pro-info .type_cases {
+    grid-template-columns: 1fr;
+  }
+
+  #product .craneinfo #from-single .inquiry-name-inputs,
+  #product .craneinfo #from-single .inquiry-contact-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  #footer .grid .grid_6 {
+    width: calc(50% - 25px);
+  }
+}

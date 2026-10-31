@@ -1,0 +1,270 @@
+{
+  "assets": [
+    {
+      "id": "836e3863eb4a07ca",
+      "filePath": "public/media/double-trolley/Double-Hoists-Trolley-Overhead-Cranes.jpg",
+      "url": "/media/double-trolley/Double-Hoists-Trolley-Overhead-Cranes.jpg",
+      "name": "Double-Hoists-Trolley-Overhead-Cranes.jpg",
+      "size": 126841
+    },
+    {
+      "id": "c62b821f6598b7fa",
+      "filePath": "public/media/double-trolley/Double-girder-overhead-crane.jpg",
+      "url": "/media/double-trolley/Double-girder-overhead-crane.jpg",
+      "name": "Double-girder-overhead-crane.jpg",
+      "size": 116463
+    },
+    {
+      "id": "840086d2a7afa6e5",
+      "filePath": "public/media/double-trolley/Electromagnetic-Overhead-Crane-with-Lifting-Magnets.jpg",
+      "url": "/media/double-trolley/Electromagnetic-Overhead-Crane-with-Lifting-Magnets.jpg",
+      "name": "Electromagnetic-Overhead-Crane-with-Lifting-Magnets.jpg",
+      "size": 119324
+    },
+    {
+      "id": "7ec8dca40f5cda03",
+      "filePath": "public/media/double-trolley/Electromagnetic-Overhead-Cranes-With-Magnet-Beam.jpg",
+      "url": "/media/double-trolley/Electromagnetic-Overhead-Cranes-With-Magnet-Beam.jpg",
+      "name": "Electromagnetic-Overhead-Cranes-With-Magnet-Beam.jpg",
+      "size": 131485
+    },
+    {
+      "id": "36a13d04bb9820b7",
+      "filePath": "public/media/double-trolley/Four-girders-and-four-rails-ladle-handing-crane-double-winches-type.jpg",
+      "url": "/media/double-trolley/Four-girders-and-four-rails-ladle-handing-crane-double-winches-type.jpg",
+      "name": "Four-girders-and-four-rails-ladle-handing-crane-double-winches-type.jpg",
+      "size": 134204
+    },
+    {
+      "id": "9fb322d0ececa704",
+      "filePath": "public/media/double-trolley/Overhead-Cranes-for-Concrete-Pile-Production-Workshop-scaled.jpg",
+      "url": "/media/double-trolley/Overhead-Cranes-for-Concrete-Pile-Production-Workshop-scaled.jpg",
+      "name": "Overhead-Cranes-for-Concrete-Pile-Production-Workshop-scaled.jpg",
+      "size": 347851
+    },
+    {
+      "id": "c67370f76d54dc46",
+      "filePath": "public/media/double-trolley/Scrap-Charging-Cranes.jpeg",
+      "url": "/media/double-trolley/Scrap-Charging-Cranes.jpeg",
+      "name": "Scrap-Charging-Cranes.jpeg",
+      "size": 104967
+    },
+    {
+      "id": "f91308146a92eceb",
+      "filePath": "public/media/double-trolley/Single-girder-overhead-crane.jpg",
+      "url": "/media/double-trolley/Single-girder-overhead-crane.jpg",
+      "name": "Single-girder-overhead-crane.jpg",
+      "size": 166828
+    },
+    {
+      "id": "fca1643b49b10720",
+      "filePath": "public/media/double-trolley/YZ-Ladle-Handling-Cranes.jpg",
+      "url": "/media/double-trolley/YZ-Ladle-Handling-Cranes.jpg",
+      "name": "YZ-Ladle-Handling-Cranes.jpg",
+      "size": 186462
+    },
+    {
+      "id": "5ced4cdfce127a75",
+      "filePath": "public/media/double-trolley/double-winch-overhead-crane-scaled.jpg",
+      "url": "/media/double-trolley/double-winch-overhead-crane-scaled.jpg",
+      "name": "double-winch-overhead-crane-scaled.jpg",
+      "size": 359462
+    },
+    {
+      "id": "3056a24c1bb61835",
+      "filePath": "public/media/double-trolley/parent-roll-handling-crane.jpg",
+      "url": "/media/double-trolley/parent-roll-handling-crane.jpg",
+      "name": "parent-roll-handling-crane.jpg",
+      "size": 42171
+    },
+    {
+      "id": "da65ac894d47bbad",
+      "filePath": "public/media/shipyard/2-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "url": "/media/shipyard/2-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "name": "2-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "size": 68832
+    },
+    {
+      "id": "29d39da8f6a4b00a",
+      "filePath": "public/media/shipyard/3-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "url": "/media/shipyard/3-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "name": "3-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "size": 71313
+    },
+    {
+      "id": "ae9e4a34a4896f20",
+      "filePath": "public/media/shipyard/4-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "url": "/media/shipyard/4-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "name": "4-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "size": 92103
+    },
+    {
+      "id": "1b71ad0c8c79a892",
+      "filePath": "public/media/shipyard/5-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "url": "/media/shipyard/5-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "name": "5-Four-link-portal-harbour-crane-design-drawings.jpg",
+      "size": 103868
+    },
+    {
+      "id": "6ba484b77460bc1f",
+      "filePath": "public/media/shipyard/6-Single-Boom-Portal-crane-design-drawings.jpg",
+      "url": "/media/shipyard/6-Single-Boom-Portal-crane-design-drawings.jpg",
+      "name": "6-Single-Boom-Portal-crane-design-drawings.jpg",
+      "size": 92828
+    },
+    {
+      "id": "90ff933fbfb9eab2",
+      "filePath": "public/media/shipyard/7-Qinghai-Shipyard-Portal-Crane.jpg",
+      "url": "/media/shipyard/7-Qinghai-Shipyard-Portal-Crane.jpg",
+      "name": "7-Qinghai-Shipyard-Portal-Crane.jpg",
+      "size": 192489
+    },
+    {
+      "id": "d83c1078a6e06c1b",
+      "filePath": "public/media/shipyard/8-Yangzijiang-Shipbuilding-Portal-Crane.jpg",
+      "url": "/media/shipyard/8-Yangzijiang-Shipbuilding-Portal-Crane.jpg",
+      "name": "8-Yangzijiang-Shipbuilding-Portal-Crane.jpg",
+      "size": 76158
+    },
+    {
+      "id": "c161f980d47417f2",
+      "filePath": "public/media/shipyard/Port-Machines-Industry-scaled.jpg",
+      "url": "/media/shipyard/Port-Machines-Industry-scaled.jpg",
+      "name": "Port-Machines-Industry-scaled.jpg",
+      "size": 262257
+    },
+    {
+      "id": "4c7152c7c07d051e",
+      "filePath": "public/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg",
+      "url": "/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg",
+      "name": "Shipyard-Portal-Cranes-870x580.jpg",
+      "size": 101688
+    },
+    {
+      "id": "babac53382c2d8d2",
+      "filePath": "public/media/shipyard/Shipyard-Portal-Cranes-900x600.jpg",
+      "url": "/media/shipyard/Shipyard-Portal-Cranes-900x600.jpg",
+      "name": "Shipyard-Portal-Cranes-900x600.jpg",
+      "size": 111201
+    },
+    {
+      "id": "c69a8ca6a50859a3",
+      "filePath": "public/wp-content/themes/website/image/homebanner_bg_2.jpg",
+      "url": "/wp-content/themes/website/image/homebanner_bg_2.jpg",
+      "name": "homebanner_bg_2.jpg",
+      "size": 275238
+    },
+    {
+      "id": "2a593ffe353a215d",
+      "filePath": "public/wp-content/themes/website/image/products_list.jpg",
+      "url": "/wp-content/themes/website/image/products_list.jpg",
+      "name": "products_list.jpg",
+      "size": 125465
+    },
+    {
+      "id": "cc5402d3884d6bc1",
+      "filePath": "public/wp-content/themes/website/image/tools-banner.png",
+      "url": "/wp-content/themes/website/image/tools-banner.png",
+      "name": "tools-banner.png",
+      "size": 322128
+    },
+    {
+      "id": "1872a5ed1d05bd39",
+      "filePath": "public/wp-content/themes/website/svg/jiantou.svg",
+      "url": "/wp-content/themes/website/svg/jiantou.svg",
+      "name": "jiantou.svg",
+      "size": 1084
+    },
+    {
+      "id": "cfbe5502433756ea",
+      "filePath": "public/wp-content/themes/website/svg/logo.svg",
+      "url": "/wp-content/themes/website/svg/logo.svg",
+      "name": "logo.svg",
+      "size": 5850
+    },
+    {
+      "id": "87089707dc211092",
+      "filePath": "public/wp-content/themes/website/svg/pdf2.svg",
+      "url": "/wp-content/themes/website/svg/pdf2.svg",
+      "name": "pdf2.svg",
+      "size": 1875
+    },
+    {
+      "id": "6252959ca277be91",
+      "filePath": "public/wp-content/themes/website/svg/phone.svg",
+      "url": "/wp-content/themes/website/svg/phone.svg",
+      "name": "phone.svg",
+      "size": 1448
+    },
+    {
+      "id": "d0214acb6376567d",
+      "filePath": "public/wp-content/themes/website/svg/symbol-defs.svg",
+      "url": "/wp-content/themes/website/svg/symbol-defs.svg",
+      "name": "symbol-defs.svg",
+      "size": 51552
+    },
+    {
+      "id": "846b0e3898812c4e",
+      "filePath": "public/wp-content/themes/website/svg/whatsapp-2.svg",
+      "url": "/wp-content/themes/website/svg/whatsapp-2.svg",
+      "name": "whatsapp-2.svg",
+      "size": 2750
+    },
+    {
+      "id": "db73204074bd0afd",
+      "filePath": "public/wp-content/uploads/2012/10/the-well-packaged-beam-of-the-overhead-crane.jpg",
+      "url": "/wp-content/uploads/2012/10/the-well-packaged-beam-of-the-overhead-crane.jpg",
+      "name": "the-well-packaged-beam-of-the-overhead-crane.jpg",
+      "size": 60492
+    },
+    {
+      "id": "38bb8d9656674451",
+      "filePath": "public/wp-content/uploads/2012/10/the-well-packaged-beam-of-the-overhead-crane1.jpg",
+      "url": "/wp-content/uploads/2012/10/the-well-packaged-beam-of-the-overhead-crane1.jpg",
+      "name": "the-well-packaged-beam-of-the-overhead-crane1.jpg",
+      "size": 61115
+    },
+    {
+      "id": "de83770a626e59a4",
+      "filePath": "public/wp-content/uploads/2023/10/Zora-Zhao==158x182.jpg",
+      "url": "/wp-content/uploads/2023/10/Zora-Zhao==158x182.jpg",
+      "name": "Zora-Zhao==158x182.jpg",
+      "size": 4067
+    },
+    {
+      "id": "a93cb7892d97db64",
+      "filePath": "public/wp-content/uploads/2023/10/Zora-Zhao==316x364.jpg",
+      "url": "/wp-content/uploads/2023/10/Zora-Zhao==316x364.jpg",
+      "name": "Zora-Zhao==316x364.jpg",
+      "size": 9999
+    },
+    {
+      "id": "868a012b2e7c15e1",
+      "filePath": "public/wp-content/uploads/2024/01/single-girder-overhead-crane-types-menu.jpg",
+      "url": "/wp-content/uploads/2024/01/single-girder-overhead-crane-types-menu.jpg",
+      "name": "single-girder-overhead-crane-types-menu.jpg",
+      "size": 13300
+    },
+    {
+      "id": "f8ae308ce8e31a1d",
+      "filePath": "public/wp-content/uploads/2024/05/menu-Steel-Scrap-Grab-Overhead-Crane.jpg",
+      "url": "/wp-content/uploads/2024/05/menu-Steel-Scrap-Grab-Overhead-Crane.jpg",
+      "name": "menu-Steel-Scrap-Grab-Overhead-Crane.jpg",
+      "size": 15280
+    },
+    {
+      "id": "49f79b121f05d166",
+      "filePath": "public/wp-content/uploads/2024/10/Round-lifting-electromagnetMW5-SERIES.png",
+      "url": "/wp-content/uploads/2024/10/Round-lifting-electromagnetMW5-SERIES.png",
+      "name": "Round-lifting-electromagnetMW5-SERIES.png",
+      "size": 8848
+    },
+    {
+      "id": "0976ff009df2fa08",
+      "filePath": "public/wp-content/uploads/image/2012_11/1352771278.jpg",
+      "url": "/wp-content/uploads/image/2012_11/1352771278.jpg",
+      "name": "1352771278.jpg",
+      "size": 60606
+    }
+  ]
+}
