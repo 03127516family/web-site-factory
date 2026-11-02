@@ -23,6 +23,14 @@
       "locale": "en",
       "filePath": "src/pages/products/shipyard-portal-cranes.astro",
       "url": "/products/shipyard-portal-cranes/"
+    },
+    {
+      "id": "746892dd-56c0-4fb4-b124-59293e26f462",
+      "type": "article",
+      "title": "浏览器真实仓库验收页",
+      "locale": "en",
+      "filePath": "src/pages/posts/browser-acceptance-2026-11-01.astro",
+      "url": "/posts/browser-acceptance-2026-11-01/"
     }
   ]
 }
