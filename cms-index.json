@@ -39,6 +39,14 @@
       "locale": "en",
       "filePath": "src/pages/posts/browser-acceptance-2026-11-03.astro",
       "url": "/posts/browser-acceptance-2026-11-03/"
+    },
+    {
+      "id": "32e97ab7-06b6-4dad-aeb3-502772fdc51f",
+      "type": "product",
+      "title": "浏览器真实产品验收 · 2026-11-03",
+      "locale": "en",
+      "filePath": "src/pages/products/browser-product-acceptance-2026-11-03.astro",
+      "url": "/products/browser-product-acceptance-2026-11-03/"
     }
   ]
 }
