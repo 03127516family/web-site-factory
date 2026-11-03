@@ -91,6 +91,7 @@
 .dgcrane-responsive #product .craneinfo .pro-info {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
+  align-items: start;
   column-gap: 50px;
 }
 .dgcrane-responsive #product .craneinfo .pro-info::before,
