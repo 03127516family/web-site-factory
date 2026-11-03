@@ -31,6 +31,14 @@
       "locale": "en",
       "filePath": "src/pages/posts/browser-acceptance-2026-11-01.astro",
       "url": "/posts/browser-acceptance-2026-11-01/"
+    },
+    {
+      "id": "8097c737-ece9-42c1-9286-00d2882a74e3",
+      "type": "article",
+      "title": "浏览器真实文章验收 · 2026-11-03",
+      "locale": "en",
+      "filePath": "src/pages/posts/browser-acceptance-2026-11-03.astro",
+      "url": "/posts/browser-acceptance-2026-11-03/"
     }
   ]
 }
