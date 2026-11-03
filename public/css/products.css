@@ -140,14 +140,7 @@
   color: #566579;
   font: 14px system-ui;
 }
-:is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort .button2 {
-  height: auto;
-  min-height: 40px;
-  max-width: 100%;
-  padding: 10px 20px;
-  line-height: 1.5;
-  text-align: center;
-}
+
 :is(.dgcrane-pack, .dgcrane-responsive) #product .pcon .prort .button2 > [data-bind] {
   color: inherit;
   font: inherit;
