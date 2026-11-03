@@ -3,6 +3,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import ContentSection from '../../components/ContentSection.astro';
 import InquiryContact from '../../components/InquiryContact.astro';
+import ProductGallery from '../../components/ProductGallery.astro';
 ---
 
 <!doctype html>
@@ -71,22 +72,11 @@ import InquiryContact from '../../components/InquiryContact.astro';
             </a>
           </div>
         </div>
-        <div class="ltgallery clearfix">
-          <div class="swiper-container gallery-top">
-            <div class="swiper-wrapper">
-              <div class="swiper-slide">
-                <img src="/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg" alt="Shipyard Portal Cranes" width="870" height="580" srcset="/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg 1x, /media/shipyard/Shipyard-Portal-Cranes-900x600.jpg 2x" />
-              </div>
-            </div>
-          </div>
-          <div class="swiper-container gallery-thumbs">
-            <div class="swiper-wrapper">
-              <div class="swiper-slide swiper-slide-thumb-active">
-                <img src="/media/shipyard/Shipyard-Portal-Cranes.jpg" alt="Shipyard Portal Cranes thumbnail" width="95" height="63" />
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProductGallery>
+          <figure class="swiper-slide">
+            <img src="/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg" alt="Shipyard Portal Cranes" width="870" height="580" srcset="/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg 1x, /media/shipyard/Shipyard-Portal-Cranes-900x600.jpg 2x" />
+          </figure>
+        </ProductGallery>
         <div class="craneinfo wrap">
           <ContentSection id="features">
             <h2>Product Features</h2>

@@ -47,6 +47,14 @@
       "locale": "en",
       "filePath": "src/pages/products/browser-product-acceptance-2026-11-03.astro",
       "url": "/products/browser-product-acceptance-2026-11-03/"
+    },
+    {
+      "id": "validation-gallery",
+      "type": "page",
+      "title": "结构验收 · Product gallery",
+      "locale": "en",
+      "filePath": "src/pages/validation/gallery.astro",
+      "url": "/validation/gallery/"
     }
   ]
 }

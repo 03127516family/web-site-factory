@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "astro": "5.18.2"
+  },
+  "dependencies": {
+    "swiper": "14.4.0"
   }
 }

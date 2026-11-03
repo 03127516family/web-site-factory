@@ -1,0 +1,18 @@
+<link rel="stylesheet" href="/css/product-gallery.css" />
+
+<div class="ltgallery clearfix" data-product-gallery="1">
+  <div class="gallery-top">
+    <div class="swiper-wrapper"><slot /></div>
+  </div>
+  <div class="gallery-thumbs">
+    <div class="swiper-wrapper"></div>
+  </div>
+</div>
+
+<script>
+  import { mountGallery } from '../scripts/product-gallery.js';
+
+  document.querySelectorAll('[data-product-gallery="1"]').forEach(root => {
+    mountGallery(root);
+  });
+</script>

@@ -1,0 +1,28 @@
+---
+import ProductGallery from '../../components/ProductGallery.astro';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Product gallery validation</title>
+  </head>
+  <body>
+    <main>
+      <h1>Product gallery validation</h1>
+      <h2>Multiple images</h2>
+      <ProductGallery>
+        <figure class="swiper-slide"><img src="/media/shipyard/Shipyard-Portal-Cranes-870x580.jpg" alt="Shipyard portal crane" /></figure>
+        <figure class="swiper-slide"><img src="/media/shipyard/7-Qinghai-Shipyard-Portal-Crane.jpg" alt="Qinghai shipyard portal crane" /></figure>
+        <figure class="swiper-slide"><img src="/media/shipyard/8-Yangzijiang-Shipbuilding-Portal-Crane.jpg" alt="Yangzijiang shipbuilding portal crane" /></figure>
+      </ProductGallery>
+      <h2>Single image</h2>
+      <ProductGallery>
+        <figure class="swiper-slide"><img src="/media/shipyard/Shipyard-Portal-Cranes-900x600.jpg" alt="Single shipyard portal crane" /><figcaption>Shipyard equipment overview</figcaption></figure>
+      </ProductGallery>
+      <h2>Empty gallery</h2>
+      <ProductGallery></ProductGallery>
+    </main>
+  </body>
+</html>
