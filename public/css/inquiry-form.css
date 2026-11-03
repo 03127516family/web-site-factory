@@ -105,7 +105,7 @@
   text-align: center;
 }
 
-#product #from-single .inquiry-upload [data-bind] {
+#product #from-single .inquiry-upload > span {
   display: block;
   color: #4a4a4a;
   font-size: 16px;

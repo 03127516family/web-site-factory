@@ -1,4 +1,40 @@
 <div class="inquiry-contact">
-  <p>Contact our crane specialists to discuss your lifting requirements.</p>
-  <a class="button2" href="mailto:sales@dgcrane.com">sales@dgcrane.com</a> <a href="https://wa.me/+8618937350200">WhatsApp: +86 189 3735 0200</a>
+  <form class="wpforms-form inquiry-form" aria-label="Product inquiry">
+    <div class="inquiry-field inquiry-name">
+      <label class="inquiry-label" for="inquiry-first-name">Name</label>
+      <div class="inquiry-name-inputs">
+        <div>
+          <input id="inquiry-first-name" type="text" placeholder="First name" />
+          <label class="inquiry-sublabel" for="inquiry-first-name">First</label>
+        </div>
+        <div>
+          <input id="inquiry-last-name" type="text" placeholder="Last name" />
+          <label class="inquiry-sublabel" for="inquiry-last-name">Last</label>
+        </div>
+      </div>
+    </div>
+    <div class="inquiry-contact-inputs">
+      <div class="inquiry-field">
+        <label class="inquiry-label" for="inquiry-email">Email <span aria-hidden="true">*</span></label>
+        <input id="inquiry-email" type="email" required />
+      </div>
+      <div class="inquiry-field">
+        <label class="inquiry-label" for="inquiry-phone">Phone number</label>
+        <input id="inquiry-phone" type="tel" />
+      </div>
+    </div>
+    <div class="inquiry-field inquiry-message">
+      <label class="inquiry-label" for="inquiry-message">Message</label>
+      <textarea id="inquiry-message"></textarea>
+    </div>
+    <div class="inquiry-upload wpforms-uploader">
+      <span>Choose files for your inquiry.</span>
+      <span>Selected files stay on this device for now.</span>
+      <input type="file" multiple aria-label="Choose files for the inquiry" disabled />
+    </div>
+    <div class="inquiry-submit">
+      <button type="button" disabled aria-describedby="inquiry-unavailable">send message</button>
+    </div>
+    <p id="inquiry-unavailable" class="inquiry-unavailable">Inquiry delivery is not connected yet.</p>
+  </form>
 </div>
