@@ -55,6 +55,101 @@
       "locale": "en",
       "filePath": "src/pages/validation/gallery.astro",
       "url": "/validation/gallery/"
+    },
+    {
+      "id": "about",
+      "type": "page",
+      "title": "Who We Are",
+      "locale": "en",
+      "filePath": "src/pages/about.astro",
+      "url": "/about/",
+      "templateEligible": true
+    },
+    {
+      "id": "contact",
+      "type": "page",
+      "title": "Contact Details",
+      "locale": "en",
+      "filePath": "src/pages/contact-us.astro",
+      "url": "/contact-us/",
+      "templateEligible": true
+    },
+    {
+      "id": "products",
+      "type": "page",
+      "title": "Products",
+      "locale": "en",
+      "filePath": "src/pages/products.astro",
+      "url": "/products/",
+      "templateEligible": true
+    },
+    {
+      "id": "blogs",
+      "type": "page",
+      "title": "All Blogs",
+      "locale": "en",
+      "filePath": "src/pages/blogs.astro",
+      "url": "/blogs/",
+      "templateEligible": true
+    },
+    {
+      "id": "single-girder-eot-cranes",
+      "type": "product",
+      "title": "Single Girder Eot Cranes",
+      "locale": "en",
+      "filePath": "src/pages/products/single-girder-eot-cranes.astro",
+      "url": "/products/single-girder-eot-cranes/",
+      "templateEligible": true
+    },
+    {
+      "id": "agv-transfer-carts",
+      "type": "product",
+      "title": "Advanced AGV Transfer Carts/Trolleys for Automated and Efficient Material Transport",
+      "locale": "en",
+      "filePath": "src/pages/agv-transfer-carts.astro",
+      "url": "/agv-transfer-carts/",
+      "templateEligible": true
+    },
+    {
+      "id": "gantry-cranes",
+      "type": "product",
+      "title": "High Performance Gantry Cranes at Competitive Prices & Flexible Plans",
+      "locale": "en",
+      "filePath": "src/pages/products/gantry-cranes.astro",
+      "url": "/products/gantry-cranes/",
+      "templateEligible": true
+    },
+    {
+      "id": "validation-journal",
+      "type": "page",
+      "title": "结构验收 · Watershed: a field journal",
+      "locale": "en",
+      "filePath": "src/pages/validation/journal.astro",
+      "url": "/validation/journal/"
+    },
+    {
+      "id": "validation-portfolio",
+      "type": "page",
+      "title": "结构验收 · Atelier: independent portfolio",
+      "locale": "en",
+      "filePath": "src/pages/validation/portfolio.astro",
+      "url": "/validation/portfolio/"
+    },
+    {
+      "id": "validation-handbook",
+      "type": "page",
+      "title": "结构验收 · Field guide: documentation and tables",
+      "locale": "en",
+      "filePath": "src/pages/validation/handbook.astro",
+      "url": "/validation/handbook/"
+    },
+    {
+      "id": "validation-plans",
+      "type": "page",
+      "title": "结构验收 · Open studio: service plans and FAQ",
+      "locale": "en",
+      "filePath": "src/pages/validation/plans.astro",
+      "url": "/validation/plans/"
     }
   ]
 }

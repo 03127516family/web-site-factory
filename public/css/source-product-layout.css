@@ -1,0 +1,210 @@
+/* Source product layouts: the section rail comes from the historical single
+   girder page; the continuous content rail comes from the AGV page. Keep these
+   structures separate from the sample catalog's generic card grid. */
+.product-section-rail .banner .con h2,
+.product-content-rail .banner .con h2 {
+  font-weight: 700;
+}
+
+/* Native disclosure retains all ten source answers in static HTML. Its open
+   attribute replaces the source jQuery .on/display state. */
+#parts details.faq_block {
+  width: 100%;
+}
+#parts details > summary.faq_q {
+  width: 100%;
+  list-style: none;
+}
+#parts details > summary::-webkit-details-marker {
+  display: none;
+}
+#parts details > summary > span {
+  display: block;
+  position: relative;
+  color: #424242;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+}
+#parts details > summary > span::before,
+#parts details > summary > span::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 12px;
+  height: 2px;
+  background: #003296;
+}
+#parts details:not([open]) > summary > span::after {
+  transform: rotate(90deg);
+}
+#parts details[open] > summary > span,
+#parts details > summary:hover > span {
+  color: #f5a623;
+}
+#parts details[open] > .faq_a {
+  display: block;
+}
+#parts details > summary:focus-visible {
+  outline: 2px solid #003296;
+  outline-offset: 2px;
+}
+
+/* The original continuous-content template puts the gallery across both rails. */
+.product-content-rail #product > .wrap {
+  position: relative;
+  display: flow-root;
+}
+.product-content-rail #product .ltgallery {
+  width: 1160px;
+  max-width: none;
+  margin: 60px 0 80px -290px;
+}
+.product-content-rail #product .ltgallery img {
+  margin: 0;
+}
+.product-content-rail .FormButton a {
+  position: relative;
+  display: inline-block;
+  padding: 8px 30px 8px 56px;
+  background: #f5a623;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 150%;
+}
+.product-content-rail .FormButton a::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 5px;
+  width: 24px;
+  height: 30px;
+  background: url('/wp-content/themes/website/svg/tianxie.svg') center / contain no-repeat;
+}
+.product-content-rail .FormButton a:hover {
+  background: #f58423;
+  color: #fff;
+}
+.product-content-rail .custom_tables {
+  overflow-x: auto;
+}
+.product-content-rail .content table {
+  width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+  border-top: 2px solid #92a8d4;
+  text-align: left;
+}
+.product-content-rail .content :is(td, th) {
+  padding: 6px 10px;
+  border-block: 1px solid #92a8d4;
+  border-right: 1px dashed #92a8d4;
+  color: #4a4a4a;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.4px;
+  line-height: 21px;
+}
+.product-content-rail .content th {
+  width: 100px;
+  padding: 10px 6px;
+  color: #143059;
+}
+.product-content-rail .content :is(td, th):last-child {
+  border-right: 0;
+}
+.product-content-rail .content > span {
+  font-size: 16px;
+  font-weight: 400;
+}
+
+@media (max-width: 1199px) {
+  .product-section-rail #product .content,
+  .product-section-rail #product .pro-info > h3,
+  .product-section-rail #product .pro-info > div,
+  .product-section-rail #product .process,
+  .product-section-rail #product .process .tips,
+  .product-section-rail #product .pro-info .cases {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+  }
+  .product-section-rail #product .pro-info > h3 {
+    margin: 0 0 24px;
+  }
+  .product-section-rail #product .content img {
+    max-width: 100%;
+  }
+  .product-section-rail #product .process .grid,
+  .product-section-rail #product .pro-info .cases .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    width: 100% !important;
+  }
+  .product-section-rail #product .process .grid .grid3,
+  .product-section-rail #product .pro-info .cases .grid_2,
+  .product-section-rail #product .pro-info .cases .grid_2 a {
+    width: 100%;
+    margin: 0;
+  }
+  .product-section-rail #product .process .grid img {
+    width: 100%;
+    height: auto;
+  }
+  .product-section-rail #product .pro-info .cases .grid_2 h4 {
+    width: auto;
+  }
+  .product-content-rail #product > .wrap {
+    width: 100%;
+  }
+  .product-content-rail #product .ltgallery {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    margin: 40px 0 60px;
+  }
+  .product-content-rail .custom_tables table {
+    min-width: 700px;
+  }
+  :is(.product-section-rail, .product-content-rail) .related {
+    height: auto;
+    padding-bottom: 60px;
+  }
+  :is(.product-section-rail, .product-content-rail) .related .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
+  }
+  :is(.product-section-rail, .product-content-rail) .related .grid_4 {
+    width: 100%;
+    margin: 0;
+  }
+}
+@media (max-width: 767px) {
+  .product-section-rail #product .type_cases,
+  .product-section-rail #product .process .grid,
+  .product-section-rail #product .pro-info .cases .grid,
+  .product-content-rail #Type-Cases .type_cases,
+  :is(.product-section-rail, .product-content-rail) .related .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :is(.product-section-rail, .product-content-rail) #product .type_cases .grid_2 {
+    padding: 0 0 24px;
+  }
+  #parts details .faq_a .photo {
+    float: none;
+  }
+}
+@media (max-width: 1199px) {
+  .product-content-rail #product {
+    margin-inline: auto;
+  }
+  :is(.product-section-rail, .product-content-rail) .related > .wrap {
+    width: calc(100% - 40px);
+    margin-inline: auto;
+  }
+}

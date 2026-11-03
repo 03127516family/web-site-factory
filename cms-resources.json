@@ -293,6 +293,895 @@
       "url": "/media/articles/validation-gallery/0186253f-2b92-4961-8492-42b1736a187b.jpg",
       "name": "Shipyard-Portal-Cranes-870x580.jpg",
       "size": 101688
+    },
+    {
+      "id": "b58c00fb1fc8ced5",
+      "filePath": "public/editor-assets/gantry-cranes/Crane-Kit.png",
+      "url": "/editor-assets/gantry-cranes/Crane-Kit.png",
+      "name": "Crane-Kit.png",
+      "size": 94263
+    },
+    {
+      "id": "e6783f0ed84c1dd2",
+      "filePath": "public/editor-assets/gantry-cranes/EAC.svg",
+      "url": "/editor-assets/gantry-cranes/EAC.svg",
+      "name": "EAC.svg",
+      "size": 717
+    },
+    {
+      "id": "61a92461c6fdae48",
+      "filePath": "public/editor-assets/gantry-cranes/ISO-1.svg",
+      "url": "/editor-assets/gantry-cranes/ISO-1.svg",
+      "name": "ISO-1.svg",
+      "size": 4640
+    },
+    {
+      "id": "8f59fc9fdbe8553d",
+      "filePath": "public/editor-assets/gantry-cranes/MG-DGCRANE-1.png",
+      "url": "/editor-assets/gantry-cranes/MG-DGCRANE-1.png",
+      "name": "MG-DGCRANE-1.png",
+      "size": 40497
+    },
+    {
+      "id": "a2f4c975a3f9d697",
+      "filePath": "public/editor-assets/gantry-cranes/MG-double-gantry-crane.jpg",
+      "url": "/editor-assets/gantry-cranes/MG-double-gantry-crane.jpg",
+      "name": "MG-double-gantry-crane.jpg",
+      "size": 30105
+    },
+    {
+      "id": "bee9f7a48eb23ccd",
+      "filePath": "public/editor-assets/gantry-cranes/MHA-single-gantry-crane.jpg",
+      "url": "/editor-assets/gantry-cranes/MHA-single-gantry-crane.jpg",
+      "name": "MHA-single-gantry-crane.jpg",
+      "size": 28079
+    },
+    {
+      "id": "c84a17228b0133aa",
+      "filePath": "public/editor-assets/gantry-cranes/SGS-1.svg",
+      "url": "/editor-assets/gantry-cranes/SGS-1.svg",
+      "name": "SGS-1.svg",
+      "size": 2116
+    },
+    {
+      "id": "a0ea6c770d5d23f0",
+      "filePath": "public/editor-assets/gantry-cranes/Zora-Zhao.jpg",
+      "url": "/editor-assets/gantry-cranes/Zora-Zhao.jpg",
+      "name": "Zora-Zhao.jpg",
+      "size": 4808
+    },
+    {
+      "id": "b912aa48909c39ed",
+      "filePath": "public/editor-assets/gantry-cranes/ce.svg",
+      "url": "/editor-assets/gantry-cranes/ce.svg",
+      "name": "ce.svg",
+      "size": 1173
+    },
+    {
+      "id": "ec01dd352feb8f4e",
+      "filePath": "public/editor-assets/gantry-cranes/chart.svg",
+      "url": "/editor-assets/gantry-cranes/chart.svg",
+      "name": "chart.svg",
+      "size": 1357
+    },
+    {
+      "id": "aa2207700eed14d3",
+      "filePath": "public/editor-assets/gantry-cranes/double-features.jpg",
+      "url": "/editor-assets/gantry-cranes/double-features.jpg",
+      "name": "double-features.jpg",
+      "size": 167803
+    },
+    {
+      "id": "4540a85b27fc5b8a",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-banner.jpg",
+      "url": "/editor-assets/gantry-cranes/gantry-banner.jpg",
+      "name": "gantry-banner.jpg",
+      "size": 44615
+    },
+    {
+      "id": "3578dfda35fa5969",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-crane-algeria.jpg",
+      "url": "/editor-assets/gantry-cranes/gantry-crane-algeria.jpg",
+      "name": "gantry-crane-algeria.jpg",
+      "size": 22135
+    },
+    {
+      "id": "96ad1823e3339599",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-crane-indonesia.jpg",
+      "url": "/editor-assets/gantry-cranes/gantry-crane-indonesia.jpg",
+      "name": "gantry-crane-indonesia.jpg",
+      "size": 20045
+    },
+    {
+      "id": "a78cfb76b47be434",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-crane-saudi-rabia.jpg",
+      "url": "/editor-assets/gantry-cranes/gantry-crane-saudi-rabia.jpg",
+      "name": "gantry-crane-saudi-rabia.jpg",
+      "size": 17430
+    },
+    {
+      "id": "e7ccf86bf4cb778d",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-crane-south-africa.jpg",
+      "url": "/editor-assets/gantry-cranes/gantry-crane-south-africa.jpg",
+      "name": "gantry-crane-south-africa.jpg",
+      "size": 20089
+    },
+    {
+      "id": "d220263ee567f99c",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-crane-uzbekistan.jpeg",
+      "url": "/editor-assets/gantry-cranes/gantry-crane-uzbekistan.jpeg",
+      "name": "gantry-crane-uzbekistan.jpeg",
+      "size": 18778
+    },
+    {
+      "id": "044f544a1d46d993",
+      "filePath": "public/editor-assets/gantry-cranes/gantry-crane-zimbabwe.jpg",
+      "url": "/editor-assets/gantry-cranes/gantry-crane-zimbabwe.jpg",
+      "name": "gantry-crane-zimbabwe.jpg",
+      "size": 22384
+    },
+    {
+      "id": "0e820ed2de0252a7",
+      "filePath": "public/editor-assets/gantry-cranes/map-3.svg",
+      "url": "/editor-assets/gantry-cranes/map-3.svg",
+      "name": "map-3.svg",
+      "size": 213969
+    },
+    {
+      "id": "5522be26249e1f54",
+      "filePath": "public/editor-assets/gantry-cranes/pie-chart-1.svg",
+      "url": "/editor-assets/gantry-cranes/pie-chart-1.svg",
+      "name": "pie-chart-1.svg",
+      "size": 414
+    },
+    {
+      "id": "d4c90e0b71c87ecc",
+      "filePath": "public/editor-assets/gantry-cranes/pie-chart-2.svg",
+      "url": "/editor-assets/gantry-cranes/pie-chart-2.svg",
+      "name": "pie-chart-2.svg",
+      "size": 686
+    },
+    {
+      "id": "9de13df4eef48e8b",
+      "filePath": "public/editor-assets/gantry-cranes/semi-gantry-cranes.jpg",
+      "url": "/editor-assets/gantry-cranes/semi-gantry-cranes.jpg",
+      "name": "semi-gantry-cranes.jpg",
+      "size": 19328
+    },
+    {
+      "id": "78418779253e13b6",
+      "filePath": "public/editor-assets/gantry-cranes/service-1.svg",
+      "url": "/editor-assets/gantry-cranes/service-1.svg",
+      "name": "service-1.svg",
+      "size": 376
+    },
+    {
+      "id": "6dce172e841b3950",
+      "filePath": "public/editor-assets/gantry-cranes/service-2.svg",
+      "url": "/editor-assets/gantry-cranes/service-2.svg",
+      "name": "service-2.svg",
+      "size": 3096
+    },
+    {
+      "id": "ab1d216e901c75fe",
+      "filePath": "public/editor-assets/gantry-cranes/service-3.svg",
+      "url": "/editor-assets/gantry-cranes/service-3.svg",
+      "name": "service-3.svg",
+      "size": 3668
+    },
+    {
+      "id": "a3dfd3ed7122b2f3",
+      "filePath": "public/editor-assets/gantry-cranes/service-4.svg",
+      "url": "/editor-assets/gantry-cranes/service-4.svg",
+      "name": "service-4.svg",
+      "size": 1198
+    },
+    {
+      "id": "e2db75b5b10ef45d",
+      "filePath": "public/editor-assets/gantry-cranes/single-features.jpg",
+      "url": "/editor-assets/gantry-cranes/single-features.jpg",
+      "name": "single-features.jpg",
+      "size": 22062
+    },
+    {
+      "id": "4d1a7edba5254417",
+      "filePath": "public/editor-assets/gantry-cranes/single-girder-gantry-crane.jpg",
+      "url": "/editor-assets/gantry-cranes/single-girder-gantry-crane.jpg",
+      "name": "single-girder-gantry-crane.jpg",
+      "size": 17687
+    },
+    {
+      "id": "0c0a7059febb5e20",
+      "filePath": "public/editor-assets/gantry-cranes/truss-gantry-cranes.jpg",
+      "url": "/editor-assets/gantry-cranes/truss-gantry-cranes.jpg",
+      "name": "truss-gantry-cranes.jpg",
+      "size": 21314
+    },
+    {
+      "id": "19e736e5f7f81d16",
+      "filePath": "public/wp-content/themes/website/image/about_video.jpg",
+      "url": "/wp-content/themes/website/image/about_video.jpg",
+      "name": "about_video.jpg",
+      "size": 14373
+    },
+    {
+      "id": "ec2705b2d3021ccb",
+      "filePath": "public/wp-content/themes/website/image/blog_banner.jpg",
+      "url": "/wp-content/themes/website/image/blog_banner.jpg",
+      "name": "blog_banner.jpg",
+      "size": 45669
+    },
+    {
+      "id": "b1a599f0d33c324b",
+      "filePath": "public/wp-content/themes/website/image/contact_banner.jpg",
+      "url": "/wp-content/themes/website/image/contact_banner.jpg",
+      "name": "contact_banner.jpg",
+      "size": 42517
+    },
+    {
+      "id": "e8e7b0fd8239959c",
+      "filePath": "public/wp-content/themes/website/image/factory.jpg",
+      "url": "/wp-content/themes/website/image/factory.jpg",
+      "name": "factory.jpg",
+      "size": 20231
+    },
+    {
+      "id": "90c456d219fa4225",
+      "filePath": "public/wp-content/uploads/1-Incoming-material-sample-test-1.jpg",
+      "url": "/wp-content/uploads/1-Incoming-material-sample-test-1.jpg",
+      "name": "1-Incoming-material-sample-test-1.jpg",
+      "size": 7838
+    },
+    {
+      "id": "f8b4d8fdd0de7bf1",
+      "filePath": "public/wp-content/uploads/10-ton-LDC-type-single-girder-overhead-crane-in-Turkmenistan.jpg",
+      "url": "/wp-content/uploads/10-ton-LDC-type-single-girder-overhead-crane-in-Turkmenistan.jpg",
+      "name": "10-ton-LDC-type-single-girder-overhead-crane-in-Turkmenistan.jpg",
+      "size": 131622
+    },
+    {
+      "id": "869684faaa892474",
+      "filePath": "public/wp-content/uploads/10ton-LD-type-single-girder-overhead-crane-in-Benin-1.jpg",
+      "url": "/wp-content/uploads/10ton-LD-type-single-girder-overhead-crane-in-Benin-1.jpg",
+      "name": "10ton-LD-type-single-girder-overhead-crane-in-Benin-1.jpg",
+      "size": 119915
+    },
+    {
+      "id": "c70e23b35e5f2666",
+      "filePath": "public/wp-content/uploads/10ton-LD-type-single-girder-overhead-crane-in-Benin-2.jpg",
+      "url": "/wp-content/uploads/10ton-LD-type-single-girder-overhead-crane-in-Benin-2.jpg",
+      "name": "10ton-LD-type-single-girder-overhead-crane-in-Benin-2.jpg",
+      "size": 106336
+    },
+    {
+      "id": "95d68008715ac83c",
+      "filePath": "public/wp-content/uploads/10ton-LDC-type-single-girder-overhead-crane-in-Qatar-1.jpg",
+      "url": "/wp-content/uploads/10ton-LDC-type-single-girder-overhead-crane-in-Qatar-1.jpg",
+      "name": "10ton-LDC-type-single-girder-overhead-crane-in-Qatar-1.jpg",
+      "size": 70012
+    },
+    {
+      "id": "67f2df049ed03f55",
+      "filePath": "public/wp-content/uploads/10ton-LDC-type-single-girder-overhead-crane-in-Qatar-2.jpg",
+      "url": "/wp-content/uploads/10ton-LDC-type-single-girder-overhead-crane-in-Qatar-2.jpg",
+      "name": "10ton-LDC-type-single-girder-overhead-crane-in-Qatar-2.jpg",
+      "size": 86035
+    },
+    {
+      "id": "1d05a324e98b88e1",
+      "filePath": "public/wp-content/uploads/10ton-LDC-type-single-girder-overhead-crane-in-Qatar-3.jpg",
+      "url": "/wp-content/uploads/10ton-LDC-type-single-girder-overhead-crane-in-Qatar-3.jpg",
+      "name": "10ton-LDC-type-single-girder-overhead-crane-in-Qatar-3.jpg",
+      "size": 86486
+    },
+    {
+      "id": "d25f025b88104815",
+      "filePath": "public/wp-content/uploads/2-Steel-plate-uncoiling-and-falttening.jpg",
+      "url": "/wp-content/uploads/2-Steel-plate-uncoiling-and-falttening.jpg",
+      "name": "2-Steel-plate-uncoiling-and-falttening.jpg",
+      "size": 13864
+    },
+    {
+      "id": "bac6ef1e7b25915e",
+      "filePath": "public/wp-content/uploads/2.After-painting-the-main-beam.jpg",
+      "url": "/wp-content/uploads/2.After-painting-the-main-beam.jpg",
+      "name": "2.After-painting-the-main-beam.jpg",
+      "size": 5267
+    },
+    {
+      "id": "8ea8e875ba2d53a7",
+      "filePath": "public/wp-content/uploads/2021-Crane-Catalog-from-DGCRANE-scaled.jpg",
+      "url": "/wp-content/uploads/2021-Crane-Catalog-from-DGCRANE-scaled.jpg",
+      "name": "2021-Crane-Catalog-from-DGCRANE-scaled.jpg",
+      "size": 8558
+    },
+    {
+      "id": "bac80f8b3afc4c23",
+      "filePath": "public/wp-content/uploads/2024/03/ldc-low-headroom-overhead-crane.jpg",
+      "url": "/wp-content/uploads/2024/03/ldc-low-headroom-overhead-crane.jpg",
+      "name": "ldc-low-headroom-overhead-crane.jpg",
+      "size": 743332
+    },
+    {
+      "id": "7baa7acf0f9d08b9",
+      "filePath": "public/wp-content/uploads/2024/06/AGV-Transfer-Cart.png",
+      "url": "/wp-content/uploads/2024/06/AGV-Transfer-Cart.png",
+      "name": "AGV-Transfer-Cart.png",
+      "size": 240089
+    },
+    {
+      "id": "b95c6bc44e97ff6b",
+      "filePath": "public/wp-content/uploads/2024/06/agv-transfer-cart-applications-in-manufacturing.jpg",
+      "url": "/wp-content/uploads/2024/06/agv-transfer-cart-applications-in-manufacturing.jpg",
+      "name": "agv-transfer-cart-applications-in-manufacturing.jpg",
+      "size": 124518
+    },
+    {
+      "id": "c730ea78bc9372e0",
+      "filePath": "public/wp-content/uploads/2024/06/agv-transfer-cart-applications-in-port.png",
+      "url": "/wp-content/uploads/2024/06/agv-transfer-cart-applications-in-port.png",
+      "name": "agv-transfer-cart-applications-in-port.png",
+      "size": 339198
+    },
+    {
+      "id": "7f6014aeb90177a0",
+      "filePath": "public/wp-content/uploads/2024/06/agv-transfer-cart-applications-in-warehousing.jpg",
+      "url": "/wp-content/uploads/2024/06/agv-transfer-cart-applications-in-warehousing.jpg",
+      "name": "agv-transfer-cart-applications-in-warehousing.jpg",
+      "size": 100231
+    },
+    {
+      "id": "5209e3298e7bfe1f",
+      "filePath": "public/wp-content/uploads/2024/08/banner-Transfer-Cart-watermarked.jpg",
+      "url": "/wp-content/uploads/2024/08/banner-Transfer-Cart-watermarked.jpg",
+      "name": "banner-Transfer-Cart-watermarked.jpg",
+      "size": 72206
+    },
+    {
+      "id": "03c1d6a6a3b7def2",
+      "filePath": "public/wp-content/uploads/2024/09/AGV-Transfer-Carts.jpg",
+      "url": "/wp-content/uploads/2024/09/AGV-Transfer-Carts.jpg",
+      "name": "AGV-Transfer-Carts.jpg",
+      "size": 28793
+    },
+    {
+      "id": "efdbe96bea7639db",
+      "filePath": "public/wp-content/uploads/2025/07/Round-Electromagnetic-Lifting-Magnets.png",
+      "url": "/wp-content/uploads/2025/07/Round-Electromagnetic-Lifting-Magnets.png",
+      "name": "Round-Electromagnetic-Lifting-Magnets.png",
+      "size": 216823
+    },
+    {
+      "id": "7014a4ebd8d81550",
+      "filePath": "public/wp-content/uploads/2026/07/single-girder-Overhead-Cranes-Exported-to-Brazil-for-Injection-Molding-Workshop.png",
+      "url": "/wp-content/uploads/2026/07/single-girder-Overhead-Cranes-Exported-to-Brazil-for-Injection-Molding-Workshop.png",
+      "name": "single-girder-Overhead-Cranes-Exported-to-Brazil-for-Injection-Molding-Workshop.png",
+      "size": 13796
+    },
+    {
+      "id": "8b4fad17eb4efdbd",
+      "filePath": "public/wp-content/uploads/2026/08/DGCRANE-Invites-You-to-EXPOMINA-PERU-2026-Closing-Session.jpg",
+      "url": "/wp-content/uploads/2026/08/DGCRANE-Invites-You-to-EXPOMINA-PERU-2026-Closing-Session.jpg",
+      "name": "DGCRANE-Invites-You-to-EXPOMINA-PERU-2026-Closing-Session.jpg",
+      "size": 3561
+    },
+    {
+      "id": "d864f2630580ba1f",
+      "filePath": "public/wp-content/uploads/2026/08/EXPOMINA-PERU-2026-DGCRANE.png",
+      "url": "/wp-content/uploads/2026/08/EXPOMINA-PERU-2026-DGCRANE.png",
+      "name": "EXPOMINA-PERU-2026-DGCRANE.png",
+      "size": 13215
+    },
+    {
+      "id": "754291caf2f29dad",
+      "filePath": "public/wp-content/uploads/2026/08/Electra-Mining-Africa-2026-invitation-DGCRANE-1.png",
+      "url": "/wp-content/uploads/2026/08/Electra-Mining-Africa-2026-invitation-DGCRANE-1.png",
+      "name": "Electra-Mining-Africa-2026-invitation-DGCRANE-1.png",
+      "size": 13843
+    },
+    {
+      "id": "97ecd76dcddc9d01",
+      "filePath": "public/wp-content/uploads/2026/08/casting-crane-2.png",
+      "url": "/wp-content/uploads/2026/08/casting-crane-2.png",
+      "name": "casting-crane-2.png",
+      "size": 10496
+    },
+    {
+      "id": "db7daba3cf0bcda4",
+      "filePath": "public/wp-content/uploads/2026/08/metallurgical-casting-crane_english.png",
+      "url": "/wp-content/uploads/2026/08/metallurgical-casting-crane_english.png",
+      "name": "metallurgical-casting-crane_english.png",
+      "size": 16048
+    },
+    {
+      "id": "ffa7179baa64766a",
+      "filePath": "public/wp-content/uploads/20ton-single-girder-overhead-crane-1.jpg",
+      "url": "/wp-content/uploads/20ton-single-girder-overhead-crane-1.jpg",
+      "name": "20ton-single-girder-overhead-crane-1.jpg",
+      "size": 98035
+    },
+    {
+      "id": "e689a0b7a585b93c",
+      "filePath": "public/wp-content/uploads/20ton-single-girder-overhead-crane-2.jpg",
+      "url": "/wp-content/uploads/20ton-single-girder-overhead-crane-2.jpg",
+      "name": "20ton-single-girder-overhead-crane-2.jpg",
+      "size": 77452
+    },
+    {
+      "id": "6d4c659b7eb5605e",
+      "filePath": "public/wp-content/uploads/3-Steel-sheeting-cuttig.jpg",
+      "url": "/wp-content/uploads/3-Steel-sheeting-cuttig.jpg",
+      "name": "3-Steel-sheeting-cuttig.jpg",
+      "size": 14747
+    },
+    {
+      "id": "e99594e41d5394d7",
+      "filePath": "public/wp-content/uploads/4-Rolling-groove.jpg",
+      "url": "/wp-content/uploads/4-Rolling-groove.jpg",
+      "name": "4-Rolling-groove.jpg",
+      "size": 14096
+    },
+    {
+      "id": "31de14754c37cd6e",
+      "filePath": "public/wp-content/uploads/5-Welding-stiffener.jpg",
+      "url": "/wp-content/uploads/5-Welding-stiffener.jpg",
+      "name": "5-Welding-stiffener.jpg",
+      "size": 13090
+    },
+    {
+      "id": "ee032410770e886a",
+      "filePath": "public/wp-content/uploads/5Ton-LDC-type-single-girder-overhead-crane-in-India-1.jpg",
+      "url": "/wp-content/uploads/5Ton-LDC-type-single-girder-overhead-crane-in-India-1.jpg",
+      "name": "5Ton-LDC-type-single-girder-overhead-crane-in-India-1.jpg",
+      "size": 91739
+    },
+    {
+      "id": "e0847af0075d2cb5",
+      "filePath": "public/wp-content/uploads/5Ton-LDC-type-single-girder-overhead-crane-in-India-2.jpg",
+      "url": "/wp-content/uploads/5Ton-LDC-type-single-girder-overhead-crane-in-India-2.jpg",
+      "name": "5Ton-LDC-type-single-girder-overhead-crane-in-India-2.jpg",
+      "size": 98998
+    },
+    {
+      "id": "1847bd2946f5e28e",
+      "filePath": "public/wp-content/uploads/5Ton-LDC-type-single-girder-overhead-crane-in-Oman.jpg",
+      "url": "/wp-content/uploads/5Ton-LDC-type-single-girder-overhead-crane-in-Oman.jpg",
+      "name": "5Ton-LDC-type-single-girder-overhead-crane-in-Oman.jpg",
+      "size": 98873
+    },
+    {
+      "id": "a06670324a15eac0",
+      "filePath": "public/wp-content/uploads/5Ton-NLH-European-Type-double-girder-overhead-crane-1.jpg",
+      "url": "/wp-content/uploads/5Ton-NLH-European-Type-double-girder-overhead-crane-1.jpg",
+      "name": "5Ton-NLH-European-Type-double-girder-overhead-crane-1.jpg",
+      "size": 105235
+    },
+    {
+      "id": "11cc420ff2e0acaa",
+      "filePath": "public/wp-content/uploads/5Ton-single-girder-overhead-crane-in-Bangladesh.jpg",
+      "url": "/wp-content/uploads/5Ton-single-girder-overhead-crane-in-Bangladesh.jpg",
+      "name": "5Ton-single-girder-overhead-crane-in-Bangladesh.jpg",
+      "size": 136408
+    },
+    {
+      "id": "22683b766cb2258c",
+      "filePath": "public/wp-content/uploads/5t-S9.1m-single-girder-overhead-crane-main-girder-scaled-1.jpg",
+      "url": "/wp-content/uploads/5t-S9.1m-single-girder-overhead-crane-main-girder-scaled-1.jpg",
+      "name": "5t-S9.1m-single-girder-overhead-crane-main-girder-scaled-1.jpg",
+      "size": 5318
+    },
+    {
+      "id": "d9f90277523d569a",
+      "filePath": "public/wp-content/uploads/6-Welding-I-beam-and-cover-plate.jpg",
+      "url": "/wp-content/uploads/6-Welding-I-beam-and-cover-plate.jpg",
+      "name": "6-Welding-I-beam-and-cover-plate.jpg",
+      "size": 15041
+    },
+    {
+      "id": "02e9959964e6212d",
+      "filePath": "public/wp-content/uploads/7-Crane-pre-assembling.jpg",
+      "url": "/wp-content/uploads/7-Crane-pre-assembling.jpg",
+      "name": "7-Crane-pre-assembling.jpg",
+      "size": 13880
+    },
+    {
+      "id": "f42e99b8ac5b9ec2",
+      "filePath": "public/wp-content/uploads/8-Crane-painting.jpg",
+      "url": "/wp-content/uploads/8-Crane-painting.jpg",
+      "name": "8-Crane-painting.jpg",
+      "size": 12785
+    },
+    {
+      "id": "a15db41fc3975fe6",
+      "filePath": "public/wp-content/uploads/9-Crane-packing-and-delivery.jpg",
+      "url": "/wp-content/uploads/9-Crane-packing-and-delivery.jpg",
+      "name": "9-Crane-packing-and-delivery.jpg",
+      "size": 15644
+    },
+    {
+      "id": "e7bae6ffec3ab17e",
+      "filePath": "public/wp-content/uploads/Crane-Motor.jpg",
+      "url": "/wp-content/uploads/Crane-Motor.jpg",
+      "name": "Crane-Motor.jpg",
+      "size": 49582
+    },
+    {
+      "id": "ce9c3a0a3810e8a2",
+      "filePath": "public/wp-content/uploads/Crane-Wheel.png",
+      "url": "/wp-content/uploads/Crane-Wheel.png",
+      "name": "Crane-Wheel.png",
+      "size": 511144
+    },
+    {
+      "id": "87b5eaf99b318c4c",
+      "filePath": "public/wp-content/uploads/Double-Girder-Overhead-Crane-1.jpg",
+      "url": "/wp-content/uploads/Double-Girder-Overhead-Crane-1.jpg",
+      "name": "Double-Girder-Overhead-Crane-1.jpg",
+      "size": 32061
+    },
+    {
+      "id": "9cce1f58a8d17b9e",
+      "filePath": "public/wp-content/uploads/Double_Girder_Gantry_Crane.jpg",
+      "url": "/wp-content/uploads/Double_Girder_Gantry_Crane.jpg",
+      "name": "Double_Girder_Gantry_Crane.jpg",
+      "size": 33261
+    },
+    {
+      "id": "b09920dd2d3aa909",
+      "filePath": "public/wp-content/uploads/Electric-Hoist-1-1536x1024.jpg",
+      "url": "/wp-content/uploads/Electric-Hoist-1-1536x1024.jpg",
+      "name": "Electric-Hoist-1-1536x1024.jpg",
+      "size": 204812
+    },
+    {
+      "id": "41230fb65bc233cc",
+      "filePath": "public/wp-content/uploads/Electric-Hoist-1-2048x1366.jpg",
+      "url": "/wp-content/uploads/Electric-Hoist-1-2048x1366.jpg",
+      "name": "Electric-Hoist-1-2048x1366.jpg",
+      "size": 320404
+    },
+    {
+      "id": "1349c81e6e50f88b",
+      "filePath": "public/wp-content/uploads/Electric-Hoist-1-scaled.jpg",
+      "url": "/wp-content/uploads/Electric-Hoist-1-scaled.jpg",
+      "name": "Electric-Hoist-1-scaled.jpg",
+      "size": 456622
+    },
+    {
+      "id": "e19a973986682704",
+      "filePath": "public/wp-content/uploads/Electrical_assembly_workshop-1-scaled.jpg",
+      "url": "/wp-content/uploads/Electrical_assembly_workshop-1-scaled.jpg",
+      "name": "Electrical_assembly_workshop-1-scaled.jpg",
+      "size": 11607
+    },
+    {
+      "id": "0d1aac89d7fc5d6f",
+      "filePath": "public/wp-content/uploads/End-Girder-1536x1024.jpg",
+      "url": "/wp-content/uploads/End-Girder-1536x1024.jpg",
+      "name": "End-Girder-1536x1024.jpg",
+      "size": 214006
+    },
+    {
+      "id": "73e5e2726fdb79f6",
+      "filePath": "public/wp-content/uploads/End-Girder.jpg",
+      "url": "/wp-content/uploads/End-Girder.jpg",
+      "name": "End-Girder.jpg",
+      "size": 305850
+    },
+    {
+      "id": "881edd7dec3bd131",
+      "filePath": "public/wp-content/uploads/European_Overhead_Crane.jpg",
+      "url": "/wp-content/uploads/European_Overhead_Crane.jpg",
+      "name": "European_Overhead_Crane.jpg",
+      "size": 11749
+    },
+    {
+      "id": "8d3fcaeee190dd89",
+      "filePath": "public/wp-content/uploads/European_Wire_Rope_Electric_Hoist.jpg",
+      "url": "/wp-content/uploads/European_Wire_Rope_Electric_Hoist.jpg",
+      "name": "European_Wire_Rope_Electric_Hoist.jpg",
+      "size": 30978
+    },
+    {
+      "id": "00b3f6bb022f7cc7",
+      "filePath": "public/wp-content/uploads/Free_Standing_Jib_Crane.jpg",
+      "url": "/wp-content/uploads/Free_Standing_Jib_Crane.jpg",
+      "name": "Free_Standing_Jib_Crane.jpg",
+      "size": 35794
+    },
+    {
+      "id": "4cdf143858bd75f7",
+      "filePath": "public/wp-content/uploads/Hook-blocks-1536x1024.jpg",
+      "url": "/wp-content/uploads/Hook-blocks-1536x1024.jpg",
+      "name": "Hook-blocks-1536x1024.jpg",
+      "size": 69298
+    },
+    {
+      "id": "e58dbb40f1a84f66",
+      "filePath": "public/wp-content/uploads/Hook-blocks.jpg",
+      "url": "/wp-content/uploads/Hook-blocks.jpg",
+      "name": "Hook-blocks.jpg",
+      "size": 109834
+    },
+    {
+      "id": "248ca74f7add617b",
+      "filePath": "public/wp-content/uploads/LB.png",
+      "url": "/wp-content/uploads/LB.png",
+      "name": "LB.png",
+      "size": 198122
+    },
+    {
+      "id": "04f7d685e76c165b",
+      "filePath": "public/wp-content/uploads/LDA-scaled.jpg",
+      "url": "/wp-content/uploads/LDA-scaled.jpg",
+      "name": "LDA-scaled.jpg",
+      "size": 538119
+    },
+    {
+      "id": "a21b8a8112eb0b64",
+      "filePath": "public/wp-content/uploads/LDC.jpg",
+      "url": "/wp-content/uploads/LDC.jpg",
+      "name": "LDC.jpg",
+      "size": 236461
+    },
+    {
+      "id": "dedaa4ab7c14389e",
+      "filePath": "public/wp-content/uploads/LDP-scaled.jpg",
+      "url": "/wp-content/uploads/LDP-scaled.jpg",
+      "name": "LDP-scaled.jpg",
+      "size": 492009
+    },
+    {
+      "id": "6535660d8e6b1175",
+      "filePath": "public/wp-content/uploads/LDY.jpg",
+      "url": "/wp-content/uploads/LDY.jpg",
+      "name": "LDY.jpg",
+      "size": 130485
+    },
+    {
+      "id": "484efef0241da035",
+      "filePath": "public/wp-content/uploads/LDZ.jpg",
+      "url": "/wp-content/uploads/LDZ.jpg",
+      "name": "LDZ.jpg",
+      "size": 317117
+    },
+    {
+      "id": "d1ca80bf4c28070b",
+      "filePath": "public/wp-content/uploads/Main-Girder-1-1536x1024.jpg",
+      "url": "/wp-content/uploads/Main-Girder-1-1536x1024.jpg",
+      "name": "Main-Girder-1-1536x1024.jpg",
+      "size": 176405
+    },
+    {
+      "id": "b3ce0753c94c204c",
+      "filePath": "public/wp-content/uploads/Main-Girder-1-2048x1365.jpg",
+      "url": "/wp-content/uploads/Main-Girder-1-2048x1365.jpg",
+      "name": "Main-Girder-1-2048x1365.jpg",
+      "size": 281751
+    },
+    {
+      "id": "303eb0cd63d04cc0",
+      "filePath": "public/wp-content/uploads/Main-Girder-1-scaled.jpg",
+      "url": "/wp-content/uploads/Main-Girder-1-scaled.jpg",
+      "name": "Main-Girder-1-scaled.jpg",
+      "size": 404455
+    },
+    {
+      "id": "0c7544e40dc1d8a6",
+      "filePath": "public/wp-content/uploads/Main-Girder-2.jpg",
+      "url": "/wp-content/uploads/Main-Girder-2.jpg",
+      "name": "Main-Girder-2.jpg",
+      "size": 4040
+    },
+    {
+      "id": "cd99a5fd971376aa",
+      "filePath": "public/wp-content/uploads/Paint_spraying_workshop-scaled.jpg",
+      "url": "/wp-content/uploads/Paint_spraying_workshop-scaled.jpg",
+      "name": "Paint_spraying_workshop-scaled.jpg",
+      "size": 10988
+    },
+    {
+      "id": "174e94320da43559",
+      "filePath": "public/wp-content/uploads/Parts_Warehouse-2.jpg",
+      "url": "/wp-content/uploads/Parts_Warehouse-2.jpg",
+      "name": "Parts_Warehouse-2.jpg",
+      "size": 14601
+    },
+    {
+      "id": "aa82ed5abc1f80c8",
+      "filePath": "public/wp-content/uploads/Single-Girder-Overhead-Crane-1536x320.jpg",
+      "url": "/wp-content/uploads/Single-Girder-Overhead-Crane-1536x320.jpg",
+      "name": "Single-Girder-Overhead-Crane-1536x320.jpg",
+      "size": 77945
+    },
+    {
+      "id": "8cd470ded3570646",
+      "filePath": "public/wp-content/uploads/Single-Girder-Overhead-Crane-2048x427.jpg",
+      "url": "/wp-content/uploads/Single-Girder-Overhead-Crane-2048x427.jpg",
+      "name": "Single-Girder-Overhead-Crane-2048x427.jpg",
+      "size": 124416
+    },
+    {
+      "id": "c63034d819e538cb",
+      "filePath": "public/wp-content/uploads/Single-Girder-Overhead-Crane-scaled.jpg",
+      "url": "/wp-content/uploads/Single-Girder-Overhead-Crane-scaled.jpg",
+      "name": "Single-Girder-Overhead-Crane-scaled.jpg",
+      "size": 177058
+    },
+    {
+      "id": "b0ba61a16a73bcfd",
+      "filePath": "public/wp-content/uploads/Underslung-Overhead-Crane-12.jpg",
+      "url": "/wp-content/uploads/Underslung-Overhead-Crane-12.jpg",
+      "name": "Underslung-Overhead-Crane-12.jpg",
+      "size": 37158
+    },
+    {
+      "id": "691de7a3dfb9c0ab",
+      "filePath": "public/wp-content/uploads/Workstation-Overhead-Crane-1.jpg",
+      "url": "/wp-content/uploads/Workstation-Overhead-Crane-1.jpg",
+      "name": "Workstation-Overhead-Crane-1.jpg",
+      "size": 12905
+    },
+    {
+      "id": "bc187b1d4b463425",
+      "filePath": "public/wp-content/uploads/beam.jpg",
+      "url": "/wp-content/uploads/beam.jpg",
+      "name": "beam.jpg",
+      "size": 4394
+    },
+    {
+      "id": "266ee0e2d4d31310",
+      "filePath": "public/wp-content/uploads/dgcrane-crane-hook-catalog-scaled.jpg",
+      "url": "/wp-content/uploads/dgcrane-crane-hook-catalog-scaled.jpg",
+      "name": "dgcrane-crane-hook-catalog-scaled.jpg",
+      "size": 6460
+    },
+    {
+      "id": "a9407f1231a2cda5",
+      "filePath": "public/wp-content/uploads/dgcrane-wheels-scaled.jpg",
+      "url": "/wp-content/uploads/dgcrane-wheels-scaled.jpg",
+      "name": "dgcrane-wheels-scaled.jpg",
+      "size": 7796
+    },
+    {
+      "id": "32c0d83bc094a9c1",
+      "filePath": "public/wp-content/uploads/dgcrane-wire-drums-scaled.jpg",
+      "url": "/wp-content/uploads/dgcrane-wire-drums-scaled.jpg",
+      "name": "dgcrane-wire-drums-scaled.jpg",
+      "size": 8728
+    },
+    {
+      "id": "044c6d9502ef1e93",
+      "filePath": "public/wp-content/uploads/download/Crane-Hook-Catalog.pdf",
+      "url": "/wp-content/uploads/download/Crane-Hook-Catalog.pdf",
+      "name": "Crane-Hook-Catalog.pdf",
+      "size": 2471196
+    },
+    {
+      "id": "0e0378045f20bcb2",
+      "filePath": "public/wp-content/uploads/download/crane-catalog-dgcrane.pdf",
+      "url": "/wp-content/uploads/download/crane-catalog-dgcrane.pdf",
+      "name": "crane-catalog-dgcrane.pdf",
+      "size": 2672978
+    },
+    {
+      "id": "f8880ac3399e3811",
+      "filePath": "public/wp-content/uploads/download/dgcrane-wheels-gt10.pdf",
+      "url": "/wp-content/uploads/download/dgcrane-wheels-gt10.pdf",
+      "name": "dgcrane-wheels-gt10.pdf",
+      "size": 4899818
+    },
+    {
+      "id": "e54f7bdd65b96a66",
+      "filePath": "public/wp-content/uploads/download/dgcrane-wire-drums-1.pdf",
+      "url": "/wp-content/uploads/download/dgcrane-wire-drums-1.pdf",
+      "name": "dgcrane-wire-drums-1.pdf",
+      "size": 4504765
+    },
+    {
+      "id": "2f21caf27a7e33f4",
+      "filePath": "public/wp-content/uploads/hoist_production_line-scaled.jpg",
+      "url": "/wp-content/uploads/hoist_production_line-scaled.jpg",
+      "name": "hoist_production_line-scaled.jpg",
+      "size": 15690
+    },
+    {
+      "id": "1d93cbb8fa133051",
+      "filePath": "public/wp-content/uploads/installation-photos-2.jpg",
+      "url": "/wp-content/uploads/installation-photos-2.jpg",
+      "name": "installation-photos-2.jpg",
+      "size": 5187
+    },
+    {
+      "id": "835a9ba70bc6bb36",
+      "filePath": "public/wp-content/uploads/meeting_room-scaled.jpg",
+      "url": "/wp-content/uploads/meeting_room-scaled.jpg",
+      "name": "meeting_room-scaled.jpg",
+      "size": 9260
+    },
+    {
+      "id": "fc1d9f8aaff9e83d",
+      "filePath": "public/wp-content/uploads/single-girder-overhead-crane-exported-to-Uruguay-3-scaled-1.jpg",
+      "url": "/wp-content/uploads/single-girder-overhead-crane-exported-to-Uruguay-3-scaled-1.jpg",
+      "name": "single-girder-overhead-crane-exported-to-Uruguay-3-scaled-1.jpg",
+      "size": 4846
+    },
+    {
+      "id": "d893333281e69562",
+      "filePath": "public/wp-content/uploads/single_girder_lean_production_line-scaled.jpg",
+      "url": "/wp-content/uploads/single_girder_lean_production_line-scaled.jpg",
+      "name": "single_girder_lean_production_line-scaled.jpg",
+      "size": 14513
+    },
+    {
+      "id": "b15388e2fc4afce4",
+      "filePath": "public/wp-content/uploads/singlegirdereot-crane-9.jpg",
+      "url": "/wp-content/uploads/singlegirdereot-crane-9.jpg",
+      "name": "singlegirdereot-crane-9.jpg",
+      "size": 52073
+    },
+    {
+      "id": "4288186427d5963b",
+      "filePath": "public/wp-content/uploads/steel_plate-pre-treatment_production_line-scaled.jpg",
+      "url": "/wp-content/uploads/steel_plate-pre-treatment_production_line-scaled.jpg",
+      "name": "steel_plate-pre-treatment_production_line-scaled.jpg",
+      "size": 15261
+    },
+    {
+      "id": "a3478ac1be3bb2f6",
+      "filePath": "public/wp-content/uploads/testing_center-scaled.jpg",
+      "url": "/wp-content/uploads/testing_center-scaled.jpg",
+      "name": "testing_center-scaled.jpg",
+      "size": 8015
+    },
+    {
+      "id": "02ec951b87532914",
+      "filePath": "public/wp-content/themes/website/svg/tianxie.svg",
+      "url": "/wp-content/themes/website/svg/tianxie.svg",
+      "name": "tianxie.svg",
+      "size": 1433
+    },
+    {
+      "id": "429c247ca68af0d5",
+      "filePath": "public/wp-content/uploads/2024/09/Ladle-transfer-cars-1.jpg",
+      "url": "/wp-content/uploads/2024/09/Ladle-transfer-cars-1.jpg",
+      "name": "Ladle-transfer-cars-1.jpg",
+      "size": 36007
+    },
+    {
+      "id": "8a628d8aafc0efd1",
+      "filePath": "public/wp-content/uploads/2024/09/Rail-Transfer-Carts.jpg",
+      "url": "/wp-content/uploads/2024/09/Rail-Transfer-Carts.jpg",
+      "name": "Rail-Transfer-Carts.jpg",
+      "size": 14617
+    },
+    {
+      "id": "913e9d0bf64a6b0d",
+      "filePath": "public/wp-content/uploads/2024/09/Trackless-Transfer-Carts.jpg",
+      "url": "/wp-content/uploads/2024/09/Trackless-Transfer-Carts.jpg",
+      "name": "Trackless-Transfer-Carts.jpg",
+      "size": 11139
+    },
+    {
+      "id": "d75250e8cfe7a786",
+      "filePath": "public/wp-content/uploads/Automobile-2.jpg",
+      "url": "/wp-content/uploads/Automobile-2.jpg",
+      "name": "Automobile-2.jpg",
+      "size": 9767
+    },
+    {
+      "id": "6dad3fc58567d946",
+      "filePath": "public/media/double-trolley/Trolley-scaled.jpg",
+      "url": "/media/double-trolley/Trolley-scaled.jpg",
+      "name": "Trolley-scaled.jpg",
+      "size": 188187
+    },
+    {
+      "id": "e36f8c37c91a2d13",
+      "filePath": "public/media/double-trolley/double-hoist-overhead-crane.jpg",
+      "url": "/media/double-trolley/double-hoist-overhead-crane.jpg",
+      "name": "double-hoist-overhead-crane.jpg",
+      "size": 126841
     }
   ]
 }

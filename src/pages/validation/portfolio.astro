@@ -1,0 +1,63 @@
+---
+import Colophon from '../../components/validation/Colophon.astro';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Atelier — Selected Studies</title>
+    <link rel="stylesheet" href="/validation/portfolio.css" />
+  </head>
+  <body>
+    <header id="portfolio-header">
+      <strong>ATELIER / 01</strong>
+      <nav>
+        <a href="#work">Work</a>
+        <a href="#method">Approach</a>
+        <a href="mailto:studio@example.com">Contact</a>
+      </nav>
+    </header>
+    <main>
+      <section id="portfolio-intro">
+        <p>INDEPENDENT DESIGN STUDIES</p>
+        <h1 id="editable-title">Making room for everyday life</h1>
+        <p id="editable-copy">A selection of spatial studies, material experiments, and observations from an independent practice.</p>
+      </section>
+      <section id="work" class="work-grid">
+        <figure id="lead-figure">
+          <img id="editable-image" src="/validation/landscape.svg" alt="A study of the valley landscape" />
+          <figcaption id="editable-caption">01 — Watershed / A continuous public landscape</figcaption>
+        </figure>
+        <figure id="detail-figure">
+          <img src="/validation/detail.svg" alt="Timber frame proportions" />
+          <figcaption>02 — Framework / A study in timber proportions</figcaption>
+        </figure>
+        <aside class="project-note" id="project-note">
+          <h2>Making as research</h2>
+          <p id="note-copy">Small prototypes make design decisions visible. We test the join, the shadow, and the surface before drawing the larger system.</p>
+        </aside>
+      </section>
+      <section id="method" class="methods">
+        <div>
+          <h2>A working method</h2>
+          <ol id="editable-list">
+            <li>Listen to the existing place.</li>
+            <li>Make the smallest useful prototype.</li>
+            <li>Review what changes in daily use.</li>
+          </ol>
+        </div>
+        <div>
+          <h2>Materials library</h2>
+          <dl id="material-list">
+            <dt>Timber</dt>
+            <dd>Repairable joints and visible grain.</dd>
+            <dt>Stone</dt>
+            <dd>Local textures and durable thresholds.</dd>
+          </dl>
+        </div>
+      </section>
+    </main>
+    <Colophon />
+  </body>
+</html>

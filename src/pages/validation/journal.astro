@@ -1,0 +1,145 @@
+---
+import ReadingFrame from '../../components/validation/ReadingFrame.astro';
+import Colophon from '../../components/validation/Colophon.astro';
+const edition = 'Autumn field notes';
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Watershed — Field Notes</title>
+  </head>
+  <body>
+    <header id="masthead">
+      <a href="/">FIELD NOTES</a>
+      <span>Landscape · Observation · Practice</span>
+    </header>
+    <main id="journal-grid">
+      <article id="article-column">
+        <p class="kicker">FIELD REPORT / 04</p>
+        <h1 id="editable-title">Following the river beyond the city</h1>
+        <p id="editable-copy" class="lede">A walking journal about water, public space, and the small decisions that shape a shared landscape.</p>
+        <figure id="lead-figure">
+          <picture>
+            <source media="(max-width: 600px)" srcset="/validation/detail.svg" />
+            <img id="editable-image" src="/validation/landscape.svg" alt="Illustrated watershed landscape" />
+          </picture>
+          <figcaption id="editable-caption">The upper valley, mapped through a day of observation.</figcaption>
+        </figure>
+        <ReadingFrame class="reading-frame">
+          <h2 id="chapter-title">Start with what is already there</h2>
+          <p id="slot-copy">We followed the shaded path beside the water and recorded where people chose to stop. Benches mattered less than shelter, a clear view, and a quiet edge.</p>
+          <blockquote id="field-quote">
+            <p>Good public space makes room for an unplanned pause.</p>
+          </blockquote>
+          <ul id="editable-list">
+            <li>Observe movement before drawing a route.</li>
+            <li>
+              Record shade at different hours.
+              <ul>
+                <li>Morning light beside the eastern bank.</li>
+                <li>Afternoon shelter beneath mature trees.</li>
+              </ul>
+            </li>
+            <li>Leave space for seasonal water.</li>
+          </ul>
+        </ReadingFrame>
+        <p id="dynamic-line">Notebook edition: {edition}</p>
+      </article>
+      <aside id="journal-aside">
+        <h2>In this notebook</h2>
+        <ol>
+          <li>River access</li>
+          <li>Habitat corridors</li>
+          <li>Shared maintenance</li>
+        </ol>
+        <p>These are original demonstration notes for editor validation, not a commissioned landscape report.</p>
+      </aside>
+    </main>
+    <Colophon />
+  </body>
+</html>
+<style>
+  :global(body) {
+    margin: 0;
+    background: #faf7ef;
+    color: #253e37;
+    font: 18px/1.7 Georgia, serif;
+  }
+  :global(*) {
+    box-sizing: border-box;
+  }
+  #masthead {
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    padding:26px 5vw;
+    border-bottom:1px solid #c8c6b8;
+  }
+  a {
+    color:inherit;
+  }
+  #journal-grid {
+    display:grid;
+    grid-template-columns:minmax(0, 780px) 230px;
+    gap:64px;
+    max-width:1180px;
+    padding:50px 30px;
+    margin:auto;
+  }
+  h1 {
+    font-size:clamp(36px, 4vw, 64px);
+    line-height:1.08;
+    margin:16px 0 28px;
+  }
+  .lede {
+    font-size:23px;
+  }
+  p {
+    margin:18px 0;
+  }
+  figure {
+    margin:36px 0;
+  }
+  img {
+    width:100%;
+    display:block;
+  }
+  figcaption {
+    font-size:15px;
+    padding-top:12px;
+  }
+  #journal-aside {
+    border-left:1px solid #c8c6b8;
+    padding-left:24px;
+    font:15px/1.7 system-ui;
+  }
+  blockquote {
+    margin:30px 0;
+    padding:4px 24px;
+    border-left:3px solid #ba803d;
+  }
+  li {
+    margin:9px 0;
+  }
+  :global(.colophon) {
+    padding:30px 5vw;
+    border-top:1px solid #c8c6b8;
+    font:14px/1.5 system-ui;
+  }
+  @media(max-width:700px) {
+    #journal-grid {
+      grid-template-columns:1fr;
+      gap:24px;
+      padding:24px;
+    }
+    #journal-aside {
+      border-left:0;
+      padding-left:0;
+    }
+    #masthead {
+      flex-direction:column;
+    }
+  }
+</style>
