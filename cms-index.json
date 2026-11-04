@@ -150,6 +150,14 @@
       "locale": "en",
       "filePath": "src/pages/validation/plans.astro",
       "url": "/validation/plans/"
+    },
+    {
+      "id": "d58492f9-bf25-4828-94ea-2c1098be2fb5",
+      "type": "article",
+      "title": "5 Ton And 10 Ton Single Girder Overhead Crane For Sale to India",
+      "locale": "en",
+      "filePath": "src/pages/posts/india-single-girder-crane-case.astro",
+      "url": "/posts/india-single-girder-crane-case/"
     }
   ]
 }
