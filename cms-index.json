@@ -166,6 +166,14 @@
       "locale": "en",
       "filePath": "src/pages/products/shipyard-portal-cranes-template-demo.astro",
       "url": "/products/shipyard-portal-cranes-template-demo/"
+    },
+    {
+      "id": "009b74b8-4355-44ec-9e58-024fde4b176d",
+      "type": "product",
+      "title": "Double Girder Eot Cranes",
+      "locale": "en",
+      "filePath": "src/pages/products/double-girder-eot-cranes.astro",
+      "url": "/products/double-girder-eot-cranes/"
     }
   ]
 }
