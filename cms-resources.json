@@ -1189,6 +1189,48 @@
       "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/16505533-890e-47c3-9116-659d0a677201.jpg",
       "name": "main-beam-scaled.jpg",
       "size": 210948
+    },
+    {
+      "id": "c5e04f95-067d-4777-994d-fe8c24884b3f",
+      "filePath": "public/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/c5e04f95-067d-4777-994d-fe8c24884b3f.png",
+      "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/c5e04f95-067d-4777-994d-fe8c24884b3f.png",
+      "name": "motor..png",
+      "size": 494429
+    },
+    {
+      "id": "058c97e1-72b2-4225-8ba3-cef04af664e5",
+      "filePath": "public/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/058c97e1-72b2-4225-8ba3-cef04af664e5.jpg",
+      "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/058c97e1-72b2-4225-8ba3-cef04af664e5.jpg",
+      "name": "Package-Of-Main-Beam.jpg",
+      "size": 194882
+    },
+    {
+      "id": "234aeed1-58a8-43f7-9bd5-d0d7230e5c90",
+      "filePath": "public/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/234aeed1-58a8-43f7-9bd5-d0d7230e5c90.jpg",
+      "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/234aeed1-58a8-43f7-9bd5-d0d7230e5c90.jpg",
+      "name": "Package-Of-Electric-Hoist.jpg",
+      "size": 88746
+    },
+    {
+      "id": "381a110d-d089-47b5-9257-f2d7244bb92f",
+      "filePath": "public/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/381a110d-d089-47b5-9257-f2d7244bb92f.jpg",
+      "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/381a110d-d089-47b5-9257-f2d7244bb92f.jpg",
+      "name": "Delivery-Picture-3.jpg",
+      "size": 121220
+    },
+    {
+      "id": "e86bbe99-623f-403c-80d0-7b475abdd2e2",
+      "filePath": "public/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/e86bbe99-623f-403c-80d0-7b475abdd2e2.jpg",
+      "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/e86bbe99-623f-403c-80d0-7b475abdd2e2.jpg",
+      "name": "Delivery-Picture-1.jpg",
+      "size": 101433
+    },
+    {
+      "id": "3d96b1b6-1dfa-41bc-8791-4c33d202f545",
+      "filePath": "public/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/3d96b1b6-1dfa-41bc-8791-4c33d202f545.jpg",
+      "url": "/media/articles/d58492f9-bf25-4828-94ea-2c1098be2fb5/3d96b1b6-1dfa-41bc-8791-4c33d202f545.jpg",
+      "name": "Delivery-Picture-2.jpg",
+      "size": 130108
     }
   ]
 }
