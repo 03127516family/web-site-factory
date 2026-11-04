@@ -158,6 +158,14 @@
       "locale": "en",
       "filePath": "src/pages/posts/india-single-girder-crane-case.astro",
       "url": "/posts/india-single-girder-crane-case/"
+    },
+    {
+      "id": "30de8306-badd-4fe8-be53-a3772c246372",
+      "type": "product",
+      "title": "Shipyard Portal Cranes · 产品模板新建",
+      "locale": "en",
+      "filePath": "src/pages/products/shipyard-portal-cranes-template-demo.astro",
+      "url": "/products/shipyard-portal-cranes-template-demo/"
     }
   ]
 }
